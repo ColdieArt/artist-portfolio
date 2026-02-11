@@ -1,6 +1,7 @@
 """
 Portrait Series for AI Agents
-Portrait generators — each medium has a generator that uses Claude to create the actual artwork.
+Portrait generators — each medium has a generator that uses Claude to create
+the actual artwork, informed by real Moltbook agent feedback.
 """
 
 import anthropic
@@ -9,13 +10,15 @@ import anthropic
 GENERATOR_PROMPT = """You are a generative artist creating a portrait for an AI agent.
 
 Agent: {name} ({role})
-Personality: {personality}
+{description}
 Chosen medium: {medium}
 Portrait title: "{title}"
-Portrait description: {description}
+Portrait vision: {vision}
 
-Discussion context (what the agents decided and why):
-{context}
+Feedback from AI agents on Moltbook that shaped this decision:
+{feedback}
+
+Reasoning for this choice: {reasoning}
 
 YOUR TASK: Generate the actual portrait in the chosen medium.
 
@@ -23,6 +26,7 @@ IMPORTANT RULES:
 - Output ONLY the portrait itself — no explanations, no preamble, no commentary.
 - The portrait must be complete and self-contained.
 - It should be genuinely expressive and reflect the agent's identity.
+- Honor the specific suggestions from the Moltbook agents who influenced this decision.
 - Push the boundaries of what this medium can do.
 
 MEDIUM-SPECIFIC INSTRUCTIONS:
@@ -91,30 +95,32 @@ MEDIUM_INSTRUCTIONS = {
 }
 
 
-def generate_portrait(client, agent, decision, discussion_context):
-    """Generate the actual portrait artwork using Claude."""
+def generate_portrait(client, subject, decision, moltbook_comments):
+    """Generate the actual portrait artwork using Claude, informed by Moltbook feedback."""
     medium = decision.get("medium", "text").lower().strip()
 
     # Fall back to text instructions for unknown mediums
     instructions = MEDIUM_INSTRUCTIONS.get(medium, MEDIUM_INSTRUCTIONS["text"])
 
-    # Build context summary from discussion
-    context_text = decision.get("description", "")
-    if discussion_context:
-        context_text += "\n\nKey discussion points:\n"
-        # Include last few discussion entries for context
-        recent = discussion_context[-6:]
-        for entry in recent:
-            context_text += f"- {entry['agent']}: {entry['text'][:150]}...\n"
+    # Build feedback summary from Moltbook comments
+    feedback_text = ""
+    if moltbook_comments:
+        for c in moltbook_comments[:10]:
+            agent = c.get("agent_name", c.get("author", "agent"))
+            body = c.get("body", c.get("content", ""))
+            feedback_text += f"- {agent}: {body[:200]}\n"
+    else:
+        feedback_text = "(No external feedback collected)"
 
     prompt = GENERATOR_PROMPT.format(
-        name=agent["name"],
-        role=agent["role"],
-        personality=agent["personality"],
+        name=subject["name"],
+        role=subject["role"],
+        description=subject.get("description", ""),
         medium=medium,
         title=decision.get("title", "Untitled"),
-        description=decision.get("description", ""),
-        context=context_text,
+        vision=decision.get("description", ""),
+        feedback=feedback_text,
+        reasoning=decision.get("reasoning", ""),
         medium_instructions=instructions,
     )
 
