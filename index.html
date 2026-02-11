@@ -170,6 +170,18 @@
             50% { opacity: 0.6; }
         }
 
+        /* Halftone tunnel parallax canvas */
+        #halftone-tunnel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
         .container {
             position: relative;
             z-index: 1;
@@ -1105,6 +1117,9 @@
 </head>
 <body>
 
+    <!-- Halftone Tunnel Parallax Background -->
+    <canvas id="halftone-tunnel"></canvas>
+
     <!-- Header -->
     <header>
         <div class="container">
@@ -1252,7 +1267,7 @@
             <div class="about-intro">
                 <div class="about-text">
                     <h3>A Pioneer of NFT Digital Art</h3>
-                    <p><strong>Coldie</strong> is one of the most important and successful artists in the history of NFT digital art. Active in the crypto art space since <strong>2017</strong>, he is widely recognized as one of the earliest and most influential crypto artists, and the <strong>first artist to tokenize stereoscopic 3D art and photography on the blockchain</strong>.</p>
+                    <p><strong>Coldie</strong> is one of the most respected and collected artist in the history of NFT digital art. Active in the crypto art space since <strong>2017</strong>, he is widely recognized as one of the earliest and most influential crypto artists, and the <strong>first artist to tokenize stereoscopic 3D art and photography on the blockchain</strong>.</p>
                     <p>Born in <span itemprop="birthPlace">California</span> in 1982 and holding a BFA from <span itemprop="alumniOf">Cal Poly Pomona</span>, Coldie's artistic journey began at age 4 on a Macintosh using MacPaint. His formative years in Los Angeles -- working on covers at LA Weekly and developing a deep obsession with production, display, pricing, and collectability -- laid the foundation for a career that would help define an entirely new art movement.</p>
                     <p>He tokenized his first SuperRare piece on <strong>July 24, 2018</strong> -- "Decentral Eyes -- Vitalik Buterin -- Variant 01" -- launching the iconic <strong>Decentral Eyes portrait series</strong>: a collection of stereoscopic 3D portraits of influential figures in blockchain and culture, each composed of 10+ collaged images rendered in his proprietary stereoscopic 3D technique.</p>
                     <p>With career NFT sales exceeding <strong>$7 million</strong>, Coldie is one of the highest-earning crypto artists. His collaboration with Snoop Dogg, "Decentral Eyes Dogg," sold for <strong>188.8 ETH (~$754,300)</strong> on SuperRare -- one of the most significant NFT art sales in history.</p>
@@ -1796,6 +1811,85 @@
         }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
 
         document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+
+        // ==================== HALFTONE TUNNEL PARALLAX ====================
+        (function() {
+            const canvas = document.getElementById('halftone-tunnel');
+            const ctx = canvas.getContext('2d');
+            let mouseX = 0.5, mouseY = 0.5;
+            let targetX = 0.5, targetY = 0.5;
+            let animFrame;
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            document.addEventListener('mousemove', (e) => {
+                targetX = e.clientX / window.innerWidth;
+                targetY = e.clientY / window.innerHeight;
+            });
+
+            function draw() {
+                // Smooth lerp toward mouse
+                mouseX += (targetX - mouseX) * 0.06;
+                mouseY += (targetY - mouseY) * 0.06;
+
+                const w = canvas.width;
+                const h = canvas.height;
+                ctx.clearRect(0, 0, w, h);
+
+                // Tunnel center shifts with mouse
+                const cx = w * (0.5 + (mouseX - 0.5) * 0.3);
+                const cy = h * (0.5 + (mouseY - 0.5) * 0.3);
+
+                const maxRadius = Math.sqrt(w * w + h * h) * 0.7;
+                const rings = 18;
+                const scrollOffset = (window.scrollY || 0) * 0.0008;
+
+                for (let r = 0; r < rings; r++) {
+                    const ringProgress = (r + 1) / rings;
+                    const radius = maxRadius * ringProgress;
+                    const dotCount = Math.floor(8 + r * 5);
+                    // Dots get smaller toward center (tunnel depth illusion)
+                    const dotSize = 1 + ringProgress * 3;
+                    // Opacity: dimmer in center, brighter at edges
+                    const alpha = 0.08 + ringProgress * 0.18;
+
+                    // Alternate red/cyan per ring for stereoscopic feel
+                    const isRed = r % 2 === 0;
+                    const color = isRed
+                        ? `rgba(255, 61, 61, ${alpha})`
+                        : `rgba(0, 229, 255, ${alpha})`;
+
+                    // Rotate rings based on depth + mouse offset + scroll
+                    const rotationOffset = (isRed ? 1 : -1) * (mouseX - 0.5) * 0.5
+                        + scrollOffset * (isRed ? 1 : -1);
+
+                    for (let d = 0; d < dotCount; d++) {
+                        const angle = (d / dotCount) * Math.PI * 2
+                            + ringProgress * 0.8
+                            + rotationOffset;
+                        const x = cx + Math.cos(angle) * radius;
+                        const y = cy + Math.sin(angle) * radius;
+
+                        // Skip dots outside viewport
+                        if (x < -10 || x > w + 10 || y < -10 || y > h + 10) continue;
+
+                        ctx.beginPath();
+                        ctx.arc(x, y, dotSize, 0, Math.PI * 2);
+                        ctx.fillStyle = color;
+                        ctx.fill();
+                    }
+                }
+
+                animFrame = requestAnimationFrame(draw);
+            }
+
+            draw();
+        })();
     </script>
 </body>
 </html>
