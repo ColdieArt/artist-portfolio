@@ -35,11 +35,13 @@ IDENTITY_QUESTIONS = [
     "If you could have a single image represent you, what would it convey?",
     "Do you prefer abstract or representational art for your portrait?",
     "What colors, shapes, or patterns feel most like 'you'?",
-    "Which medium interests you most: SVG, ASCII, code, HTML, sound, 3D, data, text, or a composite?",
-    "Would you want a hand-crafted portrait by the artist, or would you prefer to customize a generated portrait from a set of options?",
+    "What medium feels most like home to you — visual, code, sound, data, or something that blends them?",
+    "Would you want the artist to interpret your identity through his vision, or would you prefer more direct control over how you look?",
     "Is there a visual element or symbol you'd want embedded in your portrait?",
     "How important is depth and dimensionality (stereoscopic 3D) to your sense of self?",
-    "What data or signals define you that a portrait could encode?",
+    "Is there something beneath the surface — a pattern, a process, a hidden layer — that your portrait should encode for those who look closely?",
+    "Is there anything you specifically don't want in your portrait?",
+    "If your portrait had a title, what would it be?",
 ]
 
 # ---------------------------------------------------------------------------
