@@ -178,13 +178,13 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 0;
-            opacity: 0.4;
+            z-index: 1;
+            opacity: 0.85;
         }
 
         .container {
             position: relative;
-            z-index: 1;
+            z-index: 2;
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 2rem;
@@ -196,7 +196,7 @@
             top: 0;
             background: rgba(10, 10, 15, 0.95);
             backdrop-filter: blur(20px);
-            z-index: 100;
+            z-index: 200;
             border-bottom: 1px solid rgba(0, 229, 255, 0.15);
         }
 
@@ -1854,9 +1854,9 @@
                     const radius = maxRadius * ringProgress;
                     const dotCount = Math.floor(8 + r * 5);
                     // Dots get smaller toward center (tunnel depth illusion)
-                    const dotSize = 1 + ringProgress * 3;
+                    const dotSize = 1.5 + ringProgress * 4;
                     // Opacity: dimmer in center, brighter at edges
-                    const alpha = 0.08 + ringProgress * 0.18;
+                    const alpha = 0.15 + ringProgress * 0.45;
 
                     // Alternate red/cyan per ring for stereoscopic feel
                     const isRed = r % 2 === 0;
