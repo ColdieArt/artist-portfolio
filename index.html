@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Artist Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00ff88;
+            --secondary: #ff0066;
+            --tertiary: #00ccff;
+            --bg: #0a0a0f;
+            --surface: #16161f;
+            --text: #e8e8f0;
+            --text-dim: #8888a0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Mono', monospace;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridPulse 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Cursor trail effect */
+        .cursor-trail {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--primary);
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: screen;
+            animation: fadeTrail 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeTrail {
+            to {
+                opacity: 0;
+                transform: scale(0);
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Header */
+        header {
+            padding: 3rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+        }
+
+        .logo {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2rem;
+            font-style: italic;
+            background: linear-gradient(135deg, var(--primary), var(--tertiary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glitch 3s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 90%, 100% { transform: translate(0); }
+            92% { transform: translate(-2px, 2px); }
+            94% { transform: translate(2px, -2px); }
+            96% { transform: translate(-2px, -2px); }
+        }
+
+        nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 8rem 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(3rem, 8vw, 7rem);
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .hero h1 span {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--tertiary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: rainbow 6s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes rainbow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            transition: left 0.3s;
+            z-index: -1;
+        }
+
+        .btn:hover {
+            color: var(--bg);
+        }
+
+        .btn:hover::before {
+            left: 0;
+        }
+
+        .btn.secondary {
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+
+        .btn.secondary::before {
+            background: var(--secondary);
+        }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin: 6rem 0 3rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .section-header h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 3rem;
+            white-space: nowrap;
+        }
+
+        .section-header::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, var(--primary), transparent);
+        }
+
+        /* Portfolio Grid */
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .portfolio-item {
+            position: relative;
+            aspect-ratio: 1;
+            background: var(--surface);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+            overflow: hidden;
+            cursor: pointer;
+            animation: fadeInUp 0.8s ease-out both;
+        }
+
+        .portfolio-item:nth-child(1) { animation-delay: 0.1s; }
+        .portfolio-item:nth-child(2) { animation-delay: 0.2s; }
+        .portfolio-item:nth-child(3) { animation-delay: 0.3s; }
+        .portfolio-item:nth-child(4) { animation-delay: 0.4s; }
+        .portfolio-item:nth-child(5) { animation-delay: 0.5s; }
+        .portfolio-item:nth-child(6) { animation-delay: 0.6s; }
+
+        .portfolio-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.3s;
+            mix-blend-mode: overlay;
+        }
+
+        .portfolio-item:hover::before {
+            opacity: 0.3;
+        }
+
+        .portfolio-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            opacity: 0.3;
+            transition: all 0.3s;
+        }
+
+        .portfolio-item:hover .portfolio-placeholder {
+            opacity: 0.6;
+            transform: scale(1.1);
+        }
+
+        .portfolio-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 2rem;
+            background: linear-gradient(to top, var(--bg), transparent);
+            transform: translateY(100%);
+            transition: transform 0.3s;
+        }
+
+        .portfolio-item:hover .portfolio-info {
+            transform: translateY(0);
+        }
+
+        .portfolio-info h3 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .portfolio-info p {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        /* Shop Items */
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .shop-item {
+            background: var(--surface);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+            padding: 2rem;
+            position: relative;
+            transition: all 0.3s;
+            animation: fadeInUp 0.8s ease-out both;
+        }
+
+        .shop-item:nth-child(1) { animation-delay: 0.1s; }
+        .shop-item:nth-child(2) { animation-delay: 0.2s; }
+        .shop-item:nth-child(3) { animation-delay: 0.3s; }
+
+        .shop-item::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+
+        .shop-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .shop-item:hover::before {
+            opacity: 0.2;
+        }
+
+        .shop-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .shop-item h3 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .shop-item .price {
+            font-size: 1.5rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        .shop-item p {
+            color: var(--text-dim);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        /* Commission Form */
+        .commission-form {
+            max-width: 700px;
+            margin: 0 auto 6rem;
+            background: var(--surface);
+            padding: 3rem;
+            border: 1px solid rgba(0, 255, 136, 0.1);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid rgba(0, 255, 136, 0.2);
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-links a {
+            color: var(--text);
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .social-links a:hover {
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        footer p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 2rem;
+                text-align: center;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .hero {
+                padding: 4rem 0;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .portfolio-grid,
+            .shop-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .commission-form {
+                padding: 2rem 1rem;
+            }
+        }
+
+        /* Loading animation */
+        @keyframes loadingPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .loading {
+            animation: loadingPulse 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">ARTIFEX</div>
+            <nav>
+                <a href="#portfolio">Portfolio</a>
+                <a href="#shop">Shop</a>
+                <a href="#commissions">Commissions</a>
+                <a href="#contact">Contact</a>
+            </nav>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1><span>Digital</span><br><span>Experiments</span></h1>
+            <p>Pushing boundaries at the intersection of design, technology, and human experience</p>
+            <div class="cta-buttons">
+                <a href="#portfolio" class="btn">View Work</a>
+                <a href="#commissions" class="btn secondary">Commission Me</a>
+            </div>
+        </section>
+
+        <!-- Portfolio Section -->
+        <div id="portfolio" class="section-header">
+            <h2>Selected Works</h2>
+        </div>
+        <div class="portfolio-grid">
+            <div class="portfolio-item">
+                <div class="portfolio-placeholder">◆</div>
+                <div class="portfolio-info">
+                    <h3>Neural Landscapes</h3>
+                    <p>Generative art series exploring AI-driven aesthetics</p>
+                </div>
+            </div>
+            <div class="portfolio-item">
+                <div class="portfolio-placeholder">◇</div>
+                <div class="portfolio-info">
+                    <h3>Glitch Portraits</h3>
+                    <p>Digital distortion meets human emotion</p>
+                </div>
+            </div>
+            <div class="portfolio-item">
+                <div class="portfolio-placeholder">◈</div>
+                <div class="portfolio-info">
+                    <h3>Data Dreams</h3>
+                    <p>Visualizing the invisible structures of information</p>
+                </div>
+            </div>
+            <div class="portfolio-item">
+                <div class="portfolio-placeholder">◉</div>
+                <div class="portfolio-info">
+                    <h3>Motion Studies</h3>
+                    <p>Experimental animation and interactive design</p>
+                </div>
+            </div>
+            <div class="portfolio-item">
+                <div class="portfolio-placeholder">◐</div>
+                <div class="portfolio-info">
+                    <h3>Cybernetic Garden</h3>
+                    <p>Where organic forms meet digital synthesis</p>
+                </div>
+            </div>
+            <div class="portfolio-item">
+                <div class="portfolio-placeholder">◑</div>
+                <div class="portfolio-info">
+                    <h3>Type Experiments</h3>
+                    <p>Pushing typographic boundaries in digital space</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shop Section -->
+        <div id="shop" class="section-header">
+            <h2>Available Works</h2>
+        </div>
+        <div class="shop-grid">
+            <div class="shop-item">
+                <div class="shop-icon">🎨</div>
+                <h3>Digital Prints</h3>
+                <div class="price">$150 - $500</div>
+                <p>High-resolution prints of original digital artworks. Limited editions available with certificate of authenticity.</p>
+                <button class="btn">Inquire</button>
+            </div>
+            <div class="shop-item">
+                <div class="shop-icon">🖼️</div>
+                <h3>NFT Collection</h3>
+                <div class="price">Starting at 0.5 ETH</div>
+                <p>Exclusive digital collectibles on Ethereum. Each piece comes with unlockable content and commercial rights.</p>
+                <button class="btn">View on OpenSea</button>
+            </div>
+            <div class="shop-item">
+                <div class="shop-icon">💾</div>
+                <h3>Digital Assets</h3>
+                <div class="price">$50 - $200</div>
+                <p>Textures, brushes, templates, and design resources for your creative projects. Instant download.</p>
+                <button class="btn">Browse Assets</button>
+            </div>
+        </div>
+
+        <!-- Commissions Section -->
+        <div id="commissions" class="section-header">
+            <h2>Commission Work</h2>
+        </div>
+        <form class="commission-form" onsubmit="handleCommissionSubmit(event)">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="project-type">Project Type</label>
+                <select id="project-type" name="project-type" required>
+                    <option value="">Select a type</option>
+                    <option value="illustration">Illustration</option>
+                    <option value="branding">Branding & Identity</option>
+                    <option value="web-design">Web Design</option>
+                    <option value="motion">Motion Graphics</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="budget">Budget Range</label>
+                <select id="budget" name="budget" required>
+                    <option value="">Select a range</option>
+                    <option value="under-1k">Under $1,000</option>
+                    <option value="1k-5k">$1,000 - $5,000</option>
+                    <option value="5k-10k">$5,000 - $10,000</option>
+                    <option value="over-10k">Over $10,000</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="description">Project Description</label>
+                <textarea id="description" name="description" required placeholder="Tell me about your project, vision, timeline, and any specific requirements..."></textarea>
+            </div>
+            <button type="submit" class="btn">Submit Inquiry</button>
+        </form>
+
+        <!-- Footer -->
+        <footer id="contact">
+            <div class="social-links">
+                <a href="#" title="Instagram">📷</a>
+                <a href="#" title="Twitter">🐦</a>
+                <a href="#" title="Behance">🎨</a>
+                <a href="#" title="LinkedIn">💼</a>
+                <a href="#" title="Email">✉️</a>
+            </div>
+            <p>&copy; 2026 ARTIFEX. All rights reserved. Crafted with experimental code.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Cursor trail effect
+        document.addEventListener('mousemove', (e) => {
+            if (window.innerWidth > 768) {
+                const trail = document.createElement('div');
+                trail.className = 'cursor-trail';
+                trail.style.left = e.pageX + 'px';
+                trail.style.top = e.pageY + 'px';
+                document.body.appendChild(trail);
+                setTimeout(() => trail.remove(), 800);
+            }
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Form submission
+        function handleCommissionSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            
+            // Simulate submission
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+
+            setTimeout(() => {
+                alert('Thank you for your inquiry! I\'ll get back to you within 24-48 hours.');
+                form.reset();
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }, 1500);
+        }
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all animated elements
+        document.querySelectorAll('.portfolio-item, .shop-item').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
