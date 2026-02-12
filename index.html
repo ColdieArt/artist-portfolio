@@ -225,33 +225,15 @@
         }
 
         .logo {
-            font-family: 'Inter', sans-serif;
-            font-size: 2.2rem;
-            font-weight: 700;
-            font-style: normal;
             text-decoration: none;
-            position: relative;
-            color: var(--text-bright);
-            letter-spacing: 0.08em;
+            display: inline-block;
+            line-height: 0;
         }
 
-        /* Subtle shadow effect on logo */
-        .logo::before {
-            content: 'COLDIE';
-            position: absolute;
-            left: -1px;
-            top: 1px;
-            color: rgba(0, 0, 0, 0.15);
-            z-index: -1;
-        }
-
-        .logo::after {
-            content: 'COLDIE';
-            position: absolute;
-            left: 1px;
-            top: -1px;
-            color: rgba(0, 0, 0, 0.08);
-            z-index: -1;
+        .logo img {
+            height: 40px;
+            width: auto;
+            display: block;
         }
 
         nav {
@@ -1211,7 +1193,7 @@
     <!-- Header -->
     <header>
         <div class="container">
-            <a href="#" class="logo">COLDIE</a>
+            <a href="#" class="logo"><img src="images/sig-black.png" alt="Coldie"></a>
             <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
             <nav>
                 <a href="#nft-portfolio">NFT Portfolio</a>
