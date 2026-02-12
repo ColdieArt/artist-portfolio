@@ -148,6 +148,22 @@
             line-height: 1.6;
         }
 
+        /* Random background image */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.07;
+            pointer-events: none;
+            z-index: 0;
+        }
+
         /* Stereoscopic grid background */
         body::before {
             content: '';
@@ -1398,7 +1414,7 @@
                 <article class="contribution-card animate-in">
                     <div class="icon">&#x25CE;</div>
                     <h4>Invented the Timed Auction Format</h4>
-                    <p>Coldie pioneered the reserve-price-triggered 24-hour countdown auction format, now known as the "Coldie Method." SuperRare officially adopted and codified this into their smart contracts in December 2020 -- even embedding a Coldie reference on-chain. Foundation and other platforms later adopted the same mechanic.</p>
+                    <p>Coldie pioneered the "The Coldie Method" reserve-price-triggered 24-hour countdown auction format that restarts timer for 24 additional hours with each higher bid. SuperRare officially adopted and codified this into their smart contracts in December 2020 -- even embedding a Coldie reference on-chain. ASYNC, Artifex and other platforms later adopted the same mechanic as well as artists throughout the crypto art space who were looking for a fair and accessible method.</p>
                 </article>
                 <article class="contribution-card animate-in">
                     <div class="icon">&#x25C6;</div>
@@ -1449,7 +1465,7 @@
                 <div class="timeline-item animate-in">
                     <div class="year">December 2020</div>
                     <h4>"Coldie Method" Adopted by SuperRare</h4>
-                    <p>SuperRare officially codified Coldie's reserve-price timed auction format into their smart contracts, embedding a Coldie reference on-chain. This format was subsequently adopted by Foundation and other NFT platforms.</p>
+                    <p>Coldie pioneered the "The Coldie Method" reserve-price-triggered 24-hour countdown auction format that restarts timer for 24 additional hours with each higher bid. SuperRare officially adopted and codified this into their smart contracts in December 2020 -- even embedding a Coldie reference on-chain. ASYNC, Artifex and other platforms later adopted the same mechanic as well as artists throughout the crypto art space who were looking for a fair and accessible method.</p>
                 </div>
                 <div class="timeline-item animate-in">
                     <div class="year">2021</div>
@@ -2028,6 +2044,21 @@
             }
 
             draw();
+        })();
+    </script>
+    <script>
+        (function() {
+            var bgs = [
+                'background/bg-assange.png',
+                'background/bg-buffett.png',
+                'background/bg-buterin.png',
+                'background/bg-snowden.png'
+            ];
+            var pick = bgs[Math.floor(Math.random() * bgs.length)];
+            document.body.style.setProperty('--random-bg', 'url(' + pick + ')');
+            var style = document.createElement('style');
+            style.textContent = 'body::after { background-image: url(' + pick + '); }';
+            document.head.appendChild(style);
         })();
     </script>
 </body>
