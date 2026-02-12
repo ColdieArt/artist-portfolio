@@ -755,6 +755,134 @@
             }
         }
 
+        /* ==================== FEATURED 3D VIEWER ==================== */
+        .featured-viewer {
+            margin: 2rem 0 4rem;
+            border: 1px solid var(--border);
+            background: #000;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .featured-viewer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-bright), transparent);
+            z-index: 2;
+        }
+
+        .featured-viewer-header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: rgba(10, 10, 10, 0.95);
+            position: relative;
+            z-index: 2;
+        }
+
+        .featured-viewer-header .viewer-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--accent-bright);
+        }
+
+        .featured-viewer-header h3 {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.3rem;
+            color: var(--text-bright);
+            margin-top: 0.3rem;
+        }
+
+        .featured-viewer-header .viewer-link {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+            text-decoration: none;
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            transition: all 0.3s;
+        }
+
+        .featured-viewer-header .viewer-link:hover {
+            color: var(--text-bright);
+            border-color: var(--border-hover);
+        }
+
+        .featured-viewer-embed {
+            position: relative;
+            width: 100%;
+            height: 70vh;
+            min-height: 500px;
+            max-height: 800px;
+        }
+
+        .featured-viewer-embed iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        .featured-viewer-caption {
+            padding: 1.2rem 2rem;
+            border-top: 1px solid var(--border);
+            background: rgba(10, 10, 10, 0.95);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .featured-viewer-caption p {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.6;
+            max-width: 700px;
+        }
+
+        .featured-viewer-caption .viewer-tags {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .featured-viewer-caption .viewer-tags span {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.25rem 0.6rem;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+        }
+
+        @media (max-width: 768px) {
+            .featured-viewer-embed {
+                height: 50vh;
+                min-height: 350px;
+            }
+
+            .featured-viewer-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.8rem;
+                padding: 1.2rem 1.5rem;
+            }
+
+            .featured-viewer-caption {
+                flex-direction: column;
+                padding: 1rem 1.5rem;
+            }
+        }
+
         @media (max-width: 480px) {
             .hero-stats {
                 flex-direction: column;
@@ -775,6 +903,7 @@
             <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
             <nav>
                 <a href="index.html">Main Portfolio</a>
+                <a href="#featured">Featured</a>
                 <a href="#network-map">Network Map</a>
                 <a href="#gallery">Gallery</a>
                 <a href="#connections">Connections</a>
@@ -811,6 +940,33 @@
                 </div>
             </div>
         </section>
+
+        <!-- Featured: Elon Musk 3D Portrait -->
+        <div id="featured" class="section-divider">
+            <h2>Featured: 3D Portrait</h2>
+        </div>
+
+        <div class="featured-viewer fade-in">
+            <div class="featured-viewer-header">
+                <div>
+                    <div class="viewer-label">Interactive 3D Experience</div>
+                    <h3>Decentral Eyes -- Elon Musk</h3>
+                </div>
+                <a href="ELON-MUSK-AWS-EXPORT.html" target="_blank" class="viewer-link">Open Fullscreen &rarr;</a>
+            </div>
+            <div class="featured-viewer-embed">
+                <iframe src="ELON-MUSK-AWS-EXPORT.html" title="Decentral Eyes -- Elon Musk -- Interactive 3D Portrait by Coldie" loading="lazy" allow="webgl"></iframe>
+            </div>
+            <div class="featured-viewer-caption">
+                <p>A stereoscopic 3D portrait of Elon Musk rendered as an interactive Three.js experience. Click and drag to orbit. The portrait exists at the intersection of technology mogul, meme culture, and the decentralization debate.</p>
+                <div class="viewer-tags">
+                    <span>three.js</span>
+                    <span>interactive 3d</span>
+                    <span>stereoscopic</span>
+                    <span>decentral eyes</span>
+                </div>
+            </div>
+        </div>
 
         <!-- Scrolling Data Stream -->
         <div class="data-stream fade-in">
