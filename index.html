@@ -117,17 +117,17 @@
 
     <style>
         :root {
-            --red: #ff3d3d;
-            --cyan: #00e5ff;
-            --primary: #00e5ff;
-            --secondary: #ff3d3d;
-            --accent: #ff00aa;
-            --bg: #0a0a0f;
-            --surface: #12121a;
-            --surface-light: #1a1a26;
-            --text: #e8e8f0;
-            --text-dim: #8888a0;
-            --text-bright: #ffffff;
+            --red: #444444;
+            --cyan: #333333;
+            --primary: #333333;
+            --secondary: #555555;
+            --accent: #444444;
+            --bg: #d8d8d8;
+            --surface: #ececec;
+            --surface-light: #e2e2e2;
+            --text: #1a1a1a;
+            --text-dim: #555555;
+            --text-bright: #000000;
         }
 
         * {
@@ -157,8 +157,8 @@
             width: 100%;
             height: 100%;
             background:
-                linear-gradient(90deg, rgba(255, 61, 61, 0.02) 1px, transparent 1px),
-                linear-gradient(rgba(0, 229, 255, 0.02) 1px, transparent 1px);
+                linear-gradient(90deg, rgba(80, 80, 80, 0.06) 1px, transparent 1px),
+                linear-gradient(rgba(80, 80, 80, 0.06) 1px, transparent 1px);
             background-size: 60px 60px;
             animation: gridPulse 10s ease-in-out infinite;
             pointer-events: none;
@@ -194,10 +194,10 @@
         header {
             position: sticky;
             top: 0;
-            background: rgba(10, 10, 15, 0.95);
+            background: rgba(216, 216, 216, 0.95);
             backdrop-filter: blur(20px);
             z-index: 200;
-            border-bottom: 1px solid rgba(0, 229, 255, 0.15);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         header .container {
@@ -219,24 +219,22 @@
             letter-spacing: 0.08em;
         }
 
-        /* Stereoscopic 3D text effect on logo */
+        /* Subtle shadow effect on logo */
         .logo::before {
             content: 'COLDIE';
             position: absolute;
-            left: -2px;
+            left: -1px;
             top: 1px;
-            color: var(--red);
-            opacity: 0.7;
+            color: rgba(0, 0, 0, 0.15);
             z-index: -1;
         }
 
         .logo::after {
             content: 'COLDIE';
             position: absolute;
-            left: 2px;
+            left: 1px;
             top: -1px;
-            color: var(--cyan);
-            opacity: 0.7;
+            color: rgba(0, 0, 0, 0.08);
             z-index: -1;
         }
 
@@ -295,7 +293,7 @@
             letter-spacing: 0.3em;
             color: var(--cyan);
             margin-bottom: 2rem;
-            border: 1px solid rgba(0, 229, 255, 0.3);
+            border: 1px solid rgba(0, 0, 0, 0.2);
             padding: 0.5rem 1.5rem;
         }
 
@@ -307,7 +305,7 @@
             position: relative;
         }
 
-        /* Anaglyph 3D effect on hero text */
+        /* Halftone shadow effect on hero text */
         .hero-3d {
             position: relative;
             display: inline-block;
@@ -317,20 +315,18 @@
         .hero-3d::before {
             content: attr(data-text);
             position: absolute;
-            left: -3px;
+            left: -2px;
             top: 2px;
-            color: var(--red);
-            opacity: 0.6;
+            color: rgba(0, 0, 0, 0.12);
             z-index: -1;
         }
 
         .hero-3d::after {
             content: attr(data-text);
             position: absolute;
-            left: 3px;
-            top: -2px;
-            color: var(--cyan);
-            opacity: 0.6;
+            left: 2px;
+            top: -1px;
+            color: rgba(0, 0, 0, 0.06);
             z-index: -1;
         }
 
@@ -438,7 +434,7 @@
             content: '';
             flex: 1;
             height: 1px;
-            background: linear-gradient(to right, var(--cyan), transparent);
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.2), transparent);
         }
 
         /* ==================== SEARCH & FILTER BAR ==================== */
@@ -455,7 +451,7 @@
             min-width: 200px;
             padding: 0.9rem 1.2rem;
             background: var(--surface);
-            border: 1px solid rgba(0, 229, 255, 0.15);
+            border: 1px solid rgba(0, 0, 0, 0.1);
             color: var(--text);
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.9rem;
@@ -480,7 +476,7 @@
         .filter-btn {
             padding: 0.6rem 1.2rem;
             background: var(--surface);
-            border: 1px solid rgba(0, 229, 255, 0.15);
+            border: 1px solid rgba(0, 0, 0, 0.1);
             color: var(--text-dim);
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.75rem;
@@ -492,7 +488,7 @@
 
         .filter-btn:hover,
         .filter-btn.active {
-            background: rgba(0, 229, 255, 0.1);
+            background: rgba(0, 0, 0, 0.06);
             border-color: var(--cyan);
             color: var(--cyan);
         }
@@ -513,7 +509,7 @@
 
         .nft-card {
             background: var(--surface);
-            border: 1px solid rgba(0, 229, 255, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             overflow: hidden;
             transition: all 0.4s;
             position: relative;
@@ -521,8 +517,8 @@
 
         .nft-card:hover {
             transform: translateY(-4px);
-            border-color: rgba(0, 229, 255, 0.3);
-            box-shadow: 0 8px 40px rgba(0, 229, 255, 0.08);
+            border-color: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.05);
         }
 
         .nft-card-visual {
@@ -556,19 +552,19 @@
             right: 0;
             bottom: 0;
             background: linear-gradient(135deg,
-                rgba(255, 61, 61, 0.05) 0%,
+                rgba(0, 0, 0, 0.03) 0%,
                 transparent 40%,
                 transparent 60%,
-                rgba(0, 229, 255, 0.05) 100%);
+                rgba(0, 0, 0, 0.03) 100%);
             transition: opacity 0.3s;
         }
 
         .nft-card:hover .nft-card-visual::after {
             background: linear-gradient(135deg,
-                rgba(255, 61, 61, 0.12) 0%,
+                rgba(0, 0, 0, 0.08) 0%,
                 transparent 40%,
                 transparent 60%,
-                rgba(0, 229, 255, 0.12) 100%);
+                rgba(0, 0, 0, 0.08) 100%);
         }
 
         .nft-card-body {
@@ -619,7 +615,7 @@
             letter-spacing: 0.08em;
             color: var(--text-dim);
             text-decoration: none;
-            border: 1px solid rgba(0, 229, 255, 0.15);
+            border: 1px solid rgba(0, 0, 0, 0.1);
             padding: 0.4rem 0.8rem;
             transition: all 0.3s;
         }
@@ -642,7 +638,7 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             padding: 0.2rem 0.5rem;
-            background: rgba(0, 229, 255, 0.08);
+            background: rgba(0, 0, 0, 0.05);
             color: var(--cyan);
             margin-right: 0.3rem;
             margin-bottom: 0.3rem;
@@ -666,15 +662,15 @@
 
         .gallery-card {
             background: var(--surface);
-            border: 1px solid rgba(255, 61, 61, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             overflow: hidden;
             transition: all 0.4s;
         }
 
         .gallery-card:hover {
             transform: translateY(-4px);
-            border-color: rgba(255, 61, 61, 0.3);
-            box-shadow: 0 8px 40px rgba(255, 61, 61, 0.08);
+            border-color: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.05);
         }
 
         .gallery-card-visual {
@@ -756,7 +752,7 @@
 
         .about-highlights {
             background: var(--surface);
-            border: 1px solid rgba(0, 229, 255, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.06);
             padding: 2.5rem;
         }
 
@@ -769,7 +765,7 @@
 
         .highlight-item {
             padding: 1rem 0;
-            border-bottom: 1px solid rgba(0, 229, 255, 0.06);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
         }
 
         .highlight-item:last-child {
@@ -802,7 +798,7 @@
             top: 0;
             bottom: 0;
             width: 2px;
-            background: linear-gradient(to bottom, var(--cyan), var(--red), transparent);
+            background: linear-gradient(to bottom, #808080, #cccccc, transparent);
         }
 
         .timeline-item {
@@ -897,13 +893,13 @@
 
         .contribution-card {
             background: var(--surface);
-            border: 1px solid rgba(0, 229, 255, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             padding: 2rem;
             transition: all 0.3s;
         }
 
         .contribution-card:hover {
-            border-color: rgba(0, 229, 255, 0.2);
+            border-color: rgba(0, 0, 0, 0.15);
         }
 
         .contribution-card .icon {
@@ -938,13 +934,13 @@
             gap: 1rem;
             padding: 1rem 1.5rem;
             background: var(--surface);
-            border: 1px solid rgba(0, 229, 255, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.04);
             text-decoration: none;
             transition: all 0.3s;
         }
 
         .press-item:hover {
-            border-color: rgba(0, 229, 255, 0.2);
+            border-color: rgba(0, 0, 0, 0.15);
             transform: translateX(4px);
         }
 
@@ -962,7 +958,7 @@
 
         /* ==================== FOOTER ==================== */
         footer {
-            border-top: 1px solid rgba(0, 229, 255, 0.15);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
             padding: 4rem 0;
             text-align: center;
         }
@@ -982,7 +978,7 @@
             text-transform: uppercase;
             letter-spacing: 0.1em;
             padding: 0.6rem 1.2rem;
-            border: 1px solid rgba(0, 229, 255, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.06);
             transition: all 0.3s;
         }
 
@@ -1121,9 +1117,9 @@
         .featured-section {
             margin: 4rem 0;
             padding: 3rem;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(0,0,0,0.08);
             border-radius: 12px;
-            background: rgba(0,0,0,0.4);
+            background: rgba(255,255,255,0.4);
         }
 
         .featured-section .section-header {
@@ -1143,7 +1139,7 @@
             height: 0;
             overflow: hidden;
             border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(0,0,0,0.1);
         }
 
         .featured-video iframe {
@@ -1156,13 +1152,13 @@
         }
 
         .featured-text h3 {
-            color: #fff;
+            color: var(--text-bright);
             font-size: 1.4rem;
             margin-bottom: 1rem;
         }
 
         .featured-text p {
-            color: rgba(255,255,255,0.7);
+            color: var(--text-dim);
             line-height: 1.7;
             margin-bottom: 1rem;
         }
@@ -1170,14 +1166,14 @@
         .featured-text .featured-link {
             display: inline-block;
             margin-top: 0.5rem;
-            color: #fff;
+            color: var(--text-bright);
             text-decoration: none;
-            border-bottom: 1px solid rgba(255,255,255,0.3);
+            border-bottom: 1px solid rgba(0,0,0,0.2);
             transition: border-color 0.3s;
         }
 
         .featured-text .featured-link:hover {
-            border-color: #fff;
+            border-color: var(--text-bright);
         }
 
         @media (max-width: 768px) {
@@ -1938,7 +1934,7 @@
 
         document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
 
-        // ==================== HALFTONE TUNNEL PARALLAX ====================
+        // ==================== HALFTONE DOT PATTERN PARALLAX ====================
         (function() {
             const canvas = document.getElementById('halftone-tunnel');
             const ctx = canvas.getContext('2d');
@@ -1959,7 +1955,6 @@
             });
 
             function draw() {
-                // Smooth lerp toward mouse
                 mouseX += (targetX - mouseX) * 0.06;
                 mouseY += (targetY - mouseY) * 0.06;
 
@@ -1967,32 +1962,34 @@
                 const h = canvas.height;
                 ctx.clearRect(0, 0, w, h);
 
-                // Tunnel center shifts with mouse
                 const cx = w * (0.5 + (mouseX - 0.5) * 0.3);
                 const cy = h * (0.5 + (mouseY - 0.5) * 0.3);
 
-                const maxRadius = Math.sqrt(w * w + h * h) * 0.7;
-                const rings = 18;
+                const maxRadius = Math.sqrt(w * w + h * h) * 0.75;
+                const rings = 28;
                 const scrollOffset = (window.scrollY || 0) * 0.0008;
 
                 for (let r = 0; r < rings; r++) {
                     const ringProgress = (r + 1) / rings;
                     const radius = maxRadius * ringProgress;
-                    const dotCount = Math.floor(8 + r * 5);
-                    // Dots get smaller toward center (tunnel depth illusion)
-                    const dotSize = 1.5 + ringProgress * 4;
-                    // Opacity: dimmer in center, brighter at edges
-                    const alpha = 0.15 + ringProgress * 0.45;
+                    const dotCount = Math.floor(10 + r * 6);
 
-                    // Alternate red/cyan per ring for stereoscopic feel
-                    const isRed = r % 2 === 0;
-                    const color = isRed
-                        ? `rgba(255, 61, 61, ${alpha})`
-                        : `rgba(0, 229, 255, ${alpha})`;
+                    // Varied dot sizes: alternate between small, medium, large
+                    const sizeVariant = r % 3;
+                    let dotSize;
+                    if (sizeVariant === 0) dotSize = 1 + ringProgress * 2.5;
+                    else if (sizeVariant === 1) dotSize = 2 + ringProgress * 5;
+                    else dotSize = 3 + ringProgress * 7;
 
-                    // Rotate rings based on depth + mouse offset + scroll
-                    const rotationOffset = (isRed ? 1 : -1) * (mouseX - 0.5) * 0.5
-                        + scrollOffset * (isRed ? 1 : -1);
+                    const alpha = 0.12 + ringProgress * 0.35;
+
+                    // Alternate between 50% grey and 80% grey
+                    const grey = r % 2 === 0 ? 128 : 204;
+                    const color = `rgba(${grey}, ${grey}, ${grey}, ${alpha})`;
+
+                    const dir = r % 2 === 0 ? 1 : -1;
+                    const rotationOffset = dir * (mouseX - 0.5) * 0.5
+                        + scrollOffset * dir;
 
                     for (let d = 0; d < dotCount; d++) {
                         const angle = (d / dotCount) * Math.PI * 2
@@ -2001,7 +1998,6 @@
                         const x = cx + Math.cos(angle) * radius;
                         const y = cy + Math.sin(angle) * radius;
 
-                        // Skip dots outside viewport
                         if (x < -10 || x > w + 10 || y < -10 || y > h + 10) continue;
 
                         ctx.beginPath();
@@ -2009,6 +2005,23 @@
                         ctx.fillStyle = color;
                         ctx.fill();
                     }
+                }
+
+                // Extra scattered halftone dots of various sizes
+                const seed = Math.floor(scrollOffset * 100);
+                for (let i = 0; i < 80; i++) {
+                    const px = ((i * 7919 + seed) % 1000) / 1000;
+                    const py = ((i * 6271 + seed) % 1000) / 1000;
+                    const x = px * w + (mouseX - 0.5) * 20;
+                    const y = py * h + (mouseY - 0.5) * 20;
+                    const size = ((i * 3571) % 5) + 1.5;
+                    const grey = (i % 2 === 0) ? 128 : 204;
+                    const a = 0.08 + ((i * 2347) % 100) / 500;
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${grey}, ${grey}, ${grey}, ${a})`;
+                    ctx.fill();
                 }
 
                 animFrame = requestAnimationFrame(draw);
