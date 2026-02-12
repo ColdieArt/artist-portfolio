@@ -1116,6 +1116,79 @@
                 text-align: center;
             }
         }
+
+        /* Filthy Fiat Featured Section */
+        .featured-section {
+            margin: 4rem 0;
+            padding: 3rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            background: rgba(0,0,0,0.4);
+        }
+
+        .featured-section .section-header {
+            margin-bottom: 2rem;
+        }
+
+        .featured-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .featured-video {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .featured-video iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .featured-text h3 {
+            color: #fff;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .featured-text p {
+            color: rgba(255,255,255,0.7);
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .featured-text .featured-link {
+            display: inline-block;
+            margin-top: 0.5rem;
+            color: #fff;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            transition: border-color 0.3s;
+        }
+
+        .featured-text .featured-link:hover {
+            border-color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .featured-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .featured-section {
+                padding: 2rem 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1151,6 +1224,26 @@
             <div class="cta-buttons">
                 <a href="#nft-portfolio" class="btn">Digital Gallery</a>
                 <a href="#physical-gallery" class="btn secondary">Physical Gallery</a>
+            </div>
+        </section>
+
+        <!-- ==================== FILTHY FIAT FEATURED ==================== -->
+        <section class="featured-section animate-in">
+            <div class="section-header">
+                <h2>Filthy Fiat</h2>
+            </div>
+            <div class="featured-layout">
+                <div class="featured-video">
+                    <iframe src="https://www.youtube.com/embed/Eti8Lp3nVGQ" title="Filthy Fiat -- Currency Art by Coldie" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+                </div>
+                <div class="featured-text">
+                    <h3>The Tale of Hyperinflation</h3>
+                    <p>Filthy Fiat is an experimental digital and physical art project aimed to entertain and educate about the fragility and nastiness of fiat currency. Coldie never planned for this project to happen, and the fact that it did is why he is creating it.</p>
+                    <p>In 2020, as part of his SHTF preparation, Coldie buried a box in his backyard containing 200 $1 bills, silver bars, a gold coin, bullets, family photos, and a pair of paper 3D glasses. Two years later he dug up the box -- water and dirt had found their way inside. The money had turned into a thick white brick of mold, totally unspendable.</p>
+                    <p>Studying the brick of nasty moldy paper bills, Coldie realized he had inadvertently created a generative art collection -- time along with natural forces created the assets and the metadata of traits. 300 Bitcoin Ordinals were born from 300 still frames of a 12-second stereoscopic video of the deteriorated bills.</p>
+                    <p>The Warren Buffett piece was auctioned at Christie's in December 2024 -- the first Bitcoin Ordinals artwork ever auctioned at Christie's.</p>
+                    <a href="https://filthyfiat.money/" target="_blank" rel="noopener" class="featured-link">filthyfiat.money &rarr;</a>
+                </div>
             </div>
         </section>
 
