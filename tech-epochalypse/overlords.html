@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Overlords | Tech Epochalypse by Coldie</title>
+    <meta name="description" content="Explore all five Tech Epochalypse overlords. Interactive 3D portraits of technology's most powerful figures by Coldie.">
+    <meta property="og:title" content="The Overlords | Tech Epochalypse">
+    <meta property="og:description" content="Five interactive 3D portraits of technology's most powerful figures.">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .overlords-hero {
+            padding: 5rem 0 2rem;
+            text-align: center;
+        }
+
+        .overlords-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 1.5rem;
+            padding-bottom: 4rem;
+        }
+
+        .overlord-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+
+        .overlord-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+            z-index: 2;
+        }
+
+        .overlord-card:hover {
+            transform: translateY(-8px) scale(1.01);
+            border-color: var(--border-hover);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 212, 255, 0.05);
+        }
+
+        .overlord-card:hover::before {
+            opacity: 1;
+        }
+
+        .overlord-card__visual {
+            aspect-ratio: 16/10;
+            background: var(--bg-deep);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .overlord-card__visual .big-number {
+            font-family: var(--font-display);
+            font-size: 10rem;
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.02);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: color 0.4s;
+        }
+
+        .overlord-card:hover .big-number {
+            color: rgba(255, 255, 255, 0.04);
+        }
+
+        .overlord-card__visual .icon {
+            font-size: 3.5rem;
+            opacity: 0.25;
+            transition: all 0.5s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .overlord-card:hover .icon {
+            opacity: 0.6;
+            transform: scale(1.15);
+        }
+
+        .overlord-card__body {
+            padding: 1.8rem;
+        }
+
+        .overlord-card__number {
+            font-family: var(--font-body);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            color: var(--accent-blue);
+            margin-bottom: 0.6rem;
+        }
+
+        .overlord-card__body h3 {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-white);
+            margin-bottom: 0.6rem;
+        }
+
+        .overlord-card__body p {
+            color: var(--text-dim);
+            font-size: 0.82rem;
+            line-height: 1.65;
+            margin-bottom: 1.2rem;
+        }
+
+        .overlord-card__cta {
+            font-family: var(--font-body);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--accent-blue);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: gap 0.3s;
+        }
+
+        .overlord-card:hover .overlord-card__cta {
+            gap: 0.8rem;
+        }
+
+        /* Coming soon state */
+        .overlord-card--locked {
+            opacity: 0.35;
+            cursor: default;
+        }
+
+        .overlord-card--locked:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: var(--border);
+        }
+
+        .overlord-card--locked:hover::before {
+            opacity: 0;
+        }
+
+        .overlord-card--locked:hover .icon {
+            opacity: 0.25;
+            transform: none;
+        }
+
+        .overlord-card--locked .overlord-card__number {
+            color: var(--text-dim);
+        }
+
+        .overlord-card--locked .overlord-card__cta {
+            color: var(--text-dim);
+        }
+
+        @media (max-width: 768px) {
+            .overlords-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="site-nav">
+        <div class="container">
+            <a href="index.html" class="site-nav__logo">Tech Epochalypse</a>
+            <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
+            <ul class="site-nav__links">
+                <li><a href="overlords.html" class="active">Overlords</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="collectors.html">Collectors</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="../index.html" style="font-size:0.65rem;padding:0.4rem 0.8rem;border:1px solid var(--border);letter-spacing:0.1em;">Main Portfolio</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="container">
+            <div class="overlords-hero">
+                <span class="section-label reveal">The Network</span>
+                <h1 class="section-title reveal" style="font-size:clamp(2rem,5vw,3.5rem);">The Overlords</h1>
+                <p class="section-subtitle reveal" style="margin:1rem auto 0;text-align:center;">Five interactive 3D portraits of technology's most powerful figures. Each artwork is a kinetic experience you can explore, manipulate, and export.</p>
+            </div>
+
+            <div class="overlords-grid" id="overlords-grid">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+
+        <footer class="site-footer">
+            <div class="container">
+                <ul class="site-footer__links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="gallery.html">Gallery</a></li>
+                    <li><a href="collectors.html">Collectors</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="https://x.com/coldie" target="_blank" rel="noopener">X / Twitter</a></li>
+                    <li><a href="https://coldie3d.com" target="_blank" rel="noopener">coldie3d.com</a></li>
+                </ul>
+                <p>&copy; 2026 Coldie. Tech Epochalypse. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+    const overlords = [
+        {
+            number: "I",
+            name: "Elon Musk",
+            slug: "elon-musk",
+            description: "The first node in the network. An interactive 3D stereoscopic portrait -- drag, rotate, and export your own interpretation of technology's most polarizing figure.",
+            icon: "\u25C8",
+            active: true
+        },
+        {
+            number: "II",
+            name: "Coming Soon",
+            slug: null,
+            description: "The second node approaches. Another tech overlord rendered in kinetic 3D -- identity to be revealed.",
+            icon: "\u25CE",
+            active: false
+        },
+        {
+            number: "III",
+            name: "Coming Soon",
+            slug: null,
+            description: "The network expands. A third node of power and influence, waiting to be connected.",
+            icon: "\u25C6",
+            active: false
+        },
+        {
+            number: "IV",
+            name: "Coming Soon",
+            slug: null,
+            description: "The penultimate node. Identity classified -- awaiting declassification.",
+            icon: "\u25CF",
+            active: false
+        },
+        {
+            number: "V",
+            name: "Coming Soon",
+            slug: null,
+            description: "The final node completes the network. The epochalypse approaches.",
+            icon: "\u25CA",
+            active: false
+        }
+    ];
+
+    const grid = document.getElementById('overlords-grid');
+    grid.innerHTML = overlords.map((o, i) => {
+        const tag = o.active ? 'a' : 'div';
+        const href = o.active ? ` href="overlords/${o.slug}.html"` : '';
+        const locked = o.active ? '' : ' overlord-card--locked';
+        return `
+        <${tag}${href} class="overlord-card${locked} reveal reveal--delay-${i % 4 + 1}">
+            <div class="overlord-card__visual">
+                <div class="big-number">${o.number}</div>
+                <div class="icon">${o.icon}</div>
+            </div>
+            <div class="overlord-card__body">
+                <div class="overlord-card__number">Overlord ${o.number}</div>
+                <h3>${o.name}</h3>
+                <p>${o.description}</p>
+                <div class="overlord-card__cta">${o.active ? 'Interact \u2192' : 'Awaiting Reveal'}</div>
+            </div>
+        </${tag}>`;
+    }).join('');
+
+    // Mobile nav
+    document.querySelector('.nav-toggle').addEventListener('click', () => {
+        document.querySelector('.site-nav__links').classList.toggle('open');
+    });
+    document.querySelectorAll('.site-nav__links a').forEach(a => {
+        a.addEventListener('click', () => document.querySelector('.site-nav__links').classList.remove('open'));
+    });
+
+    // Scroll reveal
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

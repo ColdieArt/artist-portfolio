@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Gallery | Tech Epochalypse by Coldie</title>
+    <meta name="description" content="Community-created remixes and exports from the Tech Epochalypse interactive art series. Every iteration is unique.">
+    <meta property="og:title" content="Community Gallery | Tech Epochalypse">
+    <meta property="og:description" content="Visitor-created remixes from the Tech Epochalypse interactive art series.">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .gallery-hero {
+            padding: 5rem 0 2rem;
+            text-align: center;
+        }
+
+        /* Filters */
+        .gallery-filters {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1.2rem;
+            font-family: var(--font-body);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            color: var(--text-bright);
+            border-color: var(--accent-blue);
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .gallery-count {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+        }
+
+        /* Masonry Grid */
+        .gallery-grid {
+            columns: 3;
+            column-gap: 1rem;
+            margin-bottom: 4rem;
+        }
+
+        .gallery-item {
+            break-inside: avoid;
+            margin-bottom: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: all 0.4s;
+            cursor: pointer;
+        }
+
+        .gallery-item:hover {
+            border-color: var(--border-hover);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .gallery-item__visual {
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            background: var(--bg-deep);
+        }
+
+        .gallery-item__visual img {
+            width: 100%;
+            display: block;
+            transition: transform 0.5s;
+        }
+
+        .gallery-item:hover .gallery-item__visual img {
+            transform: scale(1.03);
+        }
+
+        .gallery-item__visual video {
+            width: 100%;
+            display: block;
+        }
+
+        .gallery-item__meta {
+            padding: 1rem 1.2rem;
+        }
+
+        .gallery-item__meta .contributor {
+            font-family: var(--font-ui);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-bright);
+            margin-bottom: 0.3rem;
+        }
+
+        .gallery-item__meta .source {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-blue);
+            margin-bottom: 0.3rem;
+        }
+
+        .gallery-item__meta .date {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+        }
+
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            cursor: pointer;
+        }
+
+        .lightbox.open {
+            display: flex;
+        }
+
+        .lightbox img,
+        .lightbox video {
+            max-width: 90%;
+            max-height: 85vh;
+            object-fit: contain;
+        }
+
+        .lightbox__close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 2001;
+        }
+
+        .lightbox__info {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .lightbox__info .contributor {
+            font-family: var(--font-ui);
+            font-size: 0.9rem;
+            color: var(--text-bright);
+        }
+
+        .lightbox__info .source {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-top: 0.3rem;
+        }
+
+        /* Empty state */
+        .gallery-empty {
+            text-align: center;
+            padding: 6rem 2rem;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            margin-bottom: 4rem;
+        }
+
+        .gallery-empty h3 {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            color: var(--text-white);
+            margin-bottom: 1rem;
+        }
+
+        .gallery-empty p {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            line-height: 1.7;
+            max-width: 500px;
+            margin: 0 auto 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .gallery-grid { columns: 2; }
+        }
+
+        @media (max-width: 600px) {
+            .gallery-grid { columns: 1; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="site-nav">
+        <div class="container">
+            <a href="index.html" class="site-nav__logo">Tech Epochalypse</a>
+            <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
+            <ul class="site-nav__links">
+                <li><a href="overlords.html">Overlords</a></li>
+                <li><a href="gallery.html" class="active">Gallery</a></li>
+                <li><a href="collectors.html">Collectors</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="../index.html" style="font-size:0.65rem;padding:0.4rem 0.8rem;border:1px solid var(--border);letter-spacing:0.1em;">Main Portfolio</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="container">
+            <div class="gallery-hero">
+                <span class="section-label reveal">Community</span>
+                <h1 class="section-title reveal" style="font-size:clamp(2rem,5vw,3.5rem);">Community Gallery</h1>
+                <p class="section-subtitle reveal" style="margin:1rem auto 0;text-align:center;">Every interaction creates a unique iteration. These are exports and remixes created by visitors exploring the Tech Epochalypse artworks.</p>
+            </div>
+
+            <div class="gallery-filters reveal">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="elon-musk">Overlord I — Elon Musk</button>
+                <button class="filter-btn" data-filter="overlord-2">Overlord II</button>
+                <button class="filter-btn" data-filter="overlord-3">Overlord III</button>
+                <button class="filter-btn" data-filter="overlord-4">Overlord IV</button>
+                <button class="filter-btn" data-filter="overlord-5">Overlord V</button>
+            </div>
+
+            <div class="gallery-count reveal" id="gallery-count"></div>
+
+            <div class="gallery-grid" id="gallery-grid">
+                <!-- Rendered by JS from curated data -->
+            </div>
+
+            <div class="gallery-empty reveal" id="gallery-empty" style="display:none;">
+                <h3>Gallery Coming Soon</h3>
+                <p>The community gallery will grow as visitors interact with the artworks and share their exports. Be the first to contribute.</p>
+                <a href="overlords.html" class="btn btn--accent btn--small">Explore the Overlords</a>
+            </div>
+        </div>
+
+        <!-- Lightbox -->
+        <div class="lightbox" id="lightbox">
+            <button class="lightbox__close">&times;</button>
+            <img id="lightbox-img" src="" alt="">
+            <div class="lightbox__info">
+                <div class="contributor" id="lightbox-contributor"></div>
+                <div class="source" id="lightbox-source"></div>
+            </div>
+        </div>
+
+        <footer class="site-footer">
+            <div class="container">
+                <ul class="site-footer__links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="overlords.html">Overlords</a></li>
+                    <li><a href="collectors.html">Collectors</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="https://x.com/coldie" target="_blank" rel="noopener">X / Twitter</a></li>
+                    <li><a href="https://coldie3d.com" target="_blank" rel="noopener">coldie3d.com</a></li>
+                </ul>
+                <p>&copy; 2026 Coldie. Tech Epochalypse. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+    // ── Gallery Data (Artist-curated, static v1) ──
+    // To add entries: add objects to this array with the fields shown.
+    // Images go in a /tech-epochalypse/gallery-images/ folder.
+    const galleryItems = [
+        // Example entry (uncomment and populate when ready):
+        // {
+        //     contributor: "Artist Name",
+        //     overlord: "elon-musk",
+        //     overlordLabel: "Overlord I — Elon Musk",
+        //     date: "2026-02-15",
+        //     type: "image", // "image" or "video"
+        //     src: "gallery-images/example.jpg"
+        // }
+    ];
+
+    const grid = document.getElementById('gallery-grid');
+    const emptyState = document.getElementById('gallery-empty');
+    const countEl = document.getElementById('gallery-count');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    let currentFilter = 'all';
+
+    function renderGallery(filter) {
+        let items = galleryItems;
+        if (filter !== 'all') {
+            items = items.filter(item => item.overlord === filter);
+        }
+
+        if (items.length === 0) {
+            grid.style.display = 'none';
+            emptyState.style.display = 'block';
+            countEl.textContent = '';
+            return;
+        }
+
+        grid.style.display = '';
+        emptyState.style.display = 'none';
+        countEl.textContent = items.length + ' submission' + (items.length !== 1 ? 's' : '');
+
+        grid.innerHTML = items.map((item, i) => `
+            <div class="gallery-item reveal" data-index="${i}" data-src="${item.src}" data-contributor="${item.contributor}" data-source="${item.overlordLabel}">
+                <div class="gallery-item__visual">
+                    ${item.type === 'video'
+                        ? `<video src="${item.src}" autoplay muted loop playsinline></video>`
+                        : `<img src="${item.src}" alt="Export by ${item.contributor}" loading="lazy">`
+                    }
+                </div>
+                <div class="gallery-item__meta">
+                    <div class="source">${item.overlordLabel}</div>
+                    <div class="contributor">${item.contributor}</div>
+                    <div class="date">${item.date}</div>
+                </div>
+            </div>
+        `).join('');
+
+        // Re-observe new elements
+        document.querySelectorAll('.gallery-item.reveal').forEach(el => observer.observe(el));
+        bindLightbox();
+    }
+
+    // Filters
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            renderGallery(currentFilter);
+        });
+    });
+
+    // Lightbox
+    const lightbox = document.getElementById('lightbox');
+    function bindLightbox() {
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const src = item.dataset.src;
+                const contributor = item.dataset.contributor;
+                const source = item.dataset.source;
+                document.getElementById('lightbox-img').src = src;
+                document.getElementById('lightbox-contributor').textContent = contributor;
+                document.getElementById('lightbox-source').textContent = source;
+                lightbox.classList.add('open');
+            });
+        });
+    }
+    lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox || e.target.classList.contains('lightbox__close')) {
+            lightbox.classList.remove('open');
+        }
+    });
+
+    // Initial render
+    renderGallery('all');
+
+    // Mobile nav
+    document.querySelector('.nav-toggle').addEventListener('click', () => {
+        document.querySelector('.site-nav__links').classList.toggle('open');
+    });
+    document.querySelectorAll('.site-nav__links a').forEach(a => {
+        a.addEventListener('click', () => document.querySelector('.site-nav__links').classList.remove('open'));
+    });
+
+    // Scroll reveal
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

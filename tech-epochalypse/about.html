@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About | Tech Epochalypse by Coldie</title>
+    <meta name="description" content="The story behind Tech Epochalypse. Learn about the series, the artist, and the process behind these interactive 3D portraits.">
+    <meta property="og:title" content="About | Tech Epochalypse by Coldie">
+    <meta property="og:description" content="The story behind Tech Epochalypse by Coldie.">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .about-hero {
+            padding: 5rem 0 2rem;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 5rem;
+            margin-bottom: 5rem;
+            align-items: start;
+        }
+
+        .about-text h2 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-white);
+            margin-bottom: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .about-text h2:first-child {
+            margin-top: 0;
+        }
+
+        .about-text p {
+            color: var(--text);
+            font-size: 0.88rem;
+            line-height: 1.8;
+            margin-bottom: 1.2rem;
+        }
+
+        .about-text p strong {
+            color: var(--text-bright);
+        }
+
+        /* Sidebar */
+        .about-sidebar {
+            position: sticky;
+            top: calc(var(--nav-height) + 2rem);
+        }
+
+        .about-sidebar-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-sidebar-card h4 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-white);
+            margin-bottom: 1rem;
+        }
+
+        .about-sidebar-card p {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            line-height: 1.7;
+            margin-bottom: 0.8rem;
+        }
+
+        .about-sidebar-card p:last-child {
+            margin-bottom: 0;
+        }
+
+        .about-sidebar-card .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .about-sidebar-card .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .about-sidebar-card .stat-row .label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-dim);
+        }
+
+        .about-sidebar-card .stat-row .value {
+            font-size: 0.82rem;
+            color: var(--text-bright);
+        }
+
+        .contact-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .contact-links a {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            padding: 0.5rem 0.8rem;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .contact-links a:hover {
+            color: var(--accent-blue);
+            border-color: rgba(0, 212, 255, 0.2);
+        }
+
+        /* Process section */
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0 4rem;
+        }
+
+        .process-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            transition: all 0.3s;
+        }
+
+        .process-card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .process-card .step {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 800;
+            color: rgba(0, 212, 255, 0.15);
+            margin-bottom: 0.8rem;
+        }
+
+        .process-card h4 {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-white);
+            margin-bottom: 0.6rem;
+        }
+
+        .process-card p {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            line-height: 1.7;
+        }
+
+        /* Press logos */
+        .press-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .press-item {
+            padding: 0.6rem 1.2rem;
+            border: 1px solid var(--border);
+            font-family: var(--font-ui);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            transition: all 0.3s;
+        }
+
+        .press-item:hover {
+            color: var(--text-bright);
+            border-color: var(--border-hover);
+        }
+
+        @media (max-width: 768px) {
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .about-sidebar {
+                position: static;
+            }
+
+            .process-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="site-nav">
+        <div class="container">
+            <a href="index.html" class="site-nav__logo">Tech Epochalypse</a>
+            <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
+            <ul class="site-nav__links">
+                <li><a href="overlords.html">Overlords</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="collectors.html">Collectors</a></li>
+                <li><a href="about.html" class="active">About</a></li>
+                <li><a href="../index.html" style="font-size:0.65rem;padding:0.4rem 0.8rem;border:1px solid var(--border);letter-spacing:0.1em;">Main Portfolio</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="container">
+            <div class="about-hero">
+                <span class="section-label reveal">About the Series</span>
+                <h1 class="section-title reveal" style="font-size:clamp(2rem,5vw,3.5rem);">Tech Epochalypse</h1>
+                <p class="section-subtitle reveal">The story behind the series, the artist, and the process.</p>
+            </div>
+
+            <div class="about-content">
+                <div class="about-text reveal">
+                    <h2>What is Tech Epochalypse?</h2>
+                    <p><strong>Tech Epochalypse</strong> is an interactive digital art series featuring five portraits of technology's most powerful and controversial figures — the "Tech Overlords." Each portrait is a kinetic, 3D, interactive artwork that viewers can explore, manipulate, and export as their own unique iteration.</p>
+                    <p>The series interrogates the concentration of power in the hands of a few technology leaders — the architects of the platforms, networks, and systems that shape daily life for billions. Through Coldie's signature stereoscopic technique rendered as interactive Three.js experiences, each portrait becomes both monument and mirror: a study of the face behind the algorithm.</p>
+                    <p>Unlike traditional digital art, these works are not static. Every viewer's interaction creates a different perspective, a different frame. The built-in export functionality means every visitor can capture and share their own version — making the boundary between creator and audience as permeable as the technology these overlords have built.</p>
+
+                    <h2>The Artist</h2>
+                    <p><strong>Coldie</strong> is a pioneering NFT digital artist recognized as one of the earliest crypto artists, active since 2017. He is the first artist to tokenize stereoscopic 3D art on the blockchain, creator of the iconic Decentral Eyes portrait series, and inventor of the reserve-price timed auction format adopted by SuperRare.</p>
+                    <p>With career NFT sales exceeding <strong>$7 million</strong>, Coldie is one of the highest-earning crypto artists. His work has been featured at Christie's, Bonhams, Sotheby's (via Pak's "The Builder" recognition), Gazelli Art House London, and major publications including Rolling Stone and Cointelegraph.</p>
+                    <p>Tech Epochalypse represents the evolution of Coldie's portrait practice from 2D collage into fully dimensional, interactive 3D experiences — pushing the medium forward while maintaining the critical lens that has defined the Decentral Eyes series since its inception.</p>
+
+                    <h2>The Process</h2>
+                </div>
+
+                <aside class="about-sidebar reveal">
+                    <div class="about-sidebar-card">
+                        <h4>Series Details</h4>
+                        <div class="stat-row">
+                            <span class="label">Series</span>
+                            <span class="value">Tech Epochalypse</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="label">Artist</span>
+                            <span class="value">Coldie</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="label">Works</span>
+                            <span class="value">5 Interactive Portraits</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="label">Medium</span>
+                            <span class="value">Three.js / WebGL</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="label">Technique</span>
+                            <span class="value">Stereoscopic 3D</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="label">Export</span>
+                            <span class="value">JPEG / MP4</span>
+                        </div>
+                    </div>
+
+                    <div class="about-sidebar-card">
+                        <h4>Connect</h4>
+                        <div class="contact-links">
+                            <a href="https://x.com/coldie" target="_blank" rel="noopener">X / Twitter <span>&rarr;</span></a>
+                            <a href="https://instagram.com/coldie3dart" target="_blank" rel="noopener">Instagram <span>&rarr;</span></a>
+                            <a href="https://superrare.com/coldie" target="_blank" rel="noopener">SuperRare <span>&rarr;</span></a>
+                            <a href="https://coldie3d.com" target="_blank" rel="noopener">coldie3d.com <span>&rarr;</span></a>
+                            <a href="https://coldie3d.medium.com" target="_blank" rel="noopener">Medium <span>&rarr;</span></a>
+                        </div>
+                    </div>
+
+                    <div class="about-sidebar-card">
+                        <h4>Featured In</h4>
+                        <div class="press-grid">
+                            <a href="https://www.rollingstone.com/music/music-news/bauhaus-nft-collection-crypto-artist-coldie-1206608/" target="_blank" rel="noopener" class="press-item">Rolling Stone</a>
+                            <a href="https://cointelegraph.com/magazine/coldie-snoop-dogg-piece-vitalik-buterin-john-mcafee/" target="_blank" rel="noopener" class="press-item">Cointelegraph</a>
+                            <a href="https://www.bonhams.com/auction/27285/" target="_blank" rel="noopener" class="press-item">Bonhams</a>
+                            <a href="https://nftnow.com/art/top-crypto-artists-ogs/" target="_blank" rel="noopener" class="press-item">NFT Now</a>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <div class="process-grid">
+                <div class="process-card reveal reveal--delay-1">
+                    <div class="step">01</div>
+                    <h4>Source Collection</h4>
+                    <p>Multiple reference images of each subject are gathered — press photos, candid shots, iconic moments. These form the raw material for the stereoscopic collage process.</p>
+                </div>
+                <div class="process-card reveal reveal--delay-2">
+                    <div class="step">02</div>
+                    <h4>Stereoscopic Collage</h4>
+                    <p>10+ images are layered and composited using Coldie's proprietary technique, creating a multi-dimensional portrait that carries visual depth and narrative tension in every layer.</p>
+                </div>
+                <div class="process-card reveal reveal--delay-3">
+                    <div class="step">03</div>
+                    <h4>3D Construction</h4>
+                    <p>The collage is translated into a Three.js scene — geometry, textures, shaders, and lighting are crafted to bring the flat portrait into interactive three-dimensional space.</p>
+                </div>
+                <div class="process-card reveal reveal--delay-4">
+                    <div class="step">04</div>
+                    <h4>Interaction Design</h4>
+                    <p>Camera controls, effects, filters, and export functionality are integrated. The artwork becomes a tool as much as a piece — every viewer creates their own iteration.</p>
+                </div>
+            </div>
+        </div>
+
+        <footer class="site-footer">
+            <div class="container">
+                <ul class="site-footer__links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="overlords.html">Overlords</a></li>
+                    <li><a href="gallery.html">Gallery</a></li>
+                    <li><a href="collectors.html">Collectors</a></li>
+                    <li><a href="https://x.com/coldie" target="_blank" rel="noopener">X / Twitter</a></li>
+                    <li><a href="https://coldie3d.com" target="_blank" rel="noopener">coldie3d.com</a></li>
+                </ul>
+                <p>&copy; 2026 Coldie. Tech Epochalypse. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+    // Mobile nav
+    document.querySelector('.nav-toggle').addEventListener('click', () => {
+        document.querySelector('.site-nav__links').classList.toggle('open');
+    });
+    document.querySelectorAll('.site-nav__links a').forEach(a => {
+        a.addEventListener('click', () => document.querySelector('.site-nav__links').classList.remove('open'));
+    });
+
+    // Scroll reveal
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

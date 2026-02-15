@@ -1,0 +1,15 @@
+{
+  "collectors": [
+    {
+      "name": "Collector Name",
+      "avatar": null,
+      "pieces": ["elon-musk"],
+      "bio": "A brief bio or quote from the collector.",
+      "socials": {
+        "twitter": null,
+        "instagram": null,
+        "website": null
+      }
+    }
+  ]
+}
