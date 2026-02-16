@@ -4360,6 +4360,34 @@ setTimeout(function () {
       });
     }
 
+    // ── Save to community gallery via localStorage ──
+    function saveToGallery(canvas) {
+      try {
+        const thumbCanvas = document.createElement('canvas');
+        const MAX = 800;
+        const scale = Math.min(MAX / canvas.width, MAX / canvas.height, 1);
+        thumbCanvas.width = Math.round(canvas.width * scale);
+        thumbCanvas.height = Math.round(canvas.height * scale);
+        const ctx = thumbCanvas.getContext('2d');
+        ctx.drawImage(canvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
+        const dataUrl = thumbCanvas.toDataURL('image/jpeg', 0.85);
+
+        const existing = JSON.parse(localStorage.getItem('te-gallery') || '[]');
+        existing.unshift({
+          id: 'export-' + Date.now(),
+          image: dataUrl,
+          overlord: 'elon-musk',
+          date: new Date().toISOString().split('T')[0],
+          type: 'image'
+        });
+        // Keep max 50 entries to stay within storage limits
+        if (existing.length > 50) existing.length = 50;
+        localStorage.setItem('te-gallery', JSON.stringify(existing));
+      } catch (e) {
+        console.warn('Gallery save failed:', e);
+      }
+    }
+
     // ── PNG export ──
     async function exportPNG() {
       setStatus('Capturing…', 'active');
@@ -4370,7 +4398,8 @@ setTimeout(function () {
       r.domElement.toBlob((blob) => {
         if (blob) {
           triggerDownload(blob, 'elon-musk-coldie.png');
-          setStatus('PNG saved ✓', 'active');
+          saveToGallery(r.domElement);
+          setStatus('PNG saved ✓ — added to gallery', 'active');
           showPostModal();
         } else {
           setStatus('Capture failed', 'error');
@@ -4462,6 +4491,9 @@ setTimeout(function () {
         lockUI(false);
         startBtn.classList.remove('recording');
       };
+
+      // Save a gallery thumbnail from the first frame
+      saveToGallery(canvas);
 
       mr.start(100); // flush data every 100 ms
       setTimeout(() => {
