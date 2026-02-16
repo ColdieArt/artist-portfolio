@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import ScrollReveal from '@/components/ScrollReveal'
+import UserExports from '@/components/UserExports'
 import overlords from '@/data/overlords.json'
 import galleryItems from '@/data/gallery.json'
 
@@ -52,6 +53,9 @@ export default function GalleryPage() {
             </div>
           </div>
         </ScrollReveal>
+
+        {/* User exports from artwork interactions */}
+        <UserExports overlordNames={overlordNames} />
 
         {/* Gallery grid */}
         {galleryItems.length > 0 ? (
