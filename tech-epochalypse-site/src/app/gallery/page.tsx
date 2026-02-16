@@ -2,7 +2,17 @@ import type { Metadata } from 'next'
 import ScrollReveal from '@/components/ScrollReveal'
 import UserExports from '@/components/UserExports'
 import overlords from '@/data/overlords.json'
-import galleryItems from '@/data/gallery.json'
+import galleryItemsRaw from '@/data/gallery.json'
+
+interface GalleryItem {
+  id: string
+  type: 'image' | 'video'
+  contributor: string
+  date: string
+  overlord: string
+}
+
+const galleryItems = galleryItemsRaw as GalleryItem[]
 
 export const metadata: Metadata = {
   title: 'Community Gallery — Tech Epochalypse',

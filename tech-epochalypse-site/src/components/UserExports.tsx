@@ -2,16 +2,56 @@
 
 import { useEffect, useState } from 'react'
 
-// Update this after deploying your Cloudflare Worker
-const GALLERY_API = 'https://te-gallery-api.YOUR_SUBDOMAIN.workers.dev'
+const AIRTABLE_BASE_ID = process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID ?? ''
+const AIRTABLE_TABLE = process.env.NEXT_PUBLIC_AIRTABLE_TABLE ?? 'Gallery'
+const AIRTABLE_TOKEN = process.env.NEXT_PUBLIC_AIRTABLE_TOKEN ?? ''
+
+interface AirtableAttachment {
+  id: string
+  url: string
+  filename: string
+  size: number
+  type: string
+  thumbnails?: {
+    small: { url: string; width: number; height: number }
+    large: { url: string; width: number; height: number }
+    full: { url: string; width: number; height: number }
+  }
+}
+
+interface GalleryRecord {
+  id: string
+  fields: {
+    Title?: string
+    Image?: AirtableAttachment[]
+    Overlord?: string
+    Date?: string
+    Contributor?: string
+  }
+  createdTime: string
+}
 
 interface GalleryExport {
   id: string
-  key: string
+  title: string
   imageUrl: string
   overlord: string
   date: string
-  size: number
+  contributor: string
+}
+
+function parseRecords(records: GalleryRecord[]): GalleryExport[] {
+  return records
+    .filter((r) => r.fields.Image && r.fields.Image.length > 0)
+    .map((r) => ({
+      id: r.id,
+      title: r.fields.Title ?? '',
+      imageUrl: r.fields.Image![0].thumbnails?.full?.url ?? r.fields.Image![0].url,
+      overlord: r.fields.Overlord ?? 'unknown',
+      date: r.fields.Date ?? r.createdTime.split('T')[0],
+      contributor: r.fields.Contributor ?? 'Visitor',
+    }))
+    .sort((a, b) => b.date.localeCompare(a.date))
 }
 
 export default function UserExports({ overlordNames }: { overlordNames: Record<string, string> }) {
@@ -22,10 +62,15 @@ export default function UserExports({ overlordNames }: { overlordNames: Record<s
   useEffect(() => {
     async function fetchGallery() {
       try {
-        const res = await fetch(GALLERY_API + '/gallery')
+        const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}?sort%5B0%5D%5Bfield%5D=Date&sort%5B0%5D%5Bdirection%5D=desc`
+        const res = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+          },
+        })
         if (!res.ok) throw new Error('Failed to fetch')
         const data = await res.json()
-        setExports(data)
+        setExports(parseRecords(data.records ?? []))
       } catch {
         setError(true)
       } finally {
@@ -65,8 +110,8 @@ export default function UserExports({ overlordNames }: { overlordNames: Record<s
           >
             <div className="aspect-[4/5] relative overflow-hidden bg-charcoal">
               <img
-                src={GALLERY_API + item.imageUrl}
-                alt={`Export of ${overlordNames[item.overlord] ?? item.overlord}`}
+                src={item.imageUrl}
+                alt={item.title || `Export of ${overlordNames[item.overlord] ?? item.overlord}`}
                 className="w-full h-full object-cover"
                 loading="lazy"
               />
@@ -74,7 +119,9 @@ export default function UserExports({ overlordNames }: { overlordNames: Record<s
             </div>
             <div className="p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-xs text-silver">Visitor</span>
+                <span className="font-mono text-xs text-silver">
+                  {item.contributor}
+                </span>
                 <span className="font-mono text-[10px] text-steel/50">
                   {item.date}
                 </span>
