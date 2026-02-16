@@ -2,6 +2,8 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Gallery API — update this URL after deploying the Cloudflare Worker -->
+  <script>window.GALLERY_API_URL = 'https://te-gallery-api.YOUR_SUBDOMAIN.workers.dev';</script>
   <script type="importmap">
     {
       "imports": {
@@ -4360,29 +4362,36 @@ setTimeout(function () {
       });
     }
 
-    // ── Save to community gallery via localStorage ──
+    // ── Gallery API endpoint (update after deploying your Cloudflare Worker) ──
+    const GALLERY_API = window.GALLERY_API_URL || '';
+
+    // ── Save to community gallery via Cloudflare R2 ──
     function saveToGallery(canvas) {
+      if (!GALLERY_API) {
+        console.warn('Gallery API not configured — set window.GALLERY_API_URL');
+        return;
+      }
       try {
         const thumbCanvas = document.createElement('canvas');
-        const MAX = 800;
+        const MAX = 1200;
         const scale = Math.min(MAX / canvas.width, MAX / canvas.height, 1);
         thumbCanvas.width = Math.round(canvas.width * scale);
         thumbCanvas.height = Math.round(canvas.height * scale);
         const ctx = thumbCanvas.getContext('2d');
         ctx.drawImage(canvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
-        const dataUrl = thumbCanvas.toDataURL('image/jpeg', 0.85);
 
-        const existing = JSON.parse(localStorage.getItem('te-gallery') || '[]');
-        existing.unshift({
-          id: 'export-' + Date.now(),
-          image: dataUrl,
-          overlord: 'elon-musk',
-          date: new Date().toISOString().split('T')[0],
-          type: 'image'
-        });
-        // Keep max 50 entries to stay within storage limits
-        if (existing.length > 50) existing.length = 50;
-        localStorage.setItem('te-gallery', JSON.stringify(existing));
+        thumbCanvas.toBlob(async (blob) => {
+          if (!blob) return;
+          const form = new FormData();
+          form.append('image', blob, 'export.jpg');
+          form.append('overlord', 'elon-musk');
+          try {
+            const res = await fetch(GALLERY_API + '/upload', { method: 'POST', body: form });
+            if (!res.ok) console.warn('Gallery upload response:', res.status);
+          } catch (e) {
+            console.warn('Gallery upload failed:', e);
+          }
+        }, 'image/jpeg', 0.85);
       } catch (e) {
         console.warn('Gallery save failed:', e);
       }
