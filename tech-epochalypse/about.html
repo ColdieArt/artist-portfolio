@@ -10,7 +10,7 @@
     <meta property="og:type" content="website">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
         .about-hero {
@@ -29,7 +29,7 @@
             font-family: var(--font-display);
             font-size: 2rem;
             font-weight: 700;
-            color: var(--text-white);
+            color: var(--text-bright);
             margin-bottom: 1.5rem;
             margin-top: 3rem;
         }
@@ -56,8 +56,8 @@
         }
 
         .about-sidebar-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
+            background: var(--surface);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             padding: 2rem;
             margin-bottom: 1.5rem;
         }
@@ -66,7 +66,7 @@
             font-family: var(--font-display);
             font-size: 1rem;
             font-weight: 700;
-            color: var(--text-white);
+            color: var(--text-bright);
             margin-bottom: 1rem;
         }
 
@@ -86,7 +86,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 0.6rem 0;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .about-sidebar-card .stat-row:last-child {
@@ -115,7 +115,7 @@
             font-size: 0.75rem;
             color: var(--text-dim);
             padding: 0.5rem 0.8rem;
-            border: 1px solid var(--border);
+            border: 1px solid rgba(0, 0, 0, 0.08);
             transition: all 0.3s;
             display: flex;
             justify-content: space-between;
@@ -123,8 +123,8 @@
         }
 
         .contact-links a:hover {
-            color: var(--accent-blue);
-            border-color: rgba(0, 212, 255, 0.2);
+            color: var(--text-bright);
+            border-color: rgba(0, 0, 0, 0.2);
         }
 
         /* Process section */
@@ -136,21 +136,23 @@
         }
 
         .process-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
+            background: var(--surface);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             padding: 2rem;
             transition: all 0.3s;
         }
 
         .process-card:hover {
-            border-color: var(--border-hover);
+            border-color: rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.05);
         }
 
         .process-card .step {
             font-family: var(--font-display);
             font-size: 2rem;
             font-weight: 800;
-            color: rgba(0, 212, 255, 0.15);
+            color: rgba(0, 0, 0, 0.08);
             margin-bottom: 0.8rem;
         }
 
@@ -158,7 +160,7 @@
             font-family: var(--font-display);
             font-size: 1.1rem;
             font-weight: 700;
-            color: var(--text-white);
+            color: var(--text-bright);
             margin-bottom: 0.6rem;
         }
 
@@ -178,7 +180,7 @@
 
         .press-item {
             padding: 0.6rem 1.2rem;
-            border: 1px solid var(--border);
+            border: 1px solid rgba(0, 0, 0, 0.08);
             font-family: var(--font-ui);
             font-size: 0.75rem;
             font-weight: 600;
@@ -188,7 +190,7 @@
 
         .press-item:hover {
             color: var(--text-bright);
-            border-color: var(--border-hover);
+            border-color: rgba(0, 0, 0, 0.2);
         }
 
         @media (max-width: 768px) {
@@ -217,7 +219,7 @@
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="collectors.html">Collectors</a></li>
                 <li><a href="about.html" class="active">About</a></li>
-                <li><a href="../index.html" style="font-size:0.65rem;padding:0.4rem 0.8rem;border:1px solid var(--border);letter-spacing:0.1em;">Main Portfolio</a></li>
+                <li><a href="../index.html" class="btn small">Main Portfolio</a></li>
             </ul>
         </div>
     </nav>
@@ -226,7 +228,7 @@
         <div class="container">
             <div class="about-hero">
                 <span class="section-label reveal">About the Series</span>
-                <h1 class="section-title reveal" style="font-size:clamp(2rem,5vw,3.5rem);">Tech Epochalypse</h1>
+                <h1 class="section-title reveal" style="font-size: clamp(2rem, 5vw, 3.5rem);">Tech Epochalypse</h1>
                 <p class="section-subtitle reveal">The story behind the series, the artist, and the process.</p>
             </div>
 
@@ -321,14 +323,17 @@
             </div>
         </div>
 
+        <!-- Footer -->
         <footer class="site-footer">
             <div class="container">
                 <ul class="site-footer__links">
-                    <li><a href="index.html">Home</a></li>
                     <li><a href="overlords.html">Overlords</a></li>
                     <li><a href="gallery.html">Gallery</a></li>
                     <li><a href="collectors.html">Collectors</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="../index.html">Main Portfolio</a></li>
                     <li><a href="https://x.com/coldie" target="_blank" rel="noopener">X / Twitter</a></li>
+                    <li><a href="https://superrare.com/coldie" target="_blank" rel="noopener">SuperRare</a></li>
                     <li><a href="https://coldie3d.com" target="_blank" rel="noopener">coldie3d.com</a></li>
                 </ul>
                 <p>&copy; 2026 Coldie. Tech Epochalypse. All rights reserved.</p>
@@ -337,19 +342,31 @@
     </div>
 
     <script>
-    // Mobile nav
-    document.querySelector('.nav-toggle').addEventListener('click', () => {
+    // ── Mobile Nav Toggle ──
+    document.querySelector('.nav-toggle').addEventListener('click', function () {
         document.querySelector('.site-nav__links').classList.toggle('open');
     });
-    document.querySelectorAll('.site-nav__links a').forEach(a => {
-        a.addEventListener('click', () => document.querySelector('.site-nav__links').classList.remove('open'));
+    document.querySelectorAll('.site-nav__links a').forEach(function (link) {
+        link.addEventListener('click', function () {
+            document.querySelector('.site-nav__links').classList.remove('open');
+        });
     });
 
-    // Scroll reveal
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    // ── Scroll Reveal (IntersectionObserver) ──
+    var revealObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -60px 0px'
+    });
+
+    document.querySelectorAll('.reveal').forEach(function (el) {
+        revealObserver.observe(el);
+    });
     </script>
 </body>
 </html>
