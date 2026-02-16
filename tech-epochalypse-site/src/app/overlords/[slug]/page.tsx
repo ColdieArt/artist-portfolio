@@ -28,7 +28,6 @@ export default function OverlordPage({ params }: PageProps) {
   const overlord = overlords.find((o) => o.slug === params.slug)
   if (!overlord || overlord.status !== 'live') notFound()
 
-  const currentIndex = overlords.findIndex((o) => o.slug === params.slug)
   const liveOverlords = overlords.filter((o) => o.status === 'live')
   const currentLiveIndex = liveOverlords.findIndex(
     (o) => o.slug === params.slug
@@ -87,13 +86,8 @@ export default function OverlordPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Artwork iframe area */}
-      <div className="flex-1 pt-[7.5rem] md:pt-[8.5rem]">
-        <ArtworkViewer overlord={overlord} />
-      </div>
-
       {/* Info panel */}
-      <div className="bg-abyss border-t border-white/5">
+      <div className="pt-[7.5rem] md:pt-[8.5rem] bg-abyss border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6 md:px-12 py-12 md:py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
@@ -133,14 +127,14 @@ export default function OverlordPage({ params }: PageProps) {
                   effects. Export your unique iteration as JPEG or MP4.
                 </p>
               </div>
-              <div className="pt-4">
-                <Link href="/gallery" className="btn-secondary">
-                  Share to Community Gallery
-                </Link>
-              </div>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Launch artwork button */}
+      <div className="flex-1 flex items-center justify-center bg-void">
+        <ArtworkViewer overlord={overlord} />
       </div>
     </div>
   )
