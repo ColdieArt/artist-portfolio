@@ -10,10 +10,10 @@
     <meta property="og:type" content="website">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* ── Page Header ── */
+        /* ── Page Hero ── */
         .overlords-hero {
             padding: 5rem 0 2rem;
             text-align: center;
@@ -22,12 +22,12 @@
         /* ── Grid ── */
         .overlords-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 2rem;
-            padding-bottom: 4rem;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 4rem;
         }
 
-        /* ── Card Overrides ── */
+        /* ── Card Structure ── */
         .overlord-item {
             display: flex;
             flex-direction: column;
@@ -37,57 +37,60 @@
             aspect-ratio: 4 / 3;
         }
 
+        /* Overlay roman numeral */
         .overlord-item .card-visual .overlay-number {
             font-family: var(--font-display);
-            font-size: 5rem;
+            font-size: 7rem;
             font-weight: 700;
-            color: rgba(0, 0, 0, 0.04);
+            color: rgba(255, 255, 255, 0.03);
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             line-height: 1;
+            letter-spacing: 0.05em;
             transition: color 0.4s;
+            user-select: none;
         }
 
         .overlord-item:hover .overlay-number {
-            color: rgba(0, 0, 0, 0.08);
+            color: rgba(255, 255, 255, 0.06);
         }
 
-        .overlord-item .card-visual .icon {
-            font-size: 2.5rem;
-            opacity: 0.25;
+        /* Geometric SVG icon */
+        .overlord-item .card-visual .geo-icon {
             position: relative;
             z-index: 1;
+            opacity: 0.3;
             transition: all 0.4s;
         }
 
-        .overlord-item:hover .icon {
-            opacity: 0.5;
-            transform: scale(1.15);
+        .overlord-item:hover .geo-icon {
+            opacity: 0.6;
+            transform: scale(1.08);
         }
 
-        .overlord-item .card-body .number {
-            font-family: var(--font-body);
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.3em;
-            color: var(--text-dim);
-            margin-bottom: 0.5rem;
+        /* Card body overrides */
+        .overlord-item .card-body .meta {
+            margin-bottom: 0.75rem;
         }
 
-        /* Locked cards: neutralize hover effects */
+        .overlord-item .card-body .status-badge {
+            margin-top: 0.25rem;
+        }
+
+        /* Locked card: neutralize hover effects */
         .overlord-item.card--locked:hover .overlay-number {
-            color: rgba(0, 0, 0, 0.04);
+            color: rgba(255, 255, 255, 0.03);
         }
 
-        .overlord-item.card--locked:hover .icon {
-            opacity: 0.25;
+        .overlord-item.card--locked:hover .geo-icon {
+            opacity: 0.3;
             transform: none;
         }
 
         /* ── Responsive ── */
-        @media (max-width: 768px) {
+        @media (max-width: 600px) {
             .overlords-grid {
                 grid-template-columns: 1fr;
             }
@@ -97,98 +100,126 @@
 <body>
     <nav class="site-nav">
         <div class="container">
-            <a href="index.html" class="site-nav__logo">Tech Epochalypse</a>
+            <a href="index.html" class="site-nav__logo">Tech <span>Epochalypse</span></a>
             <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
             <ul class="site-nav__links">
                 <li><a href="overlords.html" class="active">Overlords</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="collectors.html">Collectors</a></li>
                 <li><a href="about.html">About</a></li>
-                <li><a href="../index.html" class="btn small">Main Portfolio</a></li>
             </ul>
         </div>
     </nav>
 
     <div class="page">
         <div class="container">
-            <!-- Page Header -->
+            <!-- Hero -->
             <div class="overlords-hero">
-                <span class="section-label reveal">The Network</span>
+                <span class="section-label reveal">The Series</span>
                 <h1 class="section-title reveal" style="font-size: clamp(2rem, 5vw, 3.5rem);">The Overlords</h1>
-                <p class="section-subtitle reveal" style="margin: 1rem auto 0; text-align: center;">Five interactive 3D stereoscopic portraits of technology's most powerful figures. Each artwork is a kinetic experience you can explore, manipulate, and export as your own unique iteration.</p>
+                <p class="section-subtitle reveal" style="margin: 1rem auto 0; text-align: center;">Five interactive 3D portraits of technology's most powerful figures. Each artwork is a kinetic, stereoscopic experience you can drag, rotate, and export as your own unique iteration.</p>
             </div>
 
             <!-- Overlords Grid -->
             <div class="overlords-grid">
-                <!-- Overlord I: Elon Musk (Active) -->
-                <div class="overlord-item card reveal reveal--delay-1">
+
+                <!-- Overlord I: Elon Musk (Live) -->
+                <a href="overlords/elon-musk.html" class="overlord-item card reveal reveal--delay-1" style="text-decoration: none;">
                     <div class="card-visual">
                         <div class="overlay-number">I</div>
-                        <div class="icon">&#x25C8;</div>
+                        <svg class="geo-icon" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <polygon points="32,4 60,32 32,60 4,32" stroke="currentColor" stroke-width="1" fill="none" opacity="0.6"/>
+                            <polygon points="32,14 50,32 32,50 14,32" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.4"/>
+                            <line x1="32" y1="4" x2="32" y2="60" stroke="currentColor" stroke-width="0.3" opacity="0.2"/>
+                            <line x1="4" y1="32" x2="60" y2="32" stroke="currentColor" stroke-width="0.3" opacity="0.2"/>
+                            <circle cx="32" cy="32" r="4" fill="currentColor" opacity="0.5"/>
+                        </svg>
                     </div>
                     <div class="card-body">
-                        <div class="number">Overlord I</div>
                         <h3>Elon Musk</h3>
-                        <p>The first node in the network. An interactive 3D stereoscopic portrait -- drag, rotate, and export your own interpretation of technology's most polarizing figure.</p>
-                        <a href="overlords/elon-musk.html" class="btn small">Interact &rarr;</a>
+                        <div class="meta">Interactive 3D Portrait</div>
+                        <p>The first node in the network. Drag, rotate, and export your own interpretation of technology's most polarizing figure.</p>
+                        <span class="status-badge live">Live</span>
                     </div>
-                </div>
+                </a>
 
-                <!-- Overlord II: Coming Soon -->
+                <!-- Overlord II: Locked -->
                 <div class="overlord-item card card--locked reveal reveal--delay-2">
                     <div class="card-visual">
                         <div class="overlay-number">II</div>
-                        <div class="icon">&#x25CE;</div>
+                        <svg class="geo-icon" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="32" cy="32" r="26" stroke="currentColor" stroke-width="1" fill="none" opacity="0.6"/>
+                            <circle cx="32" cy="32" r="16" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.4"/>
+                            <circle cx="32" cy="32" r="6" stroke="currentColor" stroke-width="0.3" fill="none" opacity="0.3"/>
+                            <circle cx="32" cy="32" r="3" fill="currentColor" opacity="0.4"/>
+                        </svg>
                     </div>
                     <div class="card-body">
-                        <div class="number">Overlord II</div>
-                        <h3>Coming Soon</h3>
+                        <h3>Overlord II</h3>
+                        <div class="meta">Interactive 3D Portrait</div>
                         <p>The second node approaches. Another tech overlord rendered in kinetic 3D -- identity to be revealed.</p>
-                        <span class="btn small secondary" style="pointer-events: none;">Awaiting Reveal</span>
+                        <span class="status-badge locked">Coming Soon</span>
                     </div>
                 </div>
 
-                <!-- Overlord III: Coming Soon -->
+                <!-- Overlord III: Locked -->
                 <div class="overlord-item card card--locked reveal reveal--delay-3">
                     <div class="card-visual">
                         <div class="overlay-number">III</div>
-                        <div class="icon">&#x25C6;</div>
+                        <svg class="geo-icon" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <polygon points="32,6 58,47 6,47" stroke="currentColor" stroke-width="1" fill="none" opacity="0.6"/>
+                            <polygon points="32,18 48,43 16,43" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.4"/>
+                            <line x1="32" y1="6" x2="32" y2="47" stroke="currentColor" stroke-width="0.3" opacity="0.2"/>
+                            <circle cx="32" cy="36" r="3" fill="currentColor" opacity="0.4"/>
+                        </svg>
                     </div>
                     <div class="card-body">
-                        <div class="number">Overlord III</div>
-                        <h3>Coming Soon</h3>
+                        <h3>Overlord III</h3>
+                        <div class="meta">Interactive 3D Portrait</div>
                         <p>The network expands. A third node of power and influence, waiting to be connected.</p>
-                        <span class="btn small secondary" style="pointer-events: none;">Awaiting Reveal</span>
+                        <span class="status-badge locked">Coming Soon</span>
                     </div>
                 </div>
 
-                <!-- Overlord IV: Coming Soon -->
+                <!-- Overlord IV: Locked -->
                 <div class="overlord-item card card--locked reveal reveal--delay-4">
                     <div class="card-visual">
                         <div class="overlay-number">IV</div>
-                        <div class="icon">&#x25CF;</div>
+                        <svg class="geo-icon" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="8" y="8" width="48" height="48" stroke="currentColor" stroke-width="1" fill="none" opacity="0.6"/>
+                            <rect x="18" y="18" width="28" height="28" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.4"/>
+                            <line x1="8" y1="8" x2="56" y2="56" stroke="currentColor" stroke-width="0.3" opacity="0.2"/>
+                            <line x1="56" y1="8" x2="8" y2="56" stroke="currentColor" stroke-width="0.3" opacity="0.2"/>
+                            <circle cx="32" cy="32" r="3" fill="currentColor" opacity="0.4"/>
+                        </svg>
                     </div>
                     <div class="card-body">
-                        <div class="number">Overlord IV</div>
-                        <h3>Coming Soon</h3>
+                        <h3>Overlord IV</h3>
+                        <div class="meta">Interactive 3D Portrait</div>
                         <p>The penultimate node. Identity classified -- awaiting declassification.</p>
-                        <span class="btn small secondary" style="pointer-events: none;">Awaiting Reveal</span>
+                        <span class="status-badge locked">Coming Soon</span>
                     </div>
                 </div>
 
-                <!-- Overlord V: Coming Soon -->
+                <!-- Overlord V: Locked -->
                 <div class="overlord-item card card--locked reveal">
                     <div class="card-visual">
                         <div class="overlay-number">V</div>
-                        <div class="icon">&#x25CA;</div>
+                        <svg class="geo-icon" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <polygon points="32,4 61,24 50,56 14,56 3,24" stroke="currentColor" stroke-width="1" fill="none" opacity="0.6"/>
+                            <polygon points="32,14 51,28 44,50 20,50 13,28" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.4"/>
+                            <line x1="32" y1="4" x2="32" y2="56" stroke="currentColor" stroke-width="0.3" opacity="0.2"/>
+                            <circle cx="32" cy="34" r="3" fill="currentColor" opacity="0.4"/>
+                        </svg>
                     </div>
                     <div class="card-body">
-                        <div class="number">Overlord V</div>
-                        <h3>Coming Soon</h3>
+                        <h3>Overlord V</h3>
+                        <div class="meta">Interactive 3D Portrait</div>
                         <p>The final node completes the network. The epochalypse approaches.</p>
-                        <span class="btn small secondary" style="pointer-events: none;">Awaiting Reveal</span>
+                        <span class="status-badge locked">Coming Soon</span>
                     </div>
                 </div>
+
             </div>
         </div>
 
@@ -200,7 +231,6 @@
                     <li><a href="gallery.html">Gallery</a></li>
                     <li><a href="collectors.html">Collectors</a></li>
                     <li><a href="about.html">About</a></li>
-                    <li><a href="../index.html">Main Portfolio</a></li>
                     <li><a href="https://x.com/coldie" target="_blank" rel="noopener">X / Twitter</a></li>
                     <li><a href="https://superrare.com/coldie" target="_blank" rel="noopener">SuperRare</a></li>
                     <li><a href="https://coldie3d.com" target="_blank" rel="noopener">coldie3d.com</a></li>
@@ -226,6 +256,7 @@
         entries.forEach(function (entry) {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
+                revealObserver.unobserve(entry.target);
             }
         });
     }, {

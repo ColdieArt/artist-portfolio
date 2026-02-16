@@ -10,7 +10,7 @@
     <meta property="og:type" content="website">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
         .about-hero {
@@ -57,7 +57,7 @@
 
         .about-sidebar-card {
             background: var(--surface);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
             padding: 2rem;
             margin-bottom: 1.5rem;
         }
@@ -86,7 +86,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 0.6rem 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid var(--border);
         }
 
         .about-sidebar-card .stat-row:last-child {
@@ -115,7 +115,7 @@
             font-size: 0.75rem;
             color: var(--text-dim);
             padding: 0.5rem 0.8rem;
-            border: 1px solid rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border);
             transition: all 0.3s;
             display: flex;
             justify-content: space-between;
@@ -124,35 +124,35 @@
 
         .contact-links a:hover {
             color: var(--text-bright);
-            border-color: rgba(0, 0, 0, 0.2);
+            border-color: var(--border-hover);
         }
 
         /* Process section */
         .process-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 1.5rem;
             margin: 2rem 0 4rem;
         }
 
         .process-card {
             background: var(--surface);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
             padding: 2rem;
             transition: all 0.3s;
         }
 
         .process-card:hover {
-            border-color: rgba(0, 0, 0, 0.2);
+            border-color: var(--border-hover);
             transform: translateY(-2px);
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
         }
 
         .process-card .step {
             font-family: var(--font-display);
             font-size: 2rem;
             font-weight: 800;
-            color: rgba(0, 0, 0, 0.08);
+            color: rgba(255, 255, 255, 0.04);
             margin-bottom: 0.8rem;
         }
 
@@ -180,7 +180,7 @@
 
         .press-item {
             padding: 0.6rem 1.2rem;
-            border: 1px solid rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border);
             font-family: var(--font-ui);
             font-size: 0.75rem;
             font-weight: 600;
@@ -190,7 +190,7 @@
 
         .press-item:hover {
             color: var(--text-bright);
-            border-color: rgba(0, 0, 0, 0.2);
+            border-color: var(--border-hover);
         }
 
         @media (max-width: 768px) {
@@ -212,14 +212,13 @@
 <body>
     <nav class="site-nav">
         <div class="container">
-            <a href="index.html" class="site-nav__logo">Tech Epochalypse</a>
+            <a href="index.html" class="site-nav__logo">Tech <span>Epochalypse</span></a>
             <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
             <ul class="site-nav__links">
                 <li><a href="overlords.html">Overlords</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="collectors.html">Collectors</a></li>
                 <li><a href="about.html" class="active">About</a></li>
-                <li><a href="../index.html" class="btn small">Main Portfolio</a></li>
             </ul>
         </div>
     </nav>
@@ -235,13 +234,13 @@
             <div class="about-content">
                 <div class="about-text reveal">
                     <h2>What is Tech Epochalypse?</h2>
-                    <p><strong>Tech Epochalypse</strong> is an interactive digital art series featuring five portraits of technology's most powerful and controversial figures — the "Tech Overlords." Each portrait is a kinetic, 3D, interactive artwork that viewers can explore, manipulate, and export as their own unique iteration.</p>
+                    <p>Tech Epochalypse is an interactive digital art series featuring five portraits of technology's most powerful and controversial figures — the "Tech Overlords." Each portrait is a kinetic, 3D, interactive artwork that viewers can explore, manipulate, and export as their own unique iteration.</p>
                     <p>The series interrogates the concentration of power in the hands of a few technology leaders — the architects of the platforms, networks, and systems that shape daily life for billions. Through Coldie's signature stereoscopic technique rendered as interactive Three.js experiences, each portrait becomes both monument and mirror: a study of the face behind the algorithm.</p>
                     <p>Unlike traditional digital art, these works are not static. Every viewer's interaction creates a different perspective, a different frame. The built-in export functionality means every visitor can capture and share their own version — making the boundary between creator and audience as permeable as the technology these overlords have built.</p>
 
                     <h2>The Artist</h2>
-                    <p><strong>Coldie</strong> is a pioneering NFT digital artist recognized as one of the earliest crypto artists, active since 2017. He is the first artist to tokenize stereoscopic 3D art on the blockchain, creator of the iconic Decentral Eyes portrait series, and inventor of the reserve-price timed auction format adopted by SuperRare.</p>
-                    <p>With career NFT sales exceeding <strong>$7 million</strong>, Coldie is one of the highest-earning crypto artists. His work has been featured at Christie's, Bonhams, Sotheby's (via Pak's "The Builder" recognition), Gazelli Art House London, and major publications including Rolling Stone and Cointelegraph.</p>
+                    <p>Coldie is a pioneering NFT digital artist recognized as one of the earliest crypto artists, active since 2017. He is the first artist to tokenize stereoscopic 3D art on the blockchain, creator of the iconic Decentral Eyes portrait series, and inventor of the reserve-price timed auction format adopted by SuperRare.</p>
+                    <p>With career NFT sales exceeding $7 million, Coldie is one of the highest-earning crypto artists. His work has been featured at Christie's, Bonhams, Sotheby's (via Pak's "The Builder" recognition), Gazelli Art House London, and major publications including Rolling Stone and Cointelegraph.</p>
                     <p>Tech Epochalypse represents the evolution of Coldie's portrait practice from 2D collage into fully dimensional, interactive 3D experiences — pushing the medium forward while maintaining the critical lens that has defined the Decentral Eyes series since its inception.</p>
 
                     <h2>The Process</h2>
@@ -331,7 +330,6 @@
                     <li><a href="gallery.html">Gallery</a></li>
                     <li><a href="collectors.html">Collectors</a></li>
                     <li><a href="about.html">About</a></li>
-                    <li><a href="../index.html">Main Portfolio</a></li>
                     <li><a href="https://x.com/coldie" target="_blank" rel="noopener">X / Twitter</a></li>
                     <li><a href="https://superrare.com/coldie" target="_blank" rel="noopener">SuperRare</a></li>
                     <li><a href="https://coldie3d.com" target="_blank" rel="noopener">coldie3d.com</a></li>

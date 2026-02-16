@@ -4,230 +4,141 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Overlord I — Elon Musk | Tech Epochalypse by Coldie</title>
-    <meta name="description" content="Interact with Coldie's kinetic 3D portrait of Elon Musk. Drag, rotate, apply effects, and export your own JPEG or MP4 remix.">
+    <meta name="description" content="Interact with Coldie's kinetic 3D portrait of Elon Musk. Drag, rotate, apply effects, and export your own PNG or MP4 remix.">
     <meta property="og:title" content="Overlord I — Elon Musk | Tech Epochalypse">
     <meta property="og:description" content="An interactive 3D stereoscopic portrait. Drag, rotate, and export your own interpretation.">
     <meta property="og:type" content="website">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
     <style>
-        /* ── Page Layout: flex column filling viewport ── */
+        /* ── Viewer Page: full viewport flex column ── */
         html, body {
             height: 100%;
             overflow: hidden;
         }
 
-        body::before {
+        /* Disable the body noise/grid overlays for the viewer */
+        body::before,
+        body::after {
             display: none;
         }
 
-        .artwork-page {
+        .viewer-page {
             display: flex;
             flex-direction: column;
             height: 100vh;
-        }
-
-        /* ── Sticky Nav override: not sticky on this page, just static ── */
-        .artwork-page .site-nav {
             position: relative;
-            flex-shrink: 0;
+            z-index: 1;
         }
 
-        /* ── Artwork Toolbar ── */
-        .artwork-topbar {
+        /* ── Top Toolbar ── */
+        .viewer-toolbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.7rem 1.5rem;
-            background: var(--surface);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            height: 50px;
+            padding: 0 1.25rem;
+            background: var(--bg-raised);
+            border-bottom: 1px solid var(--border);
             flex-shrink: 0;
-            flex-wrap: wrap;
-            gap: 0.6rem;
+            position: relative;
+            z-index: 100;
         }
 
-        .artwork-topbar__left {
+        .viewer-toolbar__left {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
         }
 
-        .artwork-topbar__nav-back {
+        .viewer-toolbar__back {
             font-family: var(--font-ui);
-            font-size: 0.7rem;
+            font-size: 0.72rem;
+            font-weight: 500;
             color: var(--text-dim);
             text-decoration: none;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
-            letter-spacing: 0.05em;
+            gap: 0.5rem;
+            letter-spacing: 0.04em;
             transition: color 0.3s;
         }
 
-        .artwork-topbar__nav-back:hover {
+        .viewer-toolbar__back:hover {
             color: var(--text-bright);
         }
 
-        .artwork-topbar__title {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .artwork-topbar__title .label {
-            font-family: var(--font-body);
-            font-size: 0.55rem;
-            text-transform: uppercase;
-            letter-spacing: 0.25em;
-            color: var(--text-dim);
-        }
-
-        .artwork-topbar__title h1 {
-            font-family: var(--font-display);
+        .viewer-toolbar__back .arrow {
             font-size: 1rem;
-            font-weight: 700;
-            color: var(--text-bright);
-            line-height: 1.3;
+            line-height: 1;
         }
 
-        .artwork-topbar__actions {
+        .viewer-toolbar__center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .viewer-toolbar__title {
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-bright);
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+
+        .viewer-toolbar__right {
             display: flex;
-            gap: 0.5rem;
             align-items: center;
+            gap: 0.5rem;
         }
 
         /* ── Toolbar Buttons ── */
-        .topbar-btn {
+        .toolbar-btn {
             font-family: var(--font-body);
             font-size: 0.65rem;
+            font-weight: 400;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: var(--text-dim);
             background: transparent;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
             padding: 0.4rem 0.9rem;
             cursor: pointer;
             transition: all 0.3s;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
+            gap: 0.4rem;
+            border-radius: var(--radius);
+            white-space: nowrap;
         }
 
-        .topbar-btn:hover {
-            color: var(--text-bright);
-            border-color: rgba(0, 0, 0, 0.3);
-            background: rgba(0, 0, 0, 0.03);
-        }
-
-        .topbar-btn.active {
-            color: var(--text-bright);
-            border-color: rgba(0, 0, 0, 0.25);
-            background: rgba(0, 0, 0, 0.05);
-        }
-
-        /* ── Prev/Next Navigation ── */
-        .artwork-nav {
-            display: flex;
-            gap: 0.3rem;
-        }
-
-        .artwork-nav a,
-        .artwork-nav span {
-            font-family: var(--font-ui);
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-dim);
-            text-decoration: none;
-            padding: 0.4rem 0.8rem;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
-        }
-
-        .artwork-nav a:hover {
+        .toolbar-btn:hover {
             color: var(--text-bright);
             border-color: var(--border-hover);
+            background: rgba(255, 255, 255, 0.03);
         }
 
-        .artwork-nav span {
-            opacity: 0.3;
-            cursor: default;
+        .toolbar-btn.active {
+            color: var(--accent);
+            border-color: rgba(61, 90, 254, 0.3);
+            background: var(--accent-glow);
         }
 
-        /* ── Info Panel (collapsible) ── */
-        .artwork-info {
-            background: var(--surface);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-out;
-            flex-shrink: 0;
-        }
-
-        .artwork-info.open {
-            max-height: 500px;
-        }
-
-        .artwork-info__inner {
-            padding: 2rem;
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 3rem;
-            max-width: var(--max-width);
-            margin: 0 auto;
-        }
-
-        .artwork-info h3 {
-            font-family: var(--font-display);
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--text-bright);
-            margin-bottom: 1rem;
-        }
-
-        .artwork-info p {
-            color: var(--text-dim);
-            font-size: 0.82rem;
-            line-height: 1.7;
-            margin-bottom: 1rem;
-        }
-
-        .artwork-details {
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-
-        .artwork-details__row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.6rem 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-        }
-
-        .artwork-details__row .label {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            color: var(--text-dim);
-        }
-
-        .artwork-details__row .value {
-            font-size: 0.8rem;
-            color: var(--text-bright);
-        }
-
-        /* ── Artwork Viewer ── */
-        .artwork-viewer {
+        /* ── Main Area ── */
+        .viewer-main {
             flex: 1;
             position: relative;
             min-height: 0;
-            background: var(--surface-light);
+            background: #000;
         }
 
-        .artwork-viewer iframe {
+        .viewer-main iframe {
             position: absolute;
             top: 0;
             left: 0;
@@ -235,348 +146,376 @@
             height: 100%;
             border: none;
             display: block;
+            background: #000;
+        }
+
+        /* ── Info Panel (right side, collapsible) ── */
+        .info-panel {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 380px;
+            height: 100%;
+            background: var(--bg-raised);
+            border-left: 1px solid var(--border);
+            z-index: 50;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-panel.open {
+            transform: translateX(0);
+        }
+
+        .info-panel__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .info-panel__header h2 {
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-bright);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .info-panel__close {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0.2rem;
+            line-height: 1;
+            transition: color 0.3s;
+        }
+
+        .info-panel__close:hover {
+            color: var(--text-bright);
+        }
+
+        .info-panel__body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        /* Scrollbar styling */
+        .info-panel__body::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .info-panel__body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .info-panel__body::-webkit-scrollbar-thumb {
+            background: var(--border-hover);
+            border-radius: 2px;
+        }
+
+        .info-panel__artwork-title {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-white);
+            line-height: 1.2;
+            margin-bottom: 0.3rem;
+        }
+
+        .info-panel__artist {
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-panel__medium {
+            font-family: var(--font-body);
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .info-panel__description {
+            color: var(--text);
+            font-size: 0.82rem;
+            line-height: 1.75;
+            margin-bottom: 1rem;
+        }
+
+        .info-panel__technique {
+            color: var(--text-dim);
+            font-size: 0.78rem;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        /* ── Details Grid ── */
+        .details-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .details-grid__row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.7rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .details-grid__row:first-child {
+            border-top: 1px solid var(--border);
+        }
+
+        .details-grid__label {
+            font-family: var(--font-body);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-dim);
+        }
+
+        .details-grid__value {
+            font-family: var(--font-body);
+            font-size: 0.78rem;
+            color: var(--text-bright);
+            text-align: right;
         }
 
         /* ── Mobile Notice ── */
         .mobile-notice {
             display: none;
-            padding: 3rem 2rem;
-            text-align: center;
-            background: var(--surface);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            margin: 2rem;
-        }
-
-        .mobile-notice h3 {
-            font-family: var(--font-display);
-            font-size: 1.2rem;
-            color: var(--text-bright);
-            margin-bottom: 0.8rem;
-        }
-
-        .mobile-notice p {
-            color: var(--text-dim);
-            font-size: 0.82rem;
-            line-height: 1.6;
-        }
-
-        .mobile-notice a {
-            color: var(--primary);
-            text-decoration: underline;
-            text-underline-offset: 2px;
-        }
-
-        .mobile-notice a:hover {
-            color: var(--text-bright);
-        }
-
-        /* ── Share Modal ── */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-
-        .modal-overlay.open {
-            display: flex;
-        }
-
-        .modal {
-            background: var(--bg);
-            border: 1px solid rgba(0, 0, 0, 0.15);
-            padding: 2.5rem;
-            max-width: 480px;
-            width: 90%;
-            position: relative;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
-        }
-
-        .modal h3 {
-            font-family: var(--font-display);
-            font-size: 1.3rem;
-            color: var(--text-bright);
-            margin-bottom: 0.5rem;
-        }
-
-        .modal p {
-            color: var(--text-dim);
-            font-size: 0.82rem;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-        }
-
-        .modal .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .modal label {
-            display: block;
-            font-family: var(--font-body);
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            color: var(--text-dim);
-            margin-bottom: 0.4rem;
-        }
-
-        .modal input,
-        .modal select {
-            width: 100%;
-            padding: 0.7rem 1rem;
-            background: var(--surface);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            color: var(--text);
-            font-family: var(--font-body);
-            font-size: 0.82rem;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .modal input:focus,
-        .modal select:focus {
-            border-color: rgba(0, 0, 0, 0.3);
-        }
-
-        .modal input[type="file"] {
-            padding: 0.5rem;
-            font-size: 0.75rem;
-        }
-
-        .modal__actions {
-            display: flex;
-            gap: 0.8rem;
-            margin-top: 1.5rem;
-        }
-
-        .modal__close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            color: var(--text-dim);
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: color 0.3s;
-            line-height: 1;
-        }
-
-        .modal__close:hover {
-            color: var(--text-bright);
         }
 
         /* ── Responsive ── */
         @media (max-width: 768px) {
-            .artwork-info__inner {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-                padding: 1.5rem;
+            .viewer-toolbar__center {
+                display: none;
             }
 
-            .artwork-topbar {
-                padding: 0.6rem 1rem;
+            .viewer-main iframe {
+                display: none;
             }
 
-            .artwork-topbar__left {
-                gap: 1rem;
-            }
-
-            .artwork-topbar__title h1 {
-                font-size: 0.85rem;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .artwork-viewer {
+            .info-panel {
                 display: none;
             }
 
             .mobile-notice {
-                display: block;
+                display: flex;
+                flex: 1;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 3rem 2rem;
+                text-align: center;
+                background: var(--surface);
+            }
+
+            .mobile-notice__icon {
+                font-size: 2.5rem;
+                margin-bottom: 1.5rem;
+                opacity: 0.3;
+            }
+
+            .mobile-notice h3 {
+                font-family: var(--font-display);
+                font-size: 1.3rem;
+                font-weight: 700;
+                color: var(--text-bright);
+                margin-bottom: 0.8rem;
+            }
+
+            .mobile-notice p {
+                color: var(--text-dim);
+                font-size: 0.85rem;
+                line-height: 1.7;
+                max-width: 340px;
+                margin-bottom: 1.5rem;
+            }
+
+            .mobile-notice a.btn {
+                width: auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .viewer-toolbar {
+                padding: 0 0.75rem;
+            }
+
+            .viewer-toolbar__back span:not(.arrow) {
+                display: none;
+            }
+
+            .toolbar-btn span {
+                display: none;
             }
         }
     </style>
 </head>
 <body>
-    <div class="artwork-page">
-        <!-- Navigation -->
-        <nav class="site-nav">
-            <div class="container">
-                <a href="../index.html" class="site-nav__logo">Tech Epochalypse</a>
-                <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
-                <ul class="site-nav__links">
-                    <li><a href="../overlords.html" class="active">Overlords</a></li>
-                    <li><a href="../gallery.html">Gallery</a></li>
-                    <li><a href="../collectors.html">Collectors</a></li>
-                    <li><a href="../about.html">About</a></li>
-                </ul>
-            </div>
-        </nav>
+    <div class="viewer-page">
 
-        <!-- Artwork Toolbar -->
-        <div class="artwork-topbar">
-            <div class="artwork-topbar__left">
-                <a href="../overlords.html" class="artwork-topbar__nav-back">&larr; All Overlords</a>
-                <div class="artwork-topbar__title">
-                    <span class="label">Overlord I</span>
-                    <h1>Elon Musk</h1>
-                </div>
+        <!-- Top Toolbar -->
+        <div class="viewer-toolbar">
+            <div class="viewer-toolbar__left">
+                <a href="../overlords.html" class="viewer-toolbar__back">
+                    <span class="arrow">&#8592;</span>
+                    <span>Back to Overlords</span>
+                </a>
             </div>
-            <div class="artwork-topbar__actions">
-                <button class="topbar-btn" id="toggle-info">Info</button>
-                <button class="topbar-btn" id="open-share">Share to Gallery</button>
-                <a href="../artworks/elon-musk.html" target="_blank" class="topbar-btn">Fullscreen</a>
-                <div class="artwork-nav">
-                    <span>&larr; Prev</span>
-                    <span>Next &rarr;</span>
-                </div>
-            </div>
-        </div>
 
-        <!-- Info Panel (collapsible) -->
-        <div class="artwork-info" id="artwork-info">
-            <div class="artwork-info__inner">
-                <div>
-                    <h3>Decentral Eyes — Elon Musk</h3>
-                    <p>An interactive stereoscopic 3D portrait of Elon Musk, built as a kinetic Three.js experience. The portrait can be orbited, rotated, and manipulated in real-time. Coldie's signature technique of layered collage is translated into a fully dimensional digital sculpture.</p>
-                    <p>This artwork includes built-in export functionality — create your own JPEG stills or MP4 recordings directly from the viewer. Each export is a unique iteration shaped by your interaction with the piece.</p>
-                </div>
-                <div class="artwork-details">
-                    <div class="artwork-details__row">
-                        <span class="label">Series</span>
-                        <span class="value">Tech Epochalypse</span>
-                    </div>
-                    <div class="artwork-details__row">
-                        <span class="label">Subject</span>
-                        <span class="value">Elon Musk</span>
-                    </div>
-                    <div class="artwork-details__row">
-                        <span class="label">Medium</span>
-                        <span class="value">Interactive 3D / Three.js</span>
-                    </div>
-                    <div class="artwork-details__row">
-                        <span class="label">Technique</span>
-                        <span class="value">Stereoscopic Collage</span>
-                    </div>
-                    <div class="artwork-details__row">
-                        <span class="label">Export</span>
-                        <span class="value">JPEG / MP4</span>
-                    </div>
-                    <div class="artwork-details__row">
-                        <span class="label">Artist</span>
-                        <span class="value">Coldie</span>
-                    </div>
-                </div>
+            <div class="viewer-toolbar__center">
+                <span class="viewer-toolbar__title">Overlord I — Elon Musk</span>
+            </div>
+
+            <div class="viewer-toolbar__right">
+                <button class="toolbar-btn" id="btn-info" type="button">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="8" cy="8" r="7"/>
+                        <line x1="8" y1="7" x2="8" y2="11.5"/>
+                        <circle cx="8" cy="4.5" r="0.5" fill="currentColor" stroke="none"/>
+                    </svg>
+                    Info
+                </button>
+                <a href="../artworks/elon-musk.html" target="_blank" class="toolbar-btn">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 2 14 2 14 7"/>
+                        <line x1="14" y1="2" x2="7" y2="9"/>
+                        <path d="M14 9.5V13a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1h3.5"/>
+                    </svg>
+                    Open Fullscreen
+                </a>
             </div>
         </div>
 
-        <!-- Mobile Notice -->
-        <div class="mobile-notice">
-            <h3>Best Viewed on Desktop</h3>
-            <p>This interactive 3D artwork requires a larger screen for the full experience. Visit on a desktop or tablet to interact with the piece, or <a href="../artworks/elon-musk.html" target="_blank">open it directly</a>.</p>
-        </div>
-
-        <!-- Artwork Viewer -->
-        <div class="artwork-viewer">
+        <!-- Main Area -->
+        <div class="viewer-main">
             <iframe
                 src="../artworks/elon-musk.html"
-                title="Decentral Eyes — Elon Musk — Interactive 3D Portrait by Coldie"
-                loading="lazy"
+                title="Overlord I — Elon Musk — Interactive 3D Portrait by Coldie"
                 allow="autoplay; fullscreen; clipboard-write"
                 allowfullscreen
             ></iframe>
-        </div>
 
-        <!-- Share to Gallery Modal -->
-        <div class="modal-overlay" id="share-modal">
-            <div class="modal">
-                <button class="modal__close" id="close-modal">&times;</button>
-                <h3>Share to Community Gallery</h3>
-                <p>Export a JPEG or MP4 from the artwork using its built-in export buttons, then upload it here to share your unique iteration with the community.</p>
-                <div class="form-group">
-                    <label for="share-name">Your Name / Alias</label>
-                    <input type="text" placeholder="Enter your name or alias" id="share-name">
+            <!-- Info Panel (right side overlay) -->
+            <div class="info-panel" id="info-panel">
+                <div class="info-panel__header">
+                    <h2>Artwork Details</h2>
+                    <button class="info-panel__close" id="btn-info-close" type="button" aria-label="Close info panel">&#10005;</button>
                 </div>
-                <div class="form-group">
-                    <label for="share-file">Your Export (JPEG or MP4)</label>
-                    <input type="file" accept="image/jpeg,image/png,video/mp4" id="share-file">
+                <div class="info-panel__body">
+                    <h3 class="info-panel__artwork-title">Overlord I — Elon Musk</h3>
+                    <div class="info-panel__artist">Coldie</div>
+                    <div class="info-panel__medium">Three.js / WebGL Interactive</div>
+
+                    <p class="info-panel__description">
+                        An interactive stereoscopic 3D portrait of Elon Musk, built as a kinetic
+                        Three.js experience. The portrait can be orbited, rotated, and manipulated
+                        in real-time. Coldie's signature technique of layered collage is translated
+                        into a fully dimensional digital sculpture.
+                    </p>
+
+                    <p class="info-panel__technique">
+                        This artwork uses stereoscopic 3D rendering to create depth and dimension.
+                        The layered composition draws from Coldie's physical collage practice,
+                        re-imagined as an interactive WebGL experience. Built-in export functionality
+                        lets you capture your own PNG stills or MP4 recordings directly from the viewer.
+                    </p>
+
+                    <div class="details-grid">
+                        <div class="details-grid__row">
+                            <span class="details-grid__label">Series</span>
+                            <span class="details-grid__value">Tech Epochalypse</span>
+                        </div>
+                        <div class="details-grid__row">
+                            <span class="details-grid__label">Artist</span>
+                            <span class="details-grid__value">Coldie</span>
+                        </div>
+                        <div class="details-grid__row">
+                            <span class="details-grid__label">Medium</span>
+                            <span class="details-grid__value">Three.js / WebGL</span>
+                        </div>
+                        <div class="details-grid__row">
+                            <span class="details-grid__label">Technique</span>
+                            <span class="details-grid__value">Stereoscopic 3D</span>
+                        </div>
+                        <div class="details-grid__row">
+                            <span class="details-grid__label">Interaction</span>
+                            <span class="details-grid__value">Drag / Rotate / Zoom</span>
+                        </div>
+                        <div class="details-grid__row">
+                            <span class="details-grid__label">Export</span>
+                            <span class="details-grid__value">PNG / MP4</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="share-overlord">Overlord</label>
-                    <select id="share-overlord">
-                        <option value="elon-musk" selected>Overlord I — Elon Musk</option>
-                    </select>
-                </div>
-                <div class="modal__actions">
-                    <button class="btn small" id="submit-share">Submit for Review</button>
-                    <button class="btn small secondary" id="cancel-share">Cancel</button>
-                </div>
-                <p style="font-size:0.7rem;color:var(--text-dim);margin-top:1rem;margin-bottom:0;">Submissions are reviewed by the artist before appearing in the gallery.</p>
             </div>
         </div>
+
+        <!-- Mobile Notice (shown below 768px) -->
+        <div class="mobile-notice">
+            <div class="mobile-notice__icon">&#x25C8;</div>
+            <h3>Best Experienced on Desktop</h3>
+            <p>This interactive 3D artwork requires a larger screen for the full experience. Visit on a desktop to interact with the piece, or open it directly below.</p>
+            <a href="../artworks/elon-musk.html" target="_blank" class="btn small">Open Artwork Directly</a>
+        </div>
+
     </div>
 
     <script>
-    // ── Info Panel Toggle ──
-    document.getElementById('toggle-info').addEventListener('click', function () {
-        var panel = document.getElementById('artwork-info');
-        var btn = document.getElementById('toggle-info');
-        panel.classList.toggle('open');
-        btn.classList.toggle('active');
-    });
+    (function () {
+        // ── Info Panel Toggle ──
+        var btnInfo = document.getElementById('btn-info');
+        var infoPanel = document.getElementById('info-panel');
+        var btnInfoClose = document.getElementById('btn-info-close');
 
-    // ── Share Modal: Open ──
-    document.getElementById('open-share').addEventListener('click', function () {
-        document.getElementById('share-modal').classList.add('open');
-    });
-
-    // ── Share Modal: Close (X button) ──
-    document.getElementById('close-modal').addEventListener('click', function () {
-        document.getElementById('share-modal').classList.remove('open');
-    });
-
-    // ── Share Modal: Close (Cancel button) ──
-    document.getElementById('cancel-share').addEventListener('click', function () {
-        document.getElementById('share-modal').classList.remove('open');
-    });
-
-    // ── Share Modal: Close (click overlay backdrop) ──
-    document.getElementById('share-modal').addEventListener('click', function (e) {
-        if (e.target === e.currentTarget) {
-            e.currentTarget.classList.remove('open');
+        function openInfoPanel() {
+            infoPanel.classList.add('open');
+            btnInfo.classList.add('active');
         }
-    });
 
-    // ── Share Modal: Submit (MVP placeholder, no backend) ──
-    document.getElementById('submit-share').addEventListener('click', function () {
-        var name = document.getElementById('share-name').value;
-        var file = document.getElementById('share-file').files[0];
-        if (!name || !file) {
-            alert('Please enter your name and select a file.');
-            return;
+        function closeInfoPanel() {
+            infoPanel.classList.remove('open');
+            btnInfo.classList.remove('active');
         }
-        alert('Thank you! Your submission has been received and will be reviewed by the artist.');
-        document.getElementById('share-modal').classList.remove('open');
-        document.getElementById('share-name').value = '';
-        document.getElementById('share-file').value = '';
-    });
 
-    // ── Mobile Nav Toggle ──
-    document.querySelector('.nav-toggle').addEventListener('click', function () {
-        document.querySelector('.site-nav__links').classList.toggle('open');
-    });
-    document.querySelectorAll('.site-nav__links a').forEach(function (link) {
-        link.addEventListener('click', function () {
-            document.querySelector('.site-nav__links').classList.remove('open');
+        function toggleInfoPanel() {
+            if (infoPanel.classList.contains('open')) {
+                closeInfoPanel();
+            } else {
+                openInfoPanel();
+            }
+        }
+
+        btnInfo.addEventListener('click', toggleInfoPanel);
+        btnInfoClose.addEventListener('click', closeInfoPanel);
+
+        // Close info panel on Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && infoPanel.classList.contains('open')) {
+                closeInfoPanel();
+            }
         });
-    });
+    })();
     </script>
 </body>
 </html>

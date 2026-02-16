@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tech Epochalypse | Interactive Digital Art by Coldie</title>
-    <meta name="description" content="Tech Epochalypse: Five overlords. One network. Infinite iterations. An interactive digital art series by Coldie featuring kinetic 3D portraits of tech's most powerful figures.">
+    <meta name="description" content="Tech Epochalypse: Five interactive 3D portraits of technology's most powerful figures. Drag. Rotate. Export. Every interaction creates a unique iteration. A digital art series by Coldie.">
     <meta property="og:title" content="Tech Epochalypse | Interactive Digital Art by Coldie">
-    <meta property="og:description" content="Five overlords. One network. Infinite iterations. An immersive digital art experience.">
+    <meta property="og:description" content="Five interactive 3D portraits of technology's most powerful figures. Drag. Rotate. Export. Every interaction creates a unique iteration.">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:creator" content="@Coldie">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
         /* ── Hero ── */
@@ -38,10 +38,11 @@
             font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.3em;
-            color: var(--text-dim);
-            border: 1px solid rgba(0, 0, 0, 0.2);
+            color: var(--accent);
+            border: 1px solid rgba(61, 90, 254, 0.25);
             padding: 0.5rem 1.5rem;
             margin-bottom: 2.5rem;
+            background: rgba(61, 90, 254, 0.05);
             opacity: 0;
             animation: fade-up 0.8s 0.2s ease-out forwards;
         }
@@ -51,7 +52,7 @@
             font-size: clamp(3rem, 8vw, 6rem);
             font-weight: 700;
             line-height: 1;
-            color: var(--text-bright);
+            color: var(--text-white);
             margin-bottom: 1.5rem;
             opacity: 0;
             animation: fade-up 0.8s 0.4s ease-out forwards;
@@ -62,13 +63,17 @@
             font-size: 0.95rem;
             color: var(--text-dim);
             line-height: 1.8;
-            max-width: 560px;
+            max-width: 600px;
             margin: 0 auto 3rem;
             opacity: 0;
             animation: fade-up 0.8s 0.6s ease-out forwards;
         }
 
         .hero__cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
             opacity: 0;
             animation: fade-up 0.8s 0.8s ease-out forwards;
         }
@@ -77,36 +82,33 @@
         .stats-row {
             display: flex;
             justify-content: center;
-            gap: 4rem;
-            padding: 3rem 0;
-            border-top: 1px solid rgba(0, 0, 0, 0.08);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            align-items: center;
+            padding: 2.5rem 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
             margin-bottom: 2rem;
             opacity: 0;
             animation: fade-up 0.8s 1s ease-out forwards;
         }
 
         .stats-row__item {
-            text-align: center;
-        }
-
-        .stats-row__value {
-            font-family: var(--font-display);
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-bright);
-            display: block;
-            line-height: 1.2;
-        }
-
-        .stats-row__label {
             font-family: var(--font-body);
-            font-size: 0.65rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.2em;
+            letter-spacing: 0.15em;
             color: var(--text-dim);
-            margin-top: 0.4rem;
-            display: block;
+            padding: 0 2.5rem;
+            border-right: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .stats-row__item:last-child {
+            border-right: none;
+        }
+
+        .stats-row__item strong {
+            color: var(--text-bright);
+            font-weight: 600;
         }
 
         /* ── Overlords Grid ── */
@@ -133,19 +135,29 @@
             font-family: var(--font-display);
             font-size: 5rem;
             font-weight: 700;
-            color: rgba(0, 0, 0, 0.04);
+            color: rgba(255, 255, 255, 0.03);
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             line-height: 1;
+            transition: color 0.4s;
         }
 
-        .overlord-item .card-visual .icon {
-            font-size: 2.5rem;
-            opacity: 0.25;
+        .overlord-item:hover .overlay-number {
+            color: rgba(255, 255, 255, 0.06);
+        }
+
+        .overlord-item .card-visual .geo-icon {
             position: relative;
             z-index: 1;
+            opacity: 0.3;
+            transition: all 0.4s;
+        }
+
+        .overlord-item:hover .geo-icon {
+            opacity: 0.6;
+            transform: scale(1.08);
         }
 
         .overlord-item .card-body .number {
@@ -155,6 +167,55 @@
             letter-spacing: 0.3em;
             color: var(--text-dim);
             margin-bottom: 0.5rem;
+        }
+
+        .overlord-item .card-body .status-badge {
+            margin-bottom: 0.75rem;
+        }
+
+        /* Locked card hover neutralization */
+        .overlord-item.card--locked:hover .overlay-number {
+            color: rgba(255, 255, 255, 0.03);
+        }
+
+        .overlord-item.card--locked:hover .geo-icon {
+            opacity: 0.3;
+            transform: none;
+        }
+
+        /* ── CTA Section ── */
+        .cta-section {
+            text-align: center;
+            padding: 6rem 0 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .cta-section__line {
+            width: 1px;
+            height: 60px;
+            background: linear-gradient(to bottom, transparent, var(--accent));
+            margin: 0 auto 3rem;
+        }
+
+        .cta-section__text {
+            font-family: var(--font-display);
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-weight: 700;
+            color: var(--text-white);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .cta-section__sub {
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-bottom: 2.5rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
         }
 
         @keyframes fade-up {
@@ -175,11 +236,12 @@
 
             .stats-row {
                 flex-wrap: wrap;
-                gap: 2rem;
+                gap: 0;
             }
 
-            .stats-row__value {
-                font-size: 1.6rem;
+            .stats-row__item {
+                padding: 0.6rem 1.5rem;
+                border-right: none;
             }
 
             .overlords-grid {
@@ -188,12 +250,15 @@
         }
 
         @media (max-width: 480px) {
-            .stats-row {
-                gap: 1.5rem;
+            .stats-row__item {
+                flex: 0 0 50%;
+                text-align: center;
+                padding: 0.5rem 1rem;
             }
 
-            .stats-row__item {
-                flex: 0 0 40%;
+            .hero__cta {
+                flex-direction: column;
+                align-items: center;
             }
         }
     </style>
@@ -201,14 +266,13 @@
 <body>
     <nav class="site-nav">
         <div class="container">
-            <a href="index.html" class="site-nav__logo">Tech Epochalypse</a>
+            <a href="index.html" class="site-nav__logo">Tech <span>Epochalypse</span></a>
             <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
             <ul class="site-nav__links">
                 <li><a href="overlords.html">Overlords</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="collectors.html">Collectors</a></li>
                 <li><a href="about.html">About</a></li>
-                <li><a href="../index.html" class="btn small">Main Portfolio</a></li>
             </ul>
         </div>
     </nav>
@@ -222,32 +286,21 @@
                     <span class="hero-3d" data-text="Tech">Tech</span><br>
                     <span class="hero-3d" data-text="Epochalypse">Epochalypse</span>
                 </h1>
-                <p class="hero__tagline">Five overlords. One network. Infinite iterations. A series of interactive 3D stereoscopic portraits exploring the faces of technological power.</p>
+                <p class="hero__tagline">Five interactive 3D portraits of technology's most powerful figures. Drag. Rotate. Export. Every interaction creates a unique iteration.</p>
                 <div class="hero__cta">
-                    <a href="overlords.html" class="btn">Explore the Overlords</a>
+                    <a href="overlords.html" class="btn filled">Enter the Exhibition</a>
+                    <a href="about.html" class="btn secondary">About the Series</a>
                 </div>
             </div>
         </section>
 
-        <!-- Stats -->
+        <!-- Stats Row -->
         <div class="container">
             <div class="stats-row">
-                <div class="stats-row__item">
-                    <span class="stats-row__value">5</span>
-                    <span class="stats-row__label">Overlords</span>
-                </div>
-                <div class="stats-row__item">
-                    <span class="stats-row__value">3D</span>
-                    <span class="stats-row__label">Interactive</span>
-                </div>
-                <div class="stats-row__item">
-                    <span class="stats-row__value">&infin;</span>
-                    <span class="stats-row__label">Iterations</span>
-                </div>
-                <div class="stats-row__item">
-                    <span class="stats-row__value">2025</span>
-                    <span class="stats-row__label">Series</span>
-                </div>
+                <div class="stats-row__item"><strong>5</strong> Portraits</div>
+                <div class="stats-row__item"><strong>Interactive</strong> 3D</div>
+                <div class="stats-row__item"><strong>Exportable</strong></div>
+                <div class="stats-row__item">by <strong>Coldie</strong></div>
             </div>
         </div>
 
@@ -261,29 +314,38 @@
 
                 <div class="overlords-grid">
                     <!-- Overlord I: Elon Musk (Active) -->
-                    <div class="overlord-item card reveal reveal--delay-1">
+                    <a href="overlords/elon-musk.html" class="overlord-item card reveal reveal--delay-1" style="text-decoration: none;">
                         <div class="card-visual">
                             <div class="overlay-number">I</div>
-                            <div class="icon">&#x25C8;</div>
+                            <svg class="geo-icon" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <polygon points="32,4 60,32 32,60 4,32" stroke="currentColor" stroke-width="1" fill="none" opacity="0.6"/>
+                                <polygon points="32,14 50,32 32,50 14,32" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.4"/>
+                                <circle cx="32" cy="32" r="4" fill="currentColor" opacity="0.5"/>
+                            </svg>
                         </div>
                         <div class="card-body">
+                            <span class="status-badge live">Live</span>
                             <div class="number">Overlord I</div>
                             <h3>Elon Musk</h3>
-                            <p>The first node in the network. An interactive 3D stereoscopic portrait -- drag, rotate, and export your own interpretation of technology's most polarizing figure.</p>
-                            <a href="overlords/elon-musk.html" class="btn small">View Artwork &rarr;</a>
+                            <p class="meta">Interactive 3D Portrait -- Drag, Rotate, Export</p>
                         </div>
-                    </div>
+                    </a>
 
                     <!-- Overlord II: Coming Soon -->
                     <div class="overlord-item card card--locked reveal reveal--delay-2">
                         <div class="card-visual">
                             <div class="overlay-number">II</div>
-                            <div class="icon">&#x25CE;</div>
+                            <svg class="geo-icon" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="32" cy="32" r="26" stroke="currentColor" stroke-width="1" fill="none" opacity="0.6"/>
+                                <circle cx="32" cy="32" r="16" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.4"/>
+                                <circle cx="32" cy="32" r="3" fill="currentColor" opacity="0.4"/>
+                            </svg>
                         </div>
                         <div class="card-body">
+                            <span class="status-badge locked">Coming Soon</span>
                             <div class="number">Overlord II</div>
-                            <h3>Coming Soon</h3>
-                            <p>The second node approaches. Another tech overlord rendered in kinetic 3D -- identity to be revealed.</p>
+                            <h3>Identity Classified</h3>
+                            <p class="meta">Awaiting Reveal</p>
                         </div>
                     </div>
 
@@ -291,12 +353,17 @@
                     <div class="overlord-item card card--locked reveal reveal--delay-3">
                         <div class="card-visual">
                             <div class="overlay-number">III</div>
-                            <div class="icon">&#x25C6;</div>
+                            <svg class="geo-icon" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <polygon points="32,6 58,47 6,47" stroke="currentColor" stroke-width="1" fill="none" opacity="0.6"/>
+                                <polygon points="32,18 48,43 16,43" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.4"/>
+                                <circle cx="32" cy="36" r="3" fill="currentColor" opacity="0.4"/>
+                            </svg>
                         </div>
                         <div class="card-body">
+                            <span class="status-badge locked">Coming Soon</span>
                             <div class="number">Overlord III</div>
-                            <h3>Coming Soon</h3>
-                            <p>The network expands. A third node of power and influence, waiting to be connected.</p>
+                            <h3>Identity Classified</h3>
+                            <p class="meta">Awaiting Reveal</p>
                         </div>
                     </div>
 
@@ -304,12 +371,17 @@
                     <div class="overlord-item card card--locked reveal reveal--delay-4">
                         <div class="card-visual">
                             <div class="overlay-number">IV</div>
-                            <div class="icon">&#x25CF;</div>
+                            <svg class="geo-icon" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="8" y="8" width="48" height="48" stroke="currentColor" stroke-width="1" fill="none" opacity="0.6"/>
+                                <rect x="18" y="18" width="28" height="28" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.4"/>
+                                <circle cx="32" cy="32" r="3" fill="currentColor" opacity="0.4"/>
+                            </svg>
                         </div>
                         <div class="card-body">
+                            <span class="status-badge locked">Coming Soon</span>
                             <div class="number">Overlord IV</div>
-                            <h3>Coming Soon</h3>
-                            <p>The penultimate node. Identity classified -- awaiting declassification.</p>
+                            <h3>Identity Classified</h3>
+                            <p class="meta">Awaiting Reveal</p>
                         </div>
                     </div>
 
@@ -317,15 +389,30 @@
                     <div class="overlord-item card card--locked reveal">
                         <div class="card-visual">
                             <div class="overlay-number">V</div>
-                            <div class="icon">&#x25CA;</div>
+                            <svg class="geo-icon" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <polygon points="32,4 61,24 50,56 14,56 3,24" stroke="currentColor" stroke-width="1" fill="none" opacity="0.6"/>
+                                <polygon points="32,14 51,28 44,50 20,50 13,28" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.4"/>
+                                <circle cx="32" cy="34" r="3" fill="currentColor" opacity="0.4"/>
+                            </svg>
                         </div>
                         <div class="card-body">
+                            <span class="status-badge locked">Coming Soon</span>
                             <div class="number">Overlord V</div>
-                            <h3>Coming Soon</h3>
-                            <p>The final node completes the network. The epochalypse approaches.</p>
+                            <h3>Identity Classified</h3>
+                            <p class="meta">Awaiting Reveal</p>
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section reveal">
+            <div class="container">
+                <div class="cta-section__line"></div>
+                <p class="cta-section__text">Every viewer creates a unique iteration</p>
+                <p class="cta-section__sub">No two experiences are the same. Drag, rotate, and export your own version of each portrait.</p>
+                <a href="overlords.html" class="btn filled">Enter the Exhibition</a>
             </div>
         </section>
 
@@ -337,7 +424,6 @@
                     <li><a href="gallery.html">Gallery</a></li>
                     <li><a href="collectors.html">Collectors</a></li>
                     <li><a href="about.html">About</a></li>
-                    <li><a href="../index.html">Main Portfolio</a></li>
                     <li><a href="https://x.com/coldie" target="_blank" rel="noopener">X / Twitter</a></li>
                     <li><a href="https://superrare.com/coldie" target="_blank" rel="noopener">SuperRare</a></li>
                     <li><a href="https://coldie3d.com" target="_blank" rel="noopener">coldie3d.com</a></li>
@@ -363,6 +449,7 @@
         entries.forEach(function (entry) {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
+                revealObserver.unobserve(entry.target);
             }
         });
     }, {
