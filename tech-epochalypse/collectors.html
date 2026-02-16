@@ -10,7 +10,7 @@
     <meta property="og:type" content="website">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
         .collectors-hero {
@@ -28,11 +28,12 @@
 
         .collector-card {
             background: var(--surface);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
             padding: 2.5rem;
             position: relative;
             overflow: hidden;
             transition: all 0.4s;
+            border-radius: var(--radius);
         }
 
         .collector-card::before {
@@ -42,12 +43,12 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.15), transparent);
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
         }
 
         .collector-card:hover {
-            border-color: rgba(0, 0, 0, 0.2);
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.05);
+            border-color: var(--border-hover);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-hover);
             transform: translateY(-4px);
         }
 
@@ -62,7 +63,7 @@
             width: 70px;
             height: 70px;
             border-radius: 50%;
-            border: 2px solid rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--border-hover);
             overflow: hidden;
             flex-shrink: 0;
             background: var(--surface-light);
@@ -81,7 +82,7 @@
             font-family: var(--font-display);
             font-size: 1.4rem;
             font-weight: 700;
-            color: var(--text-dim);
+            color: var(--accent);
         }
 
         .collector-card__header-text h3 {
@@ -96,7 +97,7 @@
             font-size: 0.55rem;
             text-transform: uppercase;
             letter-spacing: 0.25em;
-            color: var(--text-dim);
+            color: var(--accent);
         }
 
         .collector-card__bio {
@@ -125,26 +126,27 @@
             align-items: center;
             gap: 0.4rem;
             padding: 0.4rem 0.8rem;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border);
+            background: var(--accent-glow);
             margin-right: 0.4rem;
             margin-bottom: 0.4rem;
             font-size: 0.7rem;
             color: var(--text);
             text-decoration: none;
             transition: all 0.3s;
+            border-radius: var(--radius);
         }
 
         .piece-badge:hover {
-            border-color: rgba(0, 0, 0, 0.3);
-            background: rgba(0, 0, 0, 0.04);
+            border-color: var(--border-hover);
+            color: var(--text-bright);
         }
 
         .piece-badge .dot {
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: var(--text-dim);
+            background: var(--accent);
         }
 
         /* Social links */
@@ -159,22 +161,24 @@
             letter-spacing: 0.1em;
             color: var(--text-dim);
             padding: 0.35rem 0.7rem;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             transition: all 0.3s;
         }
 
         .collector-card__socials a:hover {
             color: var(--text-bright);
-            border-color: rgba(0, 0, 0, 0.3);
+            border-color: var(--border-hover);
         }
 
         /* Empty state */
         .collectors-empty {
             text-align: center;
             padding: 6rem 2rem;
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
             background: var(--surface);
             margin-bottom: 4rem;
+            border-radius: var(--radius);
         }
 
         .collectors-empty h3 {
@@ -206,14 +210,13 @@
 <body>
     <nav class="site-nav">
         <div class="container">
-            <a href="index.html" class="site-nav__logo">Tech Epochalypse</a>
+            <a href="index.html" class="site-nav__logo">Tech <span>Epochalypse</span></a>
             <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
             <ul class="site-nav__links">
                 <li><a href="overlords.html">Overlords</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="collectors.html" class="active">Collectors</a></li>
                 <li><a href="about.html">About</a></li>
-                <li><a href="../index.html" class="btn small">Main Portfolio</a></li>
             </ul>
         </div>
     </nav>
@@ -223,11 +226,11 @@
             <div class="collectors-hero">
                 <span class="section-label reveal">Patrons</span>
                 <h1 class="section-title reveal" style="font-size: clamp(2rem, 5vw, 3.5rem);">Patrons &amp; Collectors</h1>
-                <p class="section-subtitle reveal" style="margin: 1rem auto 0; text-align: center;">Honoring those who collected the original Tech Epochalypse artworks. Each patron holds a piece of the network.</p>
+                <p class="section-subtitle reveal" style="margin: 1rem auto 0; text-align: center;">Honoring the individuals who have collected original Tech Epochalypse artworks. Each patron holds a piece of the network.</p>
             </div>
 
             <div class="collectors-grid" id="collectors-grid">
-                <!-- Rendered by JS from collectors.json -->
+                <!-- Rendered by JS from data/collectors.json -->
             </div>
 
             <div class="collectors-empty reveal" id="collectors-empty" style="display: none;">
@@ -244,7 +247,6 @@
                     <li><a href="gallery.html">Gallery</a></li>
                     <li><a href="collectors.html">Collectors</a></li>
                     <li><a href="about.html">About</a></li>
-                    <li><a href="../index.html">Main Portfolio</a></li>
                     <li><a href="https://x.com/coldie" target="_blank" rel="noopener">X / Twitter</a></li>
                     <li><a href="https://superrare.com/coldie" target="_blank" rel="noopener">SuperRare</a></li>
                     <li><a href="https://coldie3d.com" target="_blank" rel="noopener">coldie3d.com</a></li>
@@ -257,7 +259,7 @@
     <script>
     // ── Piece name lookup ──
     var pieceNames = {
-        'elon-musk': 'Overlord I — Elon Musk',
+        'elon-musk': 'Overlord I \u2014 Elon Musk',
         'overlord-2': 'Overlord II',
         'overlord-3': 'Overlord III',
         'overlord-4': 'Overlord IV',
@@ -328,7 +330,7 @@
                     + '</div>';
             }).join('');
 
-            // Observe new elements
+            // Observe new elements for scroll reveal
             document.querySelectorAll('.collector-card.reveal').forEach(function (el) { revealObserver.observe(el); });
         })
         .catch(function () {
@@ -351,6 +353,7 @@
         entries.forEach(function (entry) {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
+                revealObserver.unobserve(entry.target);
             }
         });
     }, {

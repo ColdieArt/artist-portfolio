@@ -4,21 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Community Gallery | Tech Epochalypse by Coldie</title>
-    <meta name="description" content="Community-created remixes and exports from the Tech Epochalypse interactive art series. Every iteration is unique.">
+    <meta name="description" content="Community-created remixes and exports from the Tech Epochalypse interactive art series. Every interaction creates a unique iteration.">
     <meta property="og:title" content="Community Gallery | Tech Epochalypse">
     <meta property="og:description" content="Visitor-created remixes from the Tech Epochalypse interactive art series.">
     <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:creator" content="@Coldie">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
+        /* ── Gallery Hero ── */
         .gallery-hero {
             padding: 5rem 0 2rem;
             text-align: center;
         }
 
-        /* Filters */
+        /* ── Filter Row ── */
         .gallery-filters {
             display: flex;
             gap: 0.5rem;
@@ -27,6 +30,7 @@
             flex-wrap: wrap;
         }
 
+        /* ── Gallery Count ── */
         .gallery-count {
             text-align: center;
             font-size: 0.7rem;
@@ -34,26 +38,28 @@
             margin-bottom: 2rem;
         }
 
-        /* Masonry Grid */
+        /* ── Masonry Grid ── */
         .gallery-grid {
             columns: 3;
             column-gap: 1rem;
             margin-bottom: 4rem;
         }
 
+        /* ── Gallery Items ── */
         .gallery-item {
             break-inside: avoid;
             margin-bottom: 1rem;
             background: var(--surface);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
             overflow: hidden;
             transition: all 0.4s;
             cursor: pointer;
+            border-radius: var(--radius);
         }
 
         .gallery-item:hover {
-            border-color: rgba(0, 0, 0, 0.2);
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.05);
+            border-color: var(--border-hover);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
             transform: translateY(-2px);
         }
 
@@ -79,6 +85,7 @@
             display: block;
         }
 
+        /* ── Item Meta ── */
         .gallery-item__meta {
             padding: 1rem 1.2rem;
         }
@@ -95,7 +102,7 @@
             font-size: 0.65rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            color: var(--text-dim);
+            color: var(--accent);
             margin-bottom: 0.3rem;
         }
 
@@ -104,14 +111,14 @@
             color: var(--text-dim);
         }
 
-        /* Lightbox */
+        /* ── Lightbox ── */
         .lightbox {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.92);
             display: none;
             justify-content: center;
             align-items: center;
@@ -140,6 +147,11 @@
             font-size: 2rem;
             cursor: pointer;
             z-index: 2001;
+            transition: opacity 0.3s;
+        }
+
+        .lightbox__close:hover {
+            opacity: 0.7;
         }
 
         .lightbox__info {
@@ -163,13 +175,14 @@
             margin-top: 0.3rem;
         }
 
-        /* Empty state */
+        /* ── Empty State ── */
         .gallery-empty {
             text-align: center;
             padding: 6rem 2rem;
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
             background: var(--surface);
             margin-bottom: 4rem;
+            border-radius: var(--radius);
         }
 
         .gallery-empty h3 {
@@ -187,6 +200,7 @@
             margin: 0 auto 2rem;
         }
 
+        /* ── Responsive ── */
         @media (max-width: 1024px) {
             .gallery-grid { columns: 2; }
         }
@@ -199,49 +213,53 @@
 <body>
     <nav class="site-nav">
         <div class="container">
-            <a href="index.html" class="site-nav__logo">Tech Epochalypse</a>
+            <a href="index.html" class="site-nav__logo">Tech <span>Epochalypse</span></a>
             <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
             <ul class="site-nav__links">
                 <li><a href="overlords.html">Overlords</a></li>
                 <li><a href="gallery.html" class="active">Gallery</a></li>
                 <li><a href="collectors.html">Collectors</a></li>
                 <li><a href="about.html">About</a></li>
-                <li><a href="../index.html" class="btn small">Main Portfolio</a></li>
             </ul>
         </div>
     </nav>
 
     <div class="page">
         <div class="container">
+            <!-- Hero -->
             <div class="gallery-hero">
                 <span class="section-label reveal">Community</span>
                 <h1 class="section-title reveal" style="font-size: clamp(2rem, 5vw, 3.5rem);">Community Gallery</h1>
                 <p class="section-subtitle reveal" style="margin: 1rem auto 0; text-align: center;">Every interaction creates a unique iteration. These are exports and remixes created by visitors exploring the Tech Epochalypse artworks.</p>
             </div>
 
+            <!-- Filter Buttons -->
             <div class="gallery-filters reveal">
                 <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="elon-musk">Overlord I — Elon Musk</button>
+                <button class="filter-btn" data-filter="elon-musk">Overlord I &mdash; Elon Musk</button>
                 <button class="filter-btn" data-filter="overlord-2">Overlord II</button>
                 <button class="filter-btn" data-filter="overlord-3">Overlord III</button>
                 <button class="filter-btn" data-filter="overlord-4">Overlord IV</button>
                 <button class="filter-btn" data-filter="overlord-5">Overlord V</button>
             </div>
 
+            <!-- Gallery Count -->
             <div class="gallery-count reveal" id="gallery-count"></div>
 
+            <!-- Masonry Gallery Grid -->
             <div class="gallery-grid" id="gallery-grid">
-                <!-- Rendered by JS from curated data -->
+                <!-- Rendered by JS from galleryItems array -->
             </div>
 
+            <!-- Empty State -->
             <div class="gallery-empty reveal" id="gallery-empty" style="display: none;">
                 <h3>Gallery Coming Soon</h3>
-                <p>The community gallery will grow as visitors interact with the artworks and share their exports. Be the first to contribute.</p>
+                <p>The community gallery will grow as visitors interact with the artworks and share their unique exports. Be the first to contribute by exploring the Overlords and exporting your own iteration.</p>
                 <a href="overlords.html" class="btn small">Explore the Overlords</a>
             </div>
         </div>
 
-        <!-- Lightbox -->
+        <!-- Lightbox Overlay -->
         <div class="lightbox" id="lightbox">
             <button class="lightbox__close">&times;</button>
             <img id="lightbox-img" src="" alt="">
@@ -259,7 +277,6 @@
                     <li><a href="gallery.html">Gallery</a></li>
                     <li><a href="collectors.html">Collectors</a></li>
                     <li><a href="about.html">About</a></li>
-                    <li><a href="../index.html">Main Portfolio</a></li>
                     <li><a href="https://x.com/coldie" target="_blank" rel="noopener">X / Twitter</a></li>
                     <li><a href="https://superrare.com/coldie" target="_blank" rel="noopener">SuperRare</a></li>
                     <li><a href="https://coldie3d.com" target="_blank" rel="noopener">coldie3d.com</a></li>
@@ -270,6 +287,24 @@
     </div>
 
     <script>
+    // ── Scroll Reveal (IntersectionObserver) ──
+    // Declared first so renderGallery can attach new items to it.
+    var revealObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -60px 0px'
+    });
+
+    document.querySelectorAll('.reveal').forEach(function (el) {
+        revealObserver.observe(el);
+    });
+
     // ── Gallery Data (Artist-curated, static v1) ──
     // To add entries: add objects to this array with the fields shown.
     // Images go in a /tech-epochalypse/gallery-images/ folder.
@@ -285,12 +320,14 @@
         // }
     ];
 
+    // ── DOM References ──
     var grid = document.getElementById('gallery-grid');
     var emptyState = document.getElementById('gallery-empty');
     var countEl = document.getElementById('gallery-count');
     var filterBtns = document.querySelectorAll('.filter-btn');
     var currentFilter = 'all';
 
+    // ── Render Gallery ──
     function renderGallery(filter) {
         var items = galleryItems;
         if (filter !== 'all') {
@@ -309,12 +346,12 @@
         countEl.textContent = items.length + ' submission' + (items.length !== 1 ? 's' : '');
 
         grid.innerHTML = items.map(function (item, i) {
+            var mediaHtml = item.type === 'video'
+                ? '<video src="' + item.src + '" autoplay muted loop playsinline></video>'
+                : '<img src="' + item.src + '" alt="Export by ' + item.contributor + '" loading="lazy">';
+
             return '<div class="gallery-item reveal" data-index="' + i + '" data-src="' + item.src + '" data-contributor="' + item.contributor + '" data-source="' + item.overlordLabel + '">'
-                + '<div class="gallery-item__visual">'
-                + (item.type === 'video'
-                    ? '<video src="' + item.src + '" autoplay muted loop playsinline></video>'
-                    : '<img src="' + item.src + '" alt="Export by ' + item.contributor + '" loading="lazy">')
-                + '</div>'
+                + '<div class="gallery-item__visual">' + mediaHtml + '</div>'
                 + '<div class="gallery-item__meta">'
                 + '<div class="source">' + item.overlordLabel + '</div>'
                 + '<div class="contributor">' + item.contributor + '</div>'
@@ -322,11 +359,15 @@
                 + '</div></div>';
         }).join('');
 
-        document.querySelectorAll('.gallery-item.reveal').forEach(function (el) { revealObserver.observe(el); });
+        // Observe newly rendered items for scroll reveal
+        document.querySelectorAll('.gallery-item.reveal').forEach(function (el) {
+            revealObserver.observe(el);
+        });
+
         bindLightbox();
     }
 
-    // Filters
+    // ── Filter Button Handlers ──
     filterBtns.forEach(function (btn) {
         btn.addEventListener('click', function () {
             filterBtns.forEach(function (b) { b.classList.remove('active'); });
@@ -336,25 +377,39 @@
         });
     });
 
-    // Lightbox
+    // ── Lightbox ──
     var lightbox = document.getElementById('lightbox');
+    var lightboxImg = document.getElementById('lightbox-img');
+    var lightboxContributor = document.getElementById('lightbox-contributor');
+    var lightboxSource = document.getElementById('lightbox-source');
+
     function bindLightbox() {
         document.querySelectorAll('.gallery-item').forEach(function (item) {
             item.addEventListener('click', function () {
-                document.getElementById('lightbox-img').src = item.dataset.src;
-                document.getElementById('lightbox-contributor').textContent = item.dataset.contributor;
-                document.getElementById('lightbox-source').textContent = item.dataset.source;
+                lightboxImg.src = item.dataset.src;
+                lightboxContributor.textContent = item.dataset.contributor;
+                lightboxSource.textContent = item.dataset.source;
                 lightbox.classList.add('open');
             });
         });
     }
+
     lightbox.addEventListener('click', function (e) {
         if (e.target === lightbox || e.target.classList.contains('lightbox__close')) {
             lightbox.classList.remove('open');
+            lightboxImg.src = '';
         }
     });
 
-    // Initial render
+    // Close lightbox with Escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && lightbox.classList.contains('open')) {
+            lightbox.classList.remove('open');
+            lightboxImg.src = '';
+        }
+    });
+
+    // ── Initial Render ──
     renderGallery('all');
 
     // ── Mobile Nav Toggle ──
@@ -365,22 +420,6 @@
         link.addEventListener('click', function () {
             document.querySelector('.site-nav__links').classList.remove('open');
         });
-    });
-
-    // ── Scroll Reveal (IntersectionObserver) ──
-    var revealObserver = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
-        });
-    }, {
-        threshold: 0.1,
-        rootMargin: '0px 0px -60px 0px'
-    });
-
-    document.querySelectorAll('.reveal').forEach(function (el) {
-        revealObserver.observe(el);
     });
     </script>
 </body>
