@@ -12,223 +12,96 @@
     <meta name="twitter:creator" content="@Coldie">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
         /* ── Hero ── */
         .hero {
             position: relative;
-            height: 100vh;
-            min-height: 600px;
+            min-height: 90vh;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            overflow: hidden;
-        }
-
-        .hero__canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
+            padding: 8rem 2rem 4rem;
         }
 
         .hero__content {
             position: relative;
             z-index: 2;
             max-width: 800px;
-            padding: 0 2rem;
         }
 
-        .hero__eyebrow {
+        .hero-label {
+            display: inline-block;
             font-family: var(--font-body);
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.5em;
+            letter-spacing: 0.3em;
             color: var(--text-dim);
-            margin-bottom: 2rem;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            padding: 0.5rem 1.5rem;
+            margin-bottom: 2.5rem;
             opacity: 0;
-            animation: fade-up 0.8s 0.3s ease-out forwards;
+            animation: fade-up 0.8s 0.2s ease-out forwards;
         }
 
         .hero__title {
             font-family: var(--font-display);
-            font-size: clamp(3.5rem, 10vw, 8rem);
-            font-weight: 800;
-            line-height: 0.95;
-            color: var(--text-white);
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 700;
+            line-height: 1;
+            color: var(--text-bright);
             margin-bottom: 1.5rem;
             opacity: 0;
-            animation: fade-up 0.8s 0.5s ease-out forwards;
+            animation: fade-up 0.8s 0.4s ease-out forwards;
         }
 
         .hero__tagline {
+            font-family: var(--font-body);
             font-size: 0.95rem;
             color: var(--text-dim);
-            line-height: 1.7;
-            margin-bottom: 3rem;
+            line-height: 1.8;
+            max-width: 560px;
+            margin: 0 auto 3rem;
             opacity: 0;
-            animation: fade-up 0.8s 0.7s ease-out forwards;
+            animation: fade-up 0.8s 0.6s ease-out forwards;
         }
 
         .hero__cta {
             opacity: 0;
-            animation: fade-up 0.8s 0.9s ease-out forwards;
+            animation: fade-up 0.8s 0.8s ease-out forwards;
         }
 
-        .hero__scroll {
-            position: absolute;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2;
+        /* ── Stats Row ── */
+        .stats-row {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            opacity: 0;
-            animation: fade-up 0.8s 1.2s ease-out forwards;
-        }
-
-        .hero__scroll span {
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            color: var(--text-dim);
-        }
-
-        .hero__scroll-line {
-            width: 1px;
-            height: 40px;
-            background: linear-gradient(to bottom, var(--text-dim), transparent);
-            animation: scroll-pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes scroll-pulse {
-            0%, 100% { opacity: 0.3; transform: scaleY(1); }
-            50% { opacity: 1; transform: scaleY(1.2); }
-        }
-
-        @keyframes fade-up {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ── Overlord Previews ── */
-        .preview-section {
-            padding: 6rem 0;
-        }
-
-        .preview-card {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            justify-content: center;
             gap: 4rem;
-            align-items: center;
-            padding: 4rem 0;
-            border-bottom: 1px solid var(--border);
+            padding: 3rem 0;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fade-up 0.8s 1s ease-out forwards;
         }
 
-        .preview-card:last-child {
-            border-bottom: none;
-        }
-
-        .preview-card:nth-child(even) {
-            direction: rtl;
-        }
-
-        .preview-card:nth-child(even) > * {
-            direction: ltr;
-        }
-
-        .preview-card__visual {
-            aspect-ratio: 16/10;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .preview-card__visual .overlay-number {
-            font-family: var(--font-display);
-            font-size: 8rem;
-            font-weight: 800;
-            color: rgba(255, 255, 255, 0.03);
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .preview-card__visual .icon {
-            font-size: 3rem;
-            opacity: 0.3;
-            position: relative;
-            z-index: 1;
-        }
-
-        .preview-card__info .number {
-            font-family: var(--font-body);
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 0.3em;
-            color: var(--accent-blue);
-            margin-bottom: 0.8rem;
-        }
-
-        .preview-card__info h3 {
-            font-family: var(--font-display);
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-white);
-            margin-bottom: 1rem;
-        }
-
-        .preview-card__info p {
-            color: var(--text-dim);
-            font-size: 0.85rem;
-            line-height: 1.7;
-            margin-bottom: 1.5rem;
-        }
-
-        .preview-card--locked .preview-card__visual {
-            opacity: 0.3;
-        }
-
-        .preview-card--locked h3 {
-            color: var(--text-dim);
-        }
-
-        /* ── Counts Bar ── */
-        .counts-bar {
-            display: flex;
-            justify-content: center;
-            gap: 5rem;
-            padding: 4rem 0;
-            border-top: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
-            margin: 2rem 0 0;
-        }
-
-        .counts-bar__item {
+        .stats-row__item {
             text-align: center;
         }
 
-        .counts-bar__number {
+        .stats-row__value {
             font-family: var(--font-display);
-            font-size: 2.4rem;
+            font-size: 2rem;
             font-weight: 700;
-            color: var(--text-white);
+            color: var(--text-bright);
             display: block;
+            line-height: 1.2;
         }
 
-        .counts-bar__label {
-            font-size: 0.6rem;
+        .stats-row__label {
+            font-family: var(--font-body);
+            font-size: 0.65rem;
             text-transform: uppercase;
             letter-spacing: 0.2em;
             color: var(--text-dim);
@@ -236,28 +109,91 @@
             display: block;
         }
 
+        /* ── Overlords Grid ── */
+        .overlords-section {
+            padding: 2rem 0 6rem;
+        }
+
+        .overlords-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 2rem;
+        }
+
+        .overlord-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .overlord-item .card-visual {
+            aspect-ratio: 4 / 3;
+        }
+
+        .overlord-item .card-visual .overlay-number {
+            font-family: var(--font-display);
+            font-size: 5rem;
+            font-weight: 700;
+            color: rgba(0, 0, 0, 0.04);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            line-height: 1;
+        }
+
+        .overlord-item .card-visual .icon {
+            font-size: 2.5rem;
+            opacity: 0.25;
+            position: relative;
+            z-index: 1;
+        }
+
+        .overlord-item .card-body .number {
+            font-family: var(--font-body);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+        }
+
+        @keyframes fade-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Responsive ── */
         @media (max-width: 768px) {
+            .hero {
+                min-height: auto;
+                padding: 6rem 1rem 3rem;
+            }
+
             .hero__title {
-                font-size: clamp(2.5rem, 12vw, 5rem);
+                font-size: clamp(2.5rem, 10vw, 4rem);
             }
 
-            .preview-card {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-                padding: 3rem 0;
-            }
-
-            .preview-card:nth-child(even) {
-                direction: ltr;
-            }
-
-            .counts-bar {
+            .stats-row {
                 flex-wrap: wrap;
-                gap: 2.5rem;
+                gap: 2rem;
             }
 
-            .counts-bar__number {
-                font-size: 1.8rem;
+            .stats-row__value {
+                font-size: 1.6rem;
+            }
+
+            .overlords-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-row {
+                gap: 1.5rem;
+            }
+
+            .stats-row__item {
+                flex: 0 0 40%;
             }
         }
     </style>
@@ -272,120 +208,122 @@
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="collectors.html">Collectors</a></li>
                 <li><a href="about.html">About</a></li>
-                <li><a href="../index.html" class="btn--ghost" style="font-size:0.65rem;padding:0.4rem 0.8rem;border:1px solid var(--border);letter-spacing:0.1em;">Main Portfolio</a></li>
+                <li><a href="../index.html" class="btn small">Main Portfolio</a></li>
             </ul>
         </div>
     </nav>
 
     <div class="page">
         <!-- Hero -->
-        <section class="hero section--hero">
-            <canvas class="hero__canvas" id="hero-canvas"></canvas>
+        <section class="hero">
             <div class="hero__content">
-                <p class="hero__eyebrow">An interactive digital art series by Coldie</p>
+                <span class="hero-label">An Interactive Digital Art Series by Coldie</span>
                 <h1 class="hero__title">
-                    <span class="glitch" data-text="Tech">Tech</span><br>
-                    <span class="glitch" data-text="Epochalypse">Epochalypse</span>
+                    <span class="hero-3d" data-text="Tech">Tech</span><br>
+                    <span class="hero-3d" data-text="Epochalypse">Epochalypse</span>
                 </h1>
-                <p class="hero__tagline">Five overlords. One network. Infinite iterations.</p>
+                <p class="hero__tagline">Five overlords. One network. Infinite iterations. A series of interactive 3D stereoscopic portraits exploring the faces of technological power.</p>
                 <div class="hero__cta">
-                    <a href="overlords.html" class="btn btn--accent">Enter the Network</a>
+                    <a href="overlords.html" class="btn">Explore the Overlords</a>
                 </div>
-            </div>
-            <div class="hero__scroll">
-                <span>Scroll</span>
-                <div class="hero__scroll-line"></div>
             </div>
         </section>
 
         <!-- Stats -->
         <div class="container">
-            <div class="counts-bar reveal">
-                <div class="counts-bar__item">
-                    <span class="counts-bar__number">5</span>
-                    <span class="counts-bar__label">Overlords</span>
+            <div class="stats-row">
+                <div class="stats-row__item">
+                    <span class="stats-row__value">5</span>
+                    <span class="stats-row__label">Overlords</span>
                 </div>
-                <div class="counts-bar__item">
-                    <span class="counts-bar__number">3D</span>
-                    <span class="counts-bar__label">Interactive</span>
+                <div class="stats-row__item">
+                    <span class="stats-row__value">3D</span>
+                    <span class="stats-row__label">Interactive</span>
                 </div>
-                <div class="counts-bar__item">
-                    <span class="counts-bar__number">&infin;</span>
-                    <span class="counts-bar__label">Iterations</span>
+                <div class="stats-row__item">
+                    <span class="stats-row__value">&infin;</span>
+                    <span class="stats-row__label">Iterations</span>
                 </div>
-                <div class="counts-bar__item">
-                    <span class="counts-bar__number">2025</span>
-                    <span class="counts-bar__label">Series</span>
+                <div class="stats-row__item">
+                    <span class="stats-row__value">2025</span>
+                    <span class="stats-row__label">Series</span>
                 </div>
             </div>
         </div>
 
-        <!-- Overlord Previews -->
-        <section class="preview-section">
+        <!-- The Overlords -->
+        <section class="overlords-section">
             <div class="container">
-                <div class="section-divider reveal">
-                    <h2 class="section-title" style="margin-bottom:0">The Overlords</h2>
+                <div class="section-header reveal">
+                    <h2>The Overlords</h2>
                 </div>
                 <p class="section-subtitle reveal">Five portraits of technology's most powerful figures. Each one an interactive, kinetic artwork you can explore, manipulate, and export.</p>
 
-                <div class="preview-card reveal" id="preview-1">
-                    <div class="preview-card__visual">
-                        <div class="overlay-number">I</div>
-                        <div class="icon">&#x25C8;</div>
+                <div class="overlords-grid">
+                    <!-- Overlord I: Elon Musk (Active) -->
+                    <div class="overlord-item card reveal reveal--delay-1">
+                        <div class="card-visual">
+                            <div class="overlay-number">I</div>
+                            <div class="icon">&#x25C8;</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="number">Overlord I</div>
+                            <h3>Elon Musk</h3>
+                            <p>The first node in the network. An interactive 3D stereoscopic portrait -- drag, rotate, and export your own interpretation of technology's most polarizing figure.</p>
+                            <a href="overlords/elon-musk.html" class="btn small">View Artwork &rarr;</a>
+                        </div>
                     </div>
-                    <div class="preview-card__info">
-                        <div class="number">Overlord I</div>
-                        <h3>Elon Musk</h3>
-                        <p>The first node in the network. An interactive 3D stereoscopic portrait built with Three.js -- drag, rotate, and export your own interpretation of technology's most polarizing figure.</p>
-                        <a href="overlords/elon-musk.html" class="btn btn--small">Interact &rarr;</a>
-                    </div>
-                </div>
 
-                <div class="preview-card preview-card--locked reveal" id="preview-2">
-                    <div class="preview-card__visual">
-                        <div class="overlay-number">II</div>
-                        <div class="icon">&#x25CE;</div>
+                    <!-- Overlord II: Coming Soon -->
+                    <div class="overlord-item card card--locked reveal reveal--delay-2">
+                        <div class="card-visual">
+                            <div class="overlay-number">II</div>
+                            <div class="icon">&#x25CE;</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="number">Overlord II</div>
+                            <h3>Coming Soon</h3>
+                            <p>The second node approaches. Another tech overlord rendered in kinetic 3D -- identity to be revealed.</p>
+                        </div>
                     </div>
-                    <div class="preview-card__info">
-                        <div class="number">Overlord II</div>
-                        <h3>Coming Soon</h3>
-                        <p>The second node approaches. Another tech overlord rendered in kinetic 3D -- identity to be revealed.</p>
-                    </div>
-                </div>
 
-                <div class="preview-card preview-card--locked reveal" id="preview-3">
-                    <div class="preview-card__visual">
-                        <div class="overlay-number">III</div>
-                        <div class="icon">&#x25C6;</div>
+                    <!-- Overlord III: Coming Soon -->
+                    <div class="overlord-item card card--locked reveal reveal--delay-3">
+                        <div class="card-visual">
+                            <div class="overlay-number">III</div>
+                            <div class="icon">&#x25C6;</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="number">Overlord III</div>
+                            <h3>Coming Soon</h3>
+                            <p>The network expands. A third node of power and influence, waiting to be connected.</p>
+                        </div>
                     </div>
-                    <div class="preview-card__info">
-                        <div class="number">Overlord III</div>
-                        <h3>Coming Soon</h3>
-                        <p>The network expands. A third node of power and influence, waiting to be connected.</p>
-                    </div>
-                </div>
 
-                <div class="preview-card preview-card--locked reveal" id="preview-4">
-                    <div class="preview-card__visual">
-                        <div class="overlay-number">IV</div>
-                        <div class="icon">&#x25CF;</div>
+                    <!-- Overlord IV: Coming Soon -->
+                    <div class="overlord-item card card--locked reveal reveal--delay-4">
+                        <div class="card-visual">
+                            <div class="overlay-number">IV</div>
+                            <div class="icon">&#x25CF;</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="number">Overlord IV</div>
+                            <h3>Coming Soon</h3>
+                            <p>The penultimate node. Identity classified -- awaiting declassification.</p>
+                        </div>
                     </div>
-                    <div class="preview-card__info">
-                        <div class="number">Overlord IV</div>
-                        <h3>Coming Soon</h3>
-                        <p>The penultimate node. Identity classified -- awaiting declassification.</p>
-                    </div>
-                </div>
 
-                <div class="preview-card preview-card--locked reveal" id="preview-5">
-                    <div class="preview-card__visual">
-                        <div class="overlay-number">V</div>
-                        <div class="icon">&#x25CA;</div>
-                    </div>
-                    <div class="preview-card__info">
-                        <div class="number">Overlord V</div>
-                        <h3>Coming Soon</h3>
-                        <p>The final node completes the network. The epochalypse approaches.</p>
+                    <!-- Overlord V: Coming Soon -->
+                    <div class="overlord-item card card--locked reveal">
+                        <div class="card-visual">
+                            <div class="overlay-number">V</div>
+                            <div class="icon">&#x25CA;</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="number">Overlord V</div>
+                            <h3>Coming Soon</h3>
+                            <p>The final node completes the network. The epochalypse approaches.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -399,6 +337,7 @@
                     <li><a href="gallery.html">Gallery</a></li>
                     <li><a href="collectors.html">Collectors</a></li>
                     <li><a href="about.html">About</a></li>
+                    <li><a href="../index.html">Main Portfolio</a></li>
                     <li><a href="https://x.com/coldie" target="_blank" rel="noopener">X / Twitter</a></li>
                     <li><a href="https://superrare.com/coldie" target="_blank" rel="noopener">SuperRare</a></li>
                     <li><a href="https://coldie3d.com" target="_blank" rel="noopener">coldie3d.com</a></li>
@@ -409,97 +348,31 @@
     </div>
 
     <script>
-    // ── Hero Network Particles ──
-    (function() {
-        const canvas = document.getElementById('hero-canvas');
-        const ctx = canvas.getContext('2d');
-        let mouseX = 0.5, mouseY = 0.5;
-        let targetX = 0.5, targetY = 0.5;
-
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resize();
-        window.addEventListener('resize', resize);
-
-        document.addEventListener('mousemove', e => {
-            targetX = e.clientX / window.innerWidth;
-            targetY = e.clientY / window.innerHeight;
-        });
-
-        const nodes = [];
-        for (let i = 0; i < 80; i++) {
-            nodes.push({
-                x: Math.random(),
-                y: Math.random(),
-                vx: (Math.random() - 0.5) * 0.0002,
-                vy: (Math.random() - 0.5) * 0.0002,
-                size: 0.8 + Math.random() * 2,
-                pulse: Math.random() * Math.PI * 2
-            });
-        }
-
-        function draw() {
-            mouseX += (targetX - mouseX) * 0.03;
-            mouseY += (targetY - mouseY) * 0.03;
-            const w = canvas.width, h = canvas.height;
-            ctx.clearRect(0, 0, w, h);
-
-            nodes.forEach((n, i) => {
-                n.x += n.vx;
-                n.y += n.vy;
-                n.pulse += 0.012;
-                if (n.x < -0.05) n.x = 1.05;
-                if (n.x > 1.05) n.x = -0.05;
-                if (n.y < -0.05) n.y = 1.05;
-                if (n.y > 1.05) n.y = -0.05;
-
-                const px = n.x * w + (mouseX - 0.5) * 40 * (n.size / 3);
-                const py = n.y * h + (mouseY - 0.5) * 40 * (n.size / 3);
-                const p = 0.5 + Math.sin(n.pulse) * 0.5;
-
-                ctx.beginPath();
-                ctx.arc(px, py, n.size * (0.6 + p * 0.4), 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0, 212, 255, ' + (0.08 + p * 0.12) + ')';
-                ctx.fill();
-
-                for (let j = i + 1; j < nodes.length; j++) {
-                    const o = nodes[j];
-                    const ox = o.x * w + (mouseX - 0.5) * 40 * (o.size / 3);
-                    const oy = o.y * h + (mouseY - 0.5) * 40 * (o.size / 3);
-                    const d = Math.sqrt((px - ox) ** 2 + (py - oy) ** 2);
-                    if (d < 200) {
-                        ctx.beginPath();
-                        ctx.moveTo(px, py);
-                        ctx.lineTo(ox, oy);
-                        ctx.strokeStyle = 'rgba(0, 212, 255, ' + ((1 - d / 200) * 0.06) + ')';
-                        ctx.lineWidth = 0.5;
-                        ctx.stroke();
-                    }
-                }
-            });
-
-            requestAnimationFrame(draw);
-        }
-        draw();
-    })();
-
-    // ── Mobile Nav ──
-    document.querySelector('.nav-toggle').addEventListener('click', () => {
+    // ── Mobile Nav Toggle ──
+    document.querySelector('.nav-toggle').addEventListener('click', function () {
         document.querySelector('.site-nav__links').classList.toggle('open');
     });
-    document.querySelectorAll('.site-nav__links a').forEach(a => {
-        a.addEventListener('click', () => {
+    document.querySelectorAll('.site-nav__links a').forEach(function (link) {
+        link.addEventListener('click', function () {
             document.querySelector('.site-nav__links').classList.remove('open');
         });
     });
 
-    // ── Scroll Reveal ──
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    // ── Scroll Reveal (IntersectionObserver) ──
+    var revealObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -60px 0px'
+    });
+
+    document.querySelectorAll('.reveal').forEach(function (el) {
+        revealObserver.observe(el);
+    });
     </script>
 </body>
 </html>

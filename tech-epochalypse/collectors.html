@@ -10,7 +10,7 @@
     <meta property="og:type" content="website">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
         .collectors-hero {
@@ -27,15 +27,14 @@
         }
 
         .collector-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
+            background: var(--surface);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             padding: 2.5rem;
             position: relative;
             overflow: hidden;
             transition: all 0.4s;
         }
 
-        /* Gold accent line */
         .collector-card::before {
             content: '';
             position: absolute;
@@ -43,13 +42,12 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            opacity: 0.6;
+            background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.15), transparent);
         }
 
         .collector-card:hover {
-            border-color: rgba(201, 168, 76, 0.2);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 30px rgba(201, 168, 76, 0.03);
+            border-color: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.05);
             transform: translateY(-4px);
         }
 
@@ -64,10 +62,10 @@
             width: 70px;
             height: 70px;
             border-radius: 50%;
-            border: 2px solid rgba(201, 168, 76, 0.3);
+            border: 2px solid rgba(0, 0, 0, 0.1);
             overflow: hidden;
             flex-shrink: 0;
-            background: var(--bg-elevated);
+            background: var(--surface-light);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -83,14 +81,14 @@
             font-family: var(--font-display);
             font-size: 1.4rem;
             font-weight: 700;
-            color: var(--gold);
+            color: var(--text-dim);
         }
 
         .collector-card__header-text h3 {
             font-family: var(--font-display);
             font-size: 1.4rem;
             font-weight: 700;
-            color: var(--text-white);
+            color: var(--text-bright);
             margin-bottom: 0.2rem;
         }
 
@@ -98,7 +96,7 @@
             font-size: 0.55rem;
             text-transform: uppercase;
             letter-spacing: 0.25em;
-            color: var(--gold);
+            color: var(--text-dim);
         }
 
         .collector-card__bio {
@@ -127,26 +125,26 @@
             align-items: center;
             gap: 0.4rem;
             padding: 0.4rem 0.8rem;
-            border: 1px solid rgba(201, 168, 76, 0.15);
-            background: rgba(201, 168, 76, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(0, 0, 0, 0.02);
             margin-right: 0.4rem;
             margin-bottom: 0.4rem;
             font-size: 0.7rem;
-            color: var(--text-bright);
+            color: var(--text);
             text-decoration: none;
             transition: all 0.3s;
         }
 
         .piece-badge:hover {
-            border-color: rgba(201, 168, 76, 0.4);
-            background: rgba(201, 168, 76, 0.08);
+            border-color: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.04);
         }
 
         .piece-badge .dot {
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: var(--gold);
+            background: var(--text-dim);
         }
 
         /* Social links */
@@ -161,28 +159,28 @@
             letter-spacing: 0.1em;
             color: var(--text-dim);
             padding: 0.35rem 0.7rem;
-            border: 1px solid var(--border);
+            border: 1px solid rgba(0, 0, 0, 0.1);
             transition: all 0.3s;
         }
 
         .collector-card__socials a:hover {
-            color: var(--gold);
-            border-color: rgba(201, 168, 76, 0.3);
+            color: var(--text-bright);
+            border-color: rgba(0, 0, 0, 0.3);
         }
 
         /* Empty state */
         .collectors-empty {
             text-align: center;
             padding: 6rem 2rem;
-            border: 1px solid var(--border);
-            background: var(--bg-card);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            background: var(--surface);
             margin-bottom: 4rem;
         }
 
         .collectors-empty h3 {
             font-family: var(--font-display);
             font-size: 1.4rem;
-            color: var(--text-white);
+            color: var(--text-bright);
             margin-bottom: 1rem;
         }
 
@@ -215,7 +213,7 @@
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="collectors.html" class="active">Collectors</a></li>
                 <li><a href="about.html">About</a></li>
-                <li><a href="../index.html" style="font-size:0.65rem;padding:0.4rem 0.8rem;border:1px solid var(--border);letter-spacing:0.1em;">Main Portfolio</a></li>
+                <li><a href="../index.html" class="btn small">Main Portfolio</a></li>
             </ul>
         </div>
     </nav>
@@ -223,29 +221,32 @@
     <div class="page">
         <div class="container">
             <div class="collectors-hero">
-                <span class="section-label reveal" style="color:var(--gold);">Patrons</span>
-                <h1 class="section-title reveal" style="font-size:clamp(2rem,5vw,3.5rem);">Patrons &amp; Collectors</h1>
-                <p class="section-subtitle reveal" style="margin:1rem auto 0;text-align:center;">Honoring those who collected the original Tech Epochalypse artworks. Each patron holds a piece of the network.</p>
+                <span class="section-label reveal">Patrons</span>
+                <h1 class="section-title reveal" style="font-size: clamp(2rem, 5vw, 3.5rem);">Patrons &amp; Collectors</h1>
+                <p class="section-subtitle reveal" style="margin: 1rem auto 0; text-align: center;">Honoring those who collected the original Tech Epochalypse artworks. Each patron holds a piece of the network.</p>
             </div>
 
             <div class="collectors-grid" id="collectors-grid">
                 <!-- Rendered by JS from collectors.json -->
             </div>
 
-            <div class="collectors-empty reveal" id="collectors-empty" style="display:none;">
+            <div class="collectors-empty reveal" id="collectors-empty" style="display: none;">
                 <h3>Collectors Coming Soon</h3>
                 <p>As the Tech Epochalypse artworks find their permanent homes, their patrons will be honored here.</p>
             </div>
         </div>
 
+        <!-- Footer -->
         <footer class="site-footer">
             <div class="container">
                 <ul class="site-footer__links">
-                    <li><a href="index.html">Home</a></li>
                     <li><a href="overlords.html">Overlords</a></li>
                     <li><a href="gallery.html">Gallery</a></li>
+                    <li><a href="collectors.html">Collectors</a></li>
                     <li><a href="about.html">About</a></li>
+                    <li><a href="../index.html">Main Portfolio</a></li>
                     <li><a href="https://x.com/coldie" target="_blank" rel="noopener">X / Twitter</a></li>
+                    <li><a href="https://superrare.com/coldie" target="_blank" rel="noopener">SuperRare</a></li>
                     <li><a href="https://coldie3d.com" target="_blank" rel="noopener">coldie3d.com</a></li>
                 </ul>
                 <p>&copy; 2026 Coldie. Tech Epochalypse. All rights reserved.</p>
@@ -255,7 +256,7 @@
 
     <script>
     // ── Piece name lookup ──
-    const pieceNames = {
+    var pieceNames = {
         'elon-musk': 'Overlord I — Elon Musk',
         'overlord-2': 'Overlord II',
         'overlord-3': 'Overlord III',
@@ -263,23 +264,23 @@
         'overlord-5': 'Overlord V'
     };
 
-    const pieceLinks = {
+    var pieceLinks = {
         'elon-musk': 'overlords/elon-musk.html'
     };
 
     function getInitials(name) {
-        return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+        return name.split(' ').map(function (w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
     }
 
     // ── Load collectors data ──
     fetch('data/collectors.json')
-        .then(r => r.json())
-        .then(data => {
-            const grid = document.getElementById('collectors-grid');
-            const empty = document.getElementById('collectors-empty');
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            var grid = document.getElementById('collectors-grid');
+            var empty = document.getElementById('collectors-empty');
 
             // Filter out template/placeholder entries
-            const collectors = data.collectors.filter(c => c.name && c.name !== 'Collector Name');
+            var collectors = data.collectors.filter(function (c) { return c.name && c.name !== 'Collector Name'; });
 
             if (collectors.length === 0) {
                 grid.style.display = 'none';
@@ -287,61 +288,79 @@
                 return;
             }
 
-            grid.innerHTML = collectors.map(c => `
-                <div class="collector-card reveal">
-                    <div class="collector-card__header">
-                        <div class="collector-card__avatar">
-                            ${c.avatar
-                                ? `<img src="${c.avatar}" alt="${c.name}">`
-                                : `<span class="initials">${getInitials(c.name)}</span>`
-                            }
-                        </div>
-                        <div class="collector-card__header-text">
-                            <span class="patron-label">Patron</span>
-                            <h3>${c.name}</h3>
-                        </div>
-                    </div>
-                    ${c.bio ? `<p class="collector-card__bio">"${c.bio}"</p>` : ''}
-                    <div class="collector-card__pieces">
-                        <div class="label">Pieces Owned</div>
-                        ${c.pieces.map(p => {
-                            const link = pieceLinks[p];
-                            const name = pieceNames[p] || p;
-                            return link
-                                ? `<a href="${link}" class="piece-badge"><span class="dot"></span>${name}</a>`
-                                : `<span class="piece-badge"><span class="dot"></span>${name}</span>`;
-                        }).join('')}
-                    </div>
-                    ${(c.socials && (c.socials.twitter || c.socials.instagram || c.socials.website)) ? `
-                    <div class="collector-card__socials">
-                        ${c.socials.twitter ? `<a href="${c.socials.twitter}" target="_blank" rel="noopener">Twitter</a>` : ''}
-                        ${c.socials.instagram ? `<a href="${c.socials.instagram}" target="_blank" rel="noopener">Instagram</a>` : ''}
-                        ${c.socials.website ? `<a href="${c.socials.website}" target="_blank" rel="noopener">Website</a>` : ''}
-                    </div>` : ''}
-                </div>
-            `).join('');
+            grid.innerHTML = collectors.map(function (c) {
+                var avatarHtml = c.avatar
+                    ? '<img src="' + c.avatar + '" alt="' + c.name + '">'
+                    : '<span class="initials">' + getInitials(c.name) + '</span>';
+
+                var bioHtml = c.bio ? '<p class="collector-card__bio">"' + c.bio + '"</p>' : '';
+
+                var piecesHtml = c.pieces.map(function (p) {
+                    var link = pieceLinks[p];
+                    var name = pieceNames[p] || p;
+                    return link
+                        ? '<a href="' + link + '" class="piece-badge"><span class="dot"></span>' + name + '</a>'
+                        : '<span class="piece-badge"><span class="dot"></span>' + name + '</span>';
+                }).join('');
+
+                var socialsHtml = '';
+                if (c.socials && (c.socials.twitter || c.socials.instagram || c.socials.website)) {
+                    socialsHtml = '<div class="collector-card__socials">';
+                    if (c.socials.twitter) socialsHtml += '<a href="' + c.socials.twitter + '" target="_blank" rel="noopener">Twitter</a>';
+                    if (c.socials.instagram) socialsHtml += '<a href="' + c.socials.instagram + '" target="_blank" rel="noopener">Instagram</a>';
+                    if (c.socials.website) socialsHtml += '<a href="' + c.socials.website + '" target="_blank" rel="noopener">Website</a>';
+                    socialsHtml += '</div>';
+                }
+
+                return '<div class="collector-card reveal">'
+                    + '<div class="collector-card__header">'
+                    + '<div class="collector-card__avatar">' + avatarHtml + '</div>'
+                    + '<div class="collector-card__header-text">'
+                    + '<span class="patron-label">Patron</span>'
+                    + '<h3>' + c.name + '</h3>'
+                    + '</div></div>'
+                    + bioHtml
+                    + '<div class="collector-card__pieces">'
+                    + '<div class="label">Pieces Owned</div>'
+                    + piecesHtml
+                    + '</div>'
+                    + socialsHtml
+                    + '</div>';
+            }).join('');
 
             // Observe new elements
-            document.querySelectorAll('.collector-card.reveal').forEach(el => observer.observe(el));
+            document.querySelectorAll('.collector-card.reveal').forEach(function (el) { revealObserver.observe(el); });
         })
-        .catch(() => {
+        .catch(function () {
             document.getElementById('collectors-grid').style.display = 'none';
             document.getElementById('collectors-empty').style.display = 'block';
         });
 
-    // Mobile nav
-    document.querySelector('.nav-toggle').addEventListener('click', () => {
+    // ── Mobile Nav Toggle ──
+    document.querySelector('.nav-toggle').addEventListener('click', function () {
         document.querySelector('.site-nav__links').classList.toggle('open');
     });
-    document.querySelectorAll('.site-nav__links a').forEach(a => {
-        a.addEventListener('click', () => document.querySelector('.site-nav__links').classList.remove('open'));
+    document.querySelectorAll('.site-nav__links a').forEach(function (link) {
+        link.addEventListener('click', function () {
+            document.querySelector('.site-nav__links').classList.remove('open');
+        });
     });
 
-    // Scroll reveal
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    // ── Scroll Reveal (IntersectionObserver) ──
+    var revealObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -60px 0px'
+    });
+
+    document.querySelectorAll('.reveal').forEach(function (el) {
+        revealObserver.observe(el);
+    });
     </script>
 </body>
 </html>

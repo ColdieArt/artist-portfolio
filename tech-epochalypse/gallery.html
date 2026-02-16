@@ -10,7 +10,7 @@
     <meta property="og:type" content="website">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
         .gallery-hero {
@@ -25,26 +25,6 @@
             justify-content: center;
             margin-bottom: 2rem;
             flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 0.5rem 1.2rem;
-            font-family: var(--font-body);
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-dim);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .filter-btn:hover,
-        .filter-btn.active {
-            color: var(--text-bright);
-            border-color: var(--accent-blue);
-            background: rgba(0, 212, 255, 0.05);
         }
 
         .gallery-count {
@@ -64,23 +44,24 @@
         .gallery-item {
             break-inside: avoid;
             margin-bottom: 1rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
+            background: var(--surface);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             overflow: hidden;
             transition: all 0.4s;
             cursor: pointer;
         }
 
         .gallery-item:hover {
-            border-color: var(--border-hover);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
         }
 
         .gallery-item__visual {
             width: 100%;
             position: relative;
             overflow: hidden;
-            background: var(--bg-deep);
+            background: var(--surface-light);
         }
 
         .gallery-item__visual img {
@@ -114,7 +95,7 @@
             font-size: 0.65rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            color: var(--accent-blue);
+            color: var(--text-dim);
             margin-bottom: 0.3rem;
         }
 
@@ -130,7 +111,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.92);
+            background: rgba(0, 0, 0, 0.85);
             display: none;
             justify-content: center;
             align-items: center;
@@ -155,7 +136,7 @@
             right: 1.5rem;
             background: none;
             border: none;
-            color: var(--text-dim);
+            color: #fff;
             font-size: 2rem;
             cursor: pointer;
             z-index: 2001;
@@ -173,12 +154,12 @@
         .lightbox__info .contributor {
             font-family: var(--font-ui);
             font-size: 0.9rem;
-            color: var(--text-bright);
+            color: #fff;
         }
 
         .lightbox__info .source {
             font-size: 0.7rem;
-            color: var(--text-dim);
+            color: rgba(255, 255, 255, 0.6);
             margin-top: 0.3rem;
         }
 
@@ -186,15 +167,15 @@
         .gallery-empty {
             text-align: center;
             padding: 6rem 2rem;
-            border: 1px solid var(--border);
-            background: var(--bg-card);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            background: var(--surface);
             margin-bottom: 4rem;
         }
 
         .gallery-empty h3 {
             font-family: var(--font-display);
             font-size: 1.4rem;
-            color: var(--text-white);
+            color: var(--text-bright);
             margin-bottom: 1rem;
         }
 
@@ -225,7 +206,7 @@
                 <li><a href="gallery.html" class="active">Gallery</a></li>
                 <li><a href="collectors.html">Collectors</a></li>
                 <li><a href="about.html">About</a></li>
-                <li><a href="../index.html" style="font-size:0.65rem;padding:0.4rem 0.8rem;border:1px solid var(--border);letter-spacing:0.1em;">Main Portfolio</a></li>
+                <li><a href="../index.html" class="btn small">Main Portfolio</a></li>
             </ul>
         </div>
     </nav>
@@ -234,8 +215,8 @@
         <div class="container">
             <div class="gallery-hero">
                 <span class="section-label reveal">Community</span>
-                <h1 class="section-title reveal" style="font-size:clamp(2rem,5vw,3.5rem);">Community Gallery</h1>
-                <p class="section-subtitle reveal" style="margin:1rem auto 0;text-align:center;">Every interaction creates a unique iteration. These are exports and remixes created by visitors exploring the Tech Epochalypse artworks.</p>
+                <h1 class="section-title reveal" style="font-size: clamp(2rem, 5vw, 3.5rem);">Community Gallery</h1>
+                <p class="section-subtitle reveal" style="margin: 1rem auto 0; text-align: center;">Every interaction creates a unique iteration. These are exports and remixes created by visitors exploring the Tech Epochalypse artworks.</p>
             </div>
 
             <div class="gallery-filters reveal">
@@ -253,10 +234,10 @@
                 <!-- Rendered by JS from curated data -->
             </div>
 
-            <div class="gallery-empty reveal" id="gallery-empty" style="display:none;">
+            <div class="gallery-empty reveal" id="gallery-empty" style="display: none;">
                 <h3>Gallery Coming Soon</h3>
                 <p>The community gallery will grow as visitors interact with the artworks and share their exports. Be the first to contribute.</p>
-                <a href="overlords.html" class="btn btn--accent btn--small">Explore the Overlords</a>
+                <a href="overlords.html" class="btn small">Explore the Overlords</a>
             </div>
         </div>
 
@@ -270,14 +251,17 @@
             </div>
         </div>
 
+        <!-- Footer -->
         <footer class="site-footer">
             <div class="container">
                 <ul class="site-footer__links">
-                    <li><a href="index.html">Home</a></li>
                     <li><a href="overlords.html">Overlords</a></li>
+                    <li><a href="gallery.html">Gallery</a></li>
                     <li><a href="collectors.html">Collectors</a></li>
                     <li><a href="about.html">About</a></li>
+                    <li><a href="../index.html">Main Portfolio</a></li>
                     <li><a href="https://x.com/coldie" target="_blank" rel="noopener">X / Twitter</a></li>
+                    <li><a href="https://superrare.com/coldie" target="_blank" rel="noopener">SuperRare</a></li>
                     <li><a href="https://coldie3d.com" target="_blank" rel="noopener">coldie3d.com</a></li>
                 </ul>
                 <p>&copy; 2026 Coldie. Tech Epochalypse. All rights reserved.</p>
@@ -289,7 +273,7 @@
     // ── Gallery Data (Artist-curated, static v1) ──
     // To add entries: add objects to this array with the fields shown.
     // Images go in a /tech-epochalypse/gallery-images/ folder.
-    const galleryItems = [
+    var galleryItems = [
         // Example entry (uncomment and populate when ready):
         // {
         //     contributor: "Artist Name",
@@ -301,16 +285,16 @@
         // }
     ];
 
-    const grid = document.getElementById('gallery-grid');
-    const emptyState = document.getElementById('gallery-empty');
-    const countEl = document.getElementById('gallery-count');
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    let currentFilter = 'all';
+    var grid = document.getElementById('gallery-grid');
+    var emptyState = document.getElementById('gallery-empty');
+    var countEl = document.getElementById('gallery-count');
+    var filterBtns = document.querySelectorAll('.filter-btn');
+    var currentFilter = 'all';
 
     function renderGallery(filter) {
-        let items = galleryItems;
+        var items = galleryItems;
         if (filter !== 'all') {
-            items = items.filter(item => item.overlord === filter);
+            items = items.filter(function (item) { return item.overlord === filter; });
         }
 
         if (items.length === 0) {
@@ -324,31 +308,28 @@
         emptyState.style.display = 'none';
         countEl.textContent = items.length + ' submission' + (items.length !== 1 ? 's' : '');
 
-        grid.innerHTML = items.map((item, i) => `
-            <div class="gallery-item reveal" data-index="${i}" data-src="${item.src}" data-contributor="${item.contributor}" data-source="${item.overlordLabel}">
-                <div class="gallery-item__visual">
-                    ${item.type === 'video'
-                        ? `<video src="${item.src}" autoplay muted loop playsinline></video>`
-                        : `<img src="${item.src}" alt="Export by ${item.contributor}" loading="lazy">`
-                    }
-                </div>
-                <div class="gallery-item__meta">
-                    <div class="source">${item.overlordLabel}</div>
-                    <div class="contributor">${item.contributor}</div>
-                    <div class="date">${item.date}</div>
-                </div>
-            </div>
-        `).join('');
+        grid.innerHTML = items.map(function (item, i) {
+            return '<div class="gallery-item reveal" data-index="' + i + '" data-src="' + item.src + '" data-contributor="' + item.contributor + '" data-source="' + item.overlordLabel + '">'
+                + '<div class="gallery-item__visual">'
+                + (item.type === 'video'
+                    ? '<video src="' + item.src + '" autoplay muted loop playsinline></video>'
+                    : '<img src="' + item.src + '" alt="Export by ' + item.contributor + '" loading="lazy">')
+                + '</div>'
+                + '<div class="gallery-item__meta">'
+                + '<div class="source">' + item.overlordLabel + '</div>'
+                + '<div class="contributor">' + item.contributor + '</div>'
+                + '<div class="date">' + item.date + '</div>'
+                + '</div></div>';
+        }).join('');
 
-        // Re-observe new elements
-        document.querySelectorAll('.gallery-item.reveal').forEach(el => observer.observe(el));
+        document.querySelectorAll('.gallery-item.reveal').forEach(function (el) { revealObserver.observe(el); });
         bindLightbox();
     }
 
     // Filters
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            filterBtns.forEach(b => b.classList.remove('active'));
+    filterBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            filterBtns.forEach(function (b) { b.classList.remove('active'); });
             btn.classList.add('active');
             currentFilter = btn.dataset.filter;
             renderGallery(currentFilter);
@@ -356,21 +337,18 @@
     });
 
     // Lightbox
-    const lightbox = document.getElementById('lightbox');
+    var lightbox = document.getElementById('lightbox');
     function bindLightbox() {
-        document.querySelectorAll('.gallery-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const src = item.dataset.src;
-                const contributor = item.dataset.contributor;
-                const source = item.dataset.source;
-                document.getElementById('lightbox-img').src = src;
-                document.getElementById('lightbox-contributor').textContent = contributor;
-                document.getElementById('lightbox-source').textContent = source;
+        document.querySelectorAll('.gallery-item').forEach(function (item) {
+            item.addEventListener('click', function () {
+                document.getElementById('lightbox-img').src = item.dataset.src;
+                document.getElementById('lightbox-contributor').textContent = item.dataset.contributor;
+                document.getElementById('lightbox-source').textContent = item.dataset.source;
                 lightbox.classList.add('open');
             });
         });
     }
-    lightbox.addEventListener('click', (e) => {
+    lightbox.addEventListener('click', function (e) {
         if (e.target === lightbox || e.target.classList.contains('lightbox__close')) {
             lightbox.classList.remove('open');
         }
@@ -379,19 +357,31 @@
     // Initial render
     renderGallery('all');
 
-    // Mobile nav
-    document.querySelector('.nav-toggle').addEventListener('click', () => {
+    // ── Mobile Nav Toggle ──
+    document.querySelector('.nav-toggle').addEventListener('click', function () {
         document.querySelector('.site-nav__links').classList.toggle('open');
     });
-    document.querySelectorAll('.site-nav__links a').forEach(a => {
-        a.addEventListener('click', () => document.querySelector('.site-nav__links').classList.remove('open'));
+    document.querySelectorAll('.site-nav__links a').forEach(function (link) {
+        link.addEventListener('click', function () {
+            document.querySelector('.site-nav__links').classList.remove('open');
+        });
     });
 
-    // Scroll reveal
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    // ── Scroll Reveal (IntersectionObserver) ──
+    var revealObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -60px 0px'
+    });
+
+    document.querySelectorAll('.reveal').forEach(function (el) {
+        revealObserver.observe(el);
+    });
     </script>
 </body>
 </html>
