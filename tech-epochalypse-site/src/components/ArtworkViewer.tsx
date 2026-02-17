@@ -15,15 +15,15 @@ export default function ArtworkViewer({ overlord }: { overlord: Overlord }) {
     <div className="w-full flex flex-col items-center justify-center py-16 px-6">
       <a
         href={overlord.artworkFile}
-        className="group relative inline-flex items-center gap-3 px-8 py-4 border border-neon-green/40 hover:border-neon-green text-neon-green font-mono text-sm uppercase tracking-[0.2em] transition-all duration-300 hover:bg-neon-green/5 hover:shadow-[0_0_30px_rgba(57,255,20,0.15)]"
+        className="group relative inline-flex items-center gap-3 px-8 py-4 border border-white/20 hover:border-white/50 text-white/70 hover:text-white font-mono text-sm uppercase tracking-[0.2em] transition-all duration-300 hover:bg-white/5"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="transition-transform group-hover:scale-110">
           <path d="M5 3l14 9-14 9V3z" fill="currentColor" />
         </svg>
         Launch Interactive Artwork
       </a>
-      <p className="mt-4 font-mono text-xs text-steel/50 tracking-wider">
-        Opens as full-page experience — drag, rotate, export
+      <p className="mt-4 font-mono text-[10px] text-white/15 tracking-wider uppercase">
+        Opens as full-page experience &mdash; drag, rotate, export
       </p>
     </div>
   )

@@ -5,10 +5,10 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const navLinks = [
-  { href: '/overlords', label: 'Overlords' },
-  { href: '/gallery', label: 'Gallery' },
-  { href: '/collectors', label: 'Collectors' },
-  { href: '/about', label: 'About' },
+  { href: '/overlords', label: 'SUBJECTS' },
+  { href: '/gallery', label: 'GALLERY' },
+  { href: '/collectors', label: 'COLLECTORS' },
+  { href: '/about', label: 'DOSSIER' },
 ]
 
 export default function Navigation() {
@@ -30,14 +30,14 @@ export default function Navigation() {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? 'bg-void/90 backdrop-blur-md border-b border-white/5'
+          ? 'bg-black/95 backdrop-blur-sm border-b border-white/5'
           : 'bg-transparent'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-16 md:h-20">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-14 md:h-16">
         <Link
           href="/"
-          className="font-display text-lg md:text-xl tracking-wide text-white hover:text-neon-green transition-colors duration-300"
+          className="font-display text-sm md:text-base tracking-[0.15em] text-white/80 hover:text-white transition-colors duration-300 uppercase"
         >
           Tech Epochalypse
         </Link>
@@ -48,10 +48,10 @@ export default function Navigation() {
             <Link
               key={link.href}
               href={link.href}
-              className={`font-mono text-xs uppercase tracking-[0.15em] transition-colors duration-300 ${
+              className={`font-mono text-[10px] uppercase tracking-[0.2em] transition-colors duration-300 ${
                 pathname === link.href || pathname?.startsWith(link.href + '/')
-                  ? 'text-neon-green'
-                  : 'text-steel hover:text-silver'
+                  ? 'text-white'
+                  : 'text-white/30 hover:text-white/60'
               }`}
             >
               {link.label}
@@ -66,17 +66,17 @@ export default function Navigation() {
           aria-label="Toggle menu"
         >
           <span
-            className={`w-5 h-px bg-silver transition-all duration-300 ${
+            className={`w-5 h-px bg-white/60 transition-all duration-300 ${
               mobileOpen ? 'rotate-45 translate-y-[3.5px]' : ''
             }`}
           />
           <span
-            className={`w-5 h-px bg-silver transition-all duration-300 ${
+            className={`w-5 h-px bg-white/60 transition-all duration-300 ${
               mobileOpen ? 'opacity-0' : ''
             }`}
           />
           <span
-            className={`w-5 h-px bg-silver transition-all duration-300 ${
+            className={`w-5 h-px bg-white/60 transition-all duration-300 ${
               mobileOpen ? '-rotate-45 -translate-y-[3.5px]' : ''
             }`}
           />
@@ -85,7 +85,7 @@ export default function Navigation() {
 
       {/* Mobile menu */}
       <div
-        className={`md:hidden absolute top-full left-0 right-0 bg-void/95 backdrop-blur-lg border-b border-white/5 transition-all duration-300 ${
+        className={`md:hidden absolute top-full left-0 right-0 bg-black/98 backdrop-blur-lg border-b border-white/5 transition-all duration-300 ${
           mobileOpen
             ? 'opacity-100 translate-y-0'
             : 'opacity-0 -translate-y-4 pointer-events-none'
@@ -96,10 +96,10 @@ export default function Navigation() {
             <Link
               key={link.href}
               href={link.href}
-              className={`font-mono text-sm uppercase tracking-[0.15em] py-2 transition-colors duration-300 ${
+              className={`font-mono text-xs uppercase tracking-[0.2em] py-2 transition-colors duration-300 ${
                 pathname === link.href
-                  ? 'text-neon-green'
-                  : 'text-steel hover:text-silver'
+                  ? 'text-white'
+                  : 'text-white/30 hover:text-white/60'
               }`}
             >
               {link.label}
