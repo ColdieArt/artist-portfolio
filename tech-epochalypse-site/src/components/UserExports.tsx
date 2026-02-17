@@ -27,6 +27,7 @@ interface GalleryRecord {
     Overlord?: string
     Date?: string
     Contributor?: string
+    Approved?: boolean
   }
   createdTime: string
 }
@@ -62,7 +63,12 @@ export default function UserExports({ overlordNames }: { overlordNames: Record<s
   useEffect(() => {
     async function fetchGallery() {
       try {
-        const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}?sort%5B0%5D%5Bfield%5D=Date&sort%5B0%5D%5Bdirection%5D=desc`
+        const params = new URLSearchParams({
+          'sort[0][field]': 'Date',
+          'sort[0][direction]': 'desc',
+          'filterByFormula': '{Approved}=TRUE()',
+        })
+        const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}?${params.toString()}`
         const res = await fetch(url, {
           headers: {
             Authorization: `Bearer ${AIRTABLE_TOKEN}`,
