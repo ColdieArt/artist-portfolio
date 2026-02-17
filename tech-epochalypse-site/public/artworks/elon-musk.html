@@ -4339,11 +4339,11 @@ setTimeout(function () {
       if (!panel.contains(e.target) && e.target !== toggle) panel.classList.remove('open');
     });
 
-    // ── SUBMIT YOURSELF button — go straight to post modal ──
+    // ── SUBMIT YOURSELF button — capture PNG then show post modal ──
     const submitOverlordBtn = document.getElementById('submit-overlord-btn');
     submitOverlordBtn.onclick = (e) => {
       e.stopPropagation();
-      showPostModal();
+      exportPNG();
     };
 
     // ── Format is PNG-only, duration row stays hidden ──
