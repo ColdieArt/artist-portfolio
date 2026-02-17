@@ -1,1 +1,74 @@
-[]
+[
+  {
+    "id": "g001",
+    "type": "image",
+    "src": "/images/overlords/bg-assange.png",
+    "title": "Epoch Fragment #001",
+    "contributor": "Raoul Pal",
+    "date": "2024-11-15",
+    "overlord": "elon-musk"
+  },
+  {
+    "id": "g002",
+    "type": "image",
+    "src": "/images/overlords/bg-buterin.png",
+    "title": "Neural Drift v3",
+    "contributor": "Benny",
+    "date": "2024-11-12",
+    "overlord": "elon-musk"
+  },
+  {
+    "id": "g003",
+    "type": "image",
+    "src": "/images/overlords/bg-snowden.png",
+    "title": "Signal Decay",
+    "contributor": "Christian",
+    "date": "2024-11-08",
+    "overlord": "elon-musk"
+  },
+  {
+    "id": "g004",
+    "type": "image",
+    "src": "/images/overlords/bg-buffett.png",
+    "title": "Glitch Protocol",
+    "contributor": "Batsoupyum",
+    "date": "2024-10-29",
+    "overlord": "elon-musk"
+  },
+  {
+    "id": "g005",
+    "type": "image",
+    "src": "/images/overlords/bg-assange.png",
+    "title": "Iteration 042",
+    "contributor": "Karate Kid",
+    "date": "2024-10-25",
+    "overlord": "mark-zuckerberg"
+  },
+  {
+    "id": "g006",
+    "type": "image",
+    "src": "/images/overlords/bg-snowden.png",
+    "title": "Fragmented Identity",
+    "contributor": "Raoul Pal",
+    "date": "2024-10-20",
+    "overlord": "sam-altman"
+  },
+  {
+    "id": "g007",
+    "type": "image",
+    "src": "/images/overlords/bg-buterin.png",
+    "title": "Network Collapse",
+    "contributor": "Christian",
+    "date": "2024-10-18",
+    "overlord": "jeff-bezos"
+  },
+  {
+    "id": "g008",
+    "type": "image",
+    "src": "/images/overlords/bg-buffett.png",
+    "title": "Silicon Dreams",
+    "contributor": "Benny",
+    "date": "2024-10-12",
+    "overlord": "jensen-huang"
+  }
+]
