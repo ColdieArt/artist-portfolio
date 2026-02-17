@@ -349,7 +349,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
           </div>
 
           {/* Image area */}
-          <div className="flex-1 flex items-center justify-center relative overflow-hidden">
+          <div className="flex-1 min-h-0 flex items-center justify-center relative overflow-hidden">
             {/* Previous button */}
             <button
               onClick={(e) => { e.stopPropagation(); goPrev() }}
@@ -362,13 +362,17 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
             </button>
 
             {/* Image */}
-            <div className="max-w-[90vw] max-h-[80vh] md:max-w-[85vw] md:max-h-[85vh] flex items-center justify-center">
+            <div className="relative w-full h-full flex items-center justify-center px-12 md:px-20">
               <img
                 src={currentItem.src}
                 alt={currentItem.title}
-                className="max-w-full max-h-[80vh] md:max-h-[85vh] object-contain transition-opacity duration-300"
+                className="max-w-full max-h-full object-contain transition-opacity duration-300"
                 style={{ filter: 'contrast(1.1)' }}
               />
+              {/* Contributor name overlay */}
+              <span className="absolute bottom-3 right-14 md:right-22 font-mono text-xs text-white/50 bg-black/60 px-2 py-1">
+                {currentItem.contributor}
+              </span>
             </div>
 
             {/* Next button */}
