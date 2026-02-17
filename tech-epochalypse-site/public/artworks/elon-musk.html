@@ -39,9 +39,9 @@
 
     /* ─── EXPORT PANEL ─── */
     #export-panel {
-      position: absolute;
+      position: fixed;
       left: 10px;
-      z-index: 199;
+      z-index: 201;
       background: rgba(0,0,0,0.88);
       border: 1px solid rgba(255,255,255,0.2);
       border-radius: 4px;
@@ -4226,16 +4226,15 @@ setTimeout(function () {
   <div id="export-panel">
     <div class="panel-title">EXPORT</div>
 
-    <div class="export-row">
+    <div class="export-row" style="display:none;">
       <label>Format</label>
       <select id="export-format">
-        <option value="mp4">MP4</option>
         <option value="png">PNG</option>
       </select>
     </div>
 
-    <!-- Video duration row (hidden for PNG) -->
-    <div class="export-row" id="duration-row">
+    <!-- Video duration row (hidden — PNG only) -->
+    <div class="export-row" id="duration-row" style="display:none;">
       <label>Duration (sec)</label>
       <input type="number" id="export-duration" value="5" min="1" max="60" step="1">
     </div>
@@ -4351,24 +4350,38 @@ setTimeout(function () {
       if (!panel.contains(e.target) && e.target !== toggle && e.target !== document.getElementById('submit-overlord-btn')) panel.classList.remove('open');
     });
 
-    // ── SUBMIT TO THE OVERLORD button (same as RCS toggle) ──
+    // ── SUBMIT TO THE OVERLORD button ──
     const submitOverlordBtn = document.getElementById('submit-overlord-btn');
     submitOverlordBtn.onclick = (e) => {
       e.stopPropagation();
       if (panel.classList.contains('open')) {
         panel.classList.remove('open');
       } else {
-        // Position panel above the button (bottom-right area)
+        // Temporarily show panel off-screen to measure its height
+        panel.style.visibility = 'hidden';
+        panel.classList.add('open');
+        const panelH = panel.offsetHeight;
+        const panelW = panel.offsetWidth;
+        panel.classList.remove('open');
+        panel.style.visibility = '';
+
+        // Position panel directly above the button, aligned to right edge
         const rect = submitOverlordBtn.getBoundingClientRect();
-        panel.style.top = (rect.top - panel.offsetHeight - 4) + 'px';
-        panel.style.left = (rect.right - panel.offsetWidth) + 'px';
+        const btnCenterX = rect.left + rect.width / 2;
+        let leftPos = btnCenterX - panelW / 2;
+        // Clamp so panel doesn't overflow viewport right edge
+        if (leftPos + panelW > window.innerWidth - 8) leftPos = window.innerWidth - panelW - 8;
+        if (leftPos < 8) leftPos = 8;
+
+        panel.style.top = (rect.top - panelH - 8) + 'px';
+        panel.style.left = leftPos + 'px';
         panel.classList.add('open');
       }
     };
 
-    // ── Show/hide rows based on format ──
+    // ── Format is PNG-only, duration row stays hidden ──
     fmtSel.onchange = () => {
-      durRow.style.display = (fmtSel.value === 'png') ? 'none' : 'flex';
+      durRow.style.display = 'none';
     };
 
     // ── Helpers ──
