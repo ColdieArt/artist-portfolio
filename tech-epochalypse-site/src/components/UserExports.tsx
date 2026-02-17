@@ -43,7 +43,7 @@ interface GalleryExport {
 
 function parseRecords(records: GalleryRecord[]): GalleryExport[] {
   return records
-    .filter((r) => r.fields.Image && r.fields.Image.length > 0)
+    .filter((r) => r.fields.Approved && r.fields.Image && r.fields.Image.length > 0)
     .map((r) => ({
       id: r.id,
       title: r.fields.Title ?? '',
@@ -66,7 +66,7 @@ export default function UserExports({ overlordNames }: { overlordNames: Record<s
         const params = new URLSearchParams({
           'sort[0][field]': 'Date',
           'sort[0][direction]': 'desc',
-          'filterByFormula': '{Approved}=TRUE()',
+          'filterByFormula': '{Approved}',
         })
         const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}?${params.toString()}`
         const res = await fetch(url, {
