@@ -43,7 +43,7 @@ export default function GalleryPage() {
         </ScrollReveal>
 
         {/* User exports from Airtable */}
-        <UserExports overlordNames={overlordNames} />
+        <UserExports overlordNames={overlordNames} overlordSlugs={overlordSlugs} />
 
         {/* Interactive Gallery */}
         <GalleryViewer
