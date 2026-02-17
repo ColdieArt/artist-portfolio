@@ -30,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className="bg-black text-bone">
         <div className="grain-overlay" />
         <div className="scanline" />
         <Navigation />

@@ -4,28 +4,35 @@ import ScrollReveal from '@/components/ScrollReveal'
 import overlords from '@/data/overlords.json'
 
 export const metadata: Metadata = {
-  title: 'The Overlords — Tech Epochalypse',
+  title: 'The Subjects — Tech Epochalypse',
   description:
-    'Explore all five Tech Overlords — interactive kinetic 3D portraits by Coldie.',
+    'Explore all five Tech Subjects — interactive kinetic 3D portraits by Coldie.',
 }
 
 export default function OverlordsPage() {
   return (
-    <section className="pt-28 md:pt-36 pb-24 section-padding">
+    <section className="pt-28 md:pt-36 pb-24 section-padding bg-black grid-lines">
       <div className="page-container">
         {/* Header */}
         <ScrollReveal>
           <div className="text-center mb-16 md:mb-24">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-neon-green/60 mb-4">
-              The Network
+            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-white/20 mb-4">
+              Subject Files
             </p>
-            <h1 className="font-display text-4xl md:text-6xl text-white mb-4">
-              The Overlords
+            <h1 className="font-display text-4xl md:text-6xl text-white mb-4 uppercase tracking-[0.05em]">
+              The Subjects
             </h1>
-            <p className="font-display text-lg md:text-xl italic text-steel max-w-xl mx-auto">
+            <p className="font-mono text-xs text-white/25 max-w-xl mx-auto">
               Five figures who shaped the digital epoch. Each rendered as a
               kinetic 3D portrait you can interact with.
             </p>
+            <div className="flex items-center justify-center gap-3 mt-4">
+              <div className="w-12 h-px bg-white/10" />
+              <span className="font-mono text-[9px] text-white/10 uppercase tracking-wider">
+                Clearance: <span className="redacted">LEVEL 3</span>
+              </span>
+              <div className="w-12 h-px bg-white/10" />
+            </div>
           </div>
         </ScrollReveal>
 
@@ -65,56 +72,67 @@ function OverlordCard({ overlord }: { overlord: Overlord }) {
           <img
             src={overlord.previewImage}
             alt={overlord.name}
-            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-100"
+            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 opacity-50 group-hover:opacity-70"
             loading="lazy"
+            style={{ filter: 'grayscale(1) contrast(1.2)' }}
           />
         ) : (
           <div className="w-full h-full bg-charcoal flex items-center justify-center">
-            <span className="font-display text-8xl text-white/5">
+            <span className="font-display text-8xl text-white/[0.04]">
               {overlord.number}
             </span>
           </div>
         )}
 
         {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-void via-void/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
 
-        {/* Hover glow line */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-neon-green scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+        {/* Hover reveal line */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-white/30 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
 
         {/* Number watermark */}
         <div className="absolute top-4 right-4">
-          <span className="font-display text-5xl font-light text-white/[0.07] group-hover:text-white/10 transition-colors duration-500">
+          <span className="font-display text-5xl font-light text-white/[0.05] group-hover:text-white/[0.08] transition-colors duration-500">
             {overlord.number}
           </span>
         </div>
 
+        {/* Pixelated block */}
+        <div className="absolute top-6 left-4 w-16 h-4 bg-white/[0.04] animate-pixel-drift" style={{ imageRendering: 'pixelated' as const }} />
+
         {/* Status badge */}
         {!isLive && (
-          <div className="absolute top-4 left-4 font-mono text-[10px] uppercase tracking-wider text-neon-magenta/80 bg-void/80 border border-neon-magenta/20 px-3 py-1 backdrop-blur-sm">
-            Coming Soon
+          <div className="absolute top-4 left-4 font-mono text-[9px] uppercase tracking-wider text-white/30 bg-black/80 border border-white/10 px-3 py-1 backdrop-blur-sm">
+            Classified
+          </div>
+        )}
+
+        {/* Stamp for non-live */}
+        {!isLive && (
+          <div className="stamp top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-sm">
+            RESTRICTED
           </div>
         )}
 
         {/* Bottom info */}
         <div className="absolute bottom-0 left-0 right-0 p-6">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-neon-green/60 mb-1">
-            Overlord {overlord.number}
+          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/25 mb-1">
+            Subject {overlord.number}
           </p>
-          <h3 className="font-display text-2xl text-white mb-1">
+          <h3 className="font-display text-2xl text-white mb-1 uppercase tracking-[0.03em]">
             {overlord.name}
           </h3>
-          <p className="font-display text-sm italic text-steel/80">
+          <p className="font-mono text-[10px] text-white/20">
             {overlord.title}
           </p>
 
           {/* Interact prompt */}
           <div className="mt-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-neon-green">
-              {isLive ? 'Interact' : 'Coming Soon'}
+            <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/50">
+              {isLive ? 'Access File' : 'Restricted'}
             </span>
             {isLive && (
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="text-neon-green">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="text-white/50">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             )}
