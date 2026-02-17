@@ -4,9 +4,9 @@ import ScrollReveal from '@/components/ScrollReveal'
 import overlords from '@/data/overlords.json'
 
 export const metadata: Metadata = {
-  title: 'The Subjects — Tech Epochalypse',
+  title: 'The Overlords — Tech Epochalypse',
   description:
-    'Explore all five Tech Subjects — interactive kinetic 3D portraits by Coldie.',
+    'Explore all five Tech Overlords — interactive kinetic 3D portraits by Coldie.',
 }
 
 export default function OverlordsPage() {
@@ -16,22 +16,22 @@ export default function OverlordsPage() {
         {/* Header */}
         <ScrollReveal>
           <div className="text-center mb-16 md:mb-24">
-            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-white/20 mb-4">
-              Subject Files
+            <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/40 mb-4">
+              Overlord Files
             </p>
-            <h1 className="font-display text-4xl md:text-6xl text-white mb-4 uppercase tracking-[0.05em]">
-              The Subjects
+            <h1 className="font-display text-5xl md:text-7xl text-white mb-4 uppercase tracking-[0.05em]">
+              The Overlords
             </h1>
-            <p className="font-mono text-xs text-white/25 max-w-xl mx-auto">
+            <p className="font-mono text-sm text-white/50 max-w-xl mx-auto">
               Five figures who shaped the digital epoch. Each rendered as a
               kinetic 3D portrait you can interact with.
             </p>
             <div className="flex items-center justify-center gap-3 mt-4">
-              <div className="w-12 h-px bg-white/10" />
-              <span className="font-mono text-[9px] text-white/10 uppercase tracking-wider">
+              <div className="w-12 h-px bg-white/15" />
+              <span className="font-mono text-xs text-white/25 uppercase tracking-wider">
                 Clearance: <span className="redacted">LEVEL 3</span>
               </span>
-              <div className="w-12 h-px bg-white/10" />
+              <div className="w-12 h-px bg-white/15" />
             </div>
           </div>
         </ScrollReveal>
@@ -78,7 +78,7 @@ function OverlordCard({ overlord }: { overlord: Overlord }) {
           />
         ) : (
           <div className="w-full h-full bg-charcoal flex items-center justify-center">
-            <span className="font-display text-8xl text-white/[0.04]">
+            <span className="font-display text-8xl text-white/[0.06]">
               {overlord.number}
             </span>
           </div>
@@ -92,7 +92,7 @@ function OverlordCard({ overlord }: { overlord: Overlord }) {
 
         {/* Number watermark */}
         <div className="absolute top-4 right-4">
-          <span className="font-display text-5xl font-light text-white/[0.05] group-hover:text-white/[0.08] transition-colors duration-500">
+          <span className="font-display text-5xl font-light text-white/[0.07] group-hover:text-white/[0.12] transition-colors duration-500">
             {overlord.number}
           </span>
         </div>
@@ -102,7 +102,7 @@ function OverlordCard({ overlord }: { overlord: Overlord }) {
 
         {/* Status badge */}
         {!isLive && (
-          <div className="absolute top-4 left-4 font-mono text-[9px] uppercase tracking-wider text-white/30 bg-black/80 border border-white/10 px-3 py-1 backdrop-blur-sm">
+          <div className="absolute top-4 left-4 font-mono text-xs uppercase tracking-wider text-white/40 bg-black/80 border border-white/15 px-3 py-1 backdrop-blur-sm">
             Classified
           </div>
         )}
@@ -116,23 +116,23 @@ function OverlordCard({ overlord }: { overlord: Overlord }) {
 
         {/* Bottom info */}
         <div className="absolute bottom-0 left-0 right-0 p-6">
-          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/25 mb-1">
-            Subject {overlord.number}
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/40 mb-1">
+            Overlord {overlord.number}
           </p>
-          <h3 className="font-display text-2xl text-white mb-1 uppercase tracking-[0.03em]">
+          <h3 className="font-display text-2xl md:text-3xl text-white mb-1 uppercase tracking-[0.03em]">
             {overlord.name}
           </h3>
-          <p className="font-mono text-[10px] text-white/20">
+          <p className="font-mono text-xs text-white/35">
             {overlord.title}
           </p>
 
           {/* Interact prompt */}
           <div className="mt-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/50">
+            <span className="font-mono text-xs uppercase tracking-[0.15em] text-white/60">
               {isLive ? 'Access File' : 'Restricted'}
             </span>
             {isLive && (
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="text-white/50">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="text-white/60">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             )}

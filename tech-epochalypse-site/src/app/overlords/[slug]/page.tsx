@@ -19,7 +19,7 @@ export function generateMetadata({ params }: PageProps): Metadata {
   if (!overlord) return {}
 
   return {
-    title: `Subject ${overlord.number} — ${overlord.name} | Tech Epochalypse`,
+    title: `Overlord ${overlord.number} — ${overlord.name} | Tech Epochalypse`,
     description: overlord.description,
   }
 }
@@ -42,7 +42,7 @@ export default function OverlordPage({ params }: PageProps) {
         <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-12">
           <Link
             href="/overlords"
-            className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/30 hover:text-white/60 transition-colors flex items-center gap-2"
+            className="font-mono text-xs uppercase tracking-[0.2em] text-white/40 hover:text-white/70 transition-colors flex items-center gap-2"
           >
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
               <path
@@ -53,17 +53,17 @@ export default function OverlordPage({ params }: PageProps) {
                 strokeLinejoin="round"
               />
             </svg>
-            All Subjects
+            All Overlords
           </Link>
 
           <div className="flex items-center gap-1">
-            <span className="font-mono text-[10px] text-white/20 mr-4">
-              Subject {overlord.number} &mdash; {overlord.name}
+            <span className="font-mono text-xs text-white/35 mr-4">
+              Overlord {overlord.number} &mdash; {overlord.name}
             </span>
             {prev && (
               <Link
                 href={`/overlords/${prev.slug}`}
-                className="p-2 text-white/20 hover:text-white/50 transition-colors"
+                className="p-2 text-white/30 hover:text-white/60 transition-colors"
                 title={`Previous: ${prev.name}`}
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -74,7 +74,7 @@ export default function OverlordPage({ params }: PageProps) {
             {next && (
               <Link
                 href={`/overlords/${next.slug}`}
-                className="p-2 text-white/20 hover:text-white/50 transition-colors"
+                className="p-2 text-white/30 hover:text-white/60 transition-colors"
                 title={`Next: ${next.name}`}
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -92,40 +92,40 @@ export default function OverlordPage({ params }: PageProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
               <div className="classified-header">
-                Subject {overlord.number} &mdash; Active Dossier
+                Overlord {overlord.number} &mdash; Active Dossier
               </div>
-              <h1 className="font-display text-3xl md:text-4xl text-white mb-2 uppercase tracking-[0.03em]">
+              <h1 className="font-display text-4xl md:text-5xl text-white mb-3 uppercase tracking-[0.03em]">
                 {overlord.name}
               </h1>
-              <p className="font-mono text-xs text-white/25 mb-6 uppercase tracking-wider">
+              <p className="font-mono text-sm text-white/45 mb-6 uppercase tracking-wider">
                 Designation: {overlord.title}
               </p>
-              <p className="text-white/30 text-sm font-mono leading-relaxed">
+              <p className="text-white/50 text-base font-mono leading-relaxed">
                 {overlord.lore}
               </p>
-              <p className="text-white/10 text-[10px] font-mono mt-4">
+              <p className="text-white/20 text-xs font-mono mt-4">
                 File: <span className="redacted">DOC-{overlord.number}-2024</span>
               </p>
             </div>
 
             <div className="space-y-6">
               <div>
-                <h3 className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/25 mb-2 border-b border-white/5 pb-1">
+                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white/40 mb-2 border-b border-white/10 pb-1">
                   Medium
                 </h3>
-                <p className="text-white/30 text-xs font-mono">{overlord.medium}</p>
+                <p className="text-white/50 text-sm font-mono">{overlord.medium}</p>
               </div>
               <div>
-                <h3 className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/25 mb-2 border-b border-white/5 pb-1">
+                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white/40 mb-2 border-b border-white/10 pb-1">
                   Year
                 </h3>
-                <p className="text-white/30 text-xs font-mono">{overlord.year}</p>
+                <p className="text-white/50 text-sm font-mono">{overlord.year}</p>
               </div>
               <div>
-                <h3 className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/25 mb-2 border-b border-white/5 pb-1">
+                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white/40 mb-2 border-b border-white/10 pb-1">
                   Interaction Protocol
                 </h3>
-                <p className="text-white/30 text-xs font-mono">
+                <p className="text-white/50 text-sm font-mono">
                   Drag to rotate. Use the built-in controls to apply filters and
                   effects. Export your unique iteration as JPEG or MP4.
                 </p>

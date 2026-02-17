@@ -37,7 +37,7 @@ export default function GalleryPage() {
             <h1 className="font-display text-4xl md:text-6xl text-white mb-4 uppercase tracking-[0.05em]">
               Community Gallery
             </h1>
-            <p className="font-mono text-xs text-white/25 max-w-2xl mx-auto mb-8">
+            <p className="font-mono text-sm text-white/50 max-w-2xl mx-auto mb-8">
               Every interaction creates a unique iteration. This gallery
               showcases remixes and exports from visitors around the world.
             </p>
@@ -117,8 +117,8 @@ export default function GalleryPage() {
             <h3 className="font-display text-2xl md:text-3xl text-white mb-4 uppercase tracking-[0.03em]">
               Share Your Iteration
             </h3>
-            <p className="text-white/20 text-xs font-mono max-w-lg mx-auto mb-8 leading-relaxed">
-              Create your unique export from any subject artwork, then share it
+            <p className="text-white/40 text-sm font-mono max-w-lg mx-auto mb-8 leading-relaxed">
+              Create your unique export from any overlord artwork, then share it
               with the community. Every iteration is a new perspective on the
               network.
             </p>
@@ -154,7 +154,7 @@ function EmptyGallery() {
         Gallery Pending
       </h3>
       <p className="text-white/20 text-xs font-mono max-w-sm mx-auto">
-        Community submissions will appear here. Visit a subject artwork to
+        Community submissions will appear here. Visit an overlord artwork to
         create and export your unique iteration.
       </p>
     </div>
