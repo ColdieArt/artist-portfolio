@@ -27,7 +27,7 @@ export default function CollectorsPage() {
             <h1 className="font-display text-4xl md:text-6xl text-white mb-4 uppercase tracking-[0.05em]">
               Patrons &amp; Collectors
             </h1>
-            <p className="font-mono text-xs text-white/25 max-w-2xl mx-auto">
+            <p className="font-mono text-sm text-white/50 max-w-2xl mx-auto">
               The visionaries who recognized the signal in the noise. Honoring
               those who collected the original Tech Epochalypse artworks.
             </p>
@@ -77,7 +77,7 @@ export default function CollectorsPage() {
                       </h3>
 
                       {collector.bio && (
-                        <p className="text-white/20 text-xs font-mono italic leading-relaxed mb-4">
+                        <p className="text-white/40 text-sm font-mono italic leading-relaxed mb-4">
                           &ldquo;{collector.bio}&rdquo;
                         </p>
                       )}
@@ -185,7 +185,7 @@ export default function CollectorsPage() {
             <h3 className="font-display text-2xl md:text-3xl text-white mb-4 uppercase tracking-[0.03em]">
               Interested in Collecting?
             </h3>
-            <p className="text-white/20 text-xs font-mono max-w-lg mx-auto mb-8 leading-relaxed">
+            <p className="text-white/40 text-sm font-mono max-w-lg mx-auto mb-8 leading-relaxed">
               The Tech Epochalypse series represents a new frontier in
               interactive digital art. Contact the artist to learn about
               available pieces and future drops.

@@ -230,11 +230,11 @@
   }
 
   .classified-header {
-    @apply font-mono text-xs uppercase tracking-[0.3em];
-    color: #666;
-    border-bottom: 1px solid #222;
-    padding-bottom: 4px;
-    margin-bottom: 12px;
+    @apply font-mono text-sm uppercase tracking-[0.3em];
+    color: #888;
+    border-bottom: 1px solid #333;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
   }
 
   /* ── Glow / Effects ── */
@@ -283,24 +283,24 @@
 
   /* ── Buttons — Noir Dossier Style ── */
   .btn-primary {
-    @apply relative inline-flex items-center gap-3 px-8 py-4 font-mono text-sm uppercase tracking-[0.2em]
-           border border-white/30 text-white bg-white/5
+    @apply relative inline-flex items-center gap-3 px-8 py-4 font-mono text-base uppercase tracking-[0.2em]
+           border border-white/40 text-white bg-white/5
            transition-all duration-300 ease-out;
   }
 
   .btn-primary:hover {
-    @apply bg-white/10 border-white/60;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+    @apply bg-white/10 border-white/70;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.08);
   }
 
   .btn-secondary {
-    @apply relative inline-flex items-center gap-3 px-6 py-3 font-mono text-xs uppercase tracking-[0.15em]
-           border border-white/10 text-white/50
+    @apply relative inline-flex items-center gap-3 px-6 py-3 font-mono text-sm uppercase tracking-[0.15em]
+           border border-white/15 text-white/60
            transition-all duration-300 ease-out;
   }
 
   .btn-secondary:hover {
-    @apply border-white/25 text-white/70 bg-white/5;
+    @apply border-white/30 text-white/80 bg-white/5;
   }
 
   /* ── Corrupted / Glitch Text ── */

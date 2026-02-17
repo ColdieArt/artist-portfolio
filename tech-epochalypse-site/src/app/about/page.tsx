@@ -15,7 +15,7 @@ export default function AboutPage() {
         {/* Header */}
         <ScrollReveal>
           <div className="text-center mb-16 md:mb-24">
-            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-white/20 mb-4">
+            <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/40 mb-4">
               Behind the Network
             </p>
             <h1 className="font-display text-4xl md:text-6xl text-white mb-4 uppercase tracking-[0.05em]">
@@ -59,7 +59,7 @@ export default function AboutPage() {
               <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
                 Coldie
               </h2>
-              <div className="space-y-4 text-white/25 text-xs font-mono leading-relaxed">
+              <div className="space-y-4 text-white/50 text-sm font-mono leading-relaxed">
                 <p>
                   Coldie is a pioneering digital artist and one of the earliest
                   creators in the NFT and crypto art movement. Working at the
@@ -82,9 +82,9 @@ export default function AboutPage() {
                 </p>
               </div>
 
-              <p className="text-white/10 text-[10px] font-mono mt-4">
+              <p className="text-white/20 text-xs font-mono mt-4">
                 Clearance: <span className="redacted">FULL ACCESS</span> &mdash;
-                Status: <span className="text-white/25">ACTIVE</span>
+                Status: <span className="text-white/40">ACTIVE</span>
               </p>
 
               {/* Social links */}
@@ -93,7 +93,7 @@ export default function AboutPage() {
                   href="https://twitter.com/Coldie"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-white/20 hover:text-white/50 transition-colors"
+                  className="flex items-center gap-2 text-white/35 hover:text-white/60 transition-colors"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -104,7 +104,7 @@ export default function AboutPage() {
                   href="https://instagram.com/coldie"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-white/20 hover:text-white/50 transition-colors"
+                  className="flex items-center gap-2 text-white/35 hover:text-white/60 transition-colors"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="2" y="2" width="20" height="20" rx="5"/>
@@ -132,11 +132,11 @@ export default function AboutPage() {
               <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
                 What is Tech Epochalypse?
               </h2>
-              <div className="space-y-4 text-white/25 text-xs font-mono leading-relaxed">
+              <div className="space-y-4 text-white/50 text-sm font-mono leading-relaxed">
                 <p>
                   Tech Epochalypse is an interactive digital art series exploring
                   the figures who defined &mdash; and disrupted &mdash; the technological
-                  epoch. Five &ldquo;Tech Subjects,&rdquo; rendered as kinetic
+                  epoch. Five &ldquo;Tech Overlords,&rdquo; rendered as kinetic
                   3D portraits, each built as a standalone interactive
                   experience.
                 </p>
@@ -149,9 +149,9 @@ export default function AboutPage() {
                 </p>
                 <p>
                   The series examines power, influence, and the individuals who
-                  sit at the nexus of technology and society. Each subject
+                  sit at the nexus of technology and society. Each overlord
                   represents a different facet of this epoch: innovation,
-                  transparency, decentralization, capital, and conscience.
+                  connectivity, acceleration, optimization, and silicon.
                 </p>
               </div>
             </div>
@@ -165,7 +165,7 @@ export default function AboutPage() {
               <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
                 How They&rsquo;re Made
               </h2>
-              <div className="space-y-4 text-white/25 text-xs font-mono leading-relaxed">
+              <div className="space-y-4 text-white/50 text-sm font-mono leading-relaxed">
                 <p>
                   Each artwork begins as a 3D scan or photographic reference,
                   then undergoes a process of digital manipulation, shader
@@ -218,7 +218,7 @@ export default function AboutPage() {
             <h3 className="font-display text-2xl md:text-3xl text-white mb-4 uppercase tracking-[0.03em]">
               Get in Touch
             </h3>
-            <p className="text-white/20 text-xs font-mono max-w-lg mx-auto mb-8 leading-relaxed">
+            <p className="text-white/40 text-sm font-mono max-w-lg mx-auto mb-8 leading-relaxed">
               For commissions, collaborations, press inquiries, or collecting
               opportunities, reach out through social channels or email.
             </p>
@@ -232,7 +232,7 @@ export default function AboutPage() {
                 <span>Connect on X</span>
               </a>
               <Link href="/overlords" className="btn-secondary">
-                <span>View the Subjects</span>
+                <span>View the Overlords</span>
               </Link>
             </div>
           </div>
