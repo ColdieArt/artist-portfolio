@@ -230,7 +230,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                   alt={item.title}
                   className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 opacity-70 group-hover:opacity-90"
                   loading="lazy"
-                  style={{ filter: 'grayscale(1) contrast(1.15)' }}
+                  style={{ filter: 'contrast(1.15)' }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
@@ -367,7 +367,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                 src={currentItem.src}
                 alt={currentItem.title}
                 className="max-w-full max-h-[80vh] md:max-h-[85vh] object-contain transition-opacity duration-300"
-                style={{ filter: 'grayscale(1) contrast(1.1)' }}
+                style={{ filter: 'contrast(1.1)' }}
               />
             </div>
 

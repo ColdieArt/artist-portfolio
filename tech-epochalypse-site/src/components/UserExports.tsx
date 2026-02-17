@@ -33,18 +33,27 @@ interface GalleryRecord {
   createdTime: string
 }
 
-function parseRecords(records: GalleryRecord[]): GalleryItem[] {
+function toSlug(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, '-')
+}
+
+function parseRecords(records: GalleryRecord[], nameToSlug: Record<string, string>): GalleryItem[] {
   return records
     .filter((r) => r.fields.Approved && r.fields.Image && r.fields.Image.length > 0)
-    .map((r) => ({
-      id: r.id,
-      type: 'image' as const,
-      src: r.fields.Image![0].thumbnails?.full?.url ?? r.fields.Image![0].url,
-      title: r.fields.Title ?? 'Untitled Export',
-      overlord: r.fields.Overlord ?? 'unknown',
-      date: r.fields.Date ?? r.createdTime.split('T')[0],
-      contributor: r.fields.Contributor ?? 'Visitor',
-    }))
+    .map((r) => {
+      const raw = r.fields.Overlord ?? 'unknown'
+      // Normalize overlord to slug: check reverse name map first, then slugify
+      const overlord = nameToSlug[raw.toLowerCase()] ?? toSlug(raw)
+      return {
+        id: r.id,
+        type: 'image' as const,
+        src: r.fields.Image![0].thumbnails?.full?.url ?? r.fields.Image![0].url,
+        title: r.fields.Title ?? 'Untitled Export',
+        overlord,
+        date: r.fields.Date ?? r.createdTime.split('T')[0],
+        contributor: r.fields.Contributor ?? 'Visitor',
+      }
+    })
     .sort((a, b) => b.date.localeCompare(a.date))
 }
 
@@ -54,6 +63,11 @@ interface Props {
 }
 
 export default function UserExports({ overlordNames, overlordSlugs }: Props) {
+  // Reverse mapping: overlord name -> slug (e.g. "Elon Musk" -> "elon-musk")
+  const nameToSlug: Record<string, string> = {}
+  for (const [slug, name] of Object.entries(overlordNames)) {
+    nameToSlug[name.toLowerCase()] = slug
+  }
   const [exports, setExports] = useState<GalleryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -71,7 +85,7 @@ export default function UserExports({ overlordNames, overlordSlugs }: Props) {
         })
         if (!res.ok) throw new Error('Failed to fetch')
         const data = await res.json()
-        setExports(parseRecords(data.records ?? []))
+        setExports(parseRecords(data.records ?? [], nameToSlug))
       } catch {
         setError(true)
       } finally {
