@@ -42,8 +42,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
 
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (isFullscreen) exitFullscreen()
-        else closeLightbox()
+        closeLightbox()
       }
       if (e.key === 'ArrowRight' || e.key === ' ') {
         e.preventDefault()
@@ -75,11 +74,26 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
   // Fullscreen change listener
   useEffect(() => {
     const handler = () => {
-      if (!document.fullscreenElement) setIsFullscreen(false)
+      if (!document.fullscreenElement) {
+        setIsFullscreen(false)
+        setLightboxIndex(null)
+        setSlideshow(false)
+      }
     }
     document.addEventListener('fullscreenchange', handler)
     return () => document.removeEventListener('fullscreenchange', handler)
   }, [])
+
+  // Auto-enter fullscreen when lightbox opens
+  useEffect(() => {
+    if (lightboxIndex !== null && lightboxRef.current && !document.fullscreenElement) {
+      lightboxRef.current.requestFullscreen().then(() => {
+        setIsFullscreen(true)
+      }).catch(() => {
+        // Fullscreen may be blocked by browser; lightbox still works without it
+      })
+    }
+  }, [lightboxIndex !== null])
 
   const activeList = slideshow ? slideshowItems : filtered
 
