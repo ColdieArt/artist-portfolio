@@ -224,7 +224,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
               onClick={() => openLightbox(i)}
               className="group relative bg-charcoal/30 border border-white/5 overflow-hidden card-hover text-left cursor-pointer focus:outline-none focus:border-white/20"
             >
-              <div className="aspect-video relative overflow-hidden bg-charcoal">
+              <div className="aspect-video relative overflow-hidden bg-charcoal" style={{ aspectRatio: '16/9' }}>
                 <img
                   src={item.src}
                   alt={item.title}
