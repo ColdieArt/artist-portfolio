@@ -4221,7 +4221,7 @@ setTimeout(function () {
   </script>
 
   <!-- ─── EXPORT PANEL HTML ─── -->
-  <button id="submit-overlord-btn">SUBMIT TO THE OVERLORD</button>
+  <button id="submit-overlord-btn">SUBMIT YOURSELF</button>
 
   <div id="export-panel">
     <div class="panel-title">EXPORT</div>
@@ -4347,36 +4347,14 @@ setTimeout(function () {
       }
     };
     document.addEventListener('click', (e) => {
-      if (!panel.contains(e.target) && e.target !== toggle && e.target !== document.getElementById('submit-overlord-btn')) panel.classList.remove('open');
+      if (!panel.contains(e.target) && e.target !== toggle) panel.classList.remove('open');
     });
 
-    // ── SUBMIT TO THE OVERLORD button ──
+    // ── SUBMIT YOURSELF button — go straight to post modal ──
     const submitOverlordBtn = document.getElementById('submit-overlord-btn');
     submitOverlordBtn.onclick = (e) => {
       e.stopPropagation();
-      if (panel.classList.contains('open')) {
-        panel.classList.remove('open');
-      } else {
-        // Temporarily show panel off-screen to measure its height
-        panel.style.visibility = 'hidden';
-        panel.classList.add('open');
-        const panelH = panel.offsetHeight;
-        const panelW = panel.offsetWidth;
-        panel.classList.remove('open');
-        panel.style.visibility = '';
-
-        // Position panel directly above the button, aligned to right edge
-        const rect = submitOverlordBtn.getBoundingClientRect();
-        const btnCenterX = rect.left + rect.width / 2;
-        let leftPos = btnCenterX - panelW / 2;
-        // Clamp so panel doesn't overflow viewport right edge
-        if (leftPos + panelW > window.innerWidth - 8) leftPos = window.innerWidth - panelW - 8;
-        if (leftPos < 8) leftPos = 8;
-
-        panel.style.top = (rect.top - panelH - 8) + 'px';
-        panel.style.left = leftPos + 'px';
-        panel.classList.add('open');
-      }
+      showPostModal();
     };
 
     // ── Format is PNG-only, duration row stays hidden ──
