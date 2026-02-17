@@ -1,9 +1,53 @@
 [
   {
-    "name": "Collector Name",
+    "name": "Raoul Pal",
     "avatar": null,
     "pieces": ["elon-musk"],
-    "bio": "A brief bio or quote from the collector.",
+    "bio": null,
+    "socials": {
+      "twitter": "https://x.com/RaoulGMI",
+      "instagram": null,
+      "website": null
+    }
+  },
+  {
+    "name": "Christian",
+    "avatar": null,
+    "pieces": ["elon-musk"],
+    "bio": null,
+    "socials": {
+      "twitter": null,
+      "instagram": null,
+      "website": null
+    }
+  },
+  {
+    "name": "Benny",
+    "avatar": null,
+    "pieces": ["elon-musk"],
+    "bio": null,
+    "socials": {
+      "twitter": null,
+      "instagram": null,
+      "website": null
+    }
+  },
+  {
+    "name": "Batsoupyum",
+    "avatar": null,
+    "pieces": ["elon-musk"],
+    "bio": null,
+    "socials": {
+      "twitter": null,
+      "instagram": null,
+      "website": null
+    }
+  },
+  {
+    "name": "Karate Kid",
+    "avatar": null,
+    "pieces": ["elon-musk"],
+    "bio": null,
     "socials": {
       "twitter": null,
       "instagram": null,
