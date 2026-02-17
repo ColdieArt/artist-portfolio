@@ -1891,7 +1891,7 @@ function init() {
     camera.position.z = 10; // Zoomed out to see the full canvas
     camera.userData.yRotationAngle = 0; // Initialize angle for Y-axis camera rotation
 
-    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x1e1e1e); // Dark gray background
     renderer.outputColorSpace = THREE.SRGBColorSpace; // THREE.js best practice: set output color space
@@ -4198,14 +4198,16 @@ setTimeout(function () {
     window.camera = typeof camera != "undefined" ? camera : undefined;
     window.renderer = typeof renderer != "undefined" ? renderer : undefined;
     window.scene = typeof scene != "undefined" ? scene : undefined;
+    window.composer = typeof composer != "undefined" ? composer : undefined;
 }, 1000)
     
     // Expose for dae hooks
     setTimeout(function() {
-      window.animate = typeof animate == "function" ? animate : () => {}; 
-      window.camera = typeof camera != "undefined" ? camera : undefined; 
-      window.renderer = typeof renderer != "undefined" ? renderer : undefined; 
-      window.scene = typeof scene != "undefined" ? scene : undefined; 
+      window.animate = typeof animate == "function" ? animate : () => {};
+      window.camera = typeof camera != "undefined" ? camera : undefined;
+      window.renderer = typeof renderer != "undefined" ? renderer : undefined;
+      window.scene = typeof scene != "undefined" ? scene : undefined;
+      window.composer = typeof composer != "undefined" ? composer : undefined; 
     }, 1000)
   </script>
 
@@ -4422,8 +4424,12 @@ setTimeout(function () {
       setStatus('Capturing…', 'active');
       lockUI(true);
       const r = await getRenderer();
-      // One extra render tick so the composer has drawn the current frame
-      await new Promise(res => requestAnimationFrame(res));
+      // Force a fresh render so the buffer has the current frame
+      if (window.composer) {
+        window.composer.render();
+      } else if (window.scene && window.camera) {
+        r.render(window.scene, window.camera);
+      }
       r.domElement.toBlob((blob) => {
         if (blob) {
           triggerDownload(blob, 'elon-musk-coldie.png');
