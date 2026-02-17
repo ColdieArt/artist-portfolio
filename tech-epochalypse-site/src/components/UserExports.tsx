@@ -27,6 +27,7 @@ interface GalleryRecord {
     Overlord?: string
     Date?: string
     Contributor?: string
+    Approved?: boolean
   }
   createdTime: string
 }
@@ -42,7 +43,7 @@ interface GalleryExport {
 
 function parseRecords(records: GalleryRecord[]): GalleryExport[] {
   return records
-    .filter((r) => r.fields.Image && r.fields.Image.length > 0)
+    .filter((r) => r.fields.Approved && r.fields.Image && r.fields.Image.length > 0)
     .map((r) => ({
       id: r.id,
       title: r.fields.Title ?? '',
@@ -62,11 +63,13 @@ export default function UserExports({ overlordNames }: { overlordNames: Record<s
   useEffect(() => {
     async function fetchGallery() {
       try {
-        const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}?sort%5B0%5D%5Bfield%5D=Date&sort%5B0%5D%5Bdirection%5D=desc`
+        const filter = encodeURIComponent('{Approved}=1')
+        const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}?sort%5B0%5D%5Bfield%5D=Date&sort%5B0%5D%5Bdirection%5D=desc&filterByFormula=${filter}`
         const res = await fetch(url, {
           headers: {
             Authorization: `Bearer ${AIRTABLE_TOKEN}`,
           },
+          cache: 'no-store',
         })
         if (!res.ok) throw new Error('Failed to fetch')
         const data = await res.json()
