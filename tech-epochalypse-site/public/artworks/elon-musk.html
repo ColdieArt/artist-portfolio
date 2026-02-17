@@ -3470,6 +3470,7 @@ function init() {
         return button;
     };
     exportButtonElement = createExportButton();
+    exportButtonElement.style.display = 'none';
     leftUiContainer.appendChild(exportButtonElement);
 
     // Add the thin black rectangle with a down-facing arrow below the TRASH button
