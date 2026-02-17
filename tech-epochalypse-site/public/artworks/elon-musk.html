@@ -3454,18 +3454,7 @@ function init() {
         button.id = 'export-toggle';
         button.innerHTML = 'RCS';
         button.style.cssText = `
-            background-color: white;
-            color: black;
-            padding: 4px;
-            margin-top: 2px;
-            border: 0.5px solid white;
-            border-radius: 0;
-            cursor: pointer;
-            font-family: monospace;
-            font-size: 7px;
-            outline: none;
-            white-space: nowrap;
-            box-sizing: border-box;
+            display: none !important;
         `;
         return button;
     };
@@ -3516,7 +3505,6 @@ function init() {
         } else {
             leftUiContainer.style.top = '10px'; // Show it
             trashButtonElement.style.display = 'block'; // Show TRASH button
-            exportButtonElement.style.display = 'block'; // Show EXPORT button
             arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; // Move arrow below the UI
             arrowSpan.innerHTML = '&#x25B2'; // Change to up arrow
         }
