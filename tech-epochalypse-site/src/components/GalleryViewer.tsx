@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { createPortal } from 'react-dom'
 
 export interface GalleryItem {
   id: string
@@ -55,7 +54,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
   const [slideshow, setSlideshow] = useState(false)
   const [slideshowFilter, setSlideshowFilter] = useState<string>('all')
   const [showSlideshowMenu, setShowSlideshowMenu] = useState(false)
-  const lightboxRef = useRef<HTMLDivElement>(null)
+  const dialogRef = useRef<HTMLDialogElement>(null)
 
   const lightboxOpen = lightboxIndex !== null
 
@@ -98,17 +97,17 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
   }, [])
 
   const toggleFullscreen = useCallback(async () => {
-    if (!lightboxRef.current) return
+    if (!dialogRef.current) return
     try {
       if (!fsElement()) {
-        await fsRequest(lightboxRef.current)
+        await fsRequest(dialogRef.current)
         setIsFullscreen(true)
       } else {
         fsExit()
         setIsFullscreen(false)
       }
     } catch {
-      // Fullscreen not supported (e.g. some mobile browsers) — ignore
+      // Fullscreen not supported — ignore
     }
   }, [])
 
@@ -137,12 +136,35 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
     setSlideshow(true)
   }, [items])
 
-  // Keyboard navigation
+  // Open/close the native <dialog> when lightbox state changes.
+  // showModal() renders in the browser's top-layer — above all z-indexes.
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) return
+    if (lightboxOpen && !dialog.open) {
+      dialog.showModal()
+    } else if (!lightboxOpen && dialog.open) {
+      dialog.close()
+    }
+  }, [lightboxOpen])
+
+  // Handle native dialog cancel (browser Escape key fires this)
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) return
+    const onCancel = (e: Event) => {
+      e.preventDefault()
+      closeLightbox()
+    }
+    dialog.addEventListener('cancel', onCancel)
+    return () => dialog.removeEventListener('cancel', onCancel)
+  }, [closeLightbox])
+
+  // Keyboard navigation (arrows, space, F key)
   useEffect(() => {
     if (!lightboxOpen) return
 
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeLightbox()
       if (e.key === 'ArrowRight' || e.key === ' ') {
         e.preventDefault()
         goNext()
@@ -156,7 +178,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [lightboxOpen, closeLightbox, goNext, goPrev, toggleFullscreen])
+  }, [lightboxOpen, goNext, goPrev, toggleFullscreen])
 
   // Slideshow auto-advance
   useEffect(() => {
@@ -165,7 +187,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
     return () => clearInterval(id)
   }, [slideshow, lightboxOpen, goNextSlideshow])
 
-  // Fullscreen change listener — only updates the flag, does NOT close lightbox
+  // Fullscreen change listener
   useEffect(() => {
     const handler = () => setIsFullscreen(!!fsElement())
     document.addEventListener('fullscreenchange', handler)
@@ -174,28 +196,6 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
       document.removeEventListener('fullscreenchange', handler)
       document.removeEventListener('webkitfullscreenchange', handler)
     }
-  }, [])
-
-  // Lock body scroll when lightbox is open
-  useEffect(() => {
-    if (!lightboxOpen) return
-    const html = document.documentElement
-    html.style.overflow = 'hidden'
-    document.body.style.overflow = 'hidden'
-    document.body.style.touchAction = 'none'
-    document.body.style.overscrollBehavior = 'none'
-    return () => {
-      html.style.overflow = ''
-      document.body.style.overflow = ''
-      document.body.style.touchAction = ''
-      document.body.style.overscrollBehavior = ''
-    }
-  }, [lightboxOpen])
-
-  // Portal target — mount lightbox directly on body to escape stacking contexts
-  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null)
-  useEffect(() => {
-    setPortalTarget(document.body)
   }, [])
 
   const currentItem = lightboxIndex !== null ? activeList[lightboxIndex] : null
@@ -330,160 +330,240 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
         </div>
       )}
 
-      {/* ── Lightbox Modal — portalled to body to escape stacking contexts ── */}
-      {lightboxIndex !== null && currentItem && portalTarget && createPortal(
-        <div
-          ref={lightboxRef}
-          className="fixed inset-0 bg-black flex flex-col"
-          style={{ zIndex: 10000, height: '100dvh' }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) closeLightbox()
-          }}
-        >
-          {/* Top bar */}
-          <div className="flex items-center justify-between px-4 md:px-8 py-3 md:py-4 bg-black/90 border-b border-white/5 shrink-0">
-            <div className="flex items-center gap-2 md:gap-4 min-w-0">
-              <p className="font-mono text-xs md:text-sm text-white truncate">
-                {currentItem.title}
-              </p>
-              <span className="font-mono text-xs text-white/30 hidden md:inline">
-                by {currentItem.contributor}
-              </span>
-              {slideshow && (
-                <span className="font-mono text-[10px] uppercase tracking-wider text-white/20 bg-white/5 border border-white/10 px-2 py-0.5">
-                  Slideshow
+      {/* ── Lightbox — native <dialog> renders in browser top-layer ── */}
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
+      <dialog
+        ref={dialogRef}
+        className="lightbox-dialog"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) closeLightbox()
+        }}
+      >
+        {currentItem && (
+          <>
+            {/* Top bar */}
+            <div className="lightbox-bar" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                <p className="font-mono" style={{ fontSize: '13px', color: 'white', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {currentItem.title}
+                </p>
+                <span className="font-mono" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)' }}>
+                  by {currentItem.contributor}
                 </span>
-              )}
+                {slideshow && (
+                  <span className="font-mono" style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '2px 8px' }}>
+                    Slideshow
+                  </span>
+                )}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                <span className="font-mono" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)', marginRight: '8px' }}>
+                  {lightboxIndex! + 1} / {activeList.length}
+                </span>
+
+                {/* Slideshow toggle */}
+                <button
+                  onClick={() => setSlideshow(!slideshow)}
+                  style={{ padding: '8px', background: 'none', border: 'none', cursor: 'pointer', color: slideshow ? 'white' : 'rgba(255,255,255,0.3)' }}
+                  title={slideshow ? 'Stop slideshow' : 'Start slideshow'}
+                >
+                  {slideshow ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="6" y="4" width="4" height="16" />
+                      <rect x="14" y="4" width="4" height="16" />
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  )}
+                </button>
+
+                {/* Fullscreen toggle */}
+                <button
+                  onClick={toggleFullscreen}
+                  style={{ padding: '8px', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)' }}
+                  title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+                >
+                  {isFullscreen ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7" />
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                    </svg>
+                  )}
+                </button>
+
+                {/* Close */}
+                <button
+                  onClick={closeLightbox}
+                  style={{ padding: '8px', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', marginLeft: '4px' }}
+                  title="Close (Esc)"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-1 md:gap-2 shrink-0">
-              <span className="font-mono text-[10px] md:text-xs text-white/25 mr-1 md:mr-2">
-                {lightboxIndex + 1} / {activeList.length}
-              </span>
 
-              {/* Slideshow toggle */}
+            {/* Image area — grid cell centers the image */}
+            <div className="lightbox-image-area">
+              {/* Previous button */}
               <button
-                onClick={() => setSlideshow(!slideshow)}
-                className={`p-2 transition-colors ${
-                  slideshow ? 'text-white' : 'text-white/30 hover:text-white/60'
-                }`}
-                title={slideshow ? 'Stop slideshow' : 'Start slideshow'}
+                onClick={(e) => { e.stopPropagation(); goPrev() }}
+                className="lightbox-nav lightbox-nav-prev"
+                title="Previous (Left arrow)"
               >
-                {slideshow ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="6" y="4" width="4" height="16" />
-                    <rect x="14" y="4" width="4" height="16" />
-                  </svg>
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                )}
-              </button>
-
-              {/* Fullscreen toggle — hidden on mobile where it's unsupported */}
-              <button
-                onClick={toggleFullscreen}
-                className="p-2 text-white/30 hover:text-white/60 transition-colors hidden md:block"
-                title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-              >
-                {isFullscreen ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7" />
-                  </svg>
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-                  </svg>
-                )}
-              </button>
-
-              {/* Close */}
-              <button
-                onClick={closeLightbox}
-                className="p-2 text-white/30 hover:text-white/60 transition-colors ml-1 md:ml-2"
-                title="Close (Esc)"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <path d="M18 6L6 18M6 6l12 12" />
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 18l-6-6 6-6" />
                 </svg>
               </button>
+
+              {/* The image */}
+              <img
+                key={currentItem.id}
+                src={currentItem.src}
+                alt={currentItem.title}
+                className="lightbox-img"
+              />
+
+              {/* Contributor overlay */}
+              <span className="font-mono" style={{ position: 'absolute', bottom: '12px', right: '12px', fontSize: '11px', color: 'rgba(255,255,255,0.5)', background: 'rgba(0,0,0,0.6)', padding: '2px 8px', zIndex: 2 }}>
+                {currentItem.contributor}
+              </span>
+
+              {/* Next button */}
+              <button
+                onClick={(e) => { e.stopPropagation(); goNext() }}
+                className="lightbox-nav lightbox-nav-next"
+                title="Next (Right arrow)"
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+
+              {/* Slideshow progress bar */}
+              {slideshow && (
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '2px', background: 'rgba(255,255,255,0.05)', zIndex: 2 }}>
+                  <div className="lightbox-slideshow-bar" />
+                </div>
+              )}
             </div>
-          </div>
 
-          {/* Image area */}
-          <div className="flex-1 min-h-0 relative overflow-hidden">
-            {/* Previous button */}
-            <button
-              onClick={(e) => { e.stopPropagation(); goPrev() }}
-              className="absolute left-1 md:left-6 top-1/2 -translate-y-1/2 z-10 p-3 text-white/20 hover:text-white/60 transition-colors"
-              title="Previous (Left arrow)"
-            >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-            </button>
-
-            {/* Image — absolutely fills area, object-contain centers it */}
-            <img
-              src={currentItem.src}
-              alt={currentItem.title}
-              className="absolute inset-0 w-full h-full object-contain transition-opacity duration-300"
-              style={{ filter: 'contrast(1.1)' }}
-            />
-            {/* Contributor name overlay */}
-            <span className="absolute bottom-3 right-3 font-mono text-xs text-white/50 bg-black/60 px-2 py-1 z-10">
-              {currentItem.contributor}
-            </span>
-
-            {/* Next button */}
-            <button
-              onClick={(e) => { e.stopPropagation(); goNext() }}
-              className="absolute right-1 md:right-6 top-1/2 -translate-y-1/2 z-10 p-3 text-white/20 hover:text-white/60 transition-colors"
-              title="Next (Right arrow)"
-            >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </button>
-
-            {/* Slideshow progress bar */}
-            {slideshow && (
-              <div className="absolute bottom-0 left-0 right-0 h-px bg-white/5 z-10">
-                <div
-                  className="h-full bg-white/30"
-                  style={{
-                    animation: 'slideshowProgress 4s linear infinite',
-                  }}
-                />
+            {/* Bottom bar */}
+            <div className="lightbox-bar" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <span className="font-mono" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.3)' }}>
+                  {overlordNames[currentItem.overlord] ?? currentItem.overlord}
+                </span>
+                <span className="font-mono" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.2)' }}>
+                  {currentItem.date}
+                </span>
               </div>
-            )}
-          </div>
-
-          {/* Bottom info */}
-          <div className="flex items-center justify-between px-4 md:px-8 py-2 md:py-3 bg-black/90 border-t border-white/5 shrink-0">
-            <div className="flex items-center gap-3 md:gap-4">
-              <span className="font-mono text-[10px] md:text-xs uppercase tracking-wider text-white/30">
-                {overlordNames[currentItem.overlord] ?? currentItem.overlord}
-              </span>
-              <span className="font-mono text-[10px] md:text-xs text-white/20">
-                {currentItem.date}
-              </span>
+              <div className="font-mono" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.15)', display: 'flex', gap: '16px' }}>
+                <span>Arrow keys to navigate</span>
+                <span>F for fullscreen</span>
+                <span>Esc to close</span>
+              </div>
             </div>
-            <div className="font-mono text-[10px] text-white/15 hidden md:flex items-center gap-4">
-              <span>Arrow keys to navigate</span>
-              <span>F for fullscreen</span>
-              <span>Esc to close</span>
-            </div>
-          </div>
-        </div>,
-        portalTarget,
-      )}
+          </>
+        )}
+      </dialog>
 
-      {/* Slideshow progress keyframe */}
+      {/* Lightbox styles — all in one place, no Tailwind dependencies for the modal */}
       <style jsx>{`
-        @keyframes slideshowProgress {
-          0% { width: 0%; }
-          100% { width: 100%; }
+        .lightbox-dialog {
+          position: fixed;
+          inset: 0;
+          width: 100vw;
+          height: 100dvh;
+          max-width: none;
+          max-height: none;
+          margin: 0;
+          padding: 0;
+          border: none;
+          background: black;
+          color: white;
+          display: grid;
+          grid-template-rows: auto 1fr auto;
+          overflow: hidden;
+        }
+        .lightbox-dialog::backdrop {
+          background: black;
+        }
+        .lightbox-dialog[open] {
+          animation: lightbox-fade-in 0.2s ease-out;
+        }
+        @keyframes lightbox-fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .lightbox-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 16px;
+          background: rgba(0, 0, 0, 0.9);
+          flex-shrink: 0;
+        }
+        @media (min-width: 768px) {
+          .lightbox-bar {
+            padding: 14px 32px;
+          }
+        }
+        .lightbox-image-area {
+          position: relative;
+          display: grid;
+          place-items: center;
+          overflow: hidden;
+          min-height: 0;
+        }
+        .lightbox-img {
+          max-width: 100%;
+          max-height: 100%;
+          width: auto;
+          height: auto;
+          object-fit: contain;
+          display: block;
+          filter: contrast(1.1);
+        }
+        .lightbox-nav {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 2;
+          padding: 12px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: rgba(255, 255, 255, 0.2);
+          transition: color 0.2s;
+        }
+        .lightbox-nav:hover {
+          color: rgba(255, 255, 255, 0.6);
+        }
+        .lightbox-nav-prev {
+          left: 4px;
+        }
+        .lightbox-nav-next {
+          right: 4px;
+        }
+        @media (min-width: 768px) {
+          .lightbox-nav-prev { left: 24px; }
+          .lightbox-nav-next { right: 24px; }
+        }
+        .lightbox-slideshow-bar {
+          height: 100%;
+          background: rgba(255, 255, 255, 0.3);
+          animation: slideshow-progress 4s linear infinite;
+        }
+        @keyframes slideshow-progress {
+          from { width: 0%; }
+          to { width: 100%; }
         }
       `}</style>
     </>
