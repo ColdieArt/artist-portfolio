@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { createPortal } from 'react-dom'
 
 export interface GalleryItem {
   id: string
@@ -175,33 +176,27 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
     }
   }, [])
 
-  // Lock body scroll when lightbox is open — use position:fixed to truly
-  // prevent scroll on mobile, preserving the scroll position for restore.
-  const savedScrollY = useRef(0)
+  // Lock body scroll when lightbox is open
   useEffect(() => {
-    if (lightboxOpen) {
-      savedScrollY.current = window.scrollY
-      document.body.style.position = 'fixed'
-      document.body.style.top = `-${savedScrollY.current}px`
-      document.body.style.left = '0'
-      document.body.style.right = '0'
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.left = ''
-      document.body.style.right = ''
-      document.body.style.overflow = ''
-      window.scrollTo(0, savedScrollY.current)
-    }
+    if (!lightboxOpen) return
+    const html = document.documentElement
+    html.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
+    document.body.style.touchAction = 'none'
+    document.body.style.overscrollBehavior = 'none'
     return () => {
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.left = ''
-      document.body.style.right = ''
+      html.style.overflow = ''
       document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+      document.body.style.overscrollBehavior = ''
     }
   }, [lightboxOpen])
+
+  // Portal target — mount lightbox directly on body to escape stacking contexts
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null)
+  useEffect(() => {
+    setPortalTarget(document.body)
+  }, [])
 
   const currentItem = lightboxIndex !== null ? activeList[lightboxIndex] : null
 
@@ -335,11 +330,12 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
         </div>
       )}
 
-      {/* ── Lightbox Modal ── */}
-      {lightboxIndex !== null && currentItem && (
+      {/* ── Lightbox Modal — portalled to body to escape stacking contexts ── */}
+      {lightboxIndex !== null && currentItem && portalTarget && createPortal(
         <div
           ref={lightboxRef}
-          className="fixed inset-0 z-[9999] bg-black flex flex-col"
+          className="fixed inset-0 bg-black flex flex-col"
+          style={{ zIndex: 10000, height: '100dvh' }}
           onClick={(e) => {
             if (e.target === e.currentTarget) closeLightbox()
           }}
@@ -427,12 +423,12 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
               </svg>
             </button>
 
-            {/* Image — 100% width, vertically centered */}
+            {/* Image — 100% width, vertically centered, capped to container */}
             <div className="relative w-full h-full flex items-center justify-center">
               <img
                 src={currentItem.src}
                 alt={currentItem.title}
-                className="w-full h-auto object-contain transition-opacity duration-300"
+                className="w-full h-full object-contain transition-opacity duration-300"
                 style={{ filter: 'contrast(1.1)' }}
               />
               {/* Contributor name overlay */}
@@ -481,7 +477,8 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
               <span>Esc to close</span>
             </div>
           </div>
-        </div>
+        </div>,
+        portalTarget,
       )}
 
       {/* Slideshow progress keyframe */}
