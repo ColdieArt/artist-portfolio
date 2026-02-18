@@ -411,11 +411,11 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
           </div>
 
           {/* Image area */}
-          <div className="flex-1 min-h-0 flex items-center justify-center relative overflow-hidden">
+          <div className="flex-1 min-h-0 relative overflow-hidden">
             {/* Previous button */}
             <button
               onClick={(e) => { e.stopPropagation(); goPrev() }}
-              className="absolute left-1 md:left-6 z-10 p-3 text-white/20 hover:text-white/60 transition-colors"
+              className="absolute left-1 md:left-6 top-1/2 -translate-y-1/2 z-10 p-3 text-white/20 hover:text-white/60 transition-colors"
               title="Previous (Left arrow)"
             >
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -423,24 +423,22 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
               </svg>
             </button>
 
-            {/* Image — 100% width, vertically centered, capped to container */}
-            <div className="relative w-full h-full flex items-center justify-center">
-              <img
-                src={currentItem.src}
-                alt={currentItem.title}
-                className="w-full h-full object-contain transition-opacity duration-300"
-                style={{ filter: 'contrast(1.1)' }}
-              />
-              {/* Contributor name overlay */}
-              <span className="absolute bottom-3 right-3 font-mono text-xs text-white/50 bg-black/60 px-2 py-1">
-                {currentItem.contributor}
-              </span>
-            </div>
+            {/* Image — absolutely fills area, object-contain centers it */}
+            <img
+              src={currentItem.src}
+              alt={currentItem.title}
+              className="absolute inset-0 w-full h-full object-contain transition-opacity duration-300"
+              style={{ filter: 'contrast(1.1)' }}
+            />
+            {/* Contributor name overlay */}
+            <span className="absolute bottom-3 right-3 font-mono text-xs text-white/50 bg-black/60 px-2 py-1 z-10">
+              {currentItem.contributor}
+            </span>
 
             {/* Next button */}
             <button
               onClick={(e) => { e.stopPropagation(); goNext() }}
-              className="absolute right-1 md:right-6 z-10 p-3 text-white/20 hover:text-white/60 transition-colors"
+              className="absolute right-1 md:right-6 top-1/2 -translate-y-1/2 z-10 p-3 text-white/20 hover:text-white/60 transition-colors"
               title="Next (Right arrow)"
             >
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -450,7 +448,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
 
             {/* Slideshow progress bar */}
             {slideshow && (
-              <div className="absolute bottom-0 left-0 right-0 h-px bg-white/5">
+              <div className="absolute bottom-0 left-0 right-0 h-px bg-white/5 z-10">
                 <div
                   className="h-full bg-white/30"
                   style={{
