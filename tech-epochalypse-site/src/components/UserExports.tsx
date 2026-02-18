@@ -110,7 +110,7 @@ export default function UserExports({ overlordNames, overlordSlugs }: Props) {
     <div className="mb-20">
       <div className="flex items-center gap-4 mb-8">
         <h2 className="font-mono text-sm uppercase tracking-[0.2em] text-white/50">
-          Community Exports
+          The Tribute Wall
         </h2>
         <div className="flex-1 h-px bg-white/5" />
         <span className="font-mono text-xs text-white/25">
