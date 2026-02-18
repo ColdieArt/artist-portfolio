@@ -41,9 +41,9 @@
     "lore": "With a single deployment, the Accelerationist cracked open Pandora's box of machine cognition. The line between human thought and silicon intelligence dissolved overnight. There is no going back.",
     "medium": "Interactive 3D WebGL",
     "year": 2024,
-    "artworkFile": null,
+    "artworkFile": "/artworks/sam-altman.html",
     "previewImage": null,
-    "status": "coming-soon",
+    "status": "live",
     "collector": null,
     "order": 3
   },
