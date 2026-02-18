@@ -16,33 +16,18 @@ export default function ThePulsePage() {
   const loadData = useCallback(async () => {
     setLoading(true)
 
-    // Check for API key in environment or localStorage
-    const apiKey =
-      (typeof window !== 'undefined' && localStorage.getItem('pulse_api_key')) ||
-      process.env.NEXT_PUBLIC_NEWS_API_KEY ||
-      ''
-
-    if (!apiKey) {
-      // No API key — use sample data
-      setData(getSamplePulseData())
-      setUsingSample(true)
-      setLoading(false)
-      return
-    }
-
     try {
-      const pulseData = await fetchPulseData(apiKey)
+      const pulseData = await fetchPulseData()
       const hasData = pulseData.overlords.some((o) => o.pulse_count > 0)
       if (hasData) {
         setData(pulseData)
         setUsingSample(false)
       } else {
-        // API returned no results — fallback to sample
         setData(getSamplePulseData())
         setUsingSample(true)
       }
     } catch {
-      // Fetch failed — fallback to sample data
+      // RSS fetch failed — fallback to sample data
       setData(getSamplePulseData())
       setUsingSample(true)
     }
@@ -86,7 +71,7 @@ export default function ThePulsePage() {
               )}
               {usingSample && (
                 <p className="font-mono text-[10px] text-white/15 mt-2 uppercase tracking-widest">
-                  Displaying sample data &mdash; set NEXT_PUBLIC_NEWS_API_KEY for live feed
+                  Displaying sample data &mdash; live feed unavailable
                 </p>
               )}
             </div>
