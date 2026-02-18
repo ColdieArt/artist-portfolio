@@ -95,12 +95,30 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim()
 }
 
+/**
+ * Count the number of article links inside a Google News RSS description.
+ * Each <item> is a story cluster — the description HTML contains <a> tags
+ * linking to every article covering that story (main + related).
+ * Counting these gives us a real total article count per overlord.
+ */
+function countArticlesInDescription(rawHtml: string): number {
+  // Count <a href="..."> tags — each is one article in the cluster
+  // Also handle HTML-entity-encoded versions (&lt;a)
+  const decoded = rawHtml
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+  const matches = decoded.match(/<a\s/gi)
+  return matches ? matches.length : 1 // at least 1 (the item itself)
+}
+
 interface RssArticle {
   title: string
   source: string
   url: string
   pubDate: string
   description: string
+  clusterSize: number  // how many articles in this story cluster
 }
 
 /**
@@ -119,12 +137,14 @@ async function fetchViaRss2Json(rssUrl: string): Promise<RssArticle[]> {
   return json.items.map((item: { title?: string; link?: string; pubDate?: string; description?: string }) => {
     const rawTitle = item.title || ''
     const { cleanTitle, source } = extractSource(rawTitle)
+    const rawDesc = item.description || ''
     return {
       title: cleanTitle,
       source,
       url: item.link || '',
       pubDate: item.pubDate || '',
-      description: stripHtml(item.description || ''),
+      description: stripHtml(rawDesc),
+      clusterSize: countArticlesInDescription(rawDesc),
     }
   }).filter((a: RssArticle) => a.title.length > 0)
 }
@@ -169,9 +189,10 @@ async function fetchViaProxy(rssUrl: string): Promise<RssArticle[]> {
     const pubDate = item.querySelector('pubDate')?.textContent || ''
     const rawDesc = item.querySelector('description')?.textContent || ''
     const description = stripHtml(rawDesc)
+    const clusterSize = countArticlesInDescription(rawDesc)
 
     if (cleanTitle) {
-      articles.push({ title: cleanTitle, source, url, pubDate, description })
+      articles.push({ title: cleanTitle, source, url, pubDate, description, clusterSize })
     }
   })
 
@@ -193,7 +214,8 @@ async function fetchGoogleNewsRSS(query: string): Promise<{
   try {
     const articles = await fetchViaProxy(rssUrl)
     if (articles.length > 0) {
-      return { totalResults: articles.length, articles }
+      const totalArticles = articles.reduce((sum, a) => sum + a.clusterSize, 0)
+      return { totalResults: totalArticles, articles }
     }
   } catch (err) {
     console.warn('proxy fetch failed, trying rss2json:', err)
@@ -203,7 +225,8 @@ async function fetchGoogleNewsRSS(query: string): Promise<{
   try {
     const articles = await fetchViaRss2Json(rssUrl)
     if (articles.length > 0) {
-      return { totalResults: articles.length, articles }
+      const totalArticles = articles.reduce((sum, a) => sum + a.clusterSize, 0)
+      return { totalResults: totalArticles, articles }
     }
   } catch (err) {
     console.warn('rss2json also failed:', err)
