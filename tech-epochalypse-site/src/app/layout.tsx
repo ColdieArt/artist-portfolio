@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Navigation from '@/components/Navigation'
+import PulseBar from '@/components/PulseBar'
 import Footer from '@/components/Footer'
 import './globals.css'
 
@@ -34,6 +35,7 @@ export default function RootLayout({
         <div className="grain-overlay" />
         <div className="scanline" />
         <Navigation />
+        <PulseBar />
         <main className="min-h-screen">{children}</main>
         <Footer />
       </body>
