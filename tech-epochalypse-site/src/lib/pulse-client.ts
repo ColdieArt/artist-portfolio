@@ -92,51 +92,80 @@ function extractSource(title: string): { cleanTitle: string; source: string } {
  * Strip HTML tags from a string (for RSS description fields)
  */
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '').trim()
+  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim()
+}
+
+interface RssArticle {
+  title: string
+  source: string
+  url: string
+  pubDate: string
+  description: string
 }
 
 /**
- * Fetch Google News RSS for a search query and parse the XML.
- * Uses a public CORS proxy to avoid browser CORS restrictions.
+ * Strategy 1: Use rss2json.com to convert Google News RSS to JSON.
+ * Free, CORS-safe, no XML parsing needed.
  */
-async function fetchGoogleNewsRSS(query: string): Promise<{
-  totalResults: number
-  articles: { title: string; source: string; url: string; pubDate: string; description: string }[]
-}> {
-  const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`
-
-  // Try fetching directly first, then fall back to a CORS proxy
-  let xml = ''
-  try {
-    const res = await fetch(rssUrl)
-    if (res.ok) {
-      xml = await res.text()
-    }
-  } catch {
-    // Direct fetch failed (likely CORS), try proxy
+async function fetchViaRss2Json(rssUrl: string): Promise<RssArticle[]> {
+  const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`
+  const res = await fetch(apiUrl)
+  if (!res.ok) throw new Error(`rss2json ${res.status}`)
+  const json = await res.json()
+  if (json.status !== 'ok' || !Array.isArray(json.items)) {
+    throw new Error('rss2json returned bad data')
   }
 
-  if (!xml) {
-    // Use allorigins as a CORS proxy
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`
-    const res = await fetch(proxyUrl)
-    if (!res.ok) {
-      throw new Error(`RSS fetch failed: ${res.status}`)
+  return json.items.map((item: { title?: string; link?: string; pubDate?: string; description?: string }) => {
+    const rawTitle = item.title || ''
+    const { cleanTitle, source } = extractSource(rawTitle)
+    return {
+      title: cleanTitle,
+      source,
+      url: item.link || '',
+      pubDate: item.pubDate || '',
+      description: stripHtml(item.description || ''),
     }
-    xml = await res.text()
-  }
+  }).filter((a: RssArticle) => a.title.length > 0)
+}
 
-  // Parse the RSS XML
+/**
+ * Strategy 2: Fetch RSS via CORS proxy and parse XML with DOMParser.
+ */
+async function fetchViaProxy(rssUrl: string): Promise<RssArticle[]> {
+  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`
+  const res = await fetch(proxyUrl)
+  if (!res.ok) throw new Error(`proxy ${res.status}`)
+  const xml = await res.text()
+
   const parser = new DOMParser()
   const doc = parser.parseFromString(xml, 'text/xml')
-  const items = doc.querySelectorAll('item')
 
-  const articles: { title: string; source: string; url: string; pubDate: string; description: string }[] = []
+  // Check for XML parse errors
+  if (doc.querySelector('parsererror')) {
+    throw new Error('XML parse error')
+  }
+
+  const items = doc.querySelectorAll('item')
+  const articles: RssArticle[] = []
 
   items.forEach((item) => {
     const rawTitle = item.querySelector('title')?.textContent || ''
-    const { cleanTitle, source } = extractSource(rawTitle)
-    const url = item.querySelector('link')?.textContent || ''
+    const { cleanTitle, source: titleSource } = extractSource(rawTitle)
+
+    // Google News RSS has a <source> element with the publisher name
+    const sourceEl = item.querySelector('source')
+    const source = sourceEl?.textContent || titleSource
+
+    // <link> in RSS XML: textContent can be tricky, try nextSibling text
+    let url = item.querySelector('link')?.textContent?.trim() || ''
+    if (!url) {
+      // Fallback: extract link from raw XML text between <link> tags
+      const itemXml = new XMLSerializer().serializeToString(item)
+      const linkMatch = itemXml.match(/<link[^>]*>([\s\S]*?)<\/link>/)
+      if (linkMatch) url = linkMatch[1].trim()
+    }
+
     const pubDate = item.querySelector('pubDate')?.textContent || ''
     const rawDesc = item.querySelector('description')?.textContent || ''
     const description = stripHtml(rawDesc)
@@ -146,7 +175,40 @@ async function fetchGoogleNewsRSS(query: string): Promise<{
     }
   })
 
-  return { totalResults: articles.length, articles }
+  return articles
+}
+
+/**
+ * Fetch Google News RSS for a search query.
+ * Tries rss2json.com first (JSON, reliable CORS), then falls back to a CORS proxy.
+ */
+async function fetchGoogleNewsRSS(query: string): Promise<{
+  totalResults: number
+  articles: RssArticle[]
+}> {
+  const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`
+
+  // Strategy 1: rss2json.com (JSON, most reliable)
+  try {
+    const articles = await fetchViaRss2Json(rssUrl)
+    if (articles.length > 0) {
+      return { totalResults: articles.length, articles }
+    }
+  } catch (err) {
+    console.warn('rss2json failed, trying proxy:', err)
+  }
+
+  // Strategy 2: CORS proxy + XML parsing
+  try {
+    const articles = await fetchViaProxy(rssUrl)
+    if (articles.length > 0) {
+      return { totalResults: articles.length, articles }
+    }
+  } catch (err) {
+    console.warn('proxy fetch failed:', err)
+  }
+
+  throw new Error(`All RSS fetch strategies failed for: ${query}`)
 }
 
 /**
