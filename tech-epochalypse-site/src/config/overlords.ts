@@ -8,13 +8,74 @@ export interface OverlordConfig {
   artwork_slug: string
 }
 
+/**
+ * Curated list of reputable tech/business news domains.
+ * NewsAPI `domains` param restricts results to these sources only.
+ */
+export const QUALITY_DOMAINS = [
+  'reuters.com',
+  'apnews.com',
+  'bloomberg.com',
+  'cnbc.com',
+  'wsj.com',
+  'nytimes.com',
+  'washingtonpost.com',
+  'theguardian.com',
+  'bbc.com',
+  'bbc.co.uk',
+  'techcrunch.com',
+  'theverge.com',
+  'arstechnica.com',
+  'wired.com',
+  'engadget.com',
+  'zdnet.com',
+  'cnet.com',
+  'thedailybeast.com',
+  'businessinsider.com',
+  'forbes.com',
+  'ft.com',
+  'theatlantic.com',
+  'axios.com',
+  'semafor.com',
+  'theinformation.com',
+  'protocol.com',
+  'venturebeat.com',
+  'fortune.com',
+  'marketwatch.com',
+  'politico.com',
+]
+
+/**
+ * Blocklist of domains known for low-quality, clickbait, or scraped content.
+ * Articles from these domains are filtered out post-fetch as a safety net.
+ */
+export const BLOCKED_DOMAINS = [
+  'biztoc.com',
+  'yahoo.com',
+  'msn.com',
+  'news.google.com',
+  'ground.news',
+  'smarteranalyst.com',
+  'investorplace.com',
+  'benzinga.com',
+  'thestreet.com',
+  'fool.com',
+  'seekingalpha.com',
+  'accesswire.com',
+  'prnewswire.com',
+  'globenewswire.com',
+  'businesswire.com',
+  'newsbreak.com',
+  'newsbtc.com',
+]
+
 export const OVERLORDS: OverlordConfig[] = [
   {
     key: 'musk',
     name: 'Elon Musk',
     short_name: 'Musk',
     companies: ['Tesla', 'SpaceX', 'X'],
-    search_query: '"Elon Musk" OR (Tesla AND Musk) OR (SpaceX AND Musk)',
+    search_query: '"Elon Musk" AND (Tesla OR SpaceX OR xAI OR Neuralink OR "boring company" OR DOGE)',
     accent_color: '#5b8cf7',
     artwork_slug: 'elon-musk',
   },
@@ -23,7 +84,7 @@ export const OVERLORDS: OverlordConfig[] = [
     name: 'Mark Zuckerberg',
     short_name: 'Zuckerberg',
     companies: ['Meta', 'Instagram', 'Threads'],
-    search_query: '"Mark Zuckerberg" OR (Meta AND Zuckerberg)',
+    search_query: '"Mark Zuckerberg" AND (Meta OR Instagram OR Threads OR WhatsApp OR "Reality Labs" OR Llama)',
     accent_color: '#00d4ff',
     artwork_slug: 'mark-zuckerberg',
   },
@@ -32,7 +93,7 @@ export const OVERLORDS: OverlordConfig[] = [
     name: 'Sam Altman',
     short_name: 'Altman',
     companies: ['OpenAI', 'ChatGPT'],
-    search_query: '"Sam Altman" OR (OpenAI AND Altman)',
+    search_query: '"Sam Altman" AND (OpenAI OR ChatGPT OR GPT OR "artificial intelligence" OR AGI)',
     accent_color: '#f5e6a3',
     artwork_slug: 'sam-altman',
   },
@@ -41,7 +102,7 @@ export const OVERLORDS: OverlordConfig[] = [
     name: 'Jeff Bezos',
     short_name: 'Bezos',
     companies: ['Amazon', 'Blue Origin'],
-    search_query: '"Jeff Bezos" OR (Amazon AND Bezos) OR ("Blue Origin" AND Bezos)',
+    search_query: '"Jeff Bezos" AND (Amazon OR "Blue Origin" OR AWS OR Kuiper OR "Washington Post")',
     accent_color: '#ff9900',
     artwork_slug: 'jeff-bezos',
   },
@@ -50,7 +111,7 @@ export const OVERLORDS: OverlordConfig[] = [
     name: 'Jensen Huang',
     short_name: 'Huang',
     companies: ['Nvidia'],
-    search_query: '"Jensen Huang" OR (Nvidia AND Huang)',
+    search_query: '"Jensen Huang" AND (Nvidia OR GPU OR "artificial intelligence" OR CUDA OR "data center")',
     accent_color: '#76b900',
     artwork_slug: 'jensen-huang',
   },

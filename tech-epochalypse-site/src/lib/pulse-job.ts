@@ -1,4 +1,4 @@
-import { OVERLORDS } from '@/config/overlords'
+import { OVERLORDS, QUALITY_DOMAINS, BLOCKED_DOMAINS } from '@/config/overlords'
 import { calculateSentiment, type Article } from '@/lib/sentiment'
 import { upsertSnapshot, recalculateCache, logJobRun } from '@/lib/db'
 
@@ -18,6 +18,33 @@ interface NewsApiResponse {
   articles: Article[]
 }
 
+/**
+ * Check if an article URL belongs to a blocked domain.
+ */
+function isBlockedDomain(url: string): boolean {
+  try {
+    const hostname = new URL(url).hostname.replace(/^www\./, '')
+    return BLOCKED_DOMAINS.some(
+      (domain) => hostname === domain || hostname.endsWith('.' + domain)
+    )
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Filter out junk articles: removed content, empty titles, blocked domains.
+ */
+function filterArticles(articles: Article[]): Article[] {
+  return articles.filter((a) => {
+    if (!a.title || a.title === '[Removed]') return false
+    if (!a.url) return false
+    if (!a.description || a.description === '[Removed]') return false
+    if (isBlockedDomain(a.url)) return false
+    return true
+  })
+}
+
 async function fetchOverlordNews(
   query: string,
   apiKey: string
@@ -31,8 +58,9 @@ async function fetchOverlordNews(
     from: formatDate(yesterday),
     to: formatDate(today),
     language: 'en',
-    sortBy: 'popularity',
-    pageSize: '5',
+    sortBy: 'relevancy',
+    pageSize: '15',
+    domains: QUALITY_DOMAINS.join(','),
     apiKey,
   })
 
@@ -68,7 +96,10 @@ export async function runDailyPulse(): Promise<{
     try {
       const response = await fetchOverlordNews(overlord.search_query, apiKey)
 
-      const headlines = (response.articles || []).map((a) => ({
+      // Filter out junk articles, then take the top 5
+      const cleanArticles = filterArticles(response.articles || []).slice(0, 5)
+
+      const headlines = cleanArticles.map((a) => ({
         title: a.title || '',
         source_name: a.source?.name || 'Unknown',
         url: a.url || '',
@@ -76,7 +107,7 @@ export async function runDailyPulse(): Promise<{
         description: (a.description || '').substring(0, 200),
       }))
 
-      const sentimentScore = calculateSentiment(response.articles || [])
+      const sentimentScore = calculateSentiment(cleanArticles)
 
       upsertSnapshot({
         overlord: overlord.key,
