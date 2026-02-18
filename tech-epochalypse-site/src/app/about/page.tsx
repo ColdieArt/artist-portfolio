@@ -188,26 +188,66 @@ export default function AboutPage() {
           </ScrollReveal>
         </div>
 
-        {/* Press / Features */}
+        {/* Deep Dive */}
         <ScrollReveal>
           <div className="line-accent mb-16" />
           <div className="text-center mb-12">
             <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-white/15 mb-4">
-              Recognition
+              Interviews &amp; Conversations
             </p>
             <h2 className="font-display text-3xl md:text-4xl text-white uppercase tracking-[0.03em]">
-              Featured In
+              Deep Dive
             </h2>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-20">
-            {['Cointelegraph', 'SuperRare', 'Nifty Gateway'].map((pub) => (
-              <span
-                key={pub}
-                className="font-display text-lg md:text-xl text-white uppercase tracking-wider"
-              >
-                {pub}
-              </span>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <a
+              href="https://x.com/opensea/status/2023791066965541309"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block p-6 border border-white/5 hover:border-white/15 bg-white/[0.02] hover:bg-white/[0.04] transition-all"
+            >
+              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/25 mb-3">
+                OpenSea
+              </p>
+              <h3 className="font-display text-sm md:text-base text-white/70 group-hover:text-white/90 uppercase tracking-wide mb-2 transition-colors">
+                In Conversation With Coldie
+              </h3>
+              <p className="font-mono text-[10px] text-white/30 leading-relaxed">
+                Written interview on the Tech Epochalypse drop &mdash; 250 1/1 stills critiquing tech power and the systems shaping modern life.
+              </p>
+            </a>
+            <a
+              href="https://www.carrotlane.com/p/ep-19-how-coldie-built-iconic-status"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block p-6 border border-white/5 hover:border-white/15 bg-white/[0.02] hover:bg-white/[0.04] transition-all"
+            >
+              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/25 mb-3">
+                Carrot Lane
+              </p>
+              <h3 className="font-display text-sm md:text-base text-white/70 group-hover:text-white/90 uppercase tracking-wide mb-2 transition-colors">
+                How Coldie Built Iconic Status in Crypto Art
+              </h3>
+              <p className="font-mono text-[10px] text-white/30 leading-relaxed">
+                Podcast deep dive on building a legacy in crypto art, from the Snoop Dogg collaboration to the Decentral Eyes series.
+              </p>
+            </a>
+            <a
+              href="https://podcasts.proof.xyz/artist-spotlight-seeing-through-decentral-eyes-with-coldie/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block p-6 border border-white/5 hover:border-white/15 bg-white/[0.02] hover:bg-white/[0.04] transition-all"
+            >
+              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/25 mb-3">
+                PROOF Podcast
+              </p>
+              <h3 className="font-display text-sm md:text-base text-white/70 group-hover:text-white/90 uppercase tracking-wide mb-2 transition-colors">
+                Seeing Through Decentral Eyes
+              </h3>
+              <p className="font-mono text-[10px] text-white/30 leading-relaxed">
+                Artist spotlight on stereoscopic 3D art, blockchain-native creation, and the vision behind the portraits.
+              </p>
+            </a>
           </div>
         </ScrollReveal>
 
