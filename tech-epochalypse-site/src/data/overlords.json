@@ -10,7 +10,7 @@
     "medium": "Interactive 3D WebGL — Three.js, custom shaders, particle systems",
     "year": 2024,
     "artworkFile": "/artworks/elon-musk.html",
-    "previewImage": null,
+    "previewImage": "/images/overlords/ElonMusk-Thumbnail.png",
     "status": "live",
     "collector": null,
     "order": 1
@@ -26,7 +26,7 @@
     "medium": "Interactive 3D WebGL",
     "year": 2024,
     "artworkFile": "/artworks/mark-zuckerberg.html",
-    "previewImage": null,
+    "previewImage": "/images/overlords/Zuckerberg-web.jpg",
     "status": "live",
     "collector": null,
     "order": 2
@@ -42,7 +42,7 @@
     "medium": "Interactive 3D WebGL",
     "year": 2024,
     "artworkFile": "/artworks/sam-altman.html",
-    "previewImage": null,
+    "previewImage": "/images/overlords/Altman-web.jpg",
     "status": "live",
     "collector": null,
     "order": 3
@@ -58,7 +58,7 @@
     "medium": "Interactive 3D WebGL — Three.js, custom shaders, particle systems",
     "year": 2024,
     "artworkFile": "/artworks/jeff-bezos.html",
-    "previewImage": null,
+    "previewImage": "/images/overlords/Bezos-thumb.jpg",
     "status": "live",
     "collector": null,
     "order": 4
@@ -74,7 +74,7 @@
     "medium": "Interactive 3D WebGL",
     "year": 2024,
     "artworkFile": "/artworks/jensen-huang.html",
-    "previewImage": null,
+    "previewImage": "/images/overlords/Huang-web.jpg",
     "status": "live",
     "collector": null,
     "order": 5
