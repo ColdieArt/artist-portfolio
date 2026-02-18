@@ -196,7 +196,7 @@ export default function AboutPage() {
               Interviews &amp; Conversations
             </p>
             <h2 className="font-display text-3xl md:text-4xl text-white uppercase tracking-[0.03em]">
-              Deep Dive
+              Deep Dive Decentral Eyes
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
