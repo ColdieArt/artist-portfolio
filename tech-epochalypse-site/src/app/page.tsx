@@ -15,8 +15,8 @@ export default function HomePage() {
         {/* Bio-Coder surveillance data overlay */}
         <BioCoder />
 
-        {/* Dark vignette */}
-        <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/60 to-black pointer-events-none" />
+        {/* Dark vignette — softened so BioCoder/particles show through */}
+        <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/30 to-black/70 pointer-events-none" />
 
         {/* Floating pixelated blocks — parallax depth layers */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ perspective: '1200px' }}>
