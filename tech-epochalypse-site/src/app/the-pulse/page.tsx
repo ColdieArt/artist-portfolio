@@ -6,7 +6,7 @@ import PulseOverview from '@/components/pulse/PulseOverview'
 import OverlordCard from '@/components/pulse/OverlordCard'
 import PulseChart from '@/components/pulse/PulseChart'
 import PulseNarrative from '@/components/pulse/PulseNarrative'
-import { fetchPulseFromApi, getSamplePulseData, type PulseData } from '@/lib/pulse-client'
+import { fetchPulseData, getSamplePulseData, type PulseData } from '@/lib/pulse-client'
 
 export default function ThePulsePage() {
   const [data, setData] = useState<PulseData | null>(null)
@@ -16,8 +16,22 @@ export default function ThePulsePage() {
   const loadData = useCallback(async () => {
     setLoading(true)
 
+    // Check for API key in environment or localStorage
+    const apiKey =
+      (typeof window !== 'undefined' && localStorage.getItem('pulse_api_key')) ||
+      process.env.NEXT_PUBLIC_NEWS_API_KEY ||
+      ''
+
+    if (!apiKey) {
+      // No API key — use sample data
+      setData(getSamplePulseData())
+      setUsingSample(true)
+      setLoading(false)
+      return
+    }
+
     try {
-      const pulseData = await fetchPulseFromApi()
+      const pulseData = await fetchPulseData(apiKey)
       const hasData = pulseData.overlords.some((o) => o.pulse_count > 0)
       if (hasData) {
         setData(pulseData)
@@ -28,7 +42,7 @@ export default function ThePulsePage() {
         setUsingSample(true)
       }
     } catch {
-      // API unavailable or key not configured — fallback to sample data
+      // Fetch failed — fallback to sample data
       setData(getSamplePulseData())
       setUsingSample(true)
     }
@@ -72,7 +86,7 @@ export default function ThePulsePage() {
               )}
               {usingSample && (
                 <p className="font-mono text-[10px] text-white/15 mt-2 uppercase tracking-widest">
-                  Displaying sample data &mdash; set NEWS_API_KEY on server for live feed
+                  Displaying sample data &mdash; set NEXT_PUBLIC_NEWS_API_KEY for live feed
                 </p>
               )}
             </div>

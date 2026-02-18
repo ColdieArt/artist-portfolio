@@ -1,7 +1,6 @@
 {
-  "buildCommand": "cd tech-epochalypse-site && npm run build",
-  "framework": "nextjs",
-  "outputDirectory": "tech-epochalypse-site/.next",
+  "buildCommand": null,
+  "outputDirectory": ".",
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
