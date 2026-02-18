@@ -175,14 +175,32 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
     }
   }, [])
 
-  // Lock body scroll when lightbox is open
+  // Lock body scroll when lightbox is open — use position:fixed to truly
+  // prevent scroll on mobile, preserving the scroll position for restore.
+  const savedScrollY = useRef(0)
   useEffect(() => {
     if (lightboxOpen) {
+      savedScrollY.current = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${savedScrollY.current}px`
+      document.body.style.left = '0'
+      document.body.style.right = '0'
       document.body.style.overflow = 'hidden'
     } else {
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.left = ''
+      document.body.style.right = ''
+      document.body.style.overflow = ''
+      window.scrollTo(0, savedScrollY.current)
+    }
+    return () => {
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.left = ''
+      document.body.style.right = ''
       document.body.style.overflow = ''
     }
-    return () => { document.body.style.overflow = '' }
   }, [lightboxOpen])
 
   const currentItem = lightboxIndex !== null ? activeList[lightboxIndex] : null
@@ -409,16 +427,16 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
               </svg>
             </button>
 
-            {/* Image */}
-            <div className="relative w-full h-full flex items-center justify-center px-10 md:px-20">
+            {/* Image — 100% width, vertically centered */}
+            <div className="relative w-full h-full flex items-center justify-center">
               <img
                 src={currentItem.src}
                 alt={currentItem.title}
-                className="max-w-full max-h-full object-contain transition-opacity duration-300"
+                className="w-full h-auto object-contain transition-opacity duration-300"
                 style={{ filter: 'contrast(1.1)' }}
               />
               {/* Contributor name overlay */}
-              <span className="absolute bottom-3 right-12 md:right-22 font-mono text-xs text-white/50 bg-black/60 px-2 py-1">
+              <span className="absolute bottom-3 right-3 font-mono text-xs text-white/50 bg-black/60 px-2 py-1">
                 {currentItem.contributor}
               </span>
             </div>
