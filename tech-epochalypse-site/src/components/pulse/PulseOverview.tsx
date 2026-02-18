@@ -19,6 +19,7 @@ export default function PulseOverview({ overlords, hottest }: Props) {
   const maxCount = sorted[0]?.pulse_count || 1
   const leader = sorted[0]
   const rest = sorted.slice(1)
+  const totalArticles = sorted.reduce((sum, o) => sum + o.pulse_count, 0)
 
   return (
     <div>
@@ -27,8 +28,12 @@ export default function PulseOverview({ overlords, hottest }: Props) {
         <span className="redacted-partial">Live</span>
       </div>
 
+      <p className="font-mono text-xs text-white/30 mt-3 mb-6">
+        {totalArticles} total articles tracked across {sorted.length} overlords
+      </p>
+
       {/* Leader callout + leaderboard grid */}
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_1.8fr] gap-8 md:gap-10 mt-6">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_1.8fr] gap-8 md:gap-10">
 
         {/* Left: #1 Leader card */}
         {leader && (

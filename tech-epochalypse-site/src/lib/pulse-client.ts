@@ -180,7 +180,8 @@ async function fetchViaProxy(rssUrl: string): Promise<RssArticle[]> {
 
 /**
  * Fetch Google News RSS for a search query.
- * Tries rss2json.com first (JSON, reliable CORS), then falls back to a CORS proxy.
+ * Tries CORS proxy first (returns ALL items, often 50-100+), then falls
+ * back to rss2json.com (free tier caps at 10 items).
  */
 async function fetchGoogleNewsRSS(query: string): Promise<{
   totalResults: number
@@ -188,24 +189,24 @@ async function fetchGoogleNewsRSS(query: string): Promise<{
 }> {
   const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`
 
-  // Strategy 1: rss2json.com (JSON, most reliable)
-  try {
-    const articles = await fetchViaRss2Json(rssUrl)
-    if (articles.length > 0) {
-      return { totalResults: articles.length, articles }
-    }
-  } catch (err) {
-    console.warn('rss2json failed, trying proxy:', err)
-  }
-
-  // Strategy 2: CORS proxy + XML parsing
+  // Strategy 1: CORS proxy + XML parsing (returns full feed, 50-100+ items)
   try {
     const articles = await fetchViaProxy(rssUrl)
     if (articles.length > 0) {
       return { totalResults: articles.length, articles }
     }
   } catch (err) {
-    console.warn('proxy fetch failed:', err)
+    console.warn('proxy fetch failed, trying rss2json:', err)
+  }
+
+  // Strategy 2: rss2json.com (free tier caps at ~10 items)
+  try {
+    const articles = await fetchViaRss2Json(rssUrl)
+    if (articles.length > 0) {
+      return { totalResults: articles.length, articles }
+    }
+  } catch (err) {
+    console.warn('rss2json also failed:', err)
   }
 
   throw new Error(`All RSS fetch strategies failed for: ${query}`)
@@ -223,7 +224,7 @@ export async function fetchPulseData(): Promise<PulseData> {
     try {
       const data = await fetchGoogleNewsRSS(config.query)
 
-      const headlines: Headline[] = data.articles.slice(0, 5).map((a) => ({
+      const headlines: Headline[] = data.articles.slice(0, 10).map((a) => ({
         title: a.title,
         source_name: a.source,
         url: a.url,
