@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 const NEWS_API_BASE = 'https://newsapi.org/v2/everything'
 
 const OVERLORD_CONFIGS = [
