@@ -128,7 +128,7 @@ function OverlordCard({ overlord }: { overlord: Overlord }) {
           {/* Interact prompt */}
           <div className="mt-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <span className="font-mono text-xs uppercase tracking-[0.15em] text-white/60">
-              {isLive ? 'Access File' : 'Restricted'}
+              {isLive ? 'Take Control' : 'Restricted'}
             </span>
             {isLive && (
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="text-white/60">
