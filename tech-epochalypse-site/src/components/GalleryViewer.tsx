@@ -488,14 +488,14 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
           border: none;
           background: black;
           color: white;
-          display: grid;
-          grid-template-rows: auto 1fr auto;
           overflow: hidden;
         }
         .lightbox-dialog::backdrop {
           background: black;
         }
         .lightbox-dialog[open] {
+          display: grid;
+          grid-template-rows: auto 1fr auto;
           animation: lightbox-fade-in 0.2s ease-out;
         }
         @keyframes lightbox-fade-in {
