@@ -25,9 +25,9 @@
     "lore": "From a dorm room to a digital empire spanning billions of minds. The Connector didn't just build a platform — he rewired the social fabric of civilization, blurring the line between community and surveillance.",
     "medium": "Interactive 3D WebGL",
     "year": 2024,
-    "artworkFile": null,
+    "artworkFile": "/artworks/mark-zuckerberg.html",
     "previewImage": null,
-    "status": "coming-soon",
+    "status": "live",
     "collector": null,
     "order": 2
   },
