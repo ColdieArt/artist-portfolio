@@ -2,68 +2,55 @@
 
 import { useEffect, useRef } from 'react'
 
-const BIOMETRIC_PHRASES = [
-  'HEART RATE: 72 BPM',
-  'BLOOD PRESSURE: 120/80 mmHg',
-  'TEMPERATURE: 98.6 F (37.0 C)',
-  'DNA SEQUENCE: ATGCAGTACTGCA...',
-  'RETINAL SCAN: POSITIVE MATCH',
-  'VOICE PRINT: IDENTIFIED',
-  'NEURAL ACTIVITY: ELEVATED',
-  'BRAINWAVES: ALPHA DOMINANT',
-  'SKELETAL DENSITY: NORMAL',
-  'ORGAN FUNCTION: OPTIMAL',
-  'ELECTROLYTES: BALANCED',
-  'METABOLIC RATE: AVERAGE',
-  'GENETIC MARKERS: PRESENT',
-  'IMMUNE RESPONSE: ACTIVE',
-  'CELLULAR REGENERATION: HIGH',
-  'NEUROTRANSMITTER LEVELS: STABLE',
-  'ENDOCRINE SYSTEM: FUNCTIONAL',
-  'RESPIRATORY RATE: 16 BREATHS/MIN',
-  'PULSE OXIMETRY: 98% SpO2',
-  'GLUCOSE LEVELS: 90 mg/dL',
-  'ADRENAL OUTPUT: NORMAL',
-  'CIRCADIAN RHYTHM: REGULAR',
-  'COGNITIVE PROCESSING: RAPID',
-  'EMOTIONAL STATE: NEUTRAL',
-  'SLEEP CYCLE: REM STAGE ACTIVE',
-  'MUSCLE TENSION: LOW',
-  'HORMONE PROFILE: STABLE',
-  'TOXIN LEVELS: UNDETECTED',
-  'ALLERGEN RESPONSE: NEGATIVE',
-  'PAIN RECEPTORS: INACTIVE',
+const DATA_COLLECTION_PHRASES = [
+  'DATA HARVEST PROTOCOL ACTIVE',
+  'USER CONSENT: NOT REQUIRED',
+  'BROWSING HISTORY CATALOGUED',
+  'KEYSTROKE LOGGER: DEPLOYED',
+  'LOCATION PING: EVERY 30 SEC',
+  'DEVICE MICROPHONE: LISTENING',
+  'CAMERA ACCESS: GRANTED',
+  'CONTACT LIST: EXFILTRATED',
+  'PURCHASE RECORDS: COMPILED',
+  'SEARCH QUERIES: ARCHIVED',
+  'SOCIAL GRAPH: FULLY MAPPED',
+  'METADATA EXTRACTION: ONGOING',
+  'BEHAVIORAL MODEL: TRAINING',
+  'PREDICTIVE SCORE: CALCULATED',
+  'SHADOW PROFILE: CONSTRUCTED',
+  'THIRD PARTY SHARING: ENABLED',
+  'ENCRYPTION BACKDOOR: INSTALLED',
+  'FACIAL TEMPLATE: ON FILE',
+  'VOICE SIGNATURE: CAPTURED',
+  'FINGERPRINT HASH: STORED',
+  'BIOMETRIC DATABASE: UPDATED',
+  'CROSS-DEVICE TRACKING: LINKED',
+  'AD AUCTION: IDENTITY SOLD',
+  'REAL-TIME BIDDING: YOUR DATA',
+  'RETENTION PERIOD: INDEFINITE',
+  'DELETION REQUEST: DENIED',
+  'PRIVACY POLICY: 47 PAGES',
+  'OPT-OUT: FUNCTIONALITY REMOVED',
+  'COMPLIANCE STATUS: IRRELEVANT',
+  'DATA BROKER TRANSFER: COMPLETE',
 ]
 
-const SURVEILLANCE_PHRASES = [
-  'SURVEILLANCE ACTIVE',
-  'DATA COLLECTION IN PROGRESS',
-  'BIOMETRIC SCAN INITIATED',
-  'ENCRYPTED CHANNEL ESTABLISHED',
-  'ANOMALY DETECTED',
-  'NETWORK INTRUSION DETECTED',
-  'DIGITAL FOOTPRINT TRACED',
-  'INITIATING PROTOCOL SIGMA',
-  'TRACEABILITY ENABLED',
-  'SYSTEM INTEGRITY COMPROMISED',
-]
-
-const REDACTED_PHRASES = [
-  'PERSONAL IDENTIFIER ACQUIRED',
-  'LOCATION TRACKING INITIATED',
-  'COMMUNICATION LOGS UPLOADED',
-  'PURCHASE HISTORY COMPILED',
-  'BEHAVIORAL PATTERN ANALYZED',
-  'SOCIAL GRAPH MAPPED',
-  'DEVICE FINGERPRINT LOGGED',
-  'SEARCH QUERIES ARCHIVED',
-  'BIOMETRIC TEMPLATE STORED',
-  'FACIAL RECOGNITION MATCH',
-  'SUBJECT PROFILE UPDATED',
-  'METADATA EXTRACTION COMPLETE',
-  'SIGNAL INTERCEPT ACTIVE',
-  'PREDICTIVE MODEL RUNNING',
-  'COMPLIANCE SCORE CALCULATED',
+const SECURITY_PHRASES = [
+  'FIREWALL BREACH DETECTED',
+  'ZERO-DAY EXPLOIT ACTIVE',
+  'ROOT ACCESS OBTAINED',
+  'CREDENTIALS COMPROMISED',
+  'SSL CERTIFICATE SPOOFED',
+  'MAN-IN-THE-MIDDLE: ACTIVE',
+  'PACKET INSPECTION: DEEP',
+  'DNS POISONING: SUCCESSFUL',
+  'BACKDOOR PORT: 31337 OPEN',
+  'PRIVILEGE ESCALATION: ROOT',
+  'INJECTION VECTOR: SQL',
+  'BUFFER OVERFLOW: TRIGGERED',
+  'RANSOMWARE PAYLOAD: STAGED',
+  'ENDPOINT PROTECTION: BYPASSED',
+  'INTRUSION DETECTION: EVADED',
 ]
 
 const LINE_HEIGHT = 120
@@ -88,13 +75,12 @@ export default function BioCoder() {
     let animationId: number
     let scrollOffset = 0
     let sinePhase = 0
-    let lastHeartbeat = 0
     let graphData: number[] = []
     let redactionMap: number[] = []
 
     // Redacted marquee state
     let redactedScrollOffset = 0
-    let redactedWordMap: number[][] = [] // which word indices to redact per line
+    let redactedWordMap: number[][] = []
 
     // Glitch state
     let glitchActive = false
@@ -102,7 +88,7 @@ export default function BioCoder() {
     let glitchDuration = 0
     let nextGlitchTime = 2000 + Math.random() * 4000
 
-    const allPhrases = [...BIOMETRIC_PHRASES, ...SURVEILLANCE_PHRASES]
+    const allPhrases = [...DATA_COLLECTION_PHRASES, ...SECURITY_PHRASES]
 
     const initRedactionMap = () => {
       redactionMap = []
@@ -120,7 +106,7 @@ export default function BioCoder() {
     const initRedactedWordMap = () => {
       redactedWordMap = []
       for (let i = 0; i < REDACTED_TOTAL_LINES * 2; i++) {
-        const phrase = REDACTED_PHRASES[i % REDACTED_PHRASES.length]
+        const phrase = allPhrases[i % allPhrases.length]
         const words = phrase.split(/(\s+)/).filter(w => w.length > 0)
         const actualWordIndices: number[] = []
         for (let j = 0; j < words.length; j++) {
@@ -170,19 +156,21 @@ export default function BioCoder() {
         ? (time - glitchStartTime) / glitchDuration
         : 0
 
-      // ── Main biometric text — 5x bigger ──
+      // ── Main text — 5x size, left-justified, bottom-to-top scroll ──
       const fontSize = Math.max(55, Math.min(70, canvas.width / 20))
       ctx.font = `bold ${fontSize}px 'Courier New', monospace`
-      ctx.textAlign = 'center'
+      ctx.textAlign = 'left'
 
-      // Scroll
+      const leftPadding = 40
+
+      // Scroll upward (bottom to top)
       scrollOffset -= SCROLL_SPEED
       const singleSetHeight = LINE_HEIGHT * TOTAL_LINES
       if (scrollOffset < -singleSetHeight) {
         scrollOffset += singleSetHeight
       }
 
-      // Animate states
+      // Sine phase
       sinePhase += 0.003
       if (sinePhase > Math.PI * 2) sinePhase -= Math.PI * 2
 
@@ -190,10 +178,7 @@ export default function BioCoder() {
         initGraphData()
       }
 
-      const isHeartbeat = time - lastHeartbeat > 5000
-      if (isHeartbeat) lastHeartbeat = time
-
-      // Draw scrolling biometric lines
+      // Draw scrolling lines — left aligned, bottom to top
       for (let i = 0; i < TOTAL_LINES * 2; i++) {
         const phraseIndex = i % allPhrases.length
         const line = allPhrases[phraseIndex]
@@ -202,66 +187,56 @@ export default function BioCoder() {
         if (yPos < -singleSetHeight) yPos += singleSetHeight * 2
         if (yPos > canvas.height + LINE_HEIGHT) continue
 
-        // Sine wave horizontal offset (more pronounced)
+        // Sine wave horizontal drift
         const xOffset = Math.sin(i * 0.5 + sinePhase) * 80
         // Vertical sine displacement
         const yWave = Math.sin(i * 0.3 + sinePhase * 1.5) * 15
 
-        const drawX = canvas.width / 2 + xOffset
+        const drawX = leftPadding + xOffset
         const drawY = yPos + yWave
 
-        // ── Glitch: RGB channel split ──
+        // ── Glitch: monochrome channel split ──
         if (glitchActive) {
           const splitAmount = (4 + Math.random() * 8) * Math.sin(glitchProgress * Math.PI)
           const hDisplace = (Math.random() - 0.5) * 20 * Math.sin(glitchProgress * Math.PI)
 
-          // Red channel
-          ctx.fillStyle = `rgba(255, 0, 0, ${0.06 + Math.random() * 0.04})`
+          // Offset copy — lighter
+          ctx.fillStyle = `rgba(255, 255, 255, ${0.04 + Math.random() * 0.03})`
           ctx.fillText(line, drawX + hDisplace - splitAmount, drawY)
-          // Blue channel
-          ctx.fillStyle = `rgba(0, 100, 255, ${0.06 + Math.random() * 0.04})`
+          // Offset copy — darker
+          ctx.fillStyle = `rgba(255, 255, 255, ${0.03 + Math.random() * 0.02})`
           ctx.fillText(line, drawX + hDisplace + splitAmount, drawY)
         }
 
-        // Main green text — 25% brighter (0.15 → 0.19)
-        ctx.fillStyle = 'rgba(0, 255, 65, 0.19)'
+        // Main white text
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.19)'
         ctx.fillText(line, drawX, drawY)
 
-        // Redaction bars (green-tinted so they show through screen blend)
+        // Opaque redaction bars — solid white, fully covers the word
         const redactWordIdx = redactionMap[i] ?? -1
         if (redactWordIdx >= 0) {
           const words = line.split(' ')
           if (redactWordIdx < words.length) {
             const textBefore = words.slice(0, redactWordIdx).join(' ')
             const redactedWord = words[redactWordIdx]
-            const totalWidth = ctx.measureText(line).width
             const beforeWidth = textBefore
               ? ctx.measureText(textBefore + ' ').width
               : 0
             const wordWidth = ctx.measureText(redactedWord).width
-            const startX = drawX - totalWidth / 2 + beforeWidth
+            const startX = drawX + beforeWidth
 
-            // Green redaction bar (visible in screen blend)
-            ctx.fillStyle = 'rgba(0, 255, 65, 0.25)'
+            // Solid opaque white bar — completely covers the word
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.35)'
             ctx.fillRect(
-              startX - 2,
-              drawY - fontSize * 0.8,
-              wordWidth + 4,
-              fontSize * 1.0
-            )
-            // Border
-            ctx.strokeStyle = 'rgba(0, 255, 65, 0.12)'
-            ctx.lineWidth = 1
-            ctx.strokeRect(
-              startX - 2,
-              drawY - fontSize * 0.8,
-              wordWidth + 4,
-              fontSize * 1.0
+              startX - 3,
+              drawY - fontSize * 0.82,
+              wordWidth + 6,
+              fontSize * 1.05
             )
           }
         }
 
-        // Animated data visualizations
+        // Data visualizations
         if (i % 5 === 0) {
           const animType = i % 3
           const animWidth = 200
@@ -275,8 +250,7 @@ export default function BioCoder() {
           ctx.clip()
 
           if (animType === 0 && graphData.length > 0) {
-            // Bar graph — 25% brighter
-            ctx.strokeStyle = 'rgba(0, 255, 65, 0.15)'
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)'
             ctx.lineWidth = 1.5
             ctx.beginPath()
             ctx.moveTo(animX, animY + animHeight)
@@ -292,8 +266,7 @@ export default function BioCoder() {
             }
             ctx.stroke()
           } else if (animType === 1) {
-            // Sine wave — 25% brighter
-            ctx.strokeStyle = 'rgba(0, 255, 65, 0.125)'
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.125)'
             ctx.lineWidth = 1.5
             ctx.beginPath()
             for (let j = 0; j < animWidth; j++) {
@@ -307,8 +280,7 @@ export default function BioCoder() {
             }
             ctx.stroke()
           } else {
-            // Heartbeat — 25% brighter
-            ctx.strokeStyle = 'rgba(0, 255, 65, 0.15)'
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)'
             ctx.lineWidth = 1.5
             ctx.beginPath()
             for (let j = 0; j < animWidth; j++) {
@@ -330,7 +302,7 @@ export default function BioCoder() {
         }
       }
 
-      // ── Vertical marquee redacted text (Bezos-style) ──
+      // ── Vertical marquee redacted text — left justified, bottom to top ──
       redactedScrollOffset -= REDACTED_SCROLL_SPEED
       const redactedSetHeight = REDACTED_LINE_HEIGHT * REDACTED_TOTAL_LINES
       if (redactedScrollOffset < -redactedSetHeight) {
@@ -341,7 +313,7 @@ export default function BioCoder() {
       ctx.font = `bold ${redactedFontSize}px 'Courier New', monospace`
       ctx.textAlign = 'left'
 
-      // Draw on left and right edges as vertical marquee columns
+      // Two columns on left and right edges
       const columns = [
         { x: 30, width: canvas.width * 0.22 },
         { x: canvas.width - canvas.width * 0.22 - 30, width: canvas.width * 0.22 },
@@ -354,8 +326,8 @@ export default function BioCoder() {
         ctx.clip()
 
         for (let i = 0; i < REDACTED_TOTAL_LINES * 2; i++) {
-          const phraseIdx = i % REDACTED_PHRASES.length
-          const phrase = REDACTED_PHRASES[phraseIdx]
+          const phraseIdx = i % allPhrases.length
+          const phrase = allPhrases[phraseIdx]
           const words = phrase.split(/(\s+)/).filter(w => w.length > 0)
 
           let yPos = i * REDACTED_LINE_HEIGHT + redactedScrollOffset
@@ -365,11 +337,11 @@ export default function BioCoder() {
           // Sine wave horizontal drift
           const drift = Math.sin(i * 0.4 + sinePhase * 0.8) * 12
 
-          // Draw text
-          ctx.fillStyle = 'rgba(0, 255, 65, 0.10)'
+          // White text
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.10)'
           ctx.fillText(phrase, col.x + drift, yPos)
 
-          // Draw redaction bars over selected words
+          // Opaque redaction bars — solid white, fully covers words
           const wordIndices = redactedWordMap[i] ?? []
           if (wordIndices.length > 0) {
             let currentX = col.x + drift
@@ -378,32 +350,23 @@ export default function BioCoder() {
               const wordWidth = ctx.measureText(word).width
 
               if (wordIndices.includes(j)) {
-                // Solid green redaction bar
-                ctx.fillStyle = 'rgba(0, 255, 65, 0.18)'
+                // Solid opaque white bar
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.28)'
                 ctx.fillRect(
-                  currentX - 1,
-                  yPos - redactedFontSize * 0.8,
-                  wordWidth + 2,
-                  redactedFontSize * 1.0
-                )
-                // Border
-                ctx.strokeStyle = 'rgba(0, 255, 65, 0.08)'
-                ctx.lineWidth = 1
-                ctx.strokeRect(
-                  currentX - 1,
-                  yPos - redactedFontSize * 0.8,
-                  wordWidth + 2,
-                  redactedFontSize * 1.0
+                  currentX - 2,
+                  yPos - redactedFontSize * 0.82,
+                  wordWidth + 4,
+                  redactedFontSize * 1.05
                 )
               }
               currentX += wordWidth
             }
           }
 
-          // Glitch on redacted columns too
+          // Glitch on redacted columns
           if (glitchActive && Math.random() < 0.3) {
             const jumpX = (Math.random() - 0.5) * 30
-            ctx.fillStyle = `rgba(0, 255, 65, ${0.04 + Math.random() * 0.06})`
+            ctx.fillStyle = `rgba(255, 255, 255, ${0.04 + Math.random() * 0.06})`
             ctx.fillText(phrase, col.x + drift + jumpX, yPos)
           }
         }
@@ -423,17 +386,17 @@ export default function BioCoder() {
           ctx.putImageData(imageData, Math.floor(shiftX), Math.floor(sliceY))
         }
 
-        // Brief brightness flash
+        // Brief white flash
         if (Math.random() < 0.3) {
-          ctx.fillStyle = `rgba(0, 255, 65, ${0.02 + Math.random() * 0.03})`
+          ctx.fillStyle = `rgba(255, 255, 255, ${0.02 + Math.random() * 0.03})`
           ctx.fillRect(0, 0, canvas.width, canvas.height)
         }
       }
 
-      // Occasional scan line — 25% brighter
+      // Occasional scan line
       if (Math.random() > 0.97) {
         const scanY = (time * 0.05) % canvas.height
-        ctx.fillStyle = 'rgba(0, 255, 65, 0.075)'
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.075)'
         ctx.fillRect(0, scanY, canvas.width, 3)
       }
 

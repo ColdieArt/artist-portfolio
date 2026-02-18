@@ -2,7 +2,7 @@
   {
     "name": "Raoul Pal",
     "avatar": null,
-    "pieces": ["elon-musk"],
+    "pieces": ["elon-musk", "mark-zuckerberg", "sam-altman", "jeff-bezos", "jensen-huang"],
     "bio": null,
     "socials": {
       "twitter": "https://x.com/RaoulGMI",
@@ -13,7 +13,7 @@
   {
     "name": "Christian",
     "avatar": null,
-    "pieces": ["elon-musk"],
+    "pieces": ["elon-musk", "mark-zuckerberg", "sam-altman", "jeff-bezos", "jensen-huang"],
     "bio": null,
     "socials": {
       "twitter": null,
@@ -46,7 +46,7 @@
   {
     "name": "Karate Kid",
     "avatar": null,
-    "pieces": ["elon-musk"],
+    "pieces": ["mark-zuckerberg"],
     "bio": null,
     "socials": {
       "twitter": null,
