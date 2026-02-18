@@ -74,7 +74,7 @@ export default function HomePage() {
 
           <div className="animate-fade-in delay-700">
             <Link href="/overlords" className="btn-primary">
-              <span>Enter the Network</span>
+              <span>Know Your Overlord</span>
               <svg
                 width="16"
                 height="16"
