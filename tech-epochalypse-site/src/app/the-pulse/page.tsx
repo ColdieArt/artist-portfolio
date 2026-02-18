@@ -6,7 +6,7 @@ import PulseOverview from '@/components/pulse/PulseOverview'
 import OverlordCard from '@/components/pulse/OverlordCard'
 import PulseChart from '@/components/pulse/PulseChart'
 import PulseNarrative from '@/components/pulse/PulseNarrative'
-import { fetchPulseFromApi, getSamplePulseData, type PulseData } from '@/lib/pulse-client'
+import { fetchPulseData, getSamplePulseData, type PulseData } from '@/lib/pulse-client'
 
 export default function ThePulsePage() {
   const [data, setData] = useState<PulseData | null>(null)
@@ -17,18 +17,17 @@ export default function ThePulsePage() {
     setLoading(true)
 
     try {
-      const pulseData = await fetchPulseFromApi()
+      const pulseData = await fetchPulseData()
       const hasData = pulseData.overlords.some((o) => o.pulse_count > 0)
       if (hasData) {
         setData(pulseData)
         setUsingSample(false)
       } else {
-        // API returned no results — fallback to sample
         setData(getSamplePulseData())
         setUsingSample(true)
       }
     } catch {
-      // API unavailable or key not configured — fallback to sample data
+      // RSS fetch failed — fallback to sample data
       setData(getSamplePulseData())
       setUsingSample(true)
     }
@@ -72,7 +71,7 @@ export default function ThePulsePage() {
               )}
               {usingSample && (
                 <p className="font-mono text-[10px] text-white/15 mt-2 uppercase tracking-widest">
-                  Displaying sample data &mdash; set NEWS_API_KEY on server for live feed
+                  Displaying sample data &mdash; live feed unavailable
                 </p>
               )}
             </div>

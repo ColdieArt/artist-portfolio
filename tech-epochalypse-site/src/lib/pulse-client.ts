@@ -1,14 +1,11 @@
 /**
- * Client-side data fetcher for The Pulse.
+ * Client-side Google News RSS fetcher for The Pulse.
+ * Fetches real headlines via Google News RSS — no API key needed, no server route.
+ * Works perfectly with static export (output: 'export').
  *
- * In production, fetches from the internal /api/pulse route which proxies
- * NewsAPI on the server (keeping the API key secret).
- *
- * The direct fetchPulseData() function is kept for backwards compatibility
- * but the preferred entry point is now fetchPulseFromApi().
+ * Google News RSS endpoint:
+ *   https://news.google.com/rss/search?q=QUERY&hl=en-US&gl=US&ceid=US:en
  */
-
-const NEWS_API_BASE = 'https://newsapi.org/v2/everything'
 
 export interface Headline {
   title: string
@@ -39,19 +36,12 @@ export interface PulseData {
 }
 
 export const OVERLORD_CONFIGS = [
-  { key: 'musk', name: 'Elon Musk', query: '"Elon Musk"', color: '#3b82f6' },
-  { key: 'zuckerberg', name: 'Mark Zuckerberg', query: '"Mark Zuckerberg" OR "Zuckerberg Meta"', color: '#06b6d4' },
-  { key: 'altman', name: 'Sam Altman', query: '"Sam Altman" OR "Altman OpenAI"', color: '#a3a3a3' },
-  { key: 'bezos', name: 'Jeff Bezos', query: '"Jeff Bezos"', color: '#f97316' },
-  { key: 'huang', name: 'Jensen Huang', query: '"Jensen Huang" OR "Huang Nvidia"', color: '#84cc16' },
+  { key: 'musk', name: 'Elon Musk', query: 'Elon Musk', color: '#3b82f6' },
+  { key: 'zuckerberg', name: 'Mark Zuckerberg', query: 'Mark Zuckerberg', color: '#06b6d4' },
+  { key: 'altman', name: 'Sam Altman', query: 'Sam Altman', color: '#a3a3a3' },
+  { key: 'bezos', name: 'Jeff Bezos', query: 'Jeff Bezos', color: '#f97316' },
+  { key: 'huang', name: 'Jensen Huang', query: 'Jensen Huang', color: '#84cc16' },
 ] as const
-
-const QUALITY_DOMAINS = [
-  'reuters.com', 'bloomberg.com', 'techcrunch.com', 'theverge.com',
-  'arstechnica.com', 'wired.com', 'cnbc.com', 'bbc.com', 'nytimes.com',
-  'washingtonpost.com', 'ft.com', 'wsj.com', 'theguardian.com',
-  'apnews.com', 'axios.com', 'engadget.com',
-].join(',')
 
 // Simple sentiment keywords
 const POSITIVE_WORDS = new Set([
@@ -83,79 +73,118 @@ function labelSentiment(score: number): string {
   return 'negative'
 }
 
-function formatDate(d: Date): string {
-  return d.toISOString().split('T')[0]
+/**
+ * Extract the source name from a Google News RSS title.
+ * Google News titles end with " - Source Name"
+ */
+function extractSource(title: string): { cleanTitle: string; source: string } {
+  const lastDash = title.lastIndexOf(' - ')
+  if (lastDash > 0) {
+    return {
+      cleanTitle: title.substring(0, lastDash).trim(),
+      source: title.substring(lastDash + 3).trim(),
+    }
+  }
+  return { cleanTitle: title, source: 'Google News' }
 }
 
-interface NewsArticle {
-  title: string
-  description: string | null
-  url: string
-  source: { name: string }
-  publishedAt: string
+/**
+ * Strip HTML tags from a string (for RSS description fields)
+ */
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').trim()
 }
 
-async function fetchOverlordNews(
-  query: string,
-  apiKey: string
-): Promise<{ totalResults: number; articles: NewsArticle[] }> {
-  const yesterday = new Date()
-  yesterday.setDate(yesterday.getDate() - 1)
+/**
+ * Fetch Google News RSS for a search query and parse the XML.
+ * Uses a public CORS proxy to avoid browser CORS restrictions.
+ */
+async function fetchGoogleNewsRSS(query: string): Promise<{
+  totalResults: number
+  articles: { title: string; source: string; url: string; pubDate: string; description: string }[]
+}> {
+  const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`
 
-  const params = new URLSearchParams({
-    q: query,
-    from: formatDate(yesterday),
-    to: formatDate(new Date()),
-    language: 'en',
-    sortBy: 'relevancy',
-    pageSize: '10',
-    domains: QUALITY_DOMAINS,
-    apiKey,
+  // Try fetching directly first, then fall back to a CORS proxy
+  let xml = ''
+  try {
+    const res = await fetch(rssUrl)
+    if (res.ok) {
+      xml = await res.text()
+    }
+  } catch {
+    // Direct fetch failed (likely CORS), try proxy
+  }
+
+  if (!xml) {
+    // Use allorigins as a CORS proxy
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`
+    const res = await fetch(proxyUrl)
+    if (!res.ok) {
+      throw new Error(`RSS fetch failed: ${res.status}`)
+    }
+    xml = await res.text()
+  }
+
+  // Parse the RSS XML
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(xml, 'text/xml')
+  const items = doc.querySelectorAll('item')
+
+  const articles: { title: string; source: string; url: string; pubDate: string; description: string }[] = []
+
+  items.forEach((item) => {
+    const rawTitle = item.querySelector('title')?.textContent || ''
+    const { cleanTitle, source } = extractSource(rawTitle)
+    const url = item.querySelector('link')?.textContent || ''
+    const pubDate = item.querySelector('pubDate')?.textContent || ''
+    const rawDesc = item.querySelector('description')?.textContent || ''
+    const description = stripHtml(rawDesc)
+
+    if (cleanTitle) {
+      articles.push({ title: cleanTitle, source, url, pubDate, description })
+    }
   })
 
-  const res = await fetch(`${NEWS_API_BASE}?${params.toString()}`)
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`NewsAPI ${res.status}: ${text}`)
-  }
-  return res.json()
+  return { totalResults: articles.length, articles }
 }
 
-export async function fetchPulseData(apiKey: string): Promise<PulseData> {
+/**
+ * Fetch live Pulse data for all overlords from Google News RSS.
+ * No API key required.
+ */
+export async function fetchPulseData(): Promise<PulseData> {
   const results: OverlordPulse[] = []
 
-  for (const config of OVERLORD_CONFIGS) {
+  // Fetch all overlords in parallel for speed
+  const fetches = OVERLORD_CONFIGS.map(async (config) => {
     try {
-      const data = await fetchOverlordNews(config.query, apiKey)
+      const data = await fetchGoogleNewsRSS(config.query)
 
-      const cleanArticles = (data.articles || []).filter(
-        (a) => a.title && a.title !== '[Removed]' && a.description && a.description !== '[Removed]'
-      ).slice(0, 5)
-
-      const headlines: Headline[] = cleanArticles.map((a) => ({
+      const headlines: Headline[] = data.articles.slice(0, 5).map((a) => ({
         title: a.title,
-        source_name: a.source?.name || 'Unknown',
+        source_name: a.source,
         url: a.url,
-        published_at: a.publishedAt,
-        description: (a.description || '').substring(0, 200),
+        published_at: a.pubDate ? new Date(a.pubDate).toISOString() : new Date().toISOString(),
+        description: a.description.substring(0, 200),
       }))
 
-      const allText = cleanArticles.map((a) => `${a.title} ${a.description || ''}`).join(' ')
+      const allText = data.articles.map((a) => `${a.title} ${a.description}`).join(' ')
       const sentimentScore = scoreSentiment(allText)
 
-      results.push({
+      return {
         key: config.key,
         name: config.name,
         color: config.color,
-        pulse_count: data.totalResults || 0,
+        pulse_count: data.totalResults,
         sentiment_score: Math.round(sentimentScore * 100) / 100,
         sentiment_label: labelSentiment(sentimentScore),
-        trend_direction: data.totalResults > 50 ? 'surging' : data.totalResults > 20 ? 'rising' : 'stable',
+        trend_direction: data.totalResults > 80 ? 'surging' : data.totalResults > 40 ? 'rising' : 'stable',
         headlines,
-      })
+      } as OverlordPulse
     } catch (err) {
-      // On error, still add with zero data so the UI renders
-      results.push({
+      console.error(`Pulse fetch error for ${config.key}:`, err)
+      return {
         key: config.key,
         name: config.name,
         color: config.color,
@@ -164,10 +193,12 @@ export async function fetchPulseData(apiKey: string): Promise<PulseData> {
         sentiment_label: 'neutral',
         trend_direction: 'stable',
         headlines: [],
-      })
-      console.error(`Pulse fetch error for ${config.key}:`, err)
+      } as OverlordPulse
     }
-  }
+  })
+
+  const overlordResults = await Promise.all(fetches)
+  results.push(...overlordResults)
 
   // Sort by pulse count
   results.sort((a, b) => b.pulse_count - a.pulse_count)
@@ -188,8 +219,7 @@ export async function fetchPulseData(apiKey: string): Promise<PulseData> {
 }
 
 /**
- * Generate demo/sample data for when no API key is available
- * or when running in production without a paid NewsAPI plan.
+ * Generate demo/sample data for when RSS fetch fails.
  */
 export function getSamplePulseData(): PulseData {
   const sampleHeadlines: Record<string, Headline[]> = {
@@ -234,17 +264,4 @@ export function getSamplePulseData(): PulseData {
     quietest: 'bezos',
     updated_at: new Date().toISOString(),
   }
-}
-
-/**
- * Fetch pulse data from the internal /api/pulse route.
- * The API key is stored server-side and never exposed to the client.
- */
-export async function fetchPulseFromApi(): Promise<PulseData> {
-  const res = await fetch('/api/pulse')
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.error || `API returned ${res.status}`)
-  }
-  return res.json()
 }
