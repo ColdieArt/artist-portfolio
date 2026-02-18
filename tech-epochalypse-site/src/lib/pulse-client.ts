@@ -1,9 +1,11 @@
 /**
- * Client-side NewsAPI fetcher for The Pulse.
- * Fetches directly from the browser — no server-side code, no native modules.
+ * Client-side data fetcher for The Pulse.
  *
- * NOTE: NewsAPI free tier only works from localhost.
- * For production, upgrade to a paid plan or use a proxy.
+ * In production, fetches from the internal /api/pulse route which proxies
+ * NewsAPI on the server (keeping the API key secret).
+ *
+ * The direct fetchPulseData() function is kept for backwards compatibility
+ * but the preferred entry point is now fetchPulseFromApi().
  */
 
 const NEWS_API_BASE = 'https://newsapi.org/v2/everything'
@@ -232,4 +234,17 @@ export function getSamplePulseData(): PulseData {
     quietest: 'bezos',
     updated_at: new Date().toISOString(),
   }
+}
+
+/**
+ * Fetch pulse data from the internal /api/pulse route.
+ * The API key is stored server-side and never exposed to the client.
+ */
+export async function fetchPulseFromApi(): Promise<PulseData> {
+  const res = await fetch('/api/pulse')
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.error || `API returned ${res.status}`)
+  }
+  return res.json()
 }
