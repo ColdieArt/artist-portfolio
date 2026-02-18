@@ -1,0 +1,1959 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.176.0/examples/jsm/",
+        "mediabunny": "https://cdn.jsdelivr.net/npm/mediabunny@1.25.8/+esm"
+      }
+    }
+  </script>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      overflow: auto;
+      background: transparent;
+    }
+
+    main {
+      height: 100%;
+      display: flex;
+      overflow: auto;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    canvas {
+      cursor: grab;
+    }
+  </style>
+  <title>JENSEN-HUANG-AWS-MASTER | Made on juno.transient.xyz</title>
+</head>
+<body>
+  
+    
+  <script type="module">
+    import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
+
+let camera, scene, renderer, controls, composer;
+let raycaster, mouse;
+let draggableObjects = [];
+let selectedObject = null;
+let offset = new THREE.Vector3();
+let initialObjectZ = 0;
+
+const depthStep = 0.2;
+const totalDepthLayers = 15;
+const subLayerOffset = 0.05;
+const zeroParallaxDepth = (5 - 1) * depthStep;
+
+let isDragging = false;
+let pointerDownPosition = new THREE.Vector2();
+const DRAG_THRESHOLD = 5;
+
+let backgroundMesh = null;
+
+let cameraAnimationActive = false;
+let cameraAnimationTargets = [];
+let currentCameraTarget = null;
+let cameraAnimationState = 'idle';
+let cameraAnimationStartTime = 0;
+const cameraExplorationDuration = 2500;
+const cameraReturnDuration = 1250;
+let cameraPreviousPos = new THREE.Vector3();
+let cameraPreviousLookAt = new THREE.Vector3();
+let cameraCurrentTargetPos = new THREE.Vector3();
+let cameraCurrentTargetLookAt = new THREE.Vector3();
+let cameraTargetObject = null;
+
+let initialGlobalCameraPos = new THREE.Vector3();
+let initialGlobalCameraLookAt = new THREE.Vector3();
+let assetsVisitedCount = 0;
+const ASSETS_PER_GLOBAL_RETURN = 6;
+
+let yBounceInitialCameraX = 0;
+let yBounceInitialCameraY = 0;
+let yBounceInitialCameraZ = 0;
+const yBounceRangeX = 2.0;
+const yBounceSpeed = 0.001;
+
+let lastActivityTime = performance.now();
+const INACTIVITY_TIMEOUT = 3000;
+let yRotationStartTime = 0;
+const Y_ROTATION_DURATION_BEFORE_CAM_ANIM = 10000;
+
+let rightEyeRedactionRect = null;
+let leftEyeRedactionRect = null;
+let rightEyeMesh = null;
+let leftEyeMesh = null;
+
+let marqueeTextMesh;
+let marqueeTexture;
+let marqueeScrollOffset = 0;
+const MARQUEE_LINE_HEIGHT = 180;
+const MARQUEE_TOTAL_LINES = 10;
+const MARQUEE_SCROLL_SPEED = 16.0;
+const MARQUEE_PHRASES = [
+    "SECURITY BREACH DETECTED",
+    "UNAUTHORIZED ACCESS PROHIBITED",
+    "SENSITIVE DATA EXPOSED",
+    "CLASSIFIED INFORMATION AT RISK",
+    "DATA COLLECTION IN PROGRESS",
+    "WARNING: PROSECUTION FOR MISUSE",
+    "COMPROMISED SYSTEM ALERT",
+    "INTELLIGENCE GATHERING ACTIVE",
+    "MONITORING ALL COMMUNICATIONS",
+    "EVIDENCE LOGGING INITIATED",
+    "ACCESS DENIED - LEVEL 5 REQUIRED",
+    "BIOMETRIC SCAN INITIATED",
+    "ENCRYPTED CHANNEL ESTABLISHED",
+    "ANOMALY DETECTED",
+    "USE LEVERAGE",
+    "REDACTED FOR YOUR PROTECTION",
+    "SYSTEM INTEGRITY COMPROMISED",
+    "NETWORK INTRUSION DETECTED",
+    "DIGITAL FOOTPRINT TRACED",
+    "PRIVACY VIOLATION IMMINENT",
+    "DATA EXFILTRATION WARNING",
+    "LIQUIDATE AT ALL COSTS",
+    "SURVEILLANCE ACTIVE",
+    "NON-COMPLIANCE PENALTIES APPLY",
+    "INFORMATION HARVESTING IN PROGRESS",
+    "CONFIDENTIALITY BREACH",
+    "ALERT: MALWARE DETECTED",
+    "INITIATING PROTOCOL SIGMA",
+    "ACCESS LOGS REVIEWED",
+    "TRACEABILITY ENABLED",
+    "WARNING: PII EXPOSURE"
+];
+
+let biometricMarqueeTextMesh;
+let biometricMarqueeTexture;
+let biometricMarqueeScrollOffset = 0;
+const BIOMETRIC_MARQUEE_LINE_HEIGHT = 100;
+const BIOMETRIC_MARQUEE_TOTAL_LINES = 15;
+const BIOMETRIC_MARQUEE_SCROLL_SPEED = 4.0;
+const BIOMETRIC_PHRASES = [
+    "HEART RATE: 72 BPM",
+    "BLOOD PRESSURE: 120/80 mmHg",
+    "TEMPERATURE: 98.6 F (37.0 C)",
+    "DNA SEQUENCE: ATGCAGTACTGCA...",
+    "RETINAL SCAN: POSITIVE MATCH",
+    "VOICE PRINT: IDENTIFIED",
+    "NEURAL ACTIVITY: ELEVATED",
+    "BRAINWAVES: ALPHA DOMINANT",
+    "SKELETAL DENSITY: NORMAL",
+    "ORGAN FUNCTION: OPTIMAL",
+    "ELECTROLYTES: BALANCED",
+    "METABOLIC RATE: AVERAGE",
+    "GENETIC MARKERS: PRESENT",
+    "IMMUNE RESPONSE: ACTIVE",
+    "CELLULAR REGENERATION: HIGH",
+    "NEUROTRANSMITTER LEVELS: STABLE",
+    "ENDOCRINE SYSTEM: FUNCTIONAL",
+    "RESPIRATORY RATE: 16 BREATHS/MIN",
+    "PULSE OXIMETRY: 98% SpO2",
+    "GLUCOSE LEVELS: 90 mg/dL",
+    "ADRENAL OUTPUT: NORMAL",
+    "CIRCADIAN RHYTHM: REGULAR",
+    "COGNITIVE PROCESSING: RAPID",
+    "EMOTIONAL STATE: NEUTRAL",
+    "SLEEP CYCLE: REM STAGE ACTIVE",
+    "MUSCLE TENSION: LOW",
+    "HORMONE PROFILE: STABLE",
+    "TOXIN LEVELS: UNDETECTED",
+    "ALLERGEN RESPONSE: NEGATIVE",
+    "PAIN RECEPTORS: INACTIVE"
+];
+
+const DIAGNOSTIC_CAPTIONS = [
+    "DATA STREAM: STABLE",
+    "ANALYSIS: COMPLETE",
+    "STATUS: NORMALIZED",
+    "TREND: OPTIMAL",
+    "PREDICTION: LOW RISK",
+    "ALERT: NONE",
+    "READOUT: POSITIVE",
+    "DIAGNOSIS: CLEAR",
+    "VALIDATION: SUCCESS",
+    "INTEGRITY: HIGH",
+    "ACCESS: GRANTED",
+    "PROCESSING: REAL-TIME",
+    "CONNECTION: SECURE",
+    "SYSTEM: ONLINE",
+    "MODE: ACTIVE"
+];
+
+let biometricAnimationState = {
+    graphData: [],
+    sinePhase: 0,
+    heartbeatPhase: 0,
+    heartbeatPulse: false,
+    lastHeartbeatTime: 0
+};
+
+let bloodTextMesh;
+let bloodTexture;
+let bloodScrollOffset = 0;
+const BLOOD_TEXT_FONT_SIZE = 180;
+const BLOOD_TEXT_LINE_HEIGHT = BLOOD_TEXT_FONT_SIZE * 1.2;
+const BLOOD_TEXT_TOTAL_LINES = 22;
+const BLOOD_TEXT_SCROLL_SPEED = 7.0;
+let shuffledBloodPhrases = [];
+const BLOOD_TEXT_PHRASES = [
+    "BIAS REINFORCEMENT",
+    "DARK ECONOMY",
+    "REALITY DISTORTION",
+    "EXPLOIT VULNERABILITIES",
+    "FEED MANIPULATION",
+    "AI SHOCKWAVE",
+    "DESIRE TO CONFORM",
+    "CONFUSION PERSUASION",
+    "DATA PHOTONS",
+    "PSYCHOLOGICAL OPERATIONS",
+    "GEO-STALKING",
+    "DATA MINING",
+    "DOPAMINE LOOP",
+    "MAGNETIC CONTROL",
+    "VULNEARABILITY TRACKING",
+    "ENGAGEMENT TRAPS",
+    "EXPLOIT HUMAN FLAW",
+    "PRIVACY EROSION",
+    "ALWAYS-ON LISTENING",
+    "PREDICTIVE BEHAVIOR",
+    "AMPLIFIED INFLUENCE",
+    "LOCATION TRACKING",
+    "ECHO CHAMBERING",
+    "INSTANT GRATIFICATION",
+    "LICK THE BOOT",
+    "CRY & BOW",
+    "ILLUSION OF CONTROL",
+    "COGNITIVE BIAS",
+];
+
+let redactedGlitchTextMesh;
+let redactedGlitchTexture;
+let redactedGlitchScrollOffset = 0;
+const REDACTED_GLITCH_FONT_SIZE = 24;
+const REDACTED_GLITCH_LINE_HEIGHT = REDACTED_GLITCH_FONT_SIZE * 1.5;
+const REDACTED_GLITCH_TOTAL_LINES = 30;
+const REDACTED_GLITCH_SCROLL_SPEED = 2.0;
+const REDACTED_GLITCH_PHRASES = [
+    "PERSONAL IDENTIFIER ACQUIRED",
+    "LOCATION TRACKING INITIATED",
+    "COMMUNICATION LOGS UPLOADED",
+    "BEHAVIORAL PROFILE GENERATED",
+    "BIO-METRIC DATA EXTRACTED",
+    "FINANCIAL RECORDS ANALYZED",
+    "NETWORK ACTIVITY MONITORED",
+    "DIGITAL FOOTPRINT TRACED",
+    "SENTIMENT ANALYSIS COMPLETE",
+    "ACCESS CREDENTIALS COMPROMISED",
+    "THREAT ASSESSMENT LEVEL CLASSIFIED",
+    "TARGET IDENTIFIED: UNKNOWN",
+    "DATA EXFILTRATION PROTOCOL ACTIVE",
+    "SURVEVEILLANCE FEED ACTIVE",
+    "USER ACTIVITY RECORDED",
+    "PRIVACY SETTINGS OVERRIDDEN",
+    "CONNECTION LOGS STORED",
+    "SEARCH HISTORY ARCHIVED",
+    "PURCHASE PATTERNS LOGGED",
+    "EMOTIONAL RESPONSE CAPTURED",
+    "NEURAL ACTIVITY MAPPED",
+    "GENETIC PREDISPOSITIONS FLAGGED",
+    "VULNERABILITY ASSESSMENT COMPLETE",
+    "OPERATIONAL STATUS REPORTED",
+    "DIRECTIVE ISSUED: INITIATE",
+    "STATUS: COMPROMISED",
+    "ACTION: REQUIRED",
+    "WARNING: ACCESS REVOKED",
+    "CONFIDENTIALITY: BREACHED",
+    "PROTOCOL: EXECUTED"
+];
+
+let redactedGlitchPhraseData = [];
+
+const URL_JENSEN_HUANG_CHEEK = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-cheek.gif';
+const URL_BACKGROUND = '';
+const URL_RIGHT_EYE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-eyes.gif';
+const URL_MOUTH = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-mouth.gif';
+const URL_EAR = '';
+const URL_LEFT_EYE = '';
+const URL_NOSE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-nose.gif';
+const URL_SIGNATURE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/coldie-sig.gif';
+const URL_JENSEN_HUANG_HAIR = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-hair.gif';
+
+const URL_FHEAD01 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/fhead01.gif';
+const URL_FHEAD02 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/fhead02.gif';
+const URL_FHEAD03 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/fhead03.gif';
+const URL_FHEAD04 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/fhead04.gif';
+const URL_FHEAD05 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/fhead05.gif';
+
+let foreheadMeshes = [];
+let currentForeheadIndex = 0;
+let lastFlashTime = 0;
+const FLASH_INTERVAL = 20;
+
+const URL_CARD01 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/card-01.gif';
+const URL_CARD02 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/card-02.gif';
+const URL_CARD03 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/card-03.gif';
+
+let shufflingCardMeshes = [];
+const cardImageUrls = [
+    URL_CARD01,
+    URL_CARD02,
+    URL_CARD03
+];
+let currentCardImageIndex = 0;
+let lastCardFlashTime = 0;
+
+let faceMeshes = [];
+
+const BrightenTextureShader = {
+    uniforms: {
+        'tDiffuse': { value: null },
+        'brightness': { value: 0.5 }
+    },
+    vertexShader: /* glsl */`
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: /* glsl */`
+        uniform sampler2D tDiffuse;
+        uniform float brightness;
+        varying vec2 vUv;
+        void main() {
+            vec4 texel = texture2D(tDiffuse, vUv);
+            vec3 color = texel.rgb * brightness;
+            gl_FragColor = vec4(color, texel.a);
+        }
+    `
+};
+
+function initializeRedactedGlitchPhraseData() {
+    redactedGlitchPhraseData = REDACTED_GLITCH_PHRASES.map(phrase => {
+        const words = phrase.split(/(\s+)/).filter(word => word.length > 0);
+        const numWords = words.filter(word => !/\s+/.test(word)).length;
+
+        const wordIndicesToRedact = [];
+        if (numWords > 0 && Math.random() < 0.6) {
+            const numWordsToRedact = Math.floor(Math.random() * Math.min(3, numWords)) + 1;
+
+            const actualWordIndices = [];
+            for (let i = 0; i < words.length; i++) {
+                if (!/\s+/.test(words[i])) {
+                    actualWordIndices.push(i);
+                }
+            }
+
+            if (actualWordIndices.length > 0) {
+                const startIndex = Math.floor(Math.random() * Math.max(1, actualWordIndices.length - numWordsToRedact + 1));
+                for (let i = 0; i < numWordsToRedact; i++) {
+                    if (startIndex + i < actualWordIndices.length) {
+                        wordIndicesToRedact.push(actualWordIndices[startIndex + i]);
+                    }
+                }
+            }
+        }
+        return { text: phrase, redactedWordIndices: wordIndicesToRedact };
+    });
+}
+
+const GreyscaleContrastShader = {
+    uniforms: {
+        'tDiffuse': { value: null },
+        'contrast': { value: 1.5 }
+    },
+    vertexShader: /* glsl */`
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: /* glsl */`
+        uniform sampler2D tDiffuse;
+        uniform float contrast;
+        varying vec2 vUv;
+        void main() {
+            vec4 texel = texture2D(tDiffuse, vUv);
+            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
+            luma = ((luma - 0.5) * contrast) + 0.5;
+            gl_FragColor = vec4(luma, luma, luma, texel.a);
+        }
+    `
+};
+
+const GreyScaleShader = {
+    uniforms: {
+        'tDiffuse': { value: null }
+    },
+    vertexShader: /* glsl */`
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: /* glsl */`
+        uniform sampler2D tDiffuse;
+        varying vec2 vUv;
+        void main() {
+            vec4 texel = texture2D(tDiffuse, vUv);
+            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
+            gl_FragColor = vec4(luma, luma, luma, texel.a);
+        }
+    `
+};
+
+const ThresholdShader = {
+    uniforms: {
+        'tDiffuse': { value: null },
+        'threshold': { value: 0.5 }
+    },
+    vertexShader: /* glsl */`
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: /* glsl */`
+        uniform sampler2D tDiffuse;
+        uniform float threshold;
+        varying vec2 vUv;
+        void main() {
+            vec4 texel = texture2D(tDiffuse, vUv);
+            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
+            gl_FragColor = vec4(step(threshold, luma));
+        }
+    `
+};
+
+const DarkShader = {
+    uniforms: {
+        'tDiffuse': { value: null },
+        'threshold': { value: 0.5 }
+    },
+    vertexShader: /* glsl */`
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: /* glsl */`
+        uniform sampler2D tDiffuse;
+        uniform float threshold;
+        varying vec2 vUv;
+        void main() {
+            vec4 texel = texture2D(tDiffuse, vUv);
+            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
+            gl_FragColor = vec4(step(threshold, luma) * 0.04);
+        }
+    `
+};
+
+const PixelationShader = {
+    uniforms: {
+        'tDiffuse': { value: null },
+        'resolution': { value: new THREE.Vector2() },
+        'pixelSize': { value: 8.0 }
+    },
+    vertexShader: /* glsl */`
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: /* glsl */`
+        uniform sampler2D tDiffuse;
+        uniform vec2 resolution;
+        uniform float pixelSize;
+        varying vec2 vUv;
+        void main() {
+            vec2 uv = vUv;
+            vec2 pixelatedUV = floor(uv * resolution / pixelSize) * pixelSize / resolution;
+            gl_FragColor = texture2D(tDiffuse, pixelatedUV);
+        }
+    `
+};
+
+const MatrixShader = {
+    uniforms: {
+        'tDiffuse': { value: null }
+    },
+    vertexShader: /* glsl */`
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: /* glsl */`
+        uniform sampler2D tDiffuse;
+        varying vec2 vUv;
+        void main() {
+            vec4 texel = texture2D(tDiffuse, vUv);
+            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
+            vec3 finalColor = mix(vec3(0.0), vec3(0.0, 1.0, 0.0), step(0.5, luma));
+            float grid = mod(floor(vUv.x * 100.0) + floor(vUv.y * 100.0), 2.0);
+            finalColor = mix(finalColor * 0.8, finalColor, grid);
+            gl_FragColor = vec4(finalColor, texel.a);
+        }
+    `
+};
+
+const ASCIIShader = {
+    uniforms: {
+        'tDiffuse': { value: null },
+        'resolution': { value: new THREE.Vector2() },
+        'pixelSize': { value: 8.0 }
+    },
+    vertexShader: /* glsl */`
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: /* glsl */`
+        uniform sampler2D tDiffuse;
+        uniform vec2 resolution;
+        uniform float pixelSize;
+        varying vec2 vUv;
+        void main() {
+            vec2 uv = vUv;
+            vec2 pixelatedUV = floor(uv * resolution / pixelSize) * pixelSize / resolution;
+            vec4 texel = texture2D(tDiffuse, pixelatedUV);
+            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
+            float step1 = step(0.25, luma);
+            float step2 = step(0.50, luma);
+            float step3 = step(0.75, luma);
+            vec3 finalColor;
+            if (step3 == 1.0) {
+                finalColor = vec3(0.0, 1.0, 0.0);
+            } else if (step2 == 1.0) {
+                finalColor = vec3(0.0, 0.7, 0.0);
+            } else if (step1 == 1.0) {
+                finalColor = vec3(0.0, 0.4, 0.0);
+            } else {
+                finalColor = vec3(0.0);
+            }
+            gl_FragColor = vec4(finalColor, texel.a);
+        }
+    `
+};
+
+const XRayShader = {
+    uniforms: {
+        'tDiffuse': { value: null }
+    },
+    vertexShader: /* glsl */`
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: /* glsl */`
+        uniform sampler2D tDiffuse;
+        varying vec2 vUv;
+        void main() {
+            vec4 texel = texture2D(tDiffuse, vUv);
+            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
+            float invertedLuma = 1.0 - luma;
+            vec3 xrayColor = vec3(0.0, 0.7, 1.0) * invertedLuma;
+            gl_FragColor = vec4(xrayColor, texel.a);
+        }
+    `
+};
+
+const HeatmapShader = {
+    uniforms: {
+        'tDiffuse': { value: null }
+    },
+    vertexShader: /* glsl */`
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: /* glsl */`
+        uniform sampler2D tDiffuse;
+        uniform float threshold;
+        varying vec2 vUv;
+        void main() {
+            vec4 texel = texture2D(tDiffuse, vUv);
+            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
+            vec3 color;
+            if (luma < 0.2) {
+                color = mix(vec3(0.0, 0.0, 0.2), vec3(0.0, 0.0, 0.8), luma / 0.2);
+            } else if (luma < 0.4) {
+                color = mix(vec3(0.0, 0.0, 0.8), vec3(0.0, 0.8, 0.8), (luma - 0.2) / 0.2);
+            } else if (luma < 0.6) {
+                color = mix(vec3(0.0, 0.8, 0.8), vec3(0.0, 1.0, 0.0), (luma - 0.4) / 0.2);
+            } else if (luma < 0.8) {
+                color = mix(vec3(0.0, 1.0, 0.0), vec3(1.0, 1.0, 0.0), (luma - 0.6) / 0.2);
+            } else {
+                color = mix(vec3(1.0, 1.0, 0.0), vec3(1.0, 0.0, 0.0), (luma - 0.8) / 0.2);
+            }
+            gl_FragColor = vec4(color, texel.a);
+        }
+    `
+};
+
+const BloodShader = {
+    uniforms: {
+        'tDiffuse': { value: null }
+    },
+    vertexShader: /* glsl */`
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: /* glsl */`
+        uniform sampler2D tDiffuse;
+        varying vec2 vUv;
+        void main() {
+            vec4 texel = texture2D(tDiffuse, vUv);
+            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
+            vec3 color;
+            if (luma < 0.2) {
+                color = mix(vec3(0.0, 0.0, 0.0), vec3(0.3, 0.0, 0.0), luma / 0.2);
+            } else if (luma < 0.4) {
+                color = mix(vec3(0.3, 0.0, 0.0), vec3(0.7, 0.0, 0.0), (luma - 0.2) / 0.2);
+            } else if (luma < 0.6) {
+                color = mix(vec3(0.7, 0.0, 0.0), vec3(1.0, 0.1, 0.1), (luma - 0.4) / 0.2);
+            } else if (luma < 0.8) {
+                color = mix(vec3(1.0, 0.1, 0.1), vec3(1.0, 0.4, 0.0), (luma - 0.6) / 0.2);
+            } else {
+                color = mix(vec3(1.0, 0.4, 0.0), vec3(1.0, 0.7, 0.2), (luma - 0.8) / 0.2);
+            }
+            gl_FragColor = vec4(color, texel.a);
+        }
+    `
+};
+
+const CCTVFeedShader = {
+    uniforms: {
+        'tDiffuse': { value: null },
+        'time': { value: 0.0 },
+        'resolution': { value: new THREE.Vector2() }
+    },
+    vertexShader: /* glsl */`
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: /* glsl */`
+        uniform sampler2D tDiffuse;
+        uniform float time;
+        uniform vec2 resolution;
+        varying vec2 vUv;
+        float rand(vec2 co) {
+            return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+        }
+        void main() {
+            vec2 uv = vUv;
+            vec2 pixelatedUV = floor(uv * resolution / 16.0) * 16.0 / resolution;
+            float randomVal = rand(floor(uv * 100.0) + fract(time * 0.1));
+            float displacement = (randomVal - 0.5) * 0.05 * sin(time * 10.0 + uv.y * 50.0);
+            vec4 colorR = texture2D(tDiffuse, pixelatedUV + vec2(displacement, 0.0));
+            vec4 colorG = texture2D(tDiffuse, pixelatedUV);
+            vec4 colorB = texture2D(tDiffuse, pixelatedUV - vec2(displacement, 0.0));
+            vec4 glitchedColor = vec4(colorR.r, colorG.g, colorB.b, 1.0);
+            float lumaGlitched = dot(glitchedColor.rgb, vec3(0.299, 0.587, 0.114));
+            vec3 tintedColor = mix(vec3(lumaGlitched), vec3(0.0, 0.5, 0.0), 0.3);
+            float scanline = sin(uv.y * resolution.y * 0.5) * 0.05 + 0.95;
+            tintedColor *= scanline;
+            float noise = rand(uv + time * 0.01) * 0.1;
+            tintedColor += noise;
+            gl_FragColor = vec4(tintedColor, glitchedColor.a);
+        }
+    `
+};
+
+const effectControls = {
+    greyscale: false,
+    threshold: false,
+    thresholdValue: 0.4,
+    shadow: false,
+    pixelation: false,
+    pixelSize: 8.0,
+    glitch: false,
+    matrix: false,
+    ascii: false,
+    xray: false,
+    yRotation: false,
+    cameraAnimation: false,
+    redacted: false,
+    redactedGlitch: false,
+    heatmap: false,
+    blood: false,
+    cctvFeed: false,
+    marqueeText: false,
+    biometricMarquee: false,
+    anon: false,
+    og: false,
+    bloodText: false,
+    hacker: false,
+    surveillance: false,
+    greed: false
+};
+
+let greyscalePass, thresholdPass, darkPass, pixelationPass, glitchPass, matrixPass, asciiPass, xrayPass, heatmapPass, bloodPass, cctvFeedPass;
+
+let trashButtonElement = null;
+let leftUiContainer = null;
+let arrowContainer = null;
+
+const initialAssetConfigs = [];
+
+const updateUIButtonState = (effectName, isActive) => {
+    const buttons = document.querySelectorAll(`button[data-effect="${effectName}"]`);
+    buttons.forEach(button => {
+        button.style.borderColor = isActive ? '#4CAF50' : 'white';
+    });
+};
+
+let defaultMaterialMap = new Map();
+let brightMaterialMap = new Map();
+
+function updateFaceMaterialBrightness() {
+    const isAnyEffectActive = Object.keys(effectControls).some(key => {
+        return key !== 'yRotation' && key !== 'cameraAnimation' && key !== 'marqueeText' && key !== 'biometricMarquee' && key !== 'bloodText' && key !== 'redactedGlitch' && key !== 'redacted' && effectControls[key];
+    });
+
+    const targetMaterialMap = isAnyEffectActive ? brightMaterialMap : defaultMaterialMap;
+
+    faceMeshes.forEach(mesh => {
+        const material = targetMaterialMap.get(mesh.userData.id);
+        if (material && mesh.material !== material) {
+            mesh.material = material;
+            mesh.material.needsUpdate = true;
+        }
+    });
+}
+
+function createTextTexture(text, fontSize = 60, color = 'white', backgroundColor = 'rgba(0,0,0,0.5)', font = 'monospace') {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    context.font = `${fontSize}px ${font}`;
+    const metrics = context.measureText(text);
+    const textWidth = metrics.width;
+    const textHeight = fontSize * 1.2;
+    canvas.width = textWidth + 20;
+    canvas.height = textHeight + 20;
+    context.font = `${fontSize}px ${font}`;
+    context.fillStyle = backgroundColor;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = color;
+    context.fillText(text, 10, fontSize + 10);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+}
+
+function createMarqueeTexture() {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    let maxWidth = 0;
+    context.font = `bold 108px 'Courier New', monospace`;
+    MARQUEE_PHRASES.forEach(phrase => {
+        maxWidth = Math.max(maxWidth, context.measureText(phrase).width);
+    });
+    canvas.width = maxWidth + 50;
+    canvas.height = MARQUEE_LINE_HEIGHT * (MARQUEE_TOTAL_LINES * 2);
+    marqueeTexture = new THREE.CanvasTexture(canvas);
+    marqueeTexture.wrapS = THREE.RepeatWrapping;
+    marqueeTexture.wrapT = THREE.RepeatWrapping;
+    marqueeTexture.colorSpace = THREE.SRGBColorSpace;
+    marqueeTexture.minFilter = THREE.LinearFilter;
+    marqueeTexture.magFilter = THREE.LinearFilter;
+    marqueeTexture.generateMipmaps = false;
+    marqueeTexture.needsUpdate = true;
+    return marqueeTexture;
+}
+
+function updateMarqueeTexture() {
+    if (!marqueeTexture) return;
+    const canvas = marqueeTexture.image;
+    const context = canvas.getContext('2d');
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = 'rgba(0, 0, 0, 0.0)';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.font = `bold 108px 'Courier New', monospace`;
+    context.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    context.textAlign = 'center';
+    const singleSetHeight = MARQUEE_LINE_HEIGHT * MARQUEE_TOTAL_LINES;
+    for (let i = 0; i < MARQUEE_TOTAL_LINES * 2; i++) {
+        const phraseIndex = i % MARQUEE_PHRASES.length;
+        const line = MARQUEE_PHRASES[phraseIndex];
+        let yPos = (i * MARQUEE_LINE_HEIGHT) + marqueeScrollOffset;
+        if (yPos < -singleSetHeight) {
+            yPos += singleSetHeight * 2;
+        }
+        context.fillText(line, canvas.width / 2, yPos);
+    }
+    marqueeTexture.needsUpdate = true;
+}
+
+function createBiometricMarqueeTexture() {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    let maxWidth = 0;
+    canvas.width = 1200;
+    context.font = `bold 36px 'Courier New', monospace`;
+    BIOMETRIC_PHRASES.forEach(phrase => {
+        maxWidth = Math.max(maxWidth, context.measureText(phrase).width);
+    });
+    canvas.width = Math.max(canvas.width, maxWidth + 50);
+    canvas.height = BIOMETRIC_MARQUEE_LINE_HEIGHT * (BIOMETRIC_MARQUEE_TOTAL_LINES * 2);
+    biometricMarqueeTexture = new THREE.CanvasTexture(canvas);
+    biometricMarqueeTexture.wrapS = THREE.RepeatWrapping;
+    biometricMarqueeTexture.wrapT = THREE.RepeatWrapping;
+    biometricMarqueeTexture.colorSpace = THREE.SRGBColorSpace;
+    biometricMarqueeTexture.minFilter = THREE.LinearFilter;
+    biometricMarqueeTexture.magFilter = THREE.LinearFilter;
+    biometricMarqueeTexture.generateMipmaps = false;
+    biometricMarqueeTexture.needsUpdate = true;
+    return biometricMarqueeTexture;
+}
+
+function updateBiometricMarqueeTexture(currentTime) {
+    if (!biometricMarqueeTexture) return;
+    const canvas = biometricMarqueeTexture.image;
+    const context = canvas.getContext('2d');
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = 'rgba(0, 0, 0, 0.0)';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.font = `bold 36px 'Courier New', monospace`;
+    context.textAlign = 'center';
+    const singleSetHeight = BIOMETRIC_MARQUEE_LINE_HEIGHT * BIOMETRIC_MARQUEE_TOTAL_LINES;
+    biometricAnimationState.sinePhase += 0.00125;
+    if (biometricAnimationState.sinePhase > Math.PI * 2) biometricAnimationState.sinePhase -= Math.PI * 2;
+    const HEARTBEAT_INTERVAL = 6000;
+    if (currentTime - biometricAnimationState.lastHeartbeatTime > HEARTBEAT_INTERVAL) {
+        biometricAnimationState.heartbeatPulse = true;
+        biometricAnimationState.lastHeartbeatTime = currentTime;
+    } else {
+        biometricAnimationState.heartbeatPulse = false;
+    }
+    if (biometricAnimationState.graphData.length === 0 || Math.random() < 0.01) {
+        biometricAnimationState.graphData = [];
+        for (let j = 0; j < 20; j++) {
+            biometricAnimationState.graphData.push(Math.random());
+        }
+    }
+    for (let i = 0; i < BIOMETRIC_MARQUEE_TOTAL_LINES * 2; i++) {
+        const phraseIndex = i % BIOMETRIC_PHRASES.length;
+        const line = BIOMETRIC_PHRASES[phraseIndex];
+        let yPos = (i * BIOMETRIC_MARQUEE_LINE_HEIGHT) + biometricMarqueeScrollOffset;
+        if (yPos < -singleSetHeight) {
+            yPos += singleSetHeight * 2;
+        }
+        context.fillStyle = 'rgba(0, 255, 0, 0.1)';
+        context.fillText(line, canvas.width / 2, yPos);
+        if (Math.random() < 0.6) {
+            const words = line.split(' ');
+            if (words.length > 1) {
+                const wordToRedactIndex = Math.floor(Math.random() * words.length);
+                const textBeforeRedaction = words.slice(0, wordToRedactIndex).join(' ');
+                const redactedWord = words[wordToRedactIndex];
+                const totalTextWidth = context.measureText(line).width;
+                const startX = (canvas.width / 2) - (totalTextWidth / 2) + context.measureText(textBeforeRedaction).width;
+                context.fillStyle = 'black';
+                context.fillRect(startX, yPos - BIOMETRIC_MARQUEE_LINE_HEIGHT * 0.7, context.measureText(redactedWord).width, BIOMETRIC_MARQUEE_LINE_HEIGHT * 0.9);
+            }
+        }
+        if (Math.random() < 0.4) {
+            const animType = Math.floor(Math.random() * 3);
+            const animWidth = 200 * 4;
+            const animHeight = (BIOMETRIC_MARQUEE_LINE_HEIGHT * 0.8) * 4;
+            const animX = (canvas.width * 0.05) + (Math.random() * (canvas.width * 0.8 - animWidth));
+            const animY = yPos - (animHeight / 2) + (Math.random() - 0.5) * BIOMETRIC_MARQUEE_LINE_HEIGHT * 1.5;
+            context.save();
+            context.beginPath();
+            context.rect(animX, animY, animWidth, animHeight);
+            context.clip();
+            if (animType === 0) {
+                context.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+                context.lineWidth = 3;
+                context.moveTo(animX, animY + animHeight);
+                for (let j = 0; j < biometricAnimationState.graphData.length; j++) {
+                    const x = animX + (j / (biometricAnimationState.graphData.length - 1)) * animWidth;
+                    const y = animY + animHeight - (biometricAnimationState.graphData[j] * animHeight * (0.8 + 0.2 * Math.sin(currentTime * 0.0005)));
+                    context.lineTo(x, y);
+                }
+                context.stroke();
+            } else if (animType === 1) {
+                context.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+                context.lineWidth = 3;
+                context.moveTo(animX, animY + animHeight / 2 + Math.sin(biometricAnimationState.sinePhase) * animHeight * 0.1);
+                for (let j = 0; j < animWidth; j++) {
+                    const x = animX + j;
+                    const y = animY + animHeight / 2 + Math.sin((j / animWidth) * Math.PI * 4 + biometricAnimationState.sinePhase) * animHeight * 0.3;
+                    context.lineTo(x, y);
+                }
+                context.stroke();
+            } else if (animType === 2) {
+                context.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+                context.lineWidth = 3;
+                const hbHeight = animHeight * 0.4;
+                const hbCenterY = animY + animHeight / 2;
+                context.moveTo(animX, hbCenterY);
+                context.lineTo(animX + animWidth * 0.1, hbCenterY);
+                context.lineTo(animX + animWidth * 0.2, hbCenterY - hbHeight * 0.8);
+                context.lineTo(animX + animWidth * 0.25, hbCenterY + hbHeight);
+                context.lineTo(animX + animWidth * 0.3, hbCenterY - hbHeight * 0.3);
+                context.lineTo(animX + animWidth * 0.4, hbCenterY);
+                context.lineTo(animX + animWidth * 0.6, hbCenterY);
+                context.lineTo(animX + animWidth * 0.7, hbCenterY - hbHeight * 0.2);
+                context.lineTo(animX + animWidth * 0.8, hbCenterY);
+                context.lineTo(animX + animWidth, hbCenterY);
+                context.stroke();
+                if (biometricAnimationState.heartbeatPulse) {
+                    context.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                    context.fillRect(animX, animY, animWidth, animHeight);
+                }
+            }
+            context.restore();
+        }
+        if (Math.random() < 0.3) {
+            const caption = DIAGNOSTIC_CAPTIONS[Math.floor(Math.random() * DIAGNOSTIC_CAPTIONS.length)];
+            context.font = `bold 24px 'Courier New', monospace`;
+            context.textAlign = 'left';
+            const captionWidth = context.measureText(caption).width;
+            const captionHeight = 24 * 1.2;
+            const captionX = (canvas.width * 0.1) + (Math.random() * (canvas.width * 0.7 - captionWidth));
+            const captionY = yPos - (captionHeight / 2) + (Math.random() - 0.5) * (BIOMETRIC_MARQUEE_LINE_HEIGHT * 0.5);
+            const padding = 5;
+            context.fillStyle = 'black';
+            context.fillRect(captionX - padding, captionY - captionHeight * 0.7, captionWidth + padding * 2, captionHeight + padding);
+            context.fillStyle = 'white';
+            context.fillText(caption, captionX, captionY);
+        }
+    }
+    biometricMarqueeTexture.needsUpdate = true;
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function createBloodTextTexture() {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    let maxWidth = 0;
+    context.font = `bold ${BLOOD_TEXT_FONT_SIZE}px 'Impact', sans-serif`;
+    BLOOD_TEXT_PHRASES.forEach(phrase => {
+        maxWidth = Math.max(maxWidth, context.measureText(phrase).width);
+    });
+    canvas.width = maxWidth + 100;
+    canvas.height = BLOOD_TEXT_LINE_HEIGHT * (BLOOD_TEXT_TOTAL_LINES * 2);
+    bloodTexture = new THREE.CanvasTexture(canvas);
+    bloodTexture.wrapS = THREE.RepeatWrapping;
+    bloodTexture.wrapT = THREE.RepeatWrapping;
+    bloodTexture.colorSpace = THREE.SRGBColorSpace;
+    bloodTexture.minFilter = THREE.LinearFilter;
+    bloodTexture.magFilter = THREE.LinearFilter;
+    bloodTexture.generateMipmaps = false;
+    bloodTexture.needsUpdate = true;
+    return bloodTexture;
+}
+
+function updateBloodTextTexture() {
+    if (!bloodTexture) return;
+    const canvas = bloodTexture.image;
+    const context = canvas.getContext('2d');
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = 'rgba(0, 0, 0, 0.0)';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.font = `bold ${BLOOD_TEXT_FONT_SIZE}px 'Impact', sans-serif`;
+    context.fillStyle = 'white';
+    context.textAlign = 'center';
+    const singleSetHeight = BLOOD_TEXT_LINE_HEIGHT * BLOOD_TEXT_TOTAL_LINES;
+    for (let i = 0; i < BLOOD_TEXT_TOTAL_LINES * 2; i++) {
+        const phraseIndex = i % shuffledBloodPhrases.length;
+        const line = shuffledBloodPhrases[phraseIndex];
+        let yPos = (i * BLOOD_TEXT_LINE_HEIGHT) + bloodScrollOffset;
+        if (yPos < -singleSetHeight) {
+            yPos += singleSetHeight * 3;
+            shuffledBloodPhrases = shuffleArray([...BLOOD_TEXT_PHRASES]);
+        }
+        context.fillText(line, canvas.width / 2, yPos);
+    }
+    bloodTexture.needsUpdate = true;
+}
+
+function createRedactedGlitchTexture() {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    let maxWidth = 0;
+    context.font = `${REDACTED_GLITCH_FONT_SIZE}px 'Courier New', monospace`;
+    REDACTED_GLITCH_PHRASES.forEach(phrase => {
+        maxWidth = Math.max(maxWidth, context.measureText(phrase).width);
+    });
+    canvas.width = maxWidth + 50;
+    canvas.height = REDACTED_GLITCH_LINE_HEIGHT * (REDACTED_GLITCH_TOTAL_LINES * 2);
+    redactedGlitchTexture = new THREE.CanvasTexture(canvas);
+    redactedGlitchTexture.wrapS = THREE.RepeatWrapping;
+    redactedGlitchTexture.wrapT = THREE.RepeatWrapping;
+    redactedGlitchTexture.colorSpace = THREE.SRGBColorSpace;
+    redactedGlitchTexture.minFilter = THREE.LinearFilter;
+    redactedGlitchTexture.magFilter = THREE.LinearFilter;
+    redactedGlitchTexture.generateMipmaps = false;
+    redactedGlitchTexture.needsUpdate = true;
+    return redactedGlitchTexture;
+}
+
+function updateRedactedGlitchTexture() {
+    if (!redactedGlitchTexture) return;
+    const canvas = redactedGlitchTexture.image;
+    const context = canvas.getContext('2d');
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = 'rgba(255, 255, 255, 1.0)';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.font = `${REDACTED_GLITCH_FONT_SIZE}px 'Courier New', monospace`;
+    context.textAlign = 'left';
+    const singleSetHeight = REDACTED_GLITCH_LINE_HEIGHT * REDACTED_GLITCH_TOTAL_LINES;
+    for (let i = 0; i < REDACTED_GLITCH_TOTAL_LINES * 2; i++) {
+        const phraseDataIndex = i % redactedGlitchPhraseData.length;
+        const phraseData = redactedGlitchPhraseData[phraseDataIndex];
+        const line = phraseData.text;
+        const redactedWordIndices = phraseData.redactedWordIndices;
+        let yPos = (i * REDACTED_GLITCH_LINE_HEIGHT) + redactedGlitchScrollOffset;
+        if (yPos < -singleSetHeight) {
+            yPos += singleSetHeight * 2;
+        }
+        context.fillStyle = 'black';
+        context.fillText(line, 10, yPos + REDACTED_GLITCH_FONT_SIZE);
+        if (redactedWordIndices.length > 0) {
+            const words = line.split(/(\s+)/);
+            let currentX = 10;
+            for (let j = 0; j < words.length; j++) {
+                const word = words[j];
+                const wordWidth = context.measureText(word).width;
+                if (!/\s+/.test(word) && redactedWordIndices.includes(j)) {
+                    context.fillStyle = 'black';
+                    context.fillRect(currentX, yPos + REDACTED_GLITCH_FONT_SIZE * 0.2, wordWidth, REDACTED_GLITCH_FONT_SIZE * 0.9);
+                    context.strokeStyle = 'black';
+                    context.lineWidth = 2;
+                    context.strokeRect(currentX, yPos + REDACTED_GLITCH_FONT_SIZE * 0.2, wordWidth, REDACTED_GLITCH_FONT_SIZE * 0.9);
+                }
+                currentX += wordWidth;
+            }
+        }
+    }
+    redactedGlitchTexture.needsUpdate = true;
+}
+
+function stopCameraAnimationAndReset() {
+    if (cameraAnimationActive || effectControls.yRotation) {
+        cameraAnimationActive = false;
+        effectControls.cameraAnimation = false;
+        effectControls.yRotation = false;
+        updateUIButtonState('cameraAnimation', false);
+        updateUIButtonState('yRotation', false);
+        camera.position.copy(initialGlobalCameraPos);
+        controls.target.copy(initialGlobalCameraLookAt);
+        camera.lookAt(controls.target);
+        controls.enabled = true;
+        controls.update();
+        cameraAnimationState = 'idle';
+        assetsVisitedCount = 0;
+    }
+    yRotationStartTime = 0;
+}
+
+function resetPiecesToOriginalPositions() {
+    defaultMaterialMap.forEach(material => material.dispose());
+    brightMaterialMap.forEach(material => material.dispose());
+    defaultMaterialMap.clear();
+    brightMaterialMap.clear();
+    faceMeshes = [];
+
+    draggableObjects.forEach(object => {
+        scene.remove(object);
+        if (object.geometry) object.geometry.dispose();
+        if (object.material && !object.userData.isFaceMesh) {
+            if (Array.isArray(object.material)) {
+                object.material.forEach(m => m.dispose());
+            } else {
+                object.material.dispose();
+            }
+        }
+    });
+    draggableObjects = [];
+    cameraAnimationTargets = [];
+    foreheadMeshes = [];
+    shufflingCardMeshes = [];
+    rightEyeMesh = null;
+    leftEyeMesh = null;
+
+    if (rightEyeRedactionRect) { scene.remove(rightEyeRedactionRect); rightEyeRedactionRect.geometry.dispose(); rightEyeRedactionRect.material.dispose(); rightEyeRedactionRect = null; }
+    if (leftEyeRedactionRect) { scene.remove(leftEyeRedactionRect); leftEyeRedactionRect.geometry.dispose(); leftEyeRedactionRect.material.dispose(); leftEyeRedactionRect = null; }
+
+    if (marqueeTextMesh) { scene.remove(marqueeTextMesh); marqueeTextMesh.geometry.dispose(); marqueeTextMesh.material.dispose(); marqueeTextMesh = null; }
+    if (biometricMarqueeTextMesh) { scene.remove(biometricMarqueeTextMesh); biometricMarqueeTextMesh.geometry.dispose(); biometricMarqueeTextMesh.material.dispose(); biometricMarqueeTextMesh = null; }
+    if (bloodTextMesh) { scene.remove(bloodTextMesh); bloodTextMesh.geometry.dispose(); bloodTextMesh.material.dispose(); bloodTextMesh = null; }
+    if (redactedGlitchTextMesh) { scene.remove(redactedGlitchTextMesh); redactedGlitchTextMesh.geometry.dispose(); redactedGlitchTextMesh.material.dispose(); redactedGlitchTextMesh = null; }
+
+    turnOffAllEffects();
+
+    const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
+    const baseScale = 0.005;
+
+    initialAssetConfigs.forEach(config => {
+        config.removed = false;
+        const textureLoader = new THREE.TextureLoader();
+        let material, geometry, mesh;
+
+        switch (config.type) {
+            case 'image':
+                if (config.id === 'signature') {
+                    const existingSignatures = scene.children.filter(child => child.userData.id === 'signature');
+                    if (existingSignatures.length >= 1) return;
+                }
+                if (config.removed) return;
+
+                textureLoader.load(config.url, (texture) => {
+                    texture.colorSpace = THREE.SRGBColorSpace;
+                    texture.minFilter = THREE.LinearFilter;
+                    texture.magFilter = THREE.LinearFilter;
+                    texture.generateMipmaps = false;
+                    texture.anisotropy = maxAnisotropy;
+
+                    let currentMaterial;
+                    const isFaceMesh = ['rightEye', 'leftEye', 'mouth', 'nose', 'jensenHuangCheek', 'jensenHuangHair'].includes(config.id);
+                    currentMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+                    
+                    if (isFaceMesh) {
+                        const brightMaterial = new THREE.ShaderMaterial({
+                            uniforms: { tDiffuse: { value: texture }, brightness: { value: 1.2 } },
+                            vertexShader: BrightenTextureShader.vertexShader,
+                            fragmentShader: BrightenTextureShader.fragmentShader,
+                            transparent: true,
+                            side: THREE.DoubleSide,
+                            alphaTest: 0.5
+                        });
+                        defaultMaterialMap.set(config.id, currentMaterial);
+                        brightMaterialMap.set(config.id, brightMaterial);
+                    }
+
+                    const initialPlaneWidth = config.initialScale.width;
+                    const initialPlaneHeight = config.initialScale.height;
+                    geometry = new THREE.PlaneGeometry(initialPlaneWidth, initialPlaneHeight);
+                    mesh = new THREE.Mesh(geometry, currentMaterial);
+                    mesh.position.copy(config.initialPosition);
+                    mesh.rotation.copy(config.initialRotation ? new THREE.Euler().copy(config.initialRotation) : new THREE.Euler());
+                    mesh.userData.currentLayer = config.initialLayer;
+                    mesh.userData.initialPosition = config.initialPosition.clone();
+                    mesh.userData.initialLayer = config.initialLayer;
+                    mesh.userData.id = config.id;
+                    mesh.userData.initialScale = { width: initialPlaneWidth, height: initialPlaneHeight };
+                    mesh.userData.isFaceMesh = isFaceMesh;
+
+                    if (isFaceMesh) faceMeshes.push(mesh);
+                    if (config.id !== 'signature') {
+                        scene.add(mesh);
+                        draggableObjects.push(mesh);
+                        cameraAnimationTargets.push(mesh);
+                    }
+                    if (config.id.startsWith('forehead')) {
+                        foreheadMeshes.push(mesh);
+                        mesh.visible = (foreheadMeshes.length - 1 === 0);
+                    } else if (config.id.startsWith('cardGrid_')) {
+                        shufflingCardMeshes.push(mesh);
+                        scene.add(mesh);
+                    } else {
+                        scene.add(mesh);
+                    }
+
+                    if (config.id === 'rightEye' || config.id === 'leftEye') {
+                        if (config.id === 'rightEye') rightEyeMesh = mesh;
+                        if (config.id === 'leftEye') leftEyeMesh = mesh;
+                        const redactionWidth = initialPlaneWidth * 0.8;
+                        const redactionHeight = initialPlaneHeight * 0.5;
+                        const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
+                        const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                        const rect = new THREE.Mesh(redactionGeometry, redactionMaterial);
+                        rect.position.set(mesh.position.x, mesh.position.y, mesh.position.z + (1.5 * depthStep));
+                        rect.visible = (effectControls.redacted || effectControls.redactedGlitch || effectControls.anon);
+                        if (config.id === 'rightEye') rightEyeRedactionRect = rect;
+                        if (config.id === 'leftEye') leftEyeRedactionRect = rect;
+                        scene.add(rect);
+                    }
+                });
+                break;
+            case 'textMesh':
+                if (config.id === 'marqueeTextMesh') {
+                    marqueeTexture = createMarqueeTexture();
+                    const newMarqueeMaterial = new THREE.MeshBasicMaterial({ map: marqueeTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
+                    const newMarqueePlaneWidth = 20;
+                    const newMarqueePlaneHeight = newMarqueePlaneWidth / (marqueeTexture.image.width / marqueeTexture.image.height);
+                    const newMarqueeGeometry = new THREE.PlaneGeometry(newMarqueePlaneWidth, newMarqueePlaneHeight);
+                    marqueeTextMesh = new THREE.Mesh(newMarqueeGeometry, newMarqueeMaterial);
+                    marqueeTextMesh.position.copy(config.initialPosition);
+                    marqueeTextMesh.userData.initialPosition = marqueeTextMesh.position.clone();
+                    marqueeTextMesh.userData.initialLayer = config.initialLayer;
+                    marqueeTextMesh.visible = effectControls.xray;
+                    scene.add(marqueeTextMesh);
+                } else if (config.id === 'biometricMarqueeTextMesh') {
+                    biometricMarqueeTexture = createBiometricMarqueeTexture();
+                    const newBiometricMarqueeMaterial = new THREE.MeshBasicMaterial({ map: biometricMarqueeTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
+                    const newBiometricMarqueePlaneWidth = 20;
+                    const newBiometricMarqueePlaneHeight = newBiometricMarqueePlaneWidth / (biometricMarqueeTexture.image.width / biometricMarqueeTexture.image.height);
+                    const newBiometricMarqueeGeometry = new THREE.PlaneGeometry(newBiometricMarqueePlaneWidth, newBiometricMarqueePlaneHeight);
+                    biometricMarqueeTextMesh = new THREE.Mesh(newBiometricMarqueeGeometry, newBiometricMarqueeMaterial);
+                    biometricMarqueeTextMesh.position.copy(config.initialPosition);
+                    biometricMarqueeTextMesh.userData.initialPosition = biometricMarqueeTextMesh.position.clone();
+                    biometricMarqueeTextMesh.userData.initialLayer = config.initialLayer;
+                    biometricMarqueeTextMesh.visible = effectControls.biometricMarquee || effectControls.og || effectControls.hacker || effectControls.surveillance || effectControls.greed;
+                    scene.add(biometricMarqueeTextMesh);
+                } else if (config.id === 'bloodTextMesh') {
+                    bloodTexture = createBloodTextTexture();
+                    const newBloodTextMaterial = new THREE.MeshBasicMaterial({ map: bloodTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
+                    const newBloodTextPlaneWidth = 20;
+                    const newBloodTextPlaneHeight = newBloodTextPlaneWidth / (bloodTexture.image.width / bloodTexture.image.height);
+                    const newBloodTextGeometry = new THREE.PlaneGeometry(newBloodTextPlaneWidth, newBloodTextPlaneHeight);
+                    bloodTextMesh = new THREE.Mesh(newBloodTextGeometry, newBloodTextMaterial);
+                    bloodTextMesh.position.copy(config.initialPosition);
+                    bloodTextMesh.userData.initialPosition = bloodTextMesh.position.clone();
+                    bloodTextMesh.userData.initialLayer = config.initialLayer;
+                    bloodTextMesh.visible = false;
+                    scene.add(bloodTextMesh);
+                } else if (config.id === 'redactedGlitchTextMesh') {
+                    redactedGlitchTexture = createRedactedGlitchTexture();
+                    const redactedGlitchMaterial = new THREE.MeshBasicMaterial({ map: redactedGlitchTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
+                    const redactedGlitchPlaneWidth = 15;
+                    const redactedGlitchPlaneHeight = redactedGlitchPlaneWidth / (redactedGlitchTexture.image.width / redactedGlitchTexture.image.height);
+                    const redactedGlitchGeometry = new THREE.PlaneGeometry(redactedGlitchPlaneWidth, redactedGlitchPlaneHeight);
+                    redactedGlitchTextMesh = new THREE.Mesh(redactedGlitchGeometry, redactedGlitchMaterial);
+                    redactedGlitchTextMesh.position.copy(config.initialPosition);
+                    redactedGlitchTextMesh.userData.initialPosition = redactedGlitchTextMesh.position.clone();
+                    redactedGlitchTextMesh.userData.initialLayer = config.initialLayer;
+                    redactedGlitchTextMesh.visible = effectControls.redactedGlitch;
+                    scene.add(redactedGlitchTextMesh);
+                    initializeRedactedGlitchPhraseData();
+                }
+                break;
+        }
+    });
+
+    camera.position.copy(initialGlobalCameraPos);
+    controls.target.copy(initialGlobalCameraLookAt);
+    camera.lookAt(controls.target);
+    controls.update();
+
+    effectControls.cameraAnimation = false;
+    effectControls.yRotation = false;
+    cameraAnimationActive = false;
+    controls.enabled = true;
+    updateUIButtonState('yRotation', false);
+    updateUIButtonState('cameraAnimation', false);
+
+    effectControls.redacted = false;
+    effectControls.redactedGlitch = false;
+    effectControls.anon = false;
+    effectControls.hacker = false;
+    effectControls.surveillance = false;
+    effectControls.greed = false;
+    updateUIButtonState('redacted', false);
+    updateUIButtonState('redactedGlitch', false);
+    updateUIButtonState('anon', false);
+    updateUIButtonState('hacker', false);
+    updateUIButtonState('surveillance', false);
+    updateUIButtonState('greed', false);
+
+    if (!effectControls.redacted && !effectControls.redactedGlitch && !effectControls.anon && !effectControls.hacker && !effectControls.surveillance && !effectControls.greed) {
+        effectControls.threshold = false;
+        thresholdPass.enabled = false;
+        updateUIButtonState('threshold', false);
+    }
+
+    updateFaceMaterialBrightness();
+    lastActivityTime = performance.now();
+    yRotationStartTime = 0;
+}
+
+function turnOffAllEffects() {
+    greyscalePass.enabled = false;
+    thresholdPass.enabled = false;
+    darkPass.enabled = false;
+    pixelationPass.enabled = false;
+    glitchPass.enabled = false;
+    matrixPass.enabled = false;
+    asciiPass.enabled = false;
+    xrayPass.enabled = false;
+    heatmapPass.enabled = false;
+    bloodPass.enabled = false;
+    cctvFeedPass.enabled = false;
+
+    for (const prop in effectControls) {
+        if (effectControls.hasOwnProperty(prop)) {
+            effectControls[prop] = false;
+        }
+    }
+
+    updateUIButtonState('greyscale', false);
+    updateUIButtonState('threshold', false);
+    updateUIButtonState('shadow', false);
+    updateUIButtonState('pixelation', false);
+    updateUIButtonState('glitch', false);
+    updateUIButtonState('matrix', false);
+    updateUIButtonState('ascii', false);
+    updateUIButtonState('xray', false);
+    updateUIButtonState('heatmap', false);
+    updateUIButtonState('blood', false);
+    updateUIButtonState('cctvFeed', false);
+    updateUIButtonState('yRotation', false);
+    updateUIButtonState('cameraAnimation', false);
+    updateUIButtonState('redacted', false);
+    updateUIButtonState('redactedGlitch', false);
+    updateUIButtonState('anon', false);
+    updateUIButtonState('biometricMarquee', false);
+    updateUIButtonState('og', false);
+    updateUIButtonState('bloodText', false);
+    updateUIButtonState('hacker', false);
+    updateUIButtonState('surveillance', false);
+    updateUIButtonState('greed', false);
+
+    if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false;
+    if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false;
+    if (marqueeTextMesh) marqueeTextMesh.visible = false;
+    if (biometricMarqueeTextMesh) biometricMarqueeTextMesh.visible = false;
+    if (bloodTextMesh) bloodTextMesh.visible = false;
+    if (redactedGlitchTextMesh) redactedGlitchTextMesh.visible = false;
+
+    foreheadMeshes.forEach(mesh => mesh.visible = false);
+    shufflingCardMeshes.forEach(mesh => mesh.visible = false);
+
+    cameraAnimationActive = false;
+    controls.enabled = true;
+    cameraAnimationState = 'idle';
+    assetsVisitedCount = 0;
+
+    updateFaceMaterialBrightness();
+    lastActivityTime = performance.now();
+    yRotationStartTime = 0;
+}
+
+const textureAlphaCanvasCache = new Map();
+
+function getAlphaAtUV(texture, uv) {
+    if (!texture || !texture.image || !uv) return 0;
+    let canvas, context;
+    if (textureAlphaCanvasCache.has(texture.id)) {
+        ({ canvas, context } = textureAlphaCanvasCache.get(texture.id));
+    } else {
+        canvas = document.createElement('canvas');
+        context = canvas.getContext('2d');
+        canvas.width = texture.image.width;
+        canvas.height = texture.image.height;
+        context.drawImage(texture.image, 0, 0);
+        textureAlphaCanvasCache.set(texture.id, { canvas, context });
+    }
+    const x = Math.floor(uv.x * canvas.width);
+    const y = Math.floor((1 - uv.y) * canvas.height);
+    if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) return 0;
+    const pixelData = context.getImageData(x, y, 1, 1).data;
+    return pixelData[3] / 255;
+}
+
+function init() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 10;
+    camera.userData.yRotationAngle = 0;
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x1e1e1e);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    document.body.appendChild(renderer.domElement);
+    renderer.sortObjects = true;
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.screenSpacePanning = false;
+    controls.minDistance = 1;
+    controls.maxDistance = 20;
+    controls.maxPolarAngle = Math.PI / 2;
+    controls.addEventListener('change', () => {
+        lastActivityTime = performance.now();
+        stopCameraAnimationAndReset();
+    });
+    initialGlobalCameraPos.copy(camera.position);
+    initialGlobalCameraLookAt.copy(controls.target);
+
+    const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
+    composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    greyscalePass = new ShaderPass(GreyScaleShader);
+    composer.addPass(greyscalePass);
+    greyscalePass.enabled = effectControls.greyscale;
+    thresholdPass = new ShaderPass(ThresholdShader);
+    thresholdPass.uniforms['threshold'].value = effectControls.thresholdValue;
+    composer.addPass(thresholdPass);
+    thresholdPass.enabled = effectControls.threshold;
+    darkPass = new ShaderPass(DarkShader);
+    darkPass.uniforms['threshold'].value = effectControls.thresholdValue;
+    composer.addPass(darkPass);
+    darkPass.enabled = effectControls.shadow;
+    pixelationPass = new ShaderPass(PixelationShader);
+    pixelationPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
+    pixelationPass.uniforms['pixelSize'].value = effectControls.pixelSize;
+    composer.addPass(pixelationPass);
+    pixelationPass.enabled = effectControls.pixelation;
+    glitchPass = new GlitchPass();
+    composer.addPass(glitchPass);
+    glitchPass.enabled = effectControls.glitch;
+    matrixPass = new ShaderPass(MatrixShader);
+    composer.addPass(matrixPass);
+    matrixPass.enabled = effectControls.matrix;
+    asciiPass = new ShaderPass(ASCIIShader);
+    asciiPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
+    asciiPass.uniforms['pixelSize'].value = effectControls.pixelSize;
+    composer.addPass(asciiPass);
+    asciiPass.enabled = false;
+    xrayPass = new ShaderPass(XRayShader);
+    composer.addPass(xrayPass);
+    xrayPass.enabled = effectControls.xray;
+    heatmapPass = new ShaderPass(HeatmapShader);
+    composer.addPass(heatmapPass);
+    heatmapPass.enabled = effectControls.heatmap;
+    bloodPass = new ShaderPass(BloodShader);
+    composer.addPass(bloodPass);
+    bloodPass.enabled = effectControls.blood;
+    cctvFeedPass = new ShaderPass(CCTVFeedShader);
+    cctvFeedPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
+    cctvFeedPass.uniforms['time'].value = 0.0;
+    composer.addPass(cctvFeedPass);
+    cctvFeedPass.enabled = effectControls.cctvFeed;
+
+    raycaster = new THREE.Raycaster();
+    mouse = new THREE.Vector2();
+
+    const textureLoader = new THREE.TextureLoader();
+    const baseScale = 0.005;
+
+    const createFaceMesh = (id, url, initialPosition, initialLayer, scaleFactor) => {
+        const isFaceMesh = ['rightEye', 'leftEye', 'mouth', 'nose', 'jensenHuangCheek', 'jensenHuangHair'].includes(id);
+        textureLoader.load(url, (texture) => {
+            texture.colorSpace = THREE.SRGBColorSpace;
+            texture.minFilter = THREE.LinearFilter;
+            texture.magFilter = THREE.LinearFilter;
+            texture.generateMipmaps = false;
+            texture.anisotropy = maxAnisotropy;
+            const planeWidth = texture.image.width * baseScale * scaleFactor;
+            const planeHeight = texture.image.height * baseScale * scaleFactor;
+            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+            const defaultMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+            let brightMaterial = null;
+            if (isFaceMesh) {
+                brightMaterial = new THREE.ShaderMaterial({
+                    uniforms: { tDiffuse: { value: texture }, brightness: { value: 1.2 } },
+                    vertexShader: BrightenTextureShader.vertexShader,
+                    fragmentShader: BrightenTextureShader.fragmentShader,
+                    transparent: true,
+                    side: THREE.DoubleSide,
+                    alphaTest: 0.5
+                });
+                defaultMaterialMap.set(id, defaultMaterial);
+                brightMaterialMap.set(id, brightMaterial);
+            }
+            const mesh = new THREE.Mesh(geometry, defaultMaterial);
+            mesh.position.copy(initialPosition);
+            mesh.userData.currentLayer = initialLayer;
+            mesh.userData.initialPosition = initialPosition.clone();
+            mesh.userData.initialLayer = initialLayer;
+            mesh.userData.id = id;
+            mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
+            mesh.userData.isFaceMesh = isFaceMesh;
+            scene.add(mesh);
+            draggableObjects.push(mesh);
+            cameraAnimationTargets.push(mesh);
+            if (isFaceMesh) faceMeshes.push(mesh);
+            initialAssetConfigs.push({ id: id, type: 'image', url: url, initialPosition: initialPosition.clone(), initialLayer: initialLayer, initialScale: { width: planeWidth, height: planeHeight }, removed: false });
+
+            if (id === 'rightEye' || id === 'leftEye') {
+                if (id === 'rightEye') rightEyeMesh = mesh;
+                if (id === 'leftEye') leftEyeMesh = mesh;
+                const redactionWidth = planeWidth * 0.8;
+                const redactionHeight = planeHeight * 0.5;
+                const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
+                const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                const rect = new THREE.Mesh(redactionGeometry, redactionMaterial);
+                rect.position.set(mesh.position.x, mesh.position.y, mesh.position.z + (1.5 * depthStep));
+                rect.visible = (effectControls.redacted || effectControls.redactedGlitch || effectControls.anon);
+                if (id === 'rightEye') rightEyeRedactionRect = rect;
+                if (id === 'leftEye') leftEyeRedactionRect = rect;
+                scene.add(rect);
+            }
+        });
+    };
+
+    const jensenHuangHairInitialPosition = new THREE.Vector3(0, (0 + 3.25) * .9, (4 - 1) * depthStep + (7 * depthStep));
+    createFaceMesh('jensenHuangHair', URL_JENSEN_HUANG_HAIR, jensenHuangHairInitialPosition, 1 + 3, 1);
+
+    const foreheadImageUrls = [URL_FHEAD01, URL_FHEAD02, URL_FHEAD03, URL_FHEAD04, URL_FHEAD05];
+    const foreheadInitialZ = (8 - 1) * depthStep;
+    const foreheadBasePosition = new THREE.Vector3(0.2, 2.75, foreheadInitialZ);
+    foreheadImageUrls.forEach((url, index) => {
+        textureLoader.load(url, (texture) => {
+            texture.colorSpace = THREE.SRGBColorSpace;
+            texture.minFilter = THREE.LinearFilter;
+            texture.magFilter = THREE.LinearFilter;
+            texture.generateMipmaps = false;
+            texture.anisotropy = maxAnisotropy;
+            const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+            const scaleFactor = baseScale * 2 * 0.56;
+            const planeWidth = texture.image.width * scaleFactor;
+            const planeHeight = texture.image.height * scaleFactor;
+            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+            const foreheadMesh = new THREE.Mesh(geometry, material);
+            foreheadMesh.position.copy(foreheadBasePosition);
+            foreheadMesh.userData.currentLayer = 11;
+            foreheadMesh.userData.initialPosition = foreheadBasePosition.clone();
+            foreheadMesh.userData.initialLayer = 11;
+            foreheadMesh.userData.id = `forehead${index + 1}`;
+            foreheadMesh.userData.initialScale = { width: planeWidth, height: planeHeight };
+            foreheadMesh.userData.isFaceMesh = false;
+            scene.add(foreheadMesh);
+            draggableObjects.push(foreheadMesh);
+            cameraAnimationTargets.push(foreheadMesh);
+            foreheadMeshes.push(foreheadMesh);
+            foreheadMesh.visible = (index === 0);
+            initialAssetConfigs.push({ id: `forehead${index + 1}`, type: 'image', url: url, initialPosition: foreheadBasePosition.clone(), initialLayer: 11, initialScale: { width: planeWidth, height: planeHeight }, removed: false });
+        });
+    });
+
+    const gridRows = 3, gridCols = 3, gridStartX = -3.0, gridStartY = -3.0, gridSpacingX = 2.5, gridSpacingY = 2.5;
+    for (let row = 0; row < gridRows; row++) {
+        for (let col = 0; col < gridCols; col++) {
+            const randomLayer = Math.floor(Math.random() * (12 - (-10) + 1)) + (-10);
+            const cardZ = (randomLayer - 1) * depthStep;
+            const cardX = gridStartX + col * gridSpacingX;
+            const cardY = gridStartY + row * gridSpacingY;
+            const cardPosition = new THREE.Vector3(cardX, cardY, cardZ);
+            textureLoader.load(cardImageUrls[0], (texture) => {
+                texture.colorSpace = THREE.SRGBColorSpace;
+                texture.minFilter = THREE.LinearFilter;
+                texture.magFilter = THREE.LinearFilter;
+                texture.generateMipmaps = false;
+                texture.anisotropy = maxAnisotropy;
+                const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+                const scaleFactor = baseScale * 2 * 0.56;
+                const planeWidth = texture.image.width * scaleFactor;
+                const planeHeight = texture.image.height * scaleFactor;
+                const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+                const cardMesh = new THREE.Mesh(geometry, material);
+                cardMesh.position.copy(cardPosition);
+                cardMesh.userData.currentLayer = randomLayer;
+                cardMesh.userData.initialPosition = cardPosition.clone();
+                cardMesh.userData.initialLayer = randomLayer;
+                cardMesh.userData.id = `cardGrid_${row}_${col}`;
+                cardMesh.userData.initialScale = { width: planeWidth, height: planeHeight };
+                cardMesh.userData.isFaceMesh = false;
+                scene.add(cardMesh);
+                draggableObjects.push(cardMesh);
+                cameraAnimationTargets.push(cardMesh);
+                shufflingCardMeshes.push(cardMesh);
+                initialAssetConfigs.push({ id: `cardGrid_${row}_${col}`, type: 'image', url: cardImageUrls[0], initialPosition: cardPosition.clone(), initialLayer: randomLayer, initialScale: { width: planeWidth, height: planeHeight }, removed: false });
+            });
+        }
+    }
+
+    const rightEyeInitialPosition = new THREE.Vector3(.7 * .1 * 1, (0.175 * 1 * 1) + 2.0 + -2, (14 - 1) * depthStep);
+    createFaceMesh('rightEye', URL_RIGHT_EYE, rightEyeInitialPosition, 7, 1);
+
+    const cheekInitialPosition = new THREE.Vector3(1.6, -0.6, (5 - 1) * depthStep);
+    createFaceMesh('jensenHuangCheek', URL_JENSEN_HUANG_CHEEK, cheekInitialPosition, 5, 1.5);
+
+    const mouthInitialPosition = new THREE.Vector3(0, -3.5, (10 - 1.25) * depthStep);
+    createFaceMesh('mouth', URL_MOUTH, mouthInitialPosition, 9, 1);
+
+    const noseInitialPosition = new THREE.Vector3(0, -.25, (13 - 1) * depthStep);
+    createFaceMesh('nose', URL_NOSE, noseInitialPosition, 11, 0.93);
+
+    const signatureInitialLayer = 5;
+    const signatureInitialPosition = new THREE.Vector3(-5, -4.7, (5 - 1) * depthStep);
+    textureLoader.load(URL_SIGNATURE, (signatureTexture) => {
+        signatureTexture.colorSpace = THREE.SRGBColorSpace;
+        signatureTexture.minFilter = THREE.LinearFilter;
+        signatureTexture.magFilter = THREE.LinearFilter;
+        signatureTexture.generateMipmaps = false;
+        signatureTexture.anisotropy = maxAnisotropy;
+        const signatureMaterial = new THREE.MeshBasicMaterial({ map: signatureTexture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+        const signatureAspectRatio = signatureTexture.image.width / signatureTexture.image.height;
+        const signatureHeight = 1.0;
+        const signatureWidth = signatureHeight * signatureAspectRatio;
+        const signatureGeometry = new THREE.PlaneGeometry(signatureWidth, signatureHeight);
+        const signature = new THREE.Mesh(signatureGeometry, signatureMaterial);
+        signature.position.copy(signatureInitialPosition);
+        signature.userData.currentLayer = signatureInitialLayer;
+        signature.userData.initialPosition = signatureInitialPosition.clone();
+        signature.userData.initialLayer = signatureInitialLayer;
+        signature.userData.id = 'signature';
+        signature.userData.initialScale = { width: signatureWidth, height: signatureHeight };
+        signature.userData.isFaceMesh = false;
+        scene.add(signature);
+        initialAssetConfigs.push({ id: 'signature', type: 'image', url: URL_SIGNATURE, initialPosition: signatureInitialPosition.clone(), initialLayer: signatureInitialLayer, initialScale: { width: signatureWidth, height: signatureHeight }, removed: false });
+    });
+
+    marqueeTexture = createMarqueeTexture();
+    const marqueeMaterial = new THREE.MeshBasicMaterial({ map: marqueeTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
+    const marqueeGeometry = new THREE.PlaneGeometry(20, 20 / (marqueeTexture.image.width / marqueeTexture.image.height));
+    marqueeTextMesh = new THREE.Mesh(marqueeGeometry, marqueeMaterial);
+    marqueeTextMesh.position.set(0, 0, -3 * depthStep);
+    marqueeTextMesh.visible = false;
+    marqueeTextMesh.userData.initialPosition = marqueeTextMesh.position.clone();
+    marqueeTextMesh.userData.initialLayer = -3;
+    marqueeTextMesh.userData.id = 'marqueeTextMesh';
+    scene.add(marqueeTextMesh);
+    initialAssetConfigs.push({ id: 'marqueeTextMesh', type: 'textMesh', initialPosition: marqueeTextMesh.position.clone(), initialLayer: -3, removed: false });
+
+    biometricMarqueeTexture = createBiometricMarqueeTexture();
+    const biometricMarqueeMaterial = new THREE.MeshBasicMaterial({ map: biometricMarqueeTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
+    const biometricMarqueeGeometry = new THREE.PlaneGeometry(20, 20 / (biometricMarqueeTexture.image.width / biometricMarqueeTexture.image.height));
+    biometricMarqueeTextMesh = new THREE.Mesh(biometricMarqueeGeometry, biometricMarqueeMaterial);
+    biometricMarqueeTextMesh.position.set(0, 0, (5 - 1) * depthStep);
+    biometricMarqueeTextMesh.visible = false;
+    biometricMarqueeTextMesh.userData.initialPosition = biometricMarqueeTextMesh.position.clone();
+    biometricMarqueeTextMesh.userData.initialLayer = 5;
+    biometricMarqueeTextMesh.userData.id = 'biometricMarqueeTextMesh';
+    scene.add(biometricMarqueeTextMesh);
+    initialAssetConfigs.push({ id: 'biometricMarqueeTextMesh', type: 'textMesh', initialPosition: biometricMarqueeTextMesh.position.clone(), initialLayer: 5, removed: false });
+
+    bloodTexture = createBloodTextTexture();
+    const bloodTextMaterial = new THREE.MeshBasicMaterial({ map: bloodTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
+    const bloodTextGeometry = new THREE.PlaneGeometry(20, 20 / (bloodTexture.image.width / bloodTexture.image.height));
+    bloodTextMesh = new THREE.Mesh(bloodTextGeometry, bloodTextMaterial);
+    bloodTextMesh.position.set(0, 30, (8 - 1) * depthStep);
+    bloodTextMesh.visible = false;
+    bloodTextMesh.userData.initialPosition = bloodTextMesh.position.clone();
+    bloodTextMesh.userData.initialLayer = 8;
+    bloodTextMesh.userData.id = 'bloodTextMesh';
+    scene.add(bloodTextMesh);
+    initialAssetConfigs.push({ id: 'bloodTextMesh', type: 'textMesh', initialPosition: bloodTextMesh.position.clone(), initialLayer: 8, removed: false });
+
+    redactedGlitchTexture = createRedactedGlitchTexture();
+    const redactedGlitchMaterial = new THREE.MeshBasicMaterial({ map: redactedGlitchTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
+    const redactedGlitchGeometry = new THREE.PlaneGeometry(15, 15 / (redactedGlitchTexture.image.width / redactedGlitchTexture.image.height));
+    redactedGlitchTextMesh = new THREE.Mesh(redactedGlitchGeometry, redactedGlitchMaterial);
+    redactedGlitchTextMesh.position.set(0, 0, (1 - 1) * depthStep);
+    redactedGlitchTextMesh.visible = false;
+    redactedGlitchTextMesh.userData.initialPosition = redactedGlitchTextMesh.position.clone();
+    redactedGlitchTextMesh.userData.initialLayer = 1;
+    redactedGlitchTextMesh.userData.id = 'redactedGlitchTextMesh';
+    scene.add(redactedGlitchTextMesh);
+    initialAssetConfigs.push({ id: 'redactedGlitchTextMesh', type: 'textMesh', initialPosition: redactedGlitchTextMesh.position.clone(), initialLayer: 1, removed: false });
+
+    initializeRedactedGlitchPhraseData();
+    window.addEventListener('resize', onWindowResize);
+    renderer.domElement.addEventListener('pointerdown', onPointerDown);
+    renderer.domElement.addEventListener('pointermove', onPointerMove);
+    renderer.domElement.addEventListener('pointerup', onPointerUp);
+    renderer.domElement.addEventListener('click', onClick);
+
+    const addButtonToggle = (parentContainer, label, property, pass) => {
+        const button = document.createElement('button');
+        button.textContent = label.toUpperCase();
+        button.style.cssText = `background-color: black; color: white; padding: 4px; margin: 0; border: 0.5px solid ${effectControls[property] ? '#4CAF50' : 'white'}; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; box-sizing: border-box;`;
+        button.onmouseover = () => { button.style.borderColor = effectControls[property] ? '#66CC66' : '#777'; };
+        button.onmouseout = () => { button.style.borderColor = effectControls[property] ? '#4CAF50' : 'white'; };
+        button.onclick = (event) => {
+            event.stopPropagation();
+            let targetProperty = property;
+            if (property === 'hacker') { effectControls.og = !effectControls.og; effectControls.hacker = effectControls.og; targetProperty = 'og'; }
+            if (!effectControls[targetProperty]) {
+                if (effectControls.anon && targetProperty !== 'anon') { effectControls.anon = false; thresholdPass.enabled = false; bloodPass.enabled = false; glitchPass.enabled = false; if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false; if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false; updateUIButtonState('anon', false); }
+                if (targetProperty === 'cctvFeed') { effectControls.heatmap = false; heatmapPass.enabled = false; updateUIButtonState('heatmap', false); effectControls.blood = false; bloodPass.enabled = false; updateUIButtonState('blood', false); }
+                else if (targetProperty === 'heatmap') { effectControls.cctvFeed = false; cctvFeedPass.enabled = false; updateUIButtonState('cctvFeed', false); effectControls.blood = false; bloodPass.enabled = false; updateUIButtonState('blood', false); }
+                else if (targetProperty === 'blood' || targetProperty === 'bloodText') { effectControls.heatmap = false; heatmapPass.enabled = false; updateUIButtonState('heatmap', false); effectControls.cctvFeed = false; cctvFeedPass.enabled = false; updateUIButtonState('cctvFeed', false); }
+                if (targetProperty === 'anon') {
+                    for (const key in effectControls) { if (effectControls.hasOwnProperty(key) && !['anon', 'redacted', 'redactedGlitch', 'threshold', 'blood', 'glitch', 'yRotation', 'cameraAnimation', 'og', 'bloodText', 'hacker', 'surveillance', 'greed'].includes(key)) { if (effectControls[key]) { effectControls[key] = false; const p = getPassByName(key); if (p) p.enabled = false; updateUIButtonState(key, false); } } }
+                }
+            }
+            if (property !== 'hacker') effectControls[property] = !effectControls[property];
+            if (targetProperty === 'shadow') { darkPass.enabled = effectControls.shadow; effectControls.glitch = effectControls.shadow; glitchPass.enabled = effectControls.shadow; updateUIButtonState('shadow', effectControls.shadow); updateUIButtonState('glitch', effectControls.glitch); }
+            else if (targetProperty === 'redactedGlitch' || targetProperty === 'redacted') {
+                const vis = (effectControls.redacted || effectControls.redactedGlitch || effectControls.anon);
+                if (rightEyeRedactionRect) rightEyeRedactionRect.visible = vis;
+                if (leftEyeRedactionRect) leftEyeRedactionRect.visible = vis;
+                if (targetProperty === 'redactedGlitch') { glitchPass.enabled = effectControls.redactedGlitch; redactedGlitchTextMesh.visible = effectControls.redactedGlitch; updateUIButtonState('glitch', effectControls.redactedGlitch); }
+                if (vis) { effectControls.threshold = true; thresholdPass.enabled = true; updateUIButtonState('threshold', true); }
+            }
+            if (targetProperty === 'anon') { thresholdPass.enabled = effectControls.anon; bloodPass.enabled = effectControls.anon; glitchPass.enabled = effectControls.anon; if (rightEyeRedactionRect) rightEyeRedactionRect.visible = effectControls.anon; if (leftEyeRedactionRect) leftEyeRedactionRect.visible = effectControls.anon; updateUIButtonState('threshold', effectControls.anon); updateUIButtonState('blood', effectControls.anon); updateUIButtonState('glitch', effectControls.anon); }
+            if (property === 'cameraAnimation') { cameraAnimationActive = effectControls.cameraAnimation; controls.enabled = !cameraAnimationActive; if (cameraAnimationActive) { if (effectControls.yRotation) { effectControls.yRotation = false; updateUIButtonState('yRotation', false); } initialGlobalCameraPos.copy(camera.position); initialGlobalCameraLookAt.copy(controls.target); startCameraAnimation(performance.now()); } else { camera.position.copy(initialGlobalCameraPos); controls.target.copy(initialGlobalCameraLookAt); camera.lookAt(controls.target); } }
+            if (property === 'yRotation') { if (effectControls.yRotation) { controls.enabled = false; cameraAnimationActive = false; updateUIButtonState('cameraAnimation', false); yBounceInitialCameraX = camera.position.x; yBounceInitialCameraY = camera.position.y; yBounceInitialCameraZ = camera.position.z; yRotationStartTime = performance.now(); } else { controls.enabled = true; } }
+            updateFaceMaterialBrightness();
+            updateUIButtonState(property, effectControls[property]);
+        };
+        button.setAttribute('data-effect', property);
+        parentContainer.appendChild(button);
+    };
+
+    const getPassByName = (name) => {
+        switch (name) {
+            case 'greyscale': return greyscalePass;
+            case 'threshold': return thresholdPass;
+            case 'shadow': return darkPass;
+            case 'pixelation': return pixelationPass;
+            case 'glitch': return glitchPass;
+            case 'matrix': return matrixPass;
+            case 'ascii': return asciiPass;
+            case 'xray': return xrayPass;
+            case 'heatmap': return heatmapPass;
+            case 'blood': return bloodPass;
+            case 'cctvFeed': return cctvFeedPass;
+            default: return null;
+        }
+    };
+
+    const buttonsConfig = [
+        { label: '3D', property: 'yRotation', pass: null },
+        { label: 'FLY', property: 'cameraAnimation', pass: null },
+        { label: 'SHADOW', property: 'shadow', pass: darkPass },
+        { label: 'ASCII', property: 'ascii', pass: asciiPass },
+        { label: 'HEATMAP', property: 'heatmap', pass: heatmapPass },
+        { label: 'BLOOD', property: 'blood', pass: bloodPass },
+        { label: 'REDACTED', property: 'redactedGlitch', pass: null },
+        { label: 'ANON', property: 'anon', pass: null },
+        { label: 'BIOMETRIC', property: 'biometricMarquee', pass: null },
+        { label: 'OG', property: 'og', pass: null },
+        { label: 'BLOOD TEXT', property: 'bloodText', pass: null },
+        { label: 'DATA SCRAPER', property: 'hacker', pass: null },
+        { label: 'BIO-CODER', property: 'surveillance', pass: null },
+        { label: 'HIDDEN HAND', property: 'greed', pass: null },
+        { label: 'Greyscale', property: 'greyscale', pass: greyscalePass },
+        { label: 'Threshold', property: 'threshold', pass: thresholdPass },
+        { label: 'Pixelation', property: 'pixelation', pass: pixelationPass },
+        { label: 'Glitch', property: 'glitch', pass: glitchPass },
+        { label: 'Matrix', property: 'matrix', pass: matrixPass },
+        { label: 'XRAY', property: 'xray', pass: xrayPass },
+        { label: 'CCTV FEED', property: 'cctvFeed', pass: cctvFeedPass },
+    ];
+
+    leftUiContainer = document.createElement('div');
+    leftUiContainer.id = 'left-ui-container';
+    leftUiContainer.style.cssText = 'position: absolute; top: -190px; left: 10px; padding: 10px; border-radius: 5px; font-family: monospace; z-index: 100; display: flex; flex-direction: column; gap: 5px; transition: top 0.5s ease-in-out;';
+    document.body.appendChild(leftUiContainer);
+    const rightUiContainer = document.createElement('div');
+    rightUiContainer.id = 'right-ui-container';
+    rightUiContainer.style.cssText = 'position: absolute; top: 10px; right: 10px; padding: 10px; display: none; flex-direction: column; gap: 5px;';
+    document.body.appendChild(rightUiContainer);
+
+    const leftUiOrder = ['yRotation', 'cameraAnimation', 'surveillance', 'greed', 'hacker', 'shadow', 'redactedGlitch'];
+    const buttonConfigMap = new Map(buttonsConfig.map(config => [config.property, config]));
+    leftUiOrder.forEach(p => { const c = buttonConfigMap.get(p); if (c) addButtonToggle(leftUiContainer, c.label, c.property, c.pass); });
+    buttonsConfig.forEach(c => { if (!leftUiOrder.includes(c.property)) addButtonToggle(rightUiContainer, c.label, c.property, c.pass); });
+
+    const createResetButton = () => {
+        const b = document.createElement('button');
+        b.textContent = 'RESET';
+        b.style.cssText = 'background-color: black; color: white; padding: 4px; margin-top: 10px; border: 0.5px solid rgba(0,0,0,0.8); cursor: pointer; font-family: monospace; font-size: 7px;';
+        b.onclick = (e) => { e.stopPropagation(); resetPiecesToOriginalPositions(); };
+        return b;
+    };
+    leftUiContainer.appendChild(createResetButton());
+    rightUiContainer.appendChild(createResetButton());
+    const createTrashButton = () => {
+        const b = document.createElement('button');
+        b.id = 'trash-button'; b.innerHTML = 'TRASH';
+        b.style.cssText = 'background-color: black; color: white; padding: 4px; margin-top: 10px; cursor: pointer; font-family: monospace; font-size: 7px;';
+        return b;
+    };
+    trashButtonElement = createTrashButton();
+    leftUiContainer.appendChild(trashButtonElement);
+    arrowContainer = document.createElement('div');
+    arrowContainer.style.cssText = 'position: absolute; top: 0px; left: 20px; background-color: black; width: 60px; height: 15px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 101; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; transition: top 0.5s ease-in-out;';
+    const arrowSpan = document.createElement('span');
+    arrowSpan.style.color = 'white'; arrowSpan.style.fontSize = '10px'; arrowSpan.innerHTML = '&#x25BC;';
+    arrowContainer.appendChild(arrowSpan);
+    document.body.appendChild(arrowContainer);
+    arrowContainer.onclick = (e) => {
+        e.stopPropagation();
+        if (leftUiContainer.style.top === '10px') { leftUiContainer.style.top = '-190px'; trashButtonElement.style.display = 'none'; arrowContainer.style.top = '0px'; arrowSpan.innerHTML = '&#x25BC;'; }
+        else { leftUiContainer.style.top = '10px'; trashButtonElement.style.display = 'block'; arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; arrowSpan.innerHTML = '&#x25B2'; }
+    };
+    trashButtonElement.style.display = 'none';
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight);
+    if (composer) composer.setSize(window.innerWidth, window.innerHeight);
+    if (pixelationPass) pixelationPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
+    if (asciiPass) asciiPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
+    if (cctvFeedPass) cctvFeedPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
+    if (leftUiContainer.style.top === '10px') arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
+    lastActivityTime = performance.now(); stopCameraAnimationAndReset();
+}
+
+function onPointerDown(event) {
+    lastActivityTime = performance.now(); isDragging = false; pointerDownPosition.set(event.clientX, event.clientY);
+    if (event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) { selectedObject = null; controls.enabled = true; return; }
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(draggableObjects, true);
+    for (const intersect of intersects) {
+        const object = intersect.object; const material = object.material;
+        if (material && material.map && material.transparent) { if (getAlphaAtUV(material.map, intersect.uv) > 0.1) { selectedObject = object; controls.enabled = false; initialObjectZ = selectedObject.position.z; offset.copy(intersect.point).sub(selectedObject.position); break; } }
+        else if (material instanceof THREE.ShaderMaterial && material.alphaTest !== undefined && material.alphaTest > 0) { selectedObject = object; controls.enabled = false; initialObjectZ = selectedObject.position.z; offset.copy(intersect.point).sub(selectedObject.position); break; }
+        else if (material && !material.transparent) { selectedObject = object; controls.enabled = false; initialObjectZ = selectedObject.position.z; offset.copy(intersect.point).sub(selectedObject.position); break; }
+    }
+}
+
+function onPointerMove(event) {
+    lastActivityTime = performance.now();
+    if (selectedObject) {
+        if (new THREE.Vector2(event.clientX, event.clientY).distanceTo(pointerDownPosition) > DRAG_THRESHOLD) isDragging = true;
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const plane = new THREE.Plane(); plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), new THREE.Vector3(0, 0, initialObjectZ));
+        const intersection = new THREE.Vector3();
+        if (raycaster.ray.intersectPlane(plane, intersection)) {
+            const oldX = selectedObject.position.x, oldY = selectedObject.position.y;
+            selectedObject.position.x = intersection.x - offset.x; selectedObject.position.y = intersection.y - offset.y; selectedObject.position.z = initialObjectZ;
+            const deltaX = selectedObject.position.x - oldX, deltaY = selectedObject.position.y - oldY;
+            if (foreheadMeshes.includes(selectedObject)) { foreheadMeshes.forEach(mesh => { if (mesh !== selectedObject) { mesh.position.x += deltaX; mesh.position.y += deltaY; mesh.position.z = initialObjectZ; } }); }
+            if (selectedObject === rightEyeMesh && rightEyeRedactionRect) { rightEyeRedactionRect.position.x = selectedObject.position.x; rightEyeRedactionRect.position.y = selectedObject.position.y; }
+            if (selectedObject === leftEyeMesh && leftEyeRedactionRect) { leftEyeRedactionRect.position.x = selectedObject.position.x; leftEyeRedactionRect.position.y = selectedObject.position.y; }
+        }
+    }
+}
+
+function onPointerUp(event) {
+    lastActivityTime = performance.now();
+    if (isDragging && selectedObject && trashButtonElement) {
+        const rect = trashButtonElement.getBoundingClientRect();
+        if (event.clientX >= rect.left - 20 && event.clientX <= rect.right + 20 && event.clientY >= rect.top - 20 && event.clientY <= rect.bottom + 20) {
+            const configIndex = initialAssetConfigs.findIndex(config => config.id === selectedObject.userData.id);
+            if (configIndex !== -1) initialAssetConfigs[configIndex].removed = true;
+            scene.remove(selectedObject); draggableObjects = draggableObjects.filter(obj => obj !== selectedObject);
+            cameraAnimationTargets = cameraAnimationTargets.filter(obj => obj !== selectedObject);
+            foreheadMeshes = foreheadMeshes.filter(mesh => mesh !== selectedObject);
+            shufflingCardMeshes = shufflingCardMeshes.filter(mesh => mesh !== selectedObject);
+            if (selectedObject.userData.id === 'rightEye' && rightEyeRedactionRect) { scene.remove(rightEyeRedactionRect); rightEyeMesh = null; rightEyeRedactionRect = null; }
+            if (selectedObject.userData.id === 'leftEye' && leftEyeRedactionRect) { scene.remove(leftEyeRedactionRect); leftEyeMesh = null; leftEyeRedactionRect = null; }
+        }
+    }
+    selectedObject = null; if (!cameraAnimationActive && !effectControls.yRotation) controls.enabled = true;
+}
+
+function onClick(event) {
+    lastActivityTime = performance.now();
+    if (isDragging || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) return;
+    stopCameraAnimationAndReset();
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(draggableObjects, true);
+    let clickedObject = null;
+    for (const intersect of intersects) {
+        const object = intersect.object; const material = object.material;
+        if (material instanceof THREE.ShaderMaterial && material.alphaTest !== undefined && material.alphaTest > 0) { clickedObject = object; break; }
+        else if (material && material.map && material.transparent) { if (getAlphaAtUV(material.map, intersect.uv) > 0.1) { clickedObject = object; break; } }
+        else if (material && !material.transparent) { clickedObject = object; break; }
+    }
+    if (clickedObject && !['backgroundMesh', 'rightEyeRedactionRect', 'leftEyeRedactionRect', 'marqueeTextMesh', 'biometricMarqueeTextMesh', 'bloodTextMesh', 'redactedGlitchTextMesh'].includes(clickedObject.userData.id)) {
+        let currentLayer = clickedObject.userData.currentLayer || 1;
+        currentLayer--; if (currentLayer < 1) currentLayer = totalDepthLayers;
+        if (foreheadMeshes.includes(clickedObject)) { foreheadMeshes.forEach(mesh => { mesh.userData.currentLayer = currentLayer; mesh.position.z = (currentLayer - 1) * depthStep; }); }
+        else { clickedObject.userData.currentLayer = currentLayer; clickedObject.position.z = (currentLayer - 1) * depthStep; }
+        if (clickedObject === rightEyeMesh && rightEyeRedactionRect) rightEyeRedactionRect.position.z = clickedObject.position.z + (1.5 * depthStep);
+        if (clickedObject === leftEyeMesh && leftEyeRedactionRect) leftEyeRedactionRect.position.z = clickedObject.position.z + (1.5 * depthStep);
+    }
+}
+
+function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+
+function startCameraAnimation(currentTime) {
+    if (!cameraAnimationActive || cameraAnimationTargets.length === 0) return;
+    cameraPreviousPos.copy(camera.position); cameraPreviousLookAt.copy(controls.target); cameraAnimationStartTime = currentTime;
+    cameraAnimationState = 'exploring'; assetsVisitedCount++;
+    const validTargets = cameraAnimationTargets;
+    let newTarget; do { newTarget = validTargets[Math.floor(Math.random() * validTargets.length)]; } while (newTarget === cameraTargetObject && validTargets.length > 1);
+    cameraTargetObject = newTarget;
+    const center = new THREE.Box3().setFromObject(cameraTargetObject).getCenter(new THREE.Vector3());
+    const baseDistance = Math.max(new THREE.Box3().setFromObject(cameraTargetObject).getSize(new THREE.Vector3()).x, new THREE.Box3().setFromObject(cameraTargetObject).getSize(new THREE.Vector3()).y) / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2));
+    cameraCurrentTargetPos.set(center.x + (Math.random() - 0.5) * baseDistance, center.y + (Math.random() - 0.5) * baseDistance, cameraTargetObject.position.z + baseDistance * (0.8 + Math.random() * 0.7));
+    cameraCurrentTargetLookAt.copy(center);
+}
+
+function updateCameraAnimation(currentTime) {
+    if (cameraAnimationState === 'idle' || !cameraAnimationActive) return;
+    const elapsed = currentTime - cameraAnimationStartTime;
+    const duration = cameraAnimationState === 'exploring' ? cameraExplorationDuration : cameraReturnDuration;
+    let t = Math.min(1, elapsed / duration); t = easeInOutCubic(t);
+    camera.position.lerpVectors(cameraPreviousPos, cameraCurrentTargetPos, t);
+    controls.target.lerpVectors(cameraPreviousLookAt, cameraCurrentTargetLookAt, t);
+    if (elapsed >= duration) startCameraAnimation(currentTime);
+    camera.lookAt(controls.target);
+}
+
+const cardTextures = [];
+function preloadCardTextures(callback) {
+    const loader = new THREE.TextureLoader(); let loadedCount = 0; const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
+    cardImageUrls.forEach((url, index) => { loader.load(url, (texture) => { texture.colorSpace = THREE.SRGBColorSpace; texture.minFilter = THREE.LinearFilter; texture.magFilter = THREE.LinearFilter; texture.generateMipmaps = false; texture.anisotropy = maxAnisotropy; cardTextures[index] = texture; loadedCount++; if (loadedCount === cardImageUrls.length && callback) callback(); }); });
+}
+
+function animate(currentTime) {
+    requestAnimationFrame(animate);
+    if (effectControls.yRotation) { controls.enabled = false; camera.position.x = yBounceInitialCameraX + yBounceRangeX * Math.sin(currentTime * yBounceSpeed); camera.lookAt(new THREE.Vector3(0, 0, 0)); }
+    else if (cameraAnimationActive) { controls.enabled = false; updateCameraAnimation(currentTime); } else controls.update();
+    if (foreheadMeshes.length > 0 && currentTime - lastFlashTime > FLASH_INTERVAL) { foreheadMeshes[currentForeheadIndex].visible = false; currentForeheadIndex = (currentForeheadIndex + 1) % foreheadMeshes.length; foreheadMeshes[currentForeheadIndex].visible = true; lastFlashTime = currentTime; }
+    if (shufflingCardMeshes.length > 0 && cardTextures.length === cardImageUrls.length && currentTime - lastCardFlashTime > FLASH_INTERVAL) { currentCardImageIndex = (currentCardImageIndex + 1) % cardTextures.length; shufflingCardMeshes.forEach(mesh => { mesh.material.map = cardTextures[currentCardImageIndex]; mesh.material.needsUpdate = true; }); lastCardFlashTime = currentTime; }
+    if (effectControls.xray) { marqueeScrollOffset -= MARQUEE_SCROLL_SPEED; if (marqueeScrollOffset <= -MARQUEE_LINE_HEIGHT * MARQUEE_TOTAL_LINES) marqueeScrollOffset = 0; updateMarqueeTexture(); }
+    if (effectControls.biometricMarquee || effectControls.og || effectControls.hacker || effectControls.surveillance || effectControls.greed) { biometricMarqueeScrollOffset -= BIOMETRIC_MARQUEE_SCROLL_SPEED; if (biometricMarqueeScrollOffset <= -BIOMETRIC_MARQUEE_LINE_HEIGHT * BIOMETRIC_MARQUEE_TOTAL_LINES) biometricMarqueeScrollOffset = 0; updateBiometricMarqueeTexture(currentTime); }
+    if (effectControls.bloodText) { bloodScrollOffset -= BLOOD_TEXT_SCROLL_SPEED; if (bloodScrollOffset <= -(BLOOD_TEXT_LINE_HEIGHT * BLOOD_TEXT_TOTAL_LINES)) bloodScrollOffset += (BLOOD_TEXT_LINE_HEIGHT * BLOOD_TEXT_TOTAL_LINES * 3); updateBloodTextTexture(); }
+    if (effectControls.redactedGlitch) { redactedGlitchScrollOffset -= REDACTED_GLITCH_SCROLL_SPEED; if (redactedGlitchScrollOffset <= -(REDACTED_GLITCH_LINE_HEIGHT * REDACTED_GLITCH_TOTAL_LINES)) { redactedGlitchScrollOffset = 0; initializeRedactedGlitchPhraseData(); } updateRedactedGlitchTexture(); }
+    composer.render();
+}
+
+init();
+preloadCardTextures(() => animate());
+
+setTimeout(() => {
+    window.animate = typeof animate == "function" ? animate : () => { };
+    window.camera = typeof camera != "undefined" ? camera : undefined;
+    window.renderer = typeof renderer != "undefined" ? renderer : undefined;
+    window.scene = typeof scene != "undefined" ? scene : undefined;
+}, 1000);
+    
+    // Expose for dae hooks
+    setTimeout(function() {
+      window.animate = typeof animate == "function" ? animate : () => {}; 
+      window.camera = typeof camera != "undefined" ? camera : undefined; 
+      window.renderer = typeof renderer != "undefined" ? renderer : undefined; 
+      window.scene = typeof scene != "undefined" ? scene : undefined; 
+    }, 1000)
+  </script>
+
+</body></html>
