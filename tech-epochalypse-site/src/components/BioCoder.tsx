@@ -135,7 +135,7 @@ export default function BioCoder() {
         const xOffset = Math.sin(i * 0.7 + sinePhase) * 40
 
         // Draw text in faint green
-        ctx.fillStyle = 'rgba(0, 255, 0, 0.07)'
+        ctx.fillStyle = 'rgba(0, 255, 65, 0.15)'
         ctx.fillText(line, canvas.width / 2 + xOffset, yPos)
 
         // Apply stable redaction
@@ -181,7 +181,7 @@ export default function BioCoder() {
 
           if (animType === 0 && graphData.length > 0) {
             // Bar graph
-            ctx.strokeStyle = 'rgba(0, 255, 0, 0.06)'
+            ctx.strokeStyle = 'rgba(0, 255, 65, 0.12)'
             ctx.lineWidth = 1
             ctx.beginPath()
             ctx.moveTo(animX, animY + animHeight)
@@ -199,7 +199,7 @@ export default function BioCoder() {
             ctx.stroke()
           } else if (animType === 1) {
             // Sine wave
-            ctx.strokeStyle = 'rgba(0, 255, 0, 0.05)'
+            ctx.strokeStyle = 'rgba(0, 255, 65, 0.10)'
             ctx.lineWidth = 1
             ctx.beginPath()
             for (let j = 0; j < animWidth; j++) {
@@ -214,7 +214,7 @@ export default function BioCoder() {
             ctx.stroke()
           } else {
             // Heartbeat
-            ctx.strokeStyle = 'rgba(0, 255, 0, 0.06)'
+            ctx.strokeStyle = 'rgba(0, 255, 65, 0.12)'
             ctx.lineWidth = 1
             ctx.beginPath()
             for (let j = 0; j < animWidth; j++) {
@@ -240,7 +240,7 @@ export default function BioCoder() {
       // Occasional scan line
       if (Math.random() > 0.98) {
         const scanY = (time * 0.05) % canvas.height
-        ctx.fillStyle = 'rgba(0, 255, 0, 0.03)'
+        ctx.fillStyle = 'rgba(0, 255, 65, 0.06)'
         ctx.fillRect(0, scanY, canvas.width, 2)
       }
 

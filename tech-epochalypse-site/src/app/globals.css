@@ -99,12 +99,12 @@
   /* ── Text Styles ── */
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #ffffff, #888888, #ffffff);
+    background-image: linear-gradient(135deg, #00ffff, #00ff41, #00ffff);
   }
 
   .text-gradient-gold {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #cccccc, #ffffff, #cccccc);
+    background-image: linear-gradient(135deg, #d4a843, #f0d078, #d4a843);
   }
 
   /* ── Redacted Text ── */
