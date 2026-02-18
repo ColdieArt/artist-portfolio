@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import ScrollReveal from '@/components/ScrollReveal'
 
 export const metadata: Metadata = {
@@ -153,6 +152,25 @@ export default function AboutPage() {
                   represents a different facet of this epoch: innovation,
                   connectivity, acceleration, optimization, and silicon.
                 </p>
+                <p>
+                  Tech Epochalypse was created to engage viewers to &lsquo;touch
+                  the art.&rsquo; The suite of control layers leads to options.
+                  These works were created to inspire new thoughts each time they
+                  are viewed, so for this reason, the token is not permanently
+                  affected each time a new layout is created. Once the art is
+                  reloaded, the layout starts fresh and inspires a new expression.
+                  These pieces are networked art and meant to be shared and
+                  experimented both on your computer and mobile with the
+                  touchscreen experience.
+                </p>
+                <p>
+                  This is the first time Coldie has created kinetic 3D interactive
+                  art. This level of functionality and interactivity will be the
+                  building blocks for future releases. Tech Epochalypse is built
+                  on the Transient Labs ERC-7160 token standard, allowing for
+                  evolutionary updates and variety of asset storage options to
+                  ensure the art is always viewable.
+                </p>
               </div>
             </div>
           </ScrollReveal>
@@ -196,7 +214,7 @@ export default function AboutPage() {
               Interviews &amp; Conversations
             </p>
             <h2 className="font-display text-3xl md:text-4xl text-white uppercase tracking-[0.03em]">
-              Deep Dive
+              Deep Dive Decentral Eyes
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -271,9 +289,14 @@ export default function AboutPage() {
               >
                 <span>Connect on X</span>
               </a>
-              <Link href="/overlords" className="btn-secondary">
-                <span>View the Overlords</span>
-              </Link>
+              <a
+                href="https://coldie3d.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary"
+              >
+                <span>Visit Coldie3d.com</span>
+              </a>
             </div>
           </div>
         </ScrollReveal>
