@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import ScrollReveal from '@/components/ScrollReveal'
 
 export const metadata: Metadata = {
@@ -271,9 +270,14 @@ export default function AboutPage() {
               >
                 <span>Connect on X</span>
               </a>
-              <Link href="/overlords" className="btn-secondary">
-                <span>View the Overlords</span>
-              </Link>
+              <a
+                href="https://coldie3d.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary"
+              >
+                <span>Visit Coldie3d.com</span>
+              </a>
             </div>
           </div>
         </ScrollReveal>
