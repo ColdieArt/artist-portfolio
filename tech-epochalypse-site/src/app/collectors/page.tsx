@@ -21,10 +21,10 @@ export default function CollectorsPage() {
         {/* Header */}
         <ScrollReveal>
           <div className="text-center mb-16 md:mb-24">
-            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-white/20 mb-4">
+            <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/40 mb-4">
               The Inner Circle
             </p>
-            <h1 className="font-display text-4xl md:text-6xl text-white mb-4 uppercase tracking-[0.05em]">
+            <h1 className="font-display text-5xl md:text-7xl text-white mb-4 uppercase tracking-[0.05em]">
               Patrons &amp; Collectors
             </h1>
             <p className="font-mono text-sm text-white/50 max-w-2xl mx-auto">
@@ -33,7 +33,7 @@ export default function CollectorsPage() {
             </p>
             <div className="flex items-center justify-center gap-3 mt-4">
               <div className="w-12 h-px bg-white/10" />
-              <span className="font-mono text-[9px] text-white/10 uppercase tracking-wider">
+              <span className="font-mono text-xs text-white/25 uppercase tracking-wider">
                 Access: <span className="redacted">VERIFIED</span>
               </span>
               <div className="w-12 h-px bg-white/10" />
@@ -77,14 +77,14 @@ export default function CollectorsPage() {
                       </h3>
 
                       {collector.bio && (
-                        <p className="text-white/40 text-sm font-mono italic leading-relaxed mb-4">
+                        <p className="text-white/60 text-sm font-mono italic leading-relaxed mb-4">
                           &ldquo;{collector.bio}&rdquo;
                         </p>
                       )}
 
                       {/* Owned pieces */}
                       <div className="mb-4">
-                        <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/15 mb-2">
+                        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/35 mb-2">
                           Collection
                         </p>
                         <div className="flex flex-wrap gap-2">
@@ -109,7 +109,7 @@ export default function CollectorsPage() {
                                     style={{ filter: 'grayscale(1)' }}
                                   />
                                 )}
-                                <span className="font-mono text-[9px] uppercase tracking-wider text-white/25 group-hover/piece:text-white/50 transition-colors">
+                                <span className="font-mono text-[11px] uppercase tracking-wider text-white/40 group-hover/piece:text-white/60 transition-colors">
                                   {overlord.name}
                                 </span>
                               </Link>
@@ -125,7 +125,7 @@ export default function CollectorsPage() {
                             href={collector.socials.twitter}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-white/15 hover:text-white/40 transition-colors"
+                            className="text-white/30 hover:text-white/50 transition-colors"
                             title="Twitter / X"
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -138,7 +138,7 @@ export default function CollectorsPage() {
                             href={collector.socials.instagram}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-white/15 hover:text-white/40 transition-colors"
+                            className="text-white/30 hover:text-white/50 transition-colors"
                             title="Instagram"
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -153,7 +153,7 @@ export default function CollectorsPage() {
                             href={collector.socials.website}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-white/15 hover:text-white/40 transition-colors"
+                            className="text-white/30 hover:text-white/50 transition-colors"
                             title="Website"
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -179,13 +179,13 @@ export default function CollectorsPage() {
         <ScrollReveal>
           <div className="mt-24 text-center">
             <div className="line-accent mb-12" />
-            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-white/15 mb-4">
+            <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/35 mb-4">
               Join the Network
             </p>
             <h3 className="font-display text-2xl md:text-3xl text-white mb-4 uppercase tracking-[0.03em]">
               Interested in Collecting?
             </h3>
-            <p className="text-white/40 text-sm font-mono max-w-lg mx-auto mb-8 leading-relaxed">
+            <p className="text-white/55 text-sm font-mono max-w-lg mx-auto mb-8 leading-relaxed">
               The Tech Epochalypse series represents a new frontier in
               interactive digital art. Contact the artist to learn about
               available pieces and future drops.
