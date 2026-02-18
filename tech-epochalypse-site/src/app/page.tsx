@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import ParticleNetwork from '@/components/ParticleNetwork'
+import BioCoder from '@/components/BioCoder'
 import ScrollReveal from '@/components/ScrollReveal'
 import overlords from '@/data/overlords.json'
 
@@ -10,6 +11,9 @@ export default function HomePage() {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
         {/* Particle background with pixelated blocks */}
         <ParticleNetwork />
+
+        {/* Bio-Coder surveillance data overlay */}
+        <BioCoder />
 
         {/* Dark vignette */}
         <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/60 to-black pointer-events-none" />
