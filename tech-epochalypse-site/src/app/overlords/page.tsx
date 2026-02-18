@@ -23,8 +23,7 @@ export default function OverlordsPage() {
               The Overlords
             </h1>
             <p className="font-mono text-sm text-white/50 max-w-xl mx-auto">
-              Five figures who shaped the digital epoch. Each rendered as a
-              kinetic 3D portrait you can interact with.
+              Know the people who know everything about you.
             </p>
             <div className="flex items-center justify-center gap-3 mt-4">
               <div className="w-12 h-px bg-white/15" />
