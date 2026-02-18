@@ -12,6 +12,7 @@
     "artworkFile": "/artworks/elon-musk.html",
     "previewImage": "/images/overlords/ElonMusk-Thumbnail.png",
     "status": "live",
+    "twitterHandle": "elonmusk",
     "collector": null,
     "order": 1
   },
@@ -28,6 +29,7 @@
     "artworkFile": "/artworks/mark-zuckerberg.html",
     "previewImage": "/images/overlords/Zuckerberg-web.jpg",
     "status": "live",
+    "twitterHandle": "finkd",
     "collector": null,
     "order": 2
   },
@@ -44,6 +46,7 @@
     "artworkFile": "/artworks/sam-altman.html",
     "previewImage": "/images/overlords/Altman-web.jpg",
     "status": "live",
+    "twitterHandle": "sama",
     "collector": null,
     "order": 3
   },
@@ -60,6 +63,7 @@
     "artworkFile": "/artworks/jeff-bezos.html",
     "previewImage": "/images/overlords/Bezos-thumb.jpg",
     "status": "live",
+    "twitterHandle": "JeffBezos",
     "collector": null,
     "order": 4
   },
@@ -76,6 +80,7 @@
     "artworkFile": "/artworks/jensen-huang.html",
     "previewImage": "/images/overlords/Huang-web.jpg",
     "status": "live",
+    "twitterHandle": "nvidia",
     "collector": null,
     "order": 5
   }
