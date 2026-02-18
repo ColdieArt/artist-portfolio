@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import overlords from '@/data/overlords.json'
 import ArtworkViewer from '@/components/ArtworkViewer'
+import TwitterFeed from '@/components/TwitterFeed'
 
 interface PageProps {
   params: { slug: string }
@@ -134,6 +135,26 @@ export default function OverlordPage({ params }: PageProps) {
           </div>
         </div>
       </div>
+
+      {/* Recent X posts */}
+      {overlord.twitterHandle && (
+        <div className="bg-abyss border-b border-white/5">
+          <div className="max-w-7xl mx-auto px-6 md:px-12 py-12 md:py-16">
+            <div className="classified-header">
+              Intercepts &mdash; Recent Transmissions
+            </div>
+            <h2 className="font-display text-2xl md:text-3xl text-white mb-6 uppercase tracking-[0.03em]">
+              Live from @{overlord.twitterHandle}
+            </h2>
+            <div className="max-w-2xl">
+              <TwitterFeed
+                handle={overlord.twitterHandle}
+                name={overlord.name}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Launch artwork button */}
       <div className="flex-1 flex items-center justify-center bg-black">
