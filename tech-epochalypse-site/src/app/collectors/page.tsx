@@ -73,7 +73,7 @@ export default function CollectorsPage() {
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-display text-2xl text-white mb-1 uppercase tracking-[0.03em]">
-                        <span className="redacted-white">{collector.name}</span>
+                        {collector.name}
                       </h3>
 
                       {collector.bio && (
@@ -109,7 +109,7 @@ export default function CollectorsPage() {
                                     style={{ filter: 'grayscale(1)' }}
                                   />
                                 )}
-                                <span className="font-mono text-[9px] uppercase tracking-wider text-white/25 group-hover/piece:text-white/50 transition-colors redacted-white">
+                                <span className="font-mono text-[9px] uppercase tracking-wider text-white/25 group-hover/piece:text-white/50 transition-colors">
                                   {overlord.name}
                                 </span>
                               </Link>
