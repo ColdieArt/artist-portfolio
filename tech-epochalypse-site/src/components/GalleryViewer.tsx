@@ -18,6 +18,35 @@ interface Props {
   overlordSlugs: string[]
 }
 
+/**
+ * Cross-browser fullscreen helpers — handles webkit prefix for iOS Safari.
+ */
+function fsElement(): Element | null {
+  if (typeof document === 'undefined') return null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return document.fullscreenElement || (document as any).webkitFullscreenElement || null
+}
+
+async function fsRequest(el: HTMLElement): Promise<void> {
+  if (el.requestFullscreen) {
+    await el.requestFullscreen()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } else if ((el as any).webkitRequestFullscreen) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (el as any).webkitRequestFullscreen()
+  }
+}
+
+function fsExit(): void {
+  if (document.exitFullscreen) {
+    document.exitFullscreen()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } else if ((document as any).webkitExitFullscreen) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(document as any).webkitExitFullscreen()
+  }
+}
+
 export default function GalleryViewer({ items, overlordNames, overlordSlugs }: Props) {
   const [filter, setFilter] = useState<string>('all')
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
@@ -71,28 +100,27 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
     }
   })
 
-  // Fullscreen change listener
+  // Fullscreen change listener — only updates the flag, does NOT close lightbox
   useEffect(() => {
     const handler = () => {
-      if (!document.fullscreenElement) {
-        setIsFullscreen(false)
-        setLightboxIndex(null)
-        setSlideshow(false)
-      }
+      setIsFullscreen(!!fsElement())
     }
     document.addEventListener('fullscreenchange', handler)
-    return () => document.removeEventListener('fullscreenchange', handler)
+    document.addEventListener('webkitfullscreenchange', handler)
+    return () => {
+      document.removeEventListener('fullscreenchange', handler)
+      document.removeEventListener('webkitfullscreenchange', handler)
+    }
   }, [])
 
-  // Auto-enter fullscreen when lightbox opens
+  // Lock body scroll when lightbox is open
   useEffect(() => {
-    if (lightboxIndex !== null && lightboxRef.current && !document.fullscreenElement) {
-      lightboxRef.current.requestFullscreen().then(() => {
-        setIsFullscreen(true)
-      }).catch(() => {
-        // Fullscreen may be blocked by browser; lightbox still works without it
-      })
+    if (lightboxIndex !== null) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
     }
+    return () => { document.body.style.overflow = '' }
   }, [lightboxIndex !== null])
 
   const activeList = slideshow ? slideshowItems : filtered
@@ -105,7 +133,10 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
   const closeLightbox = () => {
     setLightboxIndex(null)
     setSlideshow(false)
-    if (isFullscreen) exitFullscreen()
+    if (fsElement()) {
+      try { fsExit() } catch { /* ignore */ }
+    }
+    setIsFullscreen(false)
   }
 
   const goNext = useCallback(() => {
@@ -125,19 +156,17 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
 
   const toggleFullscreen = async () => {
     if (!lightboxRef.current) return
-    if (!document.fullscreenElement) {
-      await lightboxRef.current.requestFullscreen()
-      setIsFullscreen(true)
-    } else {
-      exitFullscreen()
+    try {
+      if (!fsElement()) {
+        await fsRequest(lightboxRef.current)
+        setIsFullscreen(true)
+      } else {
+        fsExit()
+        setIsFullscreen(false)
+      }
+    } catch {
+      // Fullscreen not supported (e.g. some mobile browsers) — ignore
     }
-  }
-
-  const exitFullscreen = () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen()
-    }
-    setIsFullscreen(false)
   }
 
   const startSlideshow = (overlordFilter: string) => {
@@ -293,9 +322,9 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
           }}
         >
           {/* Top bar */}
-          <div className="flex items-center justify-between px-4 md:px-8 py-4 bg-black/90 border-b border-white/5 shrink-0">
-            <div className="flex items-center gap-4 min-w-0">
-              <p className="font-mono text-sm text-white truncate">
+          <div className="flex items-center justify-between px-4 md:px-8 py-3 md:py-4 bg-black/90 border-b border-white/5 shrink-0">
+            <div className="flex items-center gap-2 md:gap-4 min-w-0">
+              <p className="font-mono text-xs md:text-sm text-white truncate">
                 {currentItem.title}
               </p>
               <span className="font-mono text-xs text-white/30 hidden md:inline">
@@ -307,8 +336,8 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="font-mono text-xs text-white/25 mr-2">
+            <div className="flex items-center gap-1 md:gap-2 shrink-0">
+              <span className="font-mono text-[10px] md:text-xs text-white/25 mr-1 md:mr-2">
                 {lightboxIndex + 1} / {activeList.length}
               </span>
 
@@ -332,10 +361,10 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                 )}
               </button>
 
-              {/* Fullscreen toggle */}
+              {/* Fullscreen toggle — hidden on mobile where it's unsupported */}
               <button
                 onClick={toggleFullscreen}
-                className="p-2 text-white/30 hover:text-white/60 transition-colors"
+                className="p-2 text-white/30 hover:text-white/60 transition-colors hidden md:block"
                 title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
               >
                 {isFullscreen ? (
@@ -352,7 +381,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
               {/* Close */}
               <button
                 onClick={closeLightbox}
-                className="p-2 text-white/30 hover:text-white/60 transition-colors ml-2"
+                className="p-2 text-white/30 hover:text-white/60 transition-colors ml-1 md:ml-2"
                 title="Close (Esc)"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -367,7 +396,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
             {/* Previous button */}
             <button
               onClick={(e) => { e.stopPropagation(); goPrev() }}
-              className="absolute left-2 md:left-6 z-10 p-3 text-white/20 hover:text-white/60 transition-colors"
+              className="absolute left-1 md:left-6 z-10 p-3 text-white/20 hover:text-white/60 transition-colors"
               title="Previous (Left arrow)"
             >
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -376,7 +405,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
             </button>
 
             {/* Image */}
-            <div className="relative w-full h-full flex items-center justify-center px-12 md:px-20">
+            <div className="relative w-full h-full flex items-center justify-center px-10 md:px-20">
               <img
                 src={currentItem.src}
                 alt={currentItem.title}
@@ -384,7 +413,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                 style={{ filter: 'contrast(1.1)' }}
               />
               {/* Contributor name overlay */}
-              <span className="absolute bottom-3 right-14 md:right-22 font-mono text-xs text-white/50 bg-black/60 px-2 py-1">
+              <span className="absolute bottom-3 right-12 md:right-22 font-mono text-xs text-white/50 bg-black/60 px-2 py-1">
                 {currentItem.contributor}
               </span>
             </div>
@@ -392,7 +421,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
             {/* Next button */}
             <button
               onClick={(e) => { e.stopPropagation(); goNext() }}
-              className="absolute right-2 md:right-6 z-10 p-3 text-white/20 hover:text-white/60 transition-colors"
+              className="absolute right-1 md:right-6 z-10 p-3 text-white/20 hover:text-white/60 transition-colors"
               title="Next (Right arrow)"
             >
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -414,12 +443,12 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
           </div>
 
           {/* Bottom info */}
-          <div className="flex items-center justify-between px-4 md:px-8 py-3 bg-black/90 border-t border-white/5 shrink-0">
-            <div className="flex items-center gap-4">
-              <span className="font-mono text-xs uppercase tracking-wider text-white/30">
+          <div className="flex items-center justify-between px-4 md:px-8 py-2 md:py-3 bg-black/90 border-t border-white/5 shrink-0">
+            <div className="flex items-center gap-3 md:gap-4">
+              <span className="font-mono text-[10px] md:text-xs uppercase tracking-wider text-white/30">
                 {overlordNames[currentItem.overlord] ?? currentItem.overlord}
               </span>
-              <span className="font-mono text-xs text-white/20">
+              <span className="font-mono text-[10px] md:text-xs text-white/20">
                 {currentItem.date}
               </span>
             </div>
