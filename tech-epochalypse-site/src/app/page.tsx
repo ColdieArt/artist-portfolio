@@ -43,7 +43,7 @@ export default function HomePage() {
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
           <div className="animate-fade-in">
             <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/50 mb-8">
-              Classified &mdash; Interactive Digital Art Series
+              Classified &mdash; Kinetic 3D Interactive Art Series
             </p>
           </div>
 
