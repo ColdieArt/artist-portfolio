@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import ScrollReveal from '@/components/ScrollReveal'
 import GalleryViewer from '@/components/GalleryViewer'
 import UserExports from '@/components/UserExports'
-import ContestSubmissionForm from '@/components/ContestSubmissionForm'
 import overlords from '@/data/overlords.json'
 import galleryItemsRaw from '@/data/gallery.json'
 import type { GalleryItem } from '@/components/GalleryViewer'
@@ -65,7 +64,7 @@ export default function GalleryPage() {
               with the community. Every iteration is a new perspective on the
               network.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a href="/overlords" className="btn-primary">
                 <span>Create an Export</span>
               </a>
@@ -76,26 +75,6 @@ export default function GalleryPage() {
                 <span>Submit Your Work</span>
               </a>
             </div>
-          </div>
-        </ScrollReveal>
-
-        {/* Contest Entry Form */}
-        <ScrollReveal>
-          <div className="mt-16">
-            <div className="line-accent mb-12" />
-            <div className="text-center mb-8">
-              <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/40 mb-4">
-                Token-Gated
-              </p>
-              <h3 className="font-display text-2xl md:text-3xl text-white mb-4 uppercase tracking-[0.03em]">
-                Contest Entry
-              </h3>
-              <p className="text-white/40 text-sm font-mono max-w-lg mx-auto leading-relaxed">
-                Holders of Tech Epochalypse Moments tokens can enter exclusive contests.
-                Verify your wallet to submit.
-              </p>
-            </div>
-            <ContestSubmissionForm />
           </div>
         </ScrollReveal>
       </div>
