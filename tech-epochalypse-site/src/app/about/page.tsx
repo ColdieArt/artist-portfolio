@@ -152,6 +152,25 @@ export default function AboutPage() {
                   represents a different facet of this epoch: innovation,
                   connectivity, acceleration, optimization, and silicon.
                 </p>
+                <p>
+                  Tech Epochalypse was created to engage viewers to &lsquo;touch
+                  the art.&rsquo; The suite of control layers leads to options.
+                  These works were created to inspire new thoughts each time they
+                  are viewed, so for this reason, the token is not permanently
+                  affected each time a new layout is created. Once the art is
+                  reloaded, the layout starts fresh and inspires a new expression.
+                  These pieces are networked art and meant to be shared and
+                  experimented both on your computer and mobile with the
+                  touchscreen experience.
+                </p>
+                <p>
+                  This is the first time Coldie has created kinetic 3D interactive
+                  art. This level of functionality and interactivity will be the
+                  building blocks for future releases. Tech Epochalypse is built
+                  on the Transient Labs ERC-7160 token standard, allowing for
+                  evolutionary updates and variety of asset storage options to
+                  ensure the art is always viewable.
+                </p>
               </div>
             </div>
           </ScrollReveal>
