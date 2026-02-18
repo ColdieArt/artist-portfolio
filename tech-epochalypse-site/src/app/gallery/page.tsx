@@ -1,12 +1,7 @@
 import type { Metadata } from 'next'
 import ScrollReveal from '@/components/ScrollReveal'
-import GalleryViewer from '@/components/GalleryViewer'
 import UserExports from '@/components/UserExports'
 import overlords from '@/data/overlords.json'
-import galleryItemsRaw from '@/data/gallery.json'
-import type { GalleryItem } from '@/components/GalleryViewer'
-
-const galleryItems = galleryItemsRaw as GalleryItem[]
 
 export const metadata: Metadata = {
   title: 'Community Gallery — Tech Epochalypse',
@@ -44,13 +39,6 @@ export default function GalleryPage() {
 
         {/* User exports from Airtable */}
         <UserExports overlordNames={overlordNames} overlordSlugs={overlordSlugs} />
-
-        {/* Interactive Gallery */}
-        <GalleryViewer
-          items={galleryItems}
-          overlordNames={overlordNames}
-          overlordSlugs={overlordSlugs}
-        />
 
         {/* Submit CTA */}
         <ScrollReveal>

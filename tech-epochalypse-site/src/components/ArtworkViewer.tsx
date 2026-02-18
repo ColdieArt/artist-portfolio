@@ -20,7 +20,7 @@ export default function ArtworkViewer({ overlord }: { overlord: Overlord }) {
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="transition-transform group-hover:scale-110">
           <path d="M5 3l14 9-14 9V3z" fill="currentColor" />
         </svg>
-        Launch Interactive Artwork
+        LAUNCH KINETIC 3D ARTWORK
       </a>
       <p className="mt-4 font-mono text-[10px] text-white/15 tracking-wider uppercase">
         Opens as full-page experience &mdash; drag, rotate, export

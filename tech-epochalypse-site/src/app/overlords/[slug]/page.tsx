@@ -126,8 +126,7 @@ export default function OverlordPage({ params }: PageProps) {
                   Interaction Protocol
                 </h3>
                 <p className="text-white/50 text-sm font-mono">
-                  Drag to rotate. Use the built-in controls to apply filters and
-                  effects. Export your unique iteration as JPEG or MP4.
+                  Drag to rotate. Use the built-in controls to apply control layer effects. Submit your unique iteration to the overlords for total judgement.
                 </p>
               </div>
             </div>
