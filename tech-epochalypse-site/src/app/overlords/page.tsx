@@ -116,23 +116,27 @@ function OverlordCard({ overlord }: { overlord: Overlord }) {
 
         {/* Bottom info */}
         <div className="absolute bottom-0 left-0 right-0 p-6">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/40 mb-1">
+          <p className="font-mono text-sm md:text-base uppercase tracking-[0.2em] text-white/40 mb-2">
             Overlord {overlord.number}
           </p>
-          <h3 className="font-display text-2xl md:text-3xl text-white mb-1 uppercase tracking-[0.03em]">
-            {overlord.name}
+          <h3 className="font-display text-4xl md:text-5xl lg:text-6xl mb-2 uppercase tracking-[0.03em]">
+            <span className="bg-white text-black px-2 py-1 inline-block leading-tight">
+              {overlord.name}
+            </span>
           </h3>
-          <p className="font-mono text-xs text-white/35">
-            {overlord.title}
+          <p className="font-mono text-sm md:text-base">
+            <span className="bg-white text-black px-2 py-0.5 inline-block">
+              {overlord.title}
+            </span>
           </p>
 
           {/* Interact prompt */}
           <div className="mt-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="font-mono text-xs uppercase tracking-[0.15em] text-white/60">
+            <span className="font-mono text-sm uppercase tracking-[0.15em] text-white/60">
               {isLive ? 'Access File' : 'Restricted'}
             </span>
             {isLive && (
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="text-white/60">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-white/60">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             )}
