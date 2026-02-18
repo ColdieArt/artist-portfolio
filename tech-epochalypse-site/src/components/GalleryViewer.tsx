@@ -55,7 +55,8 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
   const [slideshowFilter, setSlideshowFilter] = useState<string>('all')
   const [showSlideshowMenu, setShowSlideshowMenu] = useState(false)
   const lightboxRef = useRef<HTMLDivElement>(null)
-  const slideshowInterval = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const lightboxOpen = lightboxIndex !== null
 
   const filtered = filter === 'all'
     ? items
@@ -65,14 +66,82 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
     ? items
     : items.filter((i) => i.overlord === slideshowFilter)
 
+  const activeList = slideshow ? slideshowItems : filtered
+
+  // Keep a ref to activeList length so callbacks stay stable
+  const activeListLenRef = useRef(activeList.length)
+  activeListLenRef.current = activeList.length
+
+  const slideshowItemsLenRef = useRef(slideshowItems.length)
+  slideshowItemsLenRef.current = slideshowItems.length
+
+  const goNext = useCallback(() => {
+    setLightboxIndex((prev) => {
+      if (prev === null) return null
+      return (prev + 1) % activeListLenRef.current
+    })
+  }, [])
+
+  const goPrev = useCallback(() => {
+    setLightboxIndex((prev) => {
+      if (prev === null) return null
+      return (prev - 1 + activeListLenRef.current) % activeListLenRef.current
+    })
+  }, [])
+
+  const goNextSlideshow = useCallback(() => {
+    setLightboxIndex((prev) => {
+      if (prev === null) return null
+      return ((prev ?? 0) + 1) % slideshowItemsLenRef.current
+    })
+  }, [])
+
+  const toggleFullscreen = useCallback(async () => {
+    if (!lightboxRef.current) return
+    try {
+      if (!fsElement()) {
+        await fsRequest(lightboxRef.current)
+        setIsFullscreen(true)
+      } else {
+        fsExit()
+        setIsFullscreen(false)
+      }
+    } catch {
+      // Fullscreen not supported (e.g. some mobile browsers) — ignore
+    }
+  }, [])
+
+  const closeLightbox = useCallback(() => {
+    setLightboxIndex(null)
+    setSlideshow(false)
+    if (fsElement()) {
+      try { fsExit() } catch { /* ignore */ }
+    }
+    setIsFullscreen(false)
+  }, [])
+
+  const openLightbox = useCallback((index: number) => {
+    setLightboxIndex(index)
+    setSlideshow(false)
+  }, [])
+
+  const startSlideshow = useCallback((overlordFilter: string) => {
+    setSlideshowFilter(overlordFilter)
+    setShowSlideshowMenu(false)
+    const pool = overlordFilter === 'all'
+      ? items
+      : items.filter((i) => i.overlord === overlordFilter)
+    if (pool.length === 0) return
+    setLightboxIndex(0)
+    setSlideshow(true)
+  }, [items])
+
   // Keyboard navigation
   useEffect(() => {
-    if (lightboxIndex === null) return
+    if (!lightboxOpen) return
 
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closeLightbox()
-      }
+      if (e.key === 'Escape') closeLightbox()
       if (e.key === 'ArrowRight' || e.key === ' ') {
         e.preventDefault()
         goNext()
@@ -86,25 +155,18 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  })
+  }, [lightboxOpen, closeLightbox, goNext, goPrev, toggleFullscreen])
 
   // Slideshow auto-advance
   useEffect(() => {
-    if (slideshow && lightboxIndex !== null) {
-      slideshowInterval.current = setInterval(() => {
-        goNextSlideshow()
-      }, 4000)
-    }
-    return () => {
-      if (slideshowInterval.current) clearInterval(slideshowInterval.current)
-    }
-  })
+    if (!slideshow || !lightboxOpen) return
+    const id = setInterval(goNextSlideshow, 4000)
+    return () => clearInterval(id)
+  }, [slideshow, lightboxOpen, goNextSlideshow])
 
   // Fullscreen change listener — only updates the flag, does NOT close lightbox
   useEffect(() => {
-    const handler = () => {
-      setIsFullscreen(!!fsElement())
-    }
+    const handler = () => setIsFullscreen(!!fsElement())
     document.addEventListener('fullscreenchange', handler)
     document.addEventListener('webkitfullscreenchange', handler)
     return () => {
@@ -115,70 +177,13 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
 
   // Lock body scroll when lightbox is open
   useEffect(() => {
-    if (lightboxIndex !== null) {
+    if (lightboxOpen) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
     }
     return () => { document.body.style.overflow = '' }
-  }, [lightboxIndex !== null])
-
-  const activeList = slideshow ? slideshowItems : filtered
-
-  const openLightbox = (index: number) => {
-    setLightboxIndex(index)
-    setSlideshow(false)
-  }
-
-  const closeLightbox = () => {
-    setLightboxIndex(null)
-    setSlideshow(false)
-    if (fsElement()) {
-      try { fsExit() } catch { /* ignore */ }
-    }
-    setIsFullscreen(false)
-  }
-
-  const goNext = useCallback(() => {
-    if (lightboxIndex === null) return
-    setLightboxIndex((lightboxIndex + 1) % activeList.length)
-  }, [lightboxIndex, activeList.length])
-
-  const goPrev = useCallback(() => {
-    if (lightboxIndex === null) return
-    setLightboxIndex((lightboxIndex - 1 + activeList.length) % activeList.length)
-  }, [lightboxIndex, activeList.length])
-
-  const goNextSlideshow = useCallback(() => {
-    if (lightboxIndex === null) return
-    setLightboxIndex((prev) => ((prev ?? 0) + 1) % slideshowItems.length)
-  }, [lightboxIndex, slideshowItems.length])
-
-  const toggleFullscreen = async () => {
-    if (!lightboxRef.current) return
-    try {
-      if (!fsElement()) {
-        await fsRequest(lightboxRef.current)
-        setIsFullscreen(true)
-      } else {
-        fsExit()
-        setIsFullscreen(false)
-      }
-    } catch {
-      // Fullscreen not supported (e.g. some mobile browsers) — ignore
-    }
-  }
-
-  const startSlideshow = (overlordFilter: string) => {
-    setSlideshowFilter(overlordFilter)
-    setShowSlideshowMenu(false)
-    const pool = overlordFilter === 'all'
-      ? items
-      : items.filter((i) => i.overlord === overlordFilter)
-    if (pool.length === 0) return
-    setLightboxIndex(0)
-    setSlideshow(true)
-  }
+  }, [lightboxOpen])
 
   const currentItem = lightboxIndex !== null ? activeList[lightboxIndex] : null
 
