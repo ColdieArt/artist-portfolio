@@ -548,7 +548,7 @@ export default function MainframePage() {
                     </span>
                   </a>
                   <a
-                    href="https://instagram.com/coldie"
+                    href="https://www.instagram.com/coldie3dart"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 text-white transition-colors"

@@ -6,10 +6,7 @@ import { usePathname } from 'next/navigation'
 
 const navLinks = [
   { href: '/overlords', label: 'OVERLORDS' },
-  { href: '/the-pulse', label: 'THE PULSE' },
   { href: '/mainframe', label: 'MAINFRAME' },
-  { href: '/collectors', label: 'COLLECTORS' },
-  { href: '/about', label: 'DOSSIER' },
 ]
 
 export default function Navigation() {
@@ -36,12 +33,21 @@ export default function Navigation() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-14 md:h-16">
-        <Link
-          href="/"
-          className="font-display text-base md:text-lg tracking-[0.15em] text-white hover:text-white transition-colors duration-300 uppercase"
-        >
-          Tech Epochalypse
-        </Link>
+        <div className="flex items-center gap-4 md:gap-6">
+          <Link
+            href="/"
+            className="font-display text-base md:text-lg tracking-[0.15em] text-white hover:text-white transition-colors duration-300 uppercase"
+          >
+            Tech Epochalypse
+          </Link>
+          <span className="hidden md:inline text-white/20">|</span>
+          <Link
+            href="/overlords"
+            className="hidden md:inline font-mono text-[10px] uppercase tracking-[0.2em] text-white hover:text-white transition-colors duration-300"
+          >
+            Kinetic 3D Experience
+          </Link>
+        </div>
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
