@@ -79,7 +79,7 @@ export default function UserExports({ overlordNames, overlordSlugs, category, he
     async function fetchGallery() {
       try {
         const formula = category
-          ? `AND({Approved}=1,{Category}="${category}")`
+          ? `AND({Approved}=1,LOWER({Category})="${category.toLowerCase()}")`
           : '{Approved}=1'
         const filter = encodeURIComponent(formula)
         const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}?sort%5B0%5D%5Bfield%5D=Date&sort%5B0%5D%5Bdirection%5D=desc&filterByFormula=${filter}`
