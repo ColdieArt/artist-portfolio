@@ -195,7 +195,7 @@
     }
     #post-modal-btn:hover { background: #0d1117; }
   </style>
-  <title>JENSEN-HUANG-AWS-MASTER | Made on juno.transient.xyz</title>
+  <title>JENSEN-HUANG-AWS-FINAL-WORKING | Made on juno.transient.xyz</title>
 </head>
 <body>
   
@@ -213,59 +213,65 @@ let raycaster, mouse;
 let draggableObjects = [];
 let selectedObject = null;
 let offset = new THREE.Vector3();
-let initialObjectZ = 0;
+let initialObjectZ = 0; // Store the initial Z-position of the selected object
 
-const depthStep = 0.2;
-const totalDepthLayers = 15;
-const subLayerOffset = 0.05;
-const zeroParallaxDepth = (5 - 1) * depthStep;
+const depthStep = 0.2; // Defines the depth separation between levels
+const totalDepthLayers = 15; // Total number of depth layers available
+const subLayerOffset = 0.05; // Smaller offset for visual separation within a layer (0.25 levels * depthStep = 0.25 * 0.2 = 0.05)
+const zeroParallaxDepth = (totalDepthLayers - 5) * depthStep; // Z-position for layer 5 (using new convention)
 
-let isDragging = false;
-let pointerDownPosition = new THREE.Vector2();
-const DRAG_THRESHOLD = 5;
+let isDragging = false; // Flag to indicate if a drag operation is in progress
+let pointerDownPosition = new THREE.Vector2(); // To store the initial pointer down position
+const DRAG_THRESHOLD = 5; // Pixels threshold to consider a move as a drag
 
-let backgroundMesh = null;
+let backgroundMesh = null; // To store the background mesh for positioning calculations
 
+// Camera animation variables
 let cameraAnimationActive = false;
 let cameraAnimationTargets = [];
 let currentCameraTarget = null;
-let cameraAnimationState = 'idle';
+let cameraAnimationState = 'idle'; // 'idle', 'exploring', 'returningToGlobalStart'
 let cameraAnimationStartTime = 0;
-const cameraExplorationDuration = 2500;
-const cameraReturnDuration = 1250;
+const cameraExplorationDuration = 2500; // 5 seconds for exploring (moving to target) - halved
+const cameraReturnDuration = 1250; // 2.5 seconds for returning to start - halved
 let cameraPreviousPos = new THREE.Vector3();
 let cameraPreviousLookAt = new THREE.Vector3();
 let cameraCurrentTargetPos = new THREE.Vector3();
 let cameraCurrentTargetLookAt = new THREE.Vector3();
 let cameraTargetObject = null;
 
+// New camera animation variables for global return
 let initialGlobalCameraPos = new THREE.Vector3();
 let initialGlobalCameraLookAt = new THREE.Vector3();
 let assetsVisitedCount = 0;
 const ASSETS_PER_GLOBAL_RETURN = 6;
 
+// Y-axis bounce animation variables
 let yBounceInitialCameraX = 0;
 let yBounceInitialCameraY = 0;
 let yBounceInitialCameraZ = 0;
-const yBounceRangeX = 2.0;
-const yBounceSpeed = 0.001;
+const yBounceRangeX = 2.0; // 20% of a reasonable scene width (e.g., 10 units wide scene)
+const yBounceSpeed = 0.001; // Speed of the bounce
 
+// Inactivity timer variables
 let lastActivityTime = performance.now();
-const INACTIVITY_TIMEOUT = 3000;
-let yRotationStartTime = 0;
-const Y_ROTATION_DURATION_BEFORE_CAM_ANIM = 10000;
+const INACTIVITY_TIMEOUT = 3000; // 3 seconds
+let yRotationStartTime = 0; // New: To track when Y-rotation started
+const Y_ROTATION_DURATION_BEFORE_CAM_ANIM = 10000; // 10 seconds
 
+// Redaction rectangles
 let rightEyeRedactionRect = null;
 let leftEyeRedactionRect = null;
-let rightEyeMesh = null;
-let leftEyeMesh = null;
+let rightEyeMesh = null; // Globally declare right eye mesh
+let leftEyeMesh = null; // Globally declare left eye mesh
 
+// Marquee text variables
 let marqueeTextMesh;
 let marqueeTexture;
 let marqueeScrollOffset = 0;
-const MARQUEE_LINE_HEIGHT = 180;
-const MARQUEE_TOTAL_LINES = 10;
-const MARQUEE_SCROLL_SPEED = 16.0;
+const MARQUEE_LINE_HEIGHT = 180; // Pixels per line, increased by 200%
+const MARQUEE_TOTAL_LINES = 10; // Number of lines to display
+const MARQUEE_SCROLL_SPEED = 16.0; // Pixels per frame (Increased by 4x from 4.0)
 const MARQUEE_PHRASES = [
     "SECURITY BREACH DETECTED",
     "UNAUTHORIZED ACCESS PROHIBITED",
@@ -300,12 +306,13 @@ const MARQUEE_PHRASES = [
     "WARNING: PII EXPOSURE"
 ];
 
+// New biometric marquee variables
 let biometricMarqueeTextMesh;
 let biometricMarqueeTexture;
 let biometricMarqueeScrollOffset = 0;
-const BIOMETRIC_MARQUEE_LINE_HEIGHT = 100;
-const BIOMETRIC_MARQUEE_TOTAL_LINES = 15;
-const BIOMETRIC_MARQUEE_SCROLL_SPEED = 4.0;
+const BIOMETRIC_MARQUEE_LINE_HEIGHT = 100; // Smaller font size for biometric data
+const BIOMETRIC_MARQUEE_TOTAL_LINES = 15; // More lines for biometric data
+const BIOMETRIC_MARQUEE_SCROLL_SPEED = 4.0; // Slower than main marquee (changed from 8.0 to 4.0)
 const BIOMETRIC_PHRASES = [
     "HEART RATE: 72 BPM",
     "BLOOD PRESSURE: 120/80 mmHg",
@@ -365,14 +372,15 @@ let biometricAnimationState = {
     lastHeartbeatTime: 0
 };
 
+// New Blood Text variables
 let bloodTextMesh;
 let bloodTexture;
 let bloodScrollOffset = 0;
-const BLOOD_TEXT_FONT_SIZE = 180;
-const BLOOD_TEXT_LINE_HEIGHT = BLOOD_TEXT_FONT_SIZE * 1.2;
-const BLOOD_TEXT_TOTAL_LINES = 22;
-const BLOOD_TEXT_SCROLL_SPEED = 7.0;
-let shuffledBloodPhrases = [];
+const BLOOD_TEXT_FONT_SIZE = 180; // Extremely large font size
+const BLOOD_TEXT_LINE_HEIGHT = BLOOD_TEXT_FONT_SIZE * 1.2; // Line height for spacing
+const BLOOD_TEXT_TOTAL_LINES = 22; // Number of lines to display
+const BLOOD_TEXT_SCROLL_SPEED = 7.0; // Moderate scroll speed
+let shuffledBloodPhrases = []; // To store the shuffled phrases
 const BLOOD_TEXT_PHRASES = [
     "BIAS REINFORCEMENT",
     "DARK ECONOMY",
@@ -404,6 +412,7 @@ const BLOOD_TEXT_PHRASES = [
     "COGNITIVE BIAS",
 ];
 
+// Redacted Glitch Text variables
 let redactedGlitchTextMesh;
 let redactedGlitchTexture;
 let redactedGlitchScrollOffset = 0;
@@ -444,8 +453,10 @@ const REDACTED_GLITCH_PHRASES = [
     "PROTOCOL: EXECUTED"
 ];
 
-let redactedGlitchPhraseData = [];
+// New data structure to store redacted words for each phrase
+let redactedGlitchPhraseData = []; // Array of objects {text: string, redactedWordIndices: number[], redactionApplied: boolean}
 
+// Define all layer URLs at the top of the script
 const URL_JENSEN_HUANG_CHEEK = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-cheek.gif';
 const URL_BACKGROUND = '';
 const URL_RIGHT_EYE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-eyes.gif';
@@ -462,6 +473,14 @@ const URL_FHEAD03 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoc
 const URL_FHEAD04 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/fhead04.gif';
 const URL_FHEAD05 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/fhead05.gif';
 
+const foreheadImageUrls = [
+    URL_FHEAD01,
+    URL_FHEAD02,
+    URL_FHEAD03,
+    URL_FHEAD04,
+    URL_FHEAD05
+];
+
 let foreheadMeshes = [];
 let currentForeheadIndex = 0;
 let lastFlashTime = 0;
@@ -471,21 +490,25 @@ const URL_CARD01 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch
 const URL_CARD02 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/card-02.gif';
 const URL_CARD03 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/card-03.gif';
 
+// Array to hold all card meshes for shuffling
 let shufflingCardMeshes = [];
+// Array of card image URLs to cycle through
 const cardImageUrls = [
     URL_CARD01,
     URL_CARD02,
     URL_CARD03
 ];
 let currentCardImageIndex = 0;
-let lastCardFlashTime = 0;
+let lastCardFlashTime = 0; // Separate timer for card flashing
 
+// Array of face meshes to apply the brightening material to
 let faceMeshes = [];
 
+// Custom Shader for brightening the texture
 const BrightenTextureShader = {
     uniforms: {
         'tDiffuse': { value: null },
-        'brightness': { value: 0.5 }
+        'brightness': { value: 0.5 } // 20% brighter
     },
     vertexShader: /* glsl */`
         varying vec2 vUv;
@@ -500,6 +523,7 @@ const BrightenTextureShader = {
         varying vec2 vUv;
         void main() {
             vec4 texel = texture2D(tDiffuse, vUv);
+            // Apply brightness multiplication
             vec3 color = texel.rgb * brightness;
             gl_FragColor = vec4(color, texel.a);
         }
@@ -508,13 +532,14 @@ const BrightenTextureShader = {
 
 function initializeRedactedGlitchPhraseData() {
     redactedGlitchPhraseData = REDACTED_GLITCH_PHRASES.map(phrase => {
-        const words = phrase.split(/(\s+)/).filter(word => word.length > 0);
-        const numWords = words.filter(word => !/\s+/.test(word)).length;
+        const words = phrase.split(/(\s+)/).filter(word => word.length > 0); // Split by spaces, keeping spaces
+        const numWords = words.filter(word => !/\s+/.test(word)).length; // Count actual words
 
         const wordIndicesToRedact = [];
-        if (numWords > 0 && Math.random() < 0.6) {
-            const numWordsToRedact = Math.floor(Math.random() * Math.min(3, numWords)) + 1;
+        if (numWords > 0 && Math.random() < 0.6) { // 60% chance to redact a line
+            const numWordsToRedact = Math.floor(Math.random() * Math.min(3, numWords)) + 1; // Redact 1 to 3 words
 
+            // Find actual word indices
             const actualWordIndices = [];
             for (let i = 0; i < words.length; i++) {
                 if (!/\s+/.test(words[i])) {
@@ -535,10 +560,11 @@ function initializeRedactedGlitchPhraseData() {
     });
 }
 
+// Shader definitions
 const GreyscaleContrastShader = {
     uniforms: {
         'tDiffuse': { value: null },
-        'contrast': { value: 1.5 }
+        'contrast': { value: 1.5 } // Default contrast value
     },
     vertexShader: /* glsl */`
         varying vec2 vUv;
@@ -553,8 +579,10 @@ const GreyscaleContrastShader = {
         varying vec2 vUv;
         void main() {
             vec4 texel = texture2D(tDiffuse, vUv);
-            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
+            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114)); // Convert to greyscale
+            // Apply contrast to the greyscale value
             luma = ((luma - 0.5) * contrast) + 0.5;
+            // Output greyscale with contrast
             gl_FragColor = vec4(luma, luma, luma, texel.a);
         }
     `
@@ -601,7 +629,7 @@ const ThresholdShader = {
         void main() {
             vec4 texel = texture2D(tDiffuse, vUv);
             float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
-            gl_FragColor = vec4(step(threshold, luma));
+            gl_FragColor = vec4(step(threshold, luma)); // Standard threshold: Bright becomes white, Dark becomes black
         }
     `
 };
@@ -625,7 +653,7 @@ const DarkShader = {
         void main() {
             vec4 texel = texture2D(tDiffuse, vUv);
             float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
-            gl_FragColor = vec4(step(threshold, luma) * 0.04);
+            gl_FragColor = vec4(step(threshold, luma) * 0.04); // White values are 98% black (2% white)
         }
     `
 };
@@ -672,10 +700,15 @@ const MatrixShader = {
         varying vec2 vUv;
         void main() {
             vec4 texel = texture2D(tDiffuse, vUv);
-            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
+            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114)); // Convert to greyscale
+            
+            // Simple binary look: quantize to black or green
             vec3 finalColor = mix(vec3(0.0), vec3(0.0, 1.0, 0.0), step(0.5, luma));
+            
+            // Add a subtle grid/dither to suggest binary elements
             float grid = mod(floor(vUv.x * 100.0) + floor(vUv.y * 100.0), 2.0);
             finalColor = mix(finalColor * 0.8, finalColor, grid);
+
             gl_FragColor = vec4(finalColor, texel.a);
         }
     `
@@ -703,20 +736,27 @@ const ASCIIShader = {
             vec2 uv = vUv;
             vec2 pixelatedUV = floor(uv * resolution / pixelSize) * pixelSize / resolution;
             vec4 texel = texture2D(tDiffuse, pixelatedUV);
+            
+            // Convert to luminance
             float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
-            float step1 = step(0.25, luma);
-            float step2 = step(0.50, luma);
-            float step3 = step(0.75, luma);
+            
+            // Quantize luminance to simulate character density
+            // Use a few steps to represent different 'characters'
+            float step1 = step(0.25, luma); // Darkest areas
+            float step2 = step(0.50, luma); // Mid areas
+            float step3 = step(0.75, luma); // Brightest areas
+            
             vec3 finalColor;
             if (step3 == 1.0) {
-                finalColor = vec3(0.0, 1.0, 0.0);
+                finalColor = vec3(0.0, 1.0, 0.0); // Brightest green
             } else if (step2 == 1.0) {
-                finalColor = vec3(0.0, 0.7, 0.0);
+                finalColor = vec3(0.0, 0.7, 0.0); // Medium green
             } else if (step1 == 1.0) {
-                finalColor = vec3(0.0, 0.4, 0.0);
+                finalColor = vec3(0.0, 0.4, 0.0); // Dark green
             } else {
                 finalColor = vec3(0.0);
             }
+            
             gl_FragColor = vec4(finalColor, texel.a);
         }
     `
@@ -738,9 +778,9 @@ const XRayShader = {
         varying vec2 vUv;
         void main() {
             vec4 texel = texture2D(tDiffuse, vUv);
-            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
-            float invertedLuma = 1.0 - luma;
-            vec3 xrayColor = vec3(0.0, 0.7, 1.0) * invertedLuma;
+            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114)); // Grayscale
+            float invertedLuma = 1.0 - luma; // Invert grayscale
+            vec3 xrayColor = vec3(0.0, 0.7, 1.0) * invertedLuma; // Apply a blue/cyan tint
             gl_FragColor = vec4(xrayColor, texel.a);
         }
     `
@@ -763,19 +803,21 @@ const HeatmapShader = {
         varying vec2 vUv;
         void main() {
             vec4 texel = texture2D(tDiffuse, vUv);
-            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
+            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114)); // Convert to luminance
+
             vec3 color;
-            if (luma < 0.2) {
+            if (luma < 0.2) { // Darkest areas, deep blue
                 color = mix(vec3(0.0, 0.0, 0.2), vec3(0.0, 0.0, 0.8), luma / 0.2);
-            } else if (luma < 0.4) {
+            } else if (luma < 0.4) { // Blue to Cyan
                 color = mix(vec3(0.0, 0.0, 0.8), vec3(0.0, 0.8, 0.8), (luma - 0.2) / 0.2);
-            } else if (luma < 0.6) {
+            } else if (luma < 0.6) { // Cyan to Green
                 color = mix(vec3(0.0, 0.8, 0.8), vec3(0.0, 1.0, 0.0), (luma - 0.4) / 0.2);
-            } else if (luma < 0.8) {
+            } else if (luma < 0.8) { // Green to Yellow
                 color = mix(vec3(0.0, 1.0, 0.0), vec3(1.0, 1.0, 0.0), (luma - 0.6) / 0.2);
-            } else {
+            } else { // Yellow to Red
                 color = mix(vec3(1.0, 1.0, 0.0), vec3(1.0, 0.0, 0.0), (luma - 0.8) / 0.2);
             }
+
             gl_FragColor = vec4(color, texel.a);
         }
     `
@@ -797,19 +839,21 @@ const BloodShader = {
         varying vec2 vUv;
         void main() {
             vec4 texel = texture2D(tDiffuse, vUv);
-            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
+            float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114)); // Convert to luminance
+
             vec3 color;
-            if (luma < 0.2) {
+            if (luma < 0.2) { // Very dark red to black
                 color = mix(vec3(0.0, 0.0, 0.0), vec3(0.3, 0.0, 0.0), luma / 0.2);
-            } else if (luma < 0.4) {
+            } else if (luma < 0.4) { // Deep red to medium red
                 color = mix(vec3(0.3, 0.0, 0.0), vec3(0.7, 0.0, 0.0), (luma - 0.2) / 0.2);
-            } else if (luma < 0.6) {
+            } else if (luma < 0.6) { // Medium red to bright red
                 color = mix(vec3(0.7, 0.0, 0.0), vec3(1.0, 0.1, 0.1), (luma - 0.4) / 0.2);
-            } else if (luma < 0.8) {
+            } else if (luma < 0.8) { // Bright red to orange-red
                 color = mix(vec3(1.0, 0.1, 0.1), vec3(1.0, 0.4, 0.0), (luma - 0.6) / 0.2);
-            } else {
+            } else { // Orange-red to yellowish-orange
                 color = mix(vec3(1.0, 0.4, 0.0), vec3(1.0, 0.7, 0.2), (luma - 0.8) / 0.2);
             }
+
             gl_FragColor = vec4(color, texel.a);
         }
     `
@@ -833,34 +877,50 @@ const CCTVFeedShader = {
         uniform float time;
         uniform vec2 resolution;
         varying vec2 vUv;
+
         float rand(vec2 co) {
             return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
         }
+
         void main() {
             vec2 uv = vUv;
-            vec2 pixelatedUV = floor(uv * resolution / 16.0) * 16.0 / resolution;
+            vec2 pixelatedUV = floor(uv * resolution / 16.0) * 16.0 / resolution; // Blocky effect
+
+            // Glitch effect: random horizontal displacement and color channel split
             float randomVal = rand(floor(uv * 100.0) + fract(time * 0.1));
-            float displacement = (randomVal - 0.5) * 0.05 * sin(time * 10.0 + uv.y * 50.0);
+            float displacement = (randomVal - 0.5) * 0.05 * sin(time * 10.0 + uv.y * 50.0); // Oscillating displacement
+
             vec4 colorR = texture2D(tDiffuse, pixelatedUV + vec2(displacement, 0.0));
             vec4 colorG = texture2D(tDiffuse, pixelatedUV);
             vec4 colorB = texture2D(tDiffuse, pixelatedUV - vec2(displacement, 0.0));
+
             vec4 glitchedColor = vec4(colorR.r, colorG.g, colorB.b, 1.0);
+
+            // Convert glitched color to luminance
             float lumaGlitched = dot(glitchedColor.rgb, vec3(0.299, 0.587, 0.114));
+            
+            // Apply a slight green tint
             vec3 tintedColor = mix(vec3(lumaGlitched), vec3(0.0, 0.5, 0.0), 0.3);
-            float scanline = sin(uv.y * resolution.y * 0.5) * 0.05 + 0.95;
+
+            // Add scanlines
+            float scanline = sin(uv.y * resolution.y * 0.5) * 0.05 + 0.95; // Subtle scanlines
             tintedColor *= scanline;
-            float noise = rand(uv + time * 0.01) * 0.1;
+
+            // Add subtle noise/static
+            float noise = rand(uv + time * 0.01) * 0.1; // Small amount of noise
             tintedColor += noise;
+
             gl_FragColor = vec4(tintedColor, glitchedColor.a);
         }
     `
 };
 
+// UI controls state
 const effectControls = {
     greyscale: false,
     threshold: false,
-    thresholdValue: 0.4,
-    shadow: false,
+    thresholdValue: 0.33, // Decreased by 20% (0.5 * 0.8 = 0.4)
+    shadow: false, // Renamed from 'dark' to 'shadow'
     pixelation: false,
     pixelSize: 8.0,
     glitch: false,
@@ -872,16 +932,16 @@ const effectControls = {
     redacted: false,
     redactedGlitch: false,
     heatmap: false,
-    blood: false,
+    blood: false, // New control for BLOOD effect
     cctvFeed: false,
     marqueeText: false,
-    biometricMarquee: false,
-    anon: false,
-    og: false,
-    bloodText: false,
-    hacker: false,
-    surveillance: false,
-    greed: false
+    biometricMarquee: false, // New control for biometric marquee
+    anon: false, // New control for ANON effect
+    og: false, // New control for OG effect
+    bloodText: false, // New control for blood text
+    hacker: false, // New control for HACKER effect
+    surveillance: false, // New control for SURVEILLANCE effect
+    greed: false // New control for GREED effect
 };
 
 let greyscalePass, thresholdPass, darkPass, pixelationPass, glitchPass, matrixPass, asciiPass, xrayPass, heatmapPass, bloodPass, cctvFeedPass;
@@ -891,20 +951,29 @@ let exportButtonElement = null;
 let leftUiContainer = null;
 let arrowContainer = null;
 
+// Array to store initial configurations of assets for reloading
 const initialAssetConfigs = [];
 
+// Helper function to update UI button state
 const updateUIButtonState = (effectName, isActive) => {
+    // Select all buttons with the given data-effect attribute
     const buttons = document.querySelectorAll(`button[data-effect="${effectName}"]`);
     buttons.forEach(button => {
         button.style.borderColor = isActive ? '#4CAF50' : 'white';
     });
 };
 
-let defaultMaterialMap = new Map();
-let brightMaterialMap = new Map();
+// Global material references for face parts
+let defaultMaterialMap = new Map(); // Stores the original MeshBasicMaterial for face parts
+let brightMaterialMap = new Map(); // Stores the new ShaderMaterial (BrightenTextureShader) for face parts
 
+/**
+ * Updates the material of all face meshes based on whether any post-processing effect is active.
+ * Switches between the default MeshBasicMaterial and a custom BrightenTextureShader material.
+ */
 function updateFaceMaterialBrightness() {
     const isAnyEffectActive = Object.keys(effectControls).some(key => {
+        // Exclude camera controls and text visibility controls from determining visual effect activity
         return key !== 'yRotation' && key !== 'cameraAnimation' && key !== 'marqueeText' && key !== 'biometricMarquee' && key !== 'bloodText' && key !== 'redactedGlitch' && key !== 'redacted' && effectControls[key];
     });
 
@@ -913,6 +982,7 @@ function updateFaceMaterialBrightness() {
     faceMeshes.forEach(mesh => {
         const material = targetMaterialMap.get(mesh.userData.id);
         if (material && mesh.material !== material) {
+            mesh.material.dispose(); // Dispose old material to free memory
             mesh.material = material;
             mesh.material.needsUpdate = true;
         }
@@ -922,17 +992,22 @@ function updateFaceMaterialBrightness() {
 function createTextTexture(text, fontSize = 60, color = 'white', backgroundColor = 'rgba(0,0,0,0.5)', font = 'monospace') {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
+
     context.font = `${fontSize}px ${font}`;
     const metrics = context.measureText(text);
     const textWidth = metrics.width;
-    const textHeight = fontSize * 1.2;
-    canvas.width = textWidth + 20;
+    const textHeight = fontSize * 1.2; // Approximate height including line spacing
+
+    canvas.width = textWidth + 20; // Add some padding
     canvas.height = textHeight + 20;
+
     context.font = `${fontSize}px ${font}`;
     context.fillStyle = backgroundColor;
     context.fillRect(0, 0, canvas.width, canvas.height);
+
     context.fillStyle = color;
-    context.fillText(text, 10, fontSize + 10);
+    context.fillText(text, 10, fontSize + 10); // Position text with padding
+
     const texture = new THREE.CanvasTexture(canvas);
     texture.needsUpdate = true;
     return texture;
@@ -941,62 +1016,86 @@ function createTextTexture(text, fontSize = 60, color = 'white', backgroundColor
 function createMarqueeTexture() {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
+
+    // Canvas size: large enough to hold multiple repetitions of lines for seamless scrolling
+    // Width should be enough for the longest phrase
     let maxWidth = 0;
-    context.font = `bold 108px 'Courier New', monospace`;
+    context.font = `bold 108px 'Courier New', monospace`; // Increased font size and ASCII style font, now bold
     MARQUEE_PHRASES.forEach(phrase => {
         maxWidth = Math.max(maxWidth, context.measureText(phrase).width);
     });
-    canvas.width = maxWidth + 50;
-    canvas.height = MARQUEE_LINE_HEIGHT * (MARQUEE_TOTAL_LINES * 2);
+
+    canvas.width = maxWidth + 50; // Add padding
+    canvas.height = MARQUEE_LINE_HEIGHT * (MARQUEE_TOTAL_LINES * 2); // Double the height to allow seamless scrolling
+
     marqueeTexture = new THREE.CanvasTexture(canvas);
     marqueeTexture.wrapS = THREE.RepeatWrapping;
     marqueeTexture.wrapT = THREE.RepeatWrapping;
-    marqueeTexture.colorSpace = THREE.SRGBColorSpace;
+    marqueeTexture.colorSpace = THREE.SRGBColorSpace; // Apply texture settings
     marqueeTexture.minFilter = THREE.LinearFilter;
     marqueeTexture.magFilter = THREE.LinearFilter;
     marqueeTexture.generateMipmaps = false;
+    // Anisotropy is set later in init if needed, but not strictly necessary for CanvasTexture
     marqueeTexture.needsUpdate = true;
     return marqueeTexture;
 }
 
 function updateMarqueeTexture() {
     if (!marqueeTexture) return;
+
     const canvas = marqueeTexture.image;
     const context = canvas.getContext('2d');
+
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = 'rgba(0, 0, 0, 0.0)';
+    context.fillStyle = 'rgba(0, 0, 0, 0.0)'; // Transparent background
     context.fillRect(0, 0, canvas.width, canvas.height);
-    context.font = `bold 108px 'Courier New', monospace`;
-    context.fillStyle = 'rgba(255, 255, 255, 0.05)';
+
+    context.font = `bold 108px 'Courier New', monospace`; // Increased font size and ASCII style font, now bold
+    context.fillStyle = 'rgba(255, 255, 255, 0.05)'; // Very faint white text
     context.textAlign = 'center';
+
+    // Calculate the total height of one set of lines
     const singleSetHeight = MARQUEE_LINE_HEIGHT * MARQUEE_TOTAL_LINES;
-    for (let i = 0; i < MARQUEE_TOTAL_LINES * 2; i++) {
+
+    // Draw lines, repeating them to create a seamless loop
+    for (let i = 0; i < MARQUEE_TOTAL_LINES * 2; i++) { // Draw two sets of lines
         const phraseIndex = i % MARQUEE_PHRASES.length;
         const line = MARQUEE_PHRASES[phraseIndex];
+
         let yPos = (i * MARQUEE_LINE_HEIGHT) + marqueeScrollOffset;
+
+        // Loop the text when it scrolls off the top
         if (yPos < -singleSetHeight) {
-            yPos += singleSetHeight * 2;
+            yPos += singleSetHeight * 2; // Move it to the bottom of the second set
         }
+
         context.fillText(line, canvas.width / 2, yPos);
     }
+
     marqueeTexture.needsUpdate = true;
 }
 
 function createBiometricMarqueeTexture() {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
+
     let maxWidth = 0;
-    canvas.width = 1200;
-    context.font = `bold 36px 'Courier New', monospace`;
+    // Set a fixed width for the canvas to accommodate graphs/waves
+    canvas.width = 1200; // Increased width
+
+    context.font = `bold 36px 'Courier New', monospace`; // Smaller font for biometric data (72 / 2 = 36)
     BIOMETRIC_PHRASES.forEach(phrase => {
         maxWidth = Math.max(maxWidth, context.measureText(phrase).width);
     });
+
+    // Ensure canvas width is at least maxWidth + padding, but also allow for fixed size
     canvas.width = Math.max(canvas.width, maxWidth + 50);
     canvas.height = BIOMETRIC_MARQUEE_LINE_HEIGHT * (BIOMETRIC_MARQUEE_TOTAL_LINES * 2);
+
     biometricMarqueeTexture = new THREE.CanvasTexture(canvas);
     biometricMarqueeTexture.wrapS = THREE.RepeatWrapping;
     biometricMarqueeTexture.wrapT = THREE.RepeatWrapping;
-    biometricMarqueeTexture.colorSpace = THREE.SRGBColorSpace;
+    biometricMarqueeTexture.colorSpace = THREE.SRGBColorSpace; // Apply texture settings
     biometricMarqueeTexture.minFilter = THREE.LinearFilter;
     biometricMarqueeTexture.magFilter = THREE.LinearFilter;
     biometricMarqueeTexture.generateMipmaps = false;
@@ -1006,96 +1105,127 @@ function createBiometricMarqueeTexture() {
 
 function updateBiometricMarqueeTexture(currentTime) {
     if (!biometricMarqueeTexture) return;
+
     const canvas = biometricMarqueeTexture.image;
     const context = canvas.getContext('2d');
+
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = 'rgba(0, 0, 0, 0.0)';
+    context.fillStyle = 'rgba(0, 0, 0, 0.0)'; // Transparent background
     context.fillRect(0, 0, canvas.width, canvas.height);
-    context.font = `bold 36px 'Courier New', monospace`;
+
+    context.font = `bold 36px 'Courier New', monospace`; // Smaller font for biometric data
     context.textAlign = 'center';
+
     const singleSetHeight = BIOMETRIC_MARQUEE_LINE_HEIGHT * BIOMETRIC_MARQUEE_TOTAL_LINES;
-    biometricAnimationState.sinePhase += 0.00125;
+
+    // Update biometric animation states (slowed down)
+    biometricAnimationState.sinePhase += 0.00125; // Reduced from 0.0025 by 200%
     if (biometricAnimationState.sinePhase > Math.PI * 2) biometricAnimationState.sinePhase -= Math.PI * 2;
-    const HEARTBEAT_INTERVAL = 6000;
+
+    const HEARTBEAT_INTERVAL = 6000; // milliseconds (Increased from 3000 by 200%)
     if (currentTime - biometricAnimationState.lastHeartbeatTime > HEARTBEAT_INTERVAL) {
         biometricAnimationState.heartbeatPulse = true;
         biometricAnimationState.lastHeartbeatTime = currentTime;
     } else {
         biometricAnimationState.heartbeatPulse = false;
     }
-    if (biometricAnimationState.graphData.length === 0 || Math.random() < 0.01) {
+
+    // Generate new graph data periodically or on demand
+    if (biometricAnimationState.graphData.length === 0 || Math.random() < 0.01) { // Reduced probability to regenerate graph data
         biometricAnimationState.graphData = [];
-        for (let j = 0; j < 20; j++) {
+        for (let j = 0; j < 20; j++) { // Increased number of data points for more detailed graphs
             biometricAnimationState.graphData.push(Math.random());
         }
     }
+
     for (let i = 0; i < BIOMETRIC_MARQUEE_TOTAL_LINES * 2; i++) {
         const phraseIndex = i % BIOMETRIC_PHRASES.length;
         const line = BIOMETRIC_PHRASES[phraseIndex];
+
         let yPos = (i * BIOMETRIC_MARQUEE_LINE_HEIGHT) + biometricMarqueeScrollOffset;
+
         if (yPos < -singleSetHeight) {
             yPos += singleSetHeight * 2;
         }
-        context.fillStyle = 'rgba(0, 255, 0, 0.1)';
+
+        // Draw the full text first
+        context.fillStyle = 'rgba(0, 255, 0, 0.1)'; // Faint green text
         context.fillText(line, canvas.width / 2, yPos);
-        if (Math.random() < 0.6) {
+
+        // Randomly redact parts of the text
+        if (Math.random() < 0.6) { // 60% chance to redact a line
             const words = line.split(' ');
             if (words.length > 1) {
                 const wordToRedactIndex = Math.floor(Math.random() * words.length);
+
                 const textBeforeRedaction = words.slice(0, wordToRedactIndex).join(' ');
                 const redactedWord = words[wordToRedactIndex];
+
+                // Measure text up to the redacted word to get its starting X position
                 const totalTextWidth = context.measureText(line).width;
                 const startX = (canvas.width / 2) - (totalTextWidth / 2) + context.measureText(textBeforeRedaction).width;
-                context.fillStyle = 'black';
+
+                // Draw a black rectangle over the selected word
+                context.fillStyle = 'black'; // Redaction color
                 context.fillRect(startX, yPos - BIOMETRIC_MARQUEE_LINE_HEIGHT * 0.7, context.measureText(redactedWord).width, BIOMETRIC_MARQUEE_LINE_HEIGHT * 0.9);
             }
         }
-        if (Math.random() < 0.4) {
-            const animType = Math.floor(Math.random() * 3);
-            const animWidth = 200 * 4;
-            const animHeight = (BIOMETRIC_MARQUEE_LINE_HEIGHT * 0.8) * 4;
+
+        // Randomly draw animated biometric data (graphs, sine waves, heartbeat)
+        if (Math.random() < 0.4) { // Increased chance to draw an animated element on this line
+            const animType = Math.floor(Math.random() * 3); // 0: graph, 1: sine, 2: heartbeat
+            const animWidth = 200 * 4; // Increased by 400%
+            const animHeight = (BIOMETRIC_MARQUEE_LINE_HEIGHT * 0.8) * 4; // Increased by 400%
+
+            // Randomize X position to space graphs more
             const animX = (canvas.width * 0.05) + (Math.random() * (canvas.width * 0.8 - animWidth));
+
+            // Randomize Y position to place graphs on different levels
             const animY = yPos - (animHeight / 2) + (Math.random() - 0.5) * BIOMETRIC_MARQUEE_LINE_HEIGHT * 1.5;
+
             context.save();
             context.beginPath();
             context.rect(animX, animY, animWidth, animHeight);
-            context.clip();
-            if (animType === 0) {
-                context.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-                context.lineWidth = 3;
-                context.moveTo(animX, animY + animHeight);
+            context.clip(); // Clip drawing to this rectangle
+
+            if (animType === 0) { // Graph
+                context.strokeStyle = 'rgba(255, 255, 255, 0.7)'; // White color, slightly more opaque
+                context.lineWidth = 3; // Thicker lines
+                context.moveTo(animX, animY + animHeight); // Start at bottom left
                 for (let j = 0; j < biometricAnimationState.graphData.length; j++) {
                     const x = animX + (j / (biometricAnimationState.graphData.length - 1)) * animWidth;
-                    const y = animY + animHeight - (biometricAnimationState.graphData[j] * animHeight * (0.8 + 0.2 * Math.sin(currentTime * 0.0005)));
+                    const y = animY + animHeight - (biometricAnimationState.graphData[j] * animHeight * (0.8 + 0.2 * Math.sin(currentTime * 0.0005))); // Animated height (speed reduced from 0.001 to 0.0005)
                     context.lineTo(x, y);
                 }
                 context.stroke();
-            } else if (animType === 1) {
-                context.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-                context.lineWidth = 3;
-                context.moveTo(animX, animY + animHeight / 2 + Math.sin(biometricAnimationState.sinePhase) * animHeight * 0.1);
+            } else if (animType === 1) { // Sine Wave
+                context.strokeStyle = 'rgba(255, 255, 255, 0.7)'; // White color, slightly more opaque
+                context.lineWidth = 3; // Thicker lines
+                context.moveTo(animX, animY + animHeight / 2 + Math.sin(biometricAnimationState.sinePhase) * animHeight * 0.1); // Initial point with slight offset
                 for (let j = 0; j < animWidth; j++) {
                     const x = animX + j;
                     const y = animY + animHeight / 2 + Math.sin((j / animWidth) * Math.PI * 4 + biometricAnimationState.sinePhase) * animHeight * 0.3;
                     context.lineTo(x, y);
                 }
                 context.stroke();
-            } else if (animType === 2) {
-                context.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-                context.lineWidth = 3;
+            } else if (animType === 2) { // Heartbeat
+                context.strokeStyle = 'rgba(255, 255, 255, 0.7)'; // White color, slightly more opaque
+                context.lineWidth = 3; // Thicker lines
                 const hbHeight = animHeight * 0.4;
                 const hbCenterY = animY + animHeight / 2;
+
                 context.moveTo(animX, hbCenterY);
                 context.lineTo(animX + animWidth * 0.1, hbCenterY);
-                context.lineTo(animX + animWidth * 0.2, hbCenterY - hbHeight * 0.8);
-                context.lineTo(animX + animWidth * 0.25, hbCenterY + hbHeight);
-                context.lineTo(animX + animWidth * 0.3, hbCenterY - hbHeight * 0.3);
-                context.lineTo(animX + animWidth * 0.4, hbCenterY);
+                context.lineTo(animX + animWidth * 0.2, hbCenterY - hbHeight * 0.8); // Q
+                context.lineTo(animX + animWidth * 0.25, hbCenterY + hbHeight); // R
+                context.lineTo(animX + animWidth * 0.3, hbCenterY - hbHeight * 0.3); // S
+                context.lineTo(animX + animWidth * 0.4, hbCenterY); // End of QRS
                 context.lineTo(animX + animWidth * 0.6, hbCenterY);
-                context.lineTo(animX + animWidth * 0.7, hbCenterY - hbHeight * 0.2);
+                context.lineTo(animX + animWidth * 0.7, hbCenterY - hbHeight * 0.2); // T wave peak
                 context.lineTo(animX + animWidth * 0.8, hbCenterY);
                 context.lineTo(animX + animWidth, hbCenterY);
                 context.stroke();
+
                 if (biometricAnimationState.heartbeatPulse) {
                     context.fillStyle = 'rgba(255, 255, 255, 0.2)';
                     context.fillRect(animX, animY, animWidth, animHeight);
@@ -1103,21 +1233,30 @@ function updateBiometricMarqueeTexture(currentTime) {
             }
             context.restore();
         }
-        if (Math.random() < 0.3) {
+
+        // Add diagnostic text captions in black boxes
+        if (Math.random() < 0.3) { // 30% chance to add a diagnostic caption
             const caption = DIAGNOSTIC_CAPTIONS[Math.floor(Math.random() * DIAGNOSTIC_CAPTIONS.length)];
-            context.font = `bold 24px 'Courier New', monospace`;
+            context.font = `bold 24px 'Courier New', monospace`; // Smaller font for captions (48 / 2 = 24)
             context.textAlign = 'left';
             const captionWidth = context.measureText(caption).width;
-            const captionHeight = 24 * 1.2;
+            const captionHeight = 24 * 1.2; // Approximate height
+
+            // Position the caption randomly over the line, ensuring it's within bounds
             const captionX = (canvas.width * 0.1) + (Math.random() * (canvas.width * 0.7 - captionWidth));
             const captionY = yPos - (captionHeight / 2) + (Math.random() - 0.5) * (BIOMETRIC_MARQUEE_LINE_HEIGHT * 0.5);
-            const padding = 5;
+
+            const padding = 5; // Define padding here
+            // Draw black box
             context.fillStyle = 'black';
             context.fillRect(captionX - padding, captionY - captionHeight * 0.7, captionWidth + padding * 2, captionHeight + padding);
+
+            // Draw white text
             context.fillStyle = 'white';
             context.fillText(caption, captionX, captionY);
         }
     }
+
     biometricMarqueeTexture.needsUpdate = true;
 }
 
@@ -1132,17 +1271,20 @@ function shuffleArray(array) {
 function createBloodTextTexture() {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
+
     let maxWidth = 0;
     context.font = `bold ${BLOOD_TEXT_FONT_SIZE}px 'Impact', sans-serif`;
     BLOOD_TEXT_PHRASES.forEach(phrase => {
         maxWidth = Math.max(maxWidth, context.measureText(phrase).width);
     });
-    canvas.width = maxWidth + 100;
-    canvas.height = BLOOD_TEXT_LINE_HEIGHT * (BLOOD_TEXT_TOTAL_LINES * 2);
+
+    canvas.width = maxWidth + 100; // Add padding
+    canvas.height = BLOOD_TEXT_LINE_HEIGHT * (BLOOD_TEXT_TOTAL_LINES * 2); // Double height for scrolling
+
     bloodTexture = new THREE.CanvasTexture(canvas);
     bloodTexture.wrapS = THREE.RepeatWrapping;
     bloodTexture.wrapT = THREE.RepeatWrapping;
-    bloodTexture.colorSpace = THREE.SRGBColorSpace;
+    bloodTexture.colorSpace = THREE.SRGBColorSpace; // Apply texture settings
     bloodTexture.minFilter = THREE.LinearFilter;
     bloodTexture.magFilter = THREE.LinearFilter;
     bloodTexture.generateMipmaps = false;
@@ -1152,42 +1294,57 @@ function createBloodTextTexture() {
 
 function updateBloodTextTexture() {
     if (!bloodTexture) return;
+
     const canvas = bloodTexture.image;
     const context = canvas.getContext('2d');
+
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = 'rgba(0, 0, 0, 0.0)';
+    context.fillStyle = 'rgba(0, 0, 0, 0.0)'; // Transparent background
     context.fillRect(0, 0, canvas.width, canvas.height);
+
     context.font = `bold ${BLOOD_TEXT_FONT_SIZE}px 'Impact', sans-serif`;
-    context.fillStyle = 'white';
+    context.fillStyle = 'white'; // White text for contrast
     context.textAlign = 'center';
+
     const singleSetHeight = BLOOD_TEXT_LINE_HEIGHT * BLOOD_TEXT_TOTAL_LINES;
-    for (let i = 0; i < BLOOD_TEXT_TOTAL_LINES * 2; i++) {
+
+    // Draw lines, repeating them to create a seamless loop
+    for (let i = 0; i < BLOOD_TEXT_TOTAL_LINES * 2; i++) { // Draw two sets of lines
         const phraseIndex = i % shuffledBloodPhrases.length;
         const line = shuffledBloodPhrases[phraseIndex];
+
         let yPos = (i * BLOOD_TEXT_LINE_HEIGHT) + bloodScrollOffset;
+
+        // When the first set of phrases has scrolled completely off the top of the canvas,
+        // wrap it around to the bottom, effectively creating a continuous loop.
         if (yPos < -singleSetHeight) {
-            yPos += singleSetHeight * 3;
-            shuffledBloodPhrases = shuffleArray([...BLOOD_TEXT_PHRASES]);
+            yPos += singleSetHeight * 3; // Move it to the bottom of the second set
+            shuffledBloodPhrases = shuffleArray([...BLOOD_TEXT_PHRASES]); // Reshuffle phrases on loop
         }
+
         context.fillText(line, canvas.width / 2, yPos);
     }
+
     bloodTexture.needsUpdate = true;
 }
 
 function createRedactedGlitchTexture() {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
+
     let maxWidth = 0;
     context.font = `${REDACTED_GLITCH_FONT_SIZE}px 'Courier New', monospace`;
     REDACTED_GLITCH_PHRASES.forEach(phrase => {
         maxWidth = Math.max(maxWidth, context.measureText(phrase).width);
     });
-    canvas.width = maxWidth + 50;
-    canvas.height = REDACTED_GLITCH_LINE_HEIGHT * (REDACTED_GLITCH_TOTAL_LINES * 2);
+
+    canvas.width = maxWidth + 50; // Add padding
+    canvas.height = REDACTED_GLITCH_LINE_HEIGHT * (REDACTED_GLITCH_TOTAL_LINES * 2); // Double for seamless scrolling
+
     redactedGlitchTexture = new THREE.CanvasTexture(canvas);
     redactedGlitchTexture.wrapS = THREE.RepeatWrapping;
     redactedGlitchTexture.wrapT = THREE.RepeatWrapping;
-    redactedGlitchTexture.colorSpace = THREE.SRGBColorSpace;
+    redactedGlitchTexture.colorSpace = THREE.SRGBColorSpace; // Apply texture settings
     redactedGlitchTexture.minFilter = THREE.LinearFilter;
     redactedGlitchTexture.magFilter = THREE.LinearFilter;
     redactedGlitchTexture.generateMipmaps = false;
@@ -1197,35 +1354,51 @@ function createRedactedGlitchTexture() {
 
 function updateRedactedGlitchTexture() {
     if (!redactedGlitchTexture) return;
+
     const canvas = redactedGlitchTexture.image;
     const context = canvas.getContext('2d');
+
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = 'rgba(255, 255, 255, 1.0)';
+    context.fillStyle = 'rgba(255, 255, 255, 1.0)'; // White background for threshold effect
     context.fillRect(0, 0, canvas.width, canvas.height);
+
     context.font = `${REDACTED_GLITCH_FONT_SIZE}px 'Courier New', monospace`;
     context.textAlign = 'left';
+
     const singleSetHeight = REDACTED_GLITCH_LINE_HEIGHT * REDACTED_GLITCH_TOTAL_LINES;
+
     for (let i = 0; i < REDACTED_GLITCH_TOTAL_LINES * 2; i++) {
-        const phraseDataIndex = i % redactedGlitchPhraseData.length;
+        const phraseDataIndex = i % redactedGlitchPhraseData.length; // Use the new data structure
         const phraseData = redactedGlitchPhraseData[phraseDataIndex];
         const line = phraseData.text;
         const redactedWordIndices = phraseData.redactedWordIndices;
+
         let yPos = (i * REDACTED_GLITCH_LINE_HEIGHT) + redactedGlitchScrollOffset;
+
         if (yPos < -singleSetHeight) {
             yPos += singleSetHeight * 2;
         }
+
+        // Draw text in black so it becomes white/visible with threshold effect
         context.fillStyle = 'black';
-        context.fillText(line, 10, yPos + REDACTED_GLITCH_FONT_SIZE);
+        context.fillText(line, 10, yPos + REDACTED_GLITCH_FONT_SIZE); // Add padding
+
+        // Draw redaction bars (white rectangles on white background will appear black with threshold)
         if (redactedWordIndices.length > 0) {
-            const words = line.split(/(\s+)/);
-            let currentX = 10;
+            const words = line.split(/(\s+)/); // Split by one or more spaces, keeping spaces
+            let currentX = 10; // Start X for text (accounting for padding)
+
             for (let j = 0; j < words.length; j++) {
                 const word = words[j];
                 const wordWidth = context.measureText(word).width;
-                if (!/\s+/.test(word) && redactedWordIndices.includes(j)) {
+
+                if (!/\s+/.test(word) && redactedWordIndices.includes(j)) { // If it's a word and flagged for redaction
+                    // Draw a black rectangle over the selected words (will appear white with threshold)
                     context.fillStyle = 'black';
                     context.fillRect(currentX, yPos + REDACTED_GLITCH_FONT_SIZE * 0.2, wordWidth, REDACTED_GLITCH_FONT_SIZE * 0.9);
-                    context.strokeStyle = 'black';
+
+                    // Optionally draw a border around the redacted area to make it more pronounced
+                    context.strokeStyle = 'black'; // Black border (will be white with threshold)
                     context.lineWidth = 2;
                     context.strokeRect(currentX, yPos + REDACTED_GLITCH_FONT_SIZE * 0.2, wordWidth, REDACTED_GLITCH_FONT_SIZE * 0.9);
                 }
@@ -1233,6 +1406,7 @@ function updateRedactedGlitchTexture() {
             }
         }
     }
+
     redactedGlitchTexture.needsUpdate = true;
 }
 
@@ -1241,29 +1415,36 @@ function stopCameraAnimationAndReset() {
         cameraAnimationActive = false;
         effectControls.cameraAnimation = false;
         effectControls.yRotation = false;
+
         updateUIButtonState('cameraAnimation', false);
         updateUIButtonState('yRotation', false);
+
         camera.position.copy(initialGlobalCameraPos);
         controls.target.copy(initialGlobalCameraLookAt);
         camera.lookAt(controls.target);
-        controls.enabled = true;
-        controls.update();
+        controls.enabled = true; // Re-enable orbit controls
+        controls.update(); // Ensure controls are updated after manual camera set
+
         cameraAnimationState = 'idle';
         assetsVisitedCount = 0;
     }
-    yRotationStartTime = 0;
+    yRotationStartTime = 0; // Reset Y-rotation auto-start timer on interaction
 }
 
 function resetPiecesToOriginalPositions() {
+    // Dispose of existing face materials before clearing maps
     defaultMaterialMap.forEach(material => material.dispose());
     brightMaterialMap.forEach(material => material.dispose());
     defaultMaterialMap.clear();
     brightMaterialMap.clear();
-    faceMeshes = [];
+    faceMeshes = []; // Clear the list of face meshes
 
+    // Remove all current draggable objects and their associated meshes (like redaction rectangles)
     draggableObjects.forEach(object => {
         scene.remove(object);
         if (object.geometry) object.geometry.dispose();
+        // Material disposal is handled by the material maps for face meshes, 
+        // but manually dispose of materials for non-face meshes (forehead, cards, signature, text)
         if (object.material && !object.userData.isFaceMesh) {
             if (Array.isArray(object.material)) {
                 object.material.forEach(m => m.dispose());
@@ -1272,50 +1453,85 @@ function resetPiecesToOriginalPositions() {
             }
         }
     });
-    draggableObjects = [];
-    cameraAnimationTargets = [];
+    draggableObjects = []; // Clear the array
+    cameraAnimationTargets = []; // Clear camera animation targets
+
+    // Clear forehead meshes array
     foreheadMeshes = [];
+
+    // Clear shufflingCardMeshes array
     shufflingCardMeshes = [];
+
+    // Reset specific global references
     rightEyeMesh = null;
     leftEyeMesh = null;
 
     if (rightEyeRedactionRect) { scene.remove(rightEyeRedactionRect); rightEyeRedactionRect.geometry.dispose(); rightEyeRedactionRect.material.dispose(); rightEyeRedactionRect = null; }
     if (leftEyeRedactionRect) { scene.remove(leftEyeRedactionRect); leftEyeRedactionRect.geometry.dispose(); leftEyeRedactionRect.material.dispose(); leftEyeRedactionRect = null; }
 
+    // Remove existing text meshes before re-adding to avoid duplicates and ensure clean state
     if (marqueeTextMesh) { scene.remove(marqueeTextMesh); marqueeTextMesh.geometry.dispose(); marqueeTextMesh.material.dispose(); marqueeTextMesh = null; }
     if (biometricMarqueeTextMesh) { scene.remove(biometricMarqueeTextMesh); biometricMarqueeTextMesh.geometry.dispose(); biometricMarqueeTextMesh.material.dispose(); biometricMarqueeTextMesh = null; }
     if (bloodTextMesh) { scene.remove(bloodTextMesh); bloodTextMesh.geometry.dispose(); bloodTextMesh.material.dispose(); bloodTextMesh = null; }
     if (redactedGlitchTextMesh) { scene.remove(redactedGlitchTextMesh); redactedGlitchTextMesh.geometry.dispose(); redactedGlitchTextMesh.material.dispose(); redactedGlitchTextMesh = null; }
 
+    // Turn off all effects on RESET (before re-adding assets)
     turnOffAllEffects();
 
-    const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
-    const baseScale = 0.005;
+    const maxAnisotropy = renderer.capabilities.getMaxAnisotropy(); // Get max anisotropy for texture setup
 
+    // Re-add all assets from their initial configurations
     initialAssetConfigs.forEach(config => {
+        // Reset the 'removed' flag for all assets
         config.removed = false;
+
         const textureLoader = new THREE.TextureLoader();
         let material, geometry, mesh;
 
+        // Calculate new Z position based on the new convention: lower layer = closer (larger Z)
+        let newZ;
+        const newInitialPosition = config.initialPosition.clone();
+
+        if (config.id === 'marqueeTextMesh' || config.id === 'redactedGlitchTextMesh') {
+            // Marquee/Redacted Glitch are special, keep their Z as stored in initialPosition
+            newZ = config.initialPosition.z;
+        } else {
+            // Recalculate Z for all layer-based assets
+            newZ = (totalDepthLayers - config.initialLayer) * depthStep;
+        }
+        newInitialPosition.z = newZ;
+
+
         switch (config.type) {
             case 'image':
+                // Only re-add if not a signature image or if it's the *first* signature image
                 if (config.id === 'signature') {
+                    // Count existing signature images in the scene
                     const existingSignatures = scene.children.filter(child => child.userData.id === 'signature');
-                    if (existingSignatures.length >= 1) return;
+                    if (existingSignatures.length >= 1) {
+                        // If one signature already exists, skip adding another one
+                        return;
+                    }
                 }
+                // Skip adding removed assets
                 if (config.removed) return;
 
                 textureLoader.load(config.url, (texture) => {
+                    // --- Texture Configuration Start ---
                     texture.colorSpace = THREE.SRGBColorSpace;
                     texture.minFilter = THREE.LinearFilter;
                     texture.magFilter = THREE.LinearFilter;
                     texture.generateMipmaps = false;
                     texture.anisotropy = maxAnisotropy;
+                    // --- Texture Configuration End ---
 
                     let currentMaterial;
                     const isFaceMesh = ['rightEye', 'leftEye', 'mouth', 'nose', 'jensenHuangCheek', 'jensenHuangHair'].includes(config.id);
+
+                    // Create default material
                     currentMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
                     
+                    // If it is a face mesh, create and cache both materials
                     if (isFaceMesh) {
                         const brightMaterial = new THREE.ShaderMaterial({
                             uniforms: { tDiffuse: { value: texture }, brightness: { value: 1.2 } },
@@ -1329,124 +1545,151 @@ function resetPiecesToOriginalPositions() {
                         brightMaterialMap.set(config.id, brightMaterial);
                     }
 
+                    // For images loaded from initialAssetConfigs, use the stored initialScale if available
                     const initialPlaneWidth = config.initialScale.width;
                     const initialPlaneHeight = config.initialScale.height;
+
                     geometry = new THREE.PlaneGeometry(initialPlaneWidth, initialPlaneHeight);
                     mesh = new THREE.Mesh(geometry, currentMaterial);
-                    mesh.position.copy(config.initialPosition);
-                    mesh.rotation.copy(config.initialRotation ? new THREE.Euler().copy(config.initialRotation) : new THREE.Euler());
+                    mesh.position.copy(newInitialPosition); // Use the calculated Z
+                    mesh.rotation.copy(config.initialRotation ? new THREE.Euler().copy(config.initialRotation) : new THREE.Euler()); // Apply initial rotation if present
                     mesh.userData.currentLayer = config.initialLayer;
-                    mesh.userData.initialPosition = config.initialPosition.clone();
+                    mesh.userData.initialPosition = newInitialPosition.clone(); // Store new initial Z
                     mesh.userData.initialLayer = config.initialLayer;
                     mesh.userData.id = config.id;
-                    mesh.userData.initialScale = { width: initialPlaneWidth, height: initialPlaneHeight };
-                    mesh.userData.isFaceMesh = isFaceMesh;
+                    mesh.userData.initialScale = { width: initialPlaneWidth, height: initialPlaneHeight }; // Store initial scale
+                    mesh.userData.isFaceMesh = isFaceMesh; // Mark as face mesh
 
-                    if (isFaceMesh) faceMeshes.push(mesh);
+                    if (isFaceMesh) {
+                        faceMeshes.push(mesh);
+                    }
+
                     if (config.id !== 'signature') {
                         scene.add(mesh);
                         draggableObjects.push(mesh);
                         cameraAnimationTargets.push(mesh);
                     }
+                    // Special handling for forehead meshes
                     if (config.id.startsWith('forehead')) {
                         foreheadMeshes.push(mesh);
-                        mesh.visible = (foreheadMeshes.length - 1 === 0);
-                    } else if (config.id.startsWith('cardGrid_')) {
+                        mesh.visible = (foreheadMeshes.length - 1 === 0); // Only make the first one visible initially
+                    } else if (config.id.startsWith('cardGrid_')) { // Add card grid meshes to shufflingCardMeshes
                         shufflingCardMeshes.push(mesh);
                         scene.add(mesh);
-                    } else {
+                    } else { // Signature is static, add directly to scene without making draggable
                         scene.add(mesh);
                     }
 
-                    if (config.id === 'rightEye' || config.id === 'leftEye') {
-                        if (config.id === 'rightEye') rightEyeMesh = mesh;
-                        if (config.id === 'leftEye') leftEyeMesh = mesh;
-                        const redactionWidth = initialPlaneWidth * 0.8;
+                    if (config.id === 'rightEye') {
+                        rightEyeMesh = mesh;
+                        const redactionWidth = initialPlaneWidth * .8;
                         const redactionHeight = initialPlaneHeight * 0.5;
                         const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
                         const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-                        const rect = new THREE.Mesh(redactionGeometry, redactionMaterial);
-                        rect.position.set(mesh.position.x, mesh.position.y, mesh.position.z + (1.5 * depthStep));
-                        rect.visible = (effectControls.redacted || effectControls.redactedGlitch || effectControls.anon);
-                        if (config.id === 'rightEye') rightEyeRedactionRect = rect;
-                        if (config.id === 'leftEye') leftEyeRedactionRect = rect;
-                        scene.add(rect);
+                        rightEyeRedactionRect = new THREE.Mesh(redactionGeometry, redactionMaterial);
+                        rightEyeRedactionRect.position.set(mesh.position.x, mesh.position.y, mesh.position.z + (1.5 * depthStep));
+                        rightEyeRedactionRect.visible = false;
+                        scene.add(rightEyeRedactionRect);
+                    } else if (config.id === 'leftEye') {
+                        leftEyeMesh = mesh;
+                        const redactionWidth = initialPlaneWidth * .8;
+                        const redactionHeight = initialPlaneHeight * 0.5;
+                        const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
+                        const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                        leftEyeRedactionRect = new THREE.Mesh(redactionGeometry, redactionMaterial);
+                        leftEyeRedactionRect.position.set(mesh.position.x, mesh.position.y, mesh.position.z + (1.5 * depthStep)); 
+                        leftEyeRedactionRect.visible = false;
+                        scene.add(leftEyeRedactionRect);
                     }
                 });
                 break;
             case 'textMesh':
+                // Re-initialize 3D text meshes (Marquee, Biometric, Blood, Redacted Glitch)
                 if (config.id === 'marqueeTextMesh') {
+                    // Re-create the mesh, as it was disposed earlier
                     marqueeTexture = createMarqueeTexture();
                     const newMarqueeMaterial = new THREE.MeshBasicMaterial({ map: marqueeTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
                     const newMarqueePlaneWidth = 20;
                     const newMarqueePlaneHeight = newMarqueePlaneWidth / (marqueeTexture.image.width / marqueeTexture.image.height);
                     const newMarqueeGeometry = new THREE.PlaneGeometry(newMarqueePlaneWidth, newMarqueePlaneHeight);
+
                     marqueeTextMesh = new THREE.Mesh(newMarqueeGeometry, newMarqueeMaterial);
-                    marqueeTextMesh.position.copy(config.initialPosition);
-                    marqueeTextMesh.userData.initialPosition = marqueeTextMesh.position.clone();
+                    marqueeTextMesh.position.copy(config.initialPosition); // Use the original Z for marquee
+                    marqueeTextMesh.userData.initialPosition = marqueeTextMesh.position.clone(); // Clone for userData as well
                     marqueeTextMesh.userData.initialLayer = config.initialLayer;
-                    marqueeTextMesh.visible = effectControls.xray;
+                    marqueeTextMesh.visible = effectControls.xray; // Tied to XRAY effect
                     scene.add(marqueeTextMesh);
                 } else if (config.id === 'biometricMarqueeTextMesh') {
+                    // Re-create the mesh, as it was disposed earlier
                     biometricMarqueeTexture = createBiometricMarqueeTexture();
                     const newBiometricMarqueeMaterial = new THREE.MeshBasicMaterial({ map: biometricMarqueeTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
                     const newBiometricMarqueePlaneWidth = 20;
                     const newBiometricMarqueePlaneHeight = newBiometricMarqueePlaneWidth / (biometricMarqueeTexture.image.width / biometricMarqueeTexture.image.height);
                     const newBiometricMarqueeGeometry = new THREE.PlaneGeometry(newBiometricMarqueePlaneWidth, newBiometricMarqueePlaneHeight);
+
                     biometricMarqueeTextMesh = new THREE.Mesh(newBiometricMarqueeGeometry, newBiometricMarqueeMaterial);
-                    biometricMarqueeTextMesh.position.copy(config.initialPosition);
-                    biometricMarqueeTextMesh.userData.initialPosition = biometricMarqueeTextMesh.position.clone();
+                    biometricMarqueeTextMesh.position.copy(newInitialPosition); // Use the calculated Z
+                    biometricMarqueeTextMesh.userData.initialPosition = newInitialPosition.clone(); // Clone for userData as well
                     biometricMarqueeTextMesh.userData.initialLayer = config.initialLayer;
-                    biometricMarqueeTextMesh.visible = effectControls.biometricMarquee || effectControls.og || effectControls.hacker || effectControls.surveillance || effectControls.greed;
+                    biometricMarqueeTextMesh.visible = effectControls.biometricMarquee || effectControls.og || effectControls.hacker || effectControls.surveillance || effectControls.greed; // Visibility depends on multiple effects
                     scene.add(biometricMarqueeTextMesh);
                 } else if (config.id === 'bloodTextMesh') {
+                    // Re-create the mesh, as it was disposed earlier
                     bloodTexture = createBloodTextTexture();
                     const newBloodTextMaterial = new THREE.MeshBasicMaterial({ map: bloodTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
                     const newBloodTextPlaneWidth = 20;
                     const newBloodTextPlaneHeight = newBloodTextPlaneWidth / (bloodTexture.image.width / bloodTexture.image.height);
                     const newBloodTextGeometry = new THREE.PlaneGeometry(newBloodTextPlaneWidth, newBloodTextPlaneHeight);
+
                     bloodTextMesh = new THREE.Mesh(newBloodTextGeometry, newBloodTextMaterial);
-                    bloodTextMesh.position.copy(config.initialPosition);
-                    bloodTextMesh.userData.initialPosition = bloodTextMesh.position.clone();
+                    bloodTextMesh.position.copy(newInitialPosition); // Use the calculated Z
+                    bloodTextMesh.userData.initialPosition = newInitialPosition.clone();
                     bloodTextMesh.userData.initialLayer = config.initialLayer;
+                    // Ensure bloodTextMesh is hidden on reset, as the effectControls are reset before this point
                     bloodTextMesh.visible = false;
                     scene.add(bloodTextMesh);
                 } else if (config.id === 'redactedGlitchTextMesh') {
+                    // Re-create the mesh, as it was disposed earlier
                     redactedGlitchTexture = createRedactedGlitchTexture();
                     const redactedGlitchMaterial = new THREE.MeshBasicMaterial({ map: redactedGlitchTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
                     const redactedGlitchPlaneWidth = 15;
                     const redactedGlitchPlaneHeight = redactedGlitchPlaneWidth / (redactedGlitchTexture.image.width / redactedGlitchTexture.image.height);
                     const redactedGlitchGeometry = new THREE.PlaneGeometry(redactedGlitchPlaneWidth, redactedGlitchPlaneHeight);
+
                     redactedGlitchTextMesh = new THREE.Mesh(redactedGlitchGeometry, redactedGlitchMaterial);
-                    redactedGlitchTextMesh.position.copy(config.initialPosition);
-                    redactedGlitchTextMesh.userData.initialPosition = redactedGlitchTextMesh.position.clone();
+                    redactedGlitchTextMesh.position.copy(config.initialPosition); // Use the calculated Z (which is -0.2)
+                    redactedGlitchTextMesh.userData.initialPosition = config.initialPosition.clone();
                     redactedGlitchTextMesh.userData.initialLayer = config.initialLayer;
-                    redactedGlitchTextMesh.visible = effectControls.redactedGlitch;
+                    redactedGlitchTextMesh.visible = effectControls.redactedGlitch; // Respect current effect control
                     scene.add(redactedGlitchTextMesh);
-                    initializeRedactedGlitchPhraseData();
+                    initializeRedactedGlitchPhraseData(); // Re-initialize redaction patterns
                 }
                 break;
         }
     });
 
+    // Reset camera to initial global position and look-at
     camera.position.copy(initialGlobalCameraPos);
     controls.target.copy(initialGlobalCameraLookAt);
     camera.lookAt(controls.target);
-    controls.update();
+    controls.update(); // Update controls after manual camera change
 
+    // Stop any active camera animations or Y-rotation
     effectControls.cameraAnimation = false;
     effectControls.yRotation = false;
     cameraAnimationActive = false;
-    controls.enabled = true;
+    controls.enabled = true; // Re-enable orbit controls
+    // Update UI buttons for camera animation and Y-rotation
     updateUIButtonState('yRotation', false);
     updateUIButtonState('cameraAnimation', false);
 
+    // Also disable redacted effects as they are tied to eye positions
     effectControls.redacted = false;
     effectControls.redactedGlitch = false;
-    effectControls.anon = false;
-    effectControls.hacker = false;
-    effectControls.surveillance = false;
-    effectControls.greed = false;
+    effectControls.anon = false; // Turn off anon effect on reset
+    effectControls.hacker = false; // Turn off hacker effect on reset
+    effectControls.surveillance = false; // Turn off surveillance effect on reset
+    effectControls.greed = false; // Turn off greed effect on reset
     updateUIButtonState('redacted', false);
     updateUIButtonState('redactedGlitch', false);
     updateUIButtonState('anon', false);
@@ -1454,18 +1697,22 @@ function resetPiecesToOriginalPositions() {
     updateUIButtonState('surveillance', false);
     updateUIButtonState('greed', false);
 
+    // If threshold was forced on by redacted, turn it off if no other effect is using it.
     if (!effectControls.redacted && !effectControls.redactedGlitch && !effectControls.anon && !effectControls.hacker && !effectControls.surveillance && !effectControls.greed) {
         effectControls.threshold = false;
         thresholdPass.enabled = false;
         updateUIButtonState('threshold', false);
     }
 
+    // Update face material brightness after all assets are re-added and effects are reset
     updateFaceMaterialBrightness();
-    lastActivityTime = performance.now();
-    yRotationStartTime = 0;
+
+    lastActivityTime = performance.now(); // Reset activity timer on reset
+    yRotationStartTime = 0; // Reset Y-rotation auto-start timer on reset
 }
 
 function turnOffAllEffects() {
+    // Deactivate all post-processing passes
     greyscalePass.enabled = false;
     thresholdPass.enabled = false;
     darkPass.enabled = false;
@@ -1478,15 +1725,17 @@ function turnOffAllEffects() {
     bloodPass.enabled = false;
     cctvFeedPass.enabled = false;
 
+    // Reset all effect control booleans to false
     for (const prop in effectControls) {
         if (effectControls.hasOwnProperty(prop)) {
             effectControls[prop] = false;
         }
     }
 
+    // Update UI buttons to reflect inactive state
     updateUIButtonState('greyscale', false);
     updateUIButtonState('threshold', false);
-    updateUIButtonState('shadow', false);
+    updateUIButtonState('shadow', false); // Updated from 'dark'
     updateUIButtonState('pixelation', false);
     updateUIButtonState('glitch', false);
     updateUIButtonState('matrix', false);
@@ -1503,10 +1752,11 @@ function turnOffAllEffects() {
     updateUIButtonState('biometricMarquee', false);
     updateUIButtonState('og', false);
     updateUIButtonState('bloodText', false);
-    updateUIButtonState('hacker', false);
-    updateUIButtonState('surveillance', false);
-    updateUIButtonState('greed', false);
+    updateUIButtonState('hacker', false); // Update hacker button state
+    updateUIButtonState('surveillance', false); // Update surveillance button state
+    updateUIButtonState('greed', false); // Update greed button state
 
+    // Specific effect cleanups
     if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false;
     if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false;
     if (marqueeTextMesh) marqueeTextMesh.visible = false;
@@ -1514,23 +1764,31 @@ function turnOffAllEffects() {
     if (bloodTextMesh) bloodTextMesh.visible = false;
     if (redactedGlitchTextMesh) redactedGlitchTextMesh.visible = false;
 
+    // Hide all forehead meshes
     foreheadMeshes.forEach(mesh => mesh.visible = false);
+
+    // Hide all shuffling card meshes
     shufflingCardMeshes.forEach(mesh => mesh.visible = false);
 
     cameraAnimationActive = false;
-    controls.enabled = true;
+    controls.enabled = true; // Re-enable orbit controls
     cameraAnimationState = 'idle';
     assetsVisitedCount = 0;
 
+    // Update face material brightness after all effects are reset
     updateFaceMaterialBrightness();
-    lastActivityTime = performance.now();
-    yRotationStartTime = 0;
+
+    lastActivityTime = performance.now(); // Reset activity timer
+    yRotationStartTime = 0; // Reset Y-rotation auto-start timer
 }
 
+// Cache for canvas contexts to read texture alpha values efficiently
 const textureAlphaCanvasCache = new Map();
 
 function getAlphaAtUV(texture, uv) {
     if (!texture || !texture.image || !uv) return 0;
+
+    // Use cached canvas context if available
     let canvas, context;
     if (textureAlphaCanvasCache.has(texture.id)) {
         ({ canvas, context } = textureAlphaCanvasCache.get(texture.id));
@@ -1542,24 +1800,34 @@ function getAlphaAtUV(texture, uv) {
         context.drawImage(texture.image, 0, 0);
         textureAlphaCanvasCache.set(texture.id, { canvas, context });
     }
+
     const x = Math.floor(uv.x * canvas.width);
-    const y = Math.floor((1 - uv.y) * canvas.height);
-    if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) return 0;
+    const y = Math.floor((1 - uv.y) * canvas.height); // Y-axis needs to be inverted for canvas
+
+    // Ensure coordinates are within bounds
+    if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) {
+        return 0;
+    }
+
     const pixelData = context.getImageData(x, y, 1, 1).data;
-    return pixelData[3] / 255;
+    return pixelData[3] / 255; // Alpha channel
 }
 
 function init() {
     scene = new THREE.Scene();
+
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 10;
-    camera.userData.yRotationAngle = 0;
+    camera.position.z = 10; // Zoomed out to see the full canvas
+    camera.userData.yRotationAngle = 0; // Initialize angle for Y-axis camera rotation
+
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x1e1e1e);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.setClearColor(0x1e1e1e); // Dark gray background
+    renderer.outputColorSpace = THREE.SRGBColorSpace; // Set renderer color space for accurate texture display
     document.body.appendChild(renderer.domElement);
-    renderer.sortObjects = true;
+
+    renderer.sortObjects = true; // Enable object sorting for correct transparency rendering
+
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
@@ -1569,50 +1837,66 @@ function init() {
     controls.maxPolarAngle = Math.PI / 2;
     controls.addEventListener('change', () => {
         lastActivityTime = performance.now();
-        stopCameraAnimationAndReset();
+        stopCameraAnimationAndReset(); // Stop animation on camera control interaction
     });
+
+    // Store initial global camera position and look-at target
     initialGlobalCameraPos.copy(camera.position);
     initialGlobalCameraLookAt.copy(controls.target);
 
+    // Get max anisotropy once
     const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
+
+    // Post-processing setup
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
+
     greyscalePass = new ShaderPass(GreyScaleShader);
     composer.addPass(greyscalePass);
     greyscalePass.enabled = effectControls.greyscale;
+
     thresholdPass = new ShaderPass(ThresholdShader);
     thresholdPass.uniforms['threshold'].value = effectControls.thresholdValue;
     composer.addPass(thresholdPass);
     thresholdPass.enabled = effectControls.threshold;
+
     darkPass = new ShaderPass(DarkShader);
     darkPass.uniforms['threshold'].value = effectControls.thresholdValue;
     composer.addPass(darkPass);
     darkPass.enabled = effectControls.shadow;
+
     pixelationPass = new ShaderPass(PixelationShader);
     pixelationPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
     pixelationPass.uniforms['pixelSize'].value = effectControls.pixelSize;
     composer.addPass(pixelationPass);
     pixelationPass.enabled = effectControls.pixelation;
+
     glitchPass = new GlitchPass();
     composer.addPass(glitchPass);
     glitchPass.enabled = effectControls.glitch;
+
     matrixPass = new ShaderPass(MatrixShader);
     composer.addPass(matrixPass);
     matrixPass.enabled = effectControls.matrix;
+
     asciiPass = new ShaderPass(ASCIIShader);
     asciiPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
     asciiPass.uniforms['pixelSize'].value = effectControls.pixelSize;
     composer.addPass(asciiPass);
     asciiPass.enabled = false;
+
     xrayPass = new ShaderPass(XRayShader);
     composer.addPass(xrayPass);
     xrayPass.enabled = effectControls.xray;
+
     heatmapPass = new ShaderPass(HeatmapShader);
     composer.addPass(heatmapPass);
     heatmapPass.enabled = effectControls.heatmap;
+
     bloodPass = new ShaderPass(BloodShader);
     composer.addPass(bloodPass);
     bloodPass.enabled = effectControls.blood;
+
     cctvFeedPass = new ShaderPass(CCTVFeedShader);
     cctvFeedPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
     cctvFeedPass.uniforms['time'].value = 0.0;
@@ -1623,20 +1907,31 @@ function init() {
     mouse = new THREE.Vector2();
 
     const textureLoader = new THREE.TextureLoader();
+
+    // Base scale factor to make images viewable at a reasonable size
     const baseScale = 0.005;
 
+    // Helper function to create mesh and store materials for face parts
     const createFaceMesh = (id, url, initialPosition, initialLayer, scaleFactor) => {
         const isFaceMesh = ['rightEye', 'leftEye', 'mouth', 'nose', 'jensenHuangCheek', 'jensenHuangHair'].includes(id);
+
         textureLoader.load(url, (texture) => {
+            // --- Texture Configuration Start ---
             texture.colorSpace = THREE.SRGBColorSpace;
             texture.minFilter = THREE.LinearFilter;
             texture.magFilter = THREE.LinearFilter;
             texture.generateMipmaps = false;
             texture.anisotropy = maxAnisotropy;
+            // --- Texture Configuration End ---
+
             const planeWidth = texture.image.width * baseScale * scaleFactor;
             const planeHeight = texture.image.height * baseScale * scaleFactor;
             const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+
+            // 1. Create Default Material (MeshBasicMaterial)
             const defaultMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+
+            // 2. Create Bright Material (ShaderMaterial)
             let brightMaterial = null;
             if (isFaceMesh) {
                 brightMaterial = new THREE.ShaderMaterial({
@@ -1650,194 +1945,487 @@ function init() {
                 defaultMaterialMap.set(id, defaultMaterial);
                 brightMaterialMap.set(id, brightMaterial);
             }
+
+            // Re-calculate Z based on the layer number and new convention: lower layer = closer (larger Z)
+            const newZ = (totalDepthLayers - initialLayer) * depthStep;
+            const finalPosition = initialPosition.clone();
+            finalPosition.z = newZ;
+
             const mesh = new THREE.Mesh(geometry, defaultMaterial);
-            mesh.position.copy(initialPosition);
+            mesh.position.copy(finalPosition); // Use calculated Z
             mesh.userData.currentLayer = initialLayer;
-            mesh.userData.initialPosition = initialPosition.clone();
+            mesh.userData.initialPosition = finalPosition.clone(); // Store calculated Z
             mesh.userData.initialLayer = initialLayer;
             mesh.userData.id = id;
             mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
-            mesh.userData.isFaceMesh = isFaceMesh;
+            mesh.userData.isFaceMesh = isFaceMesh; // Mark as face mesh
+
             scene.add(mesh);
             draggableObjects.push(mesh);
             cameraAnimationTargets.push(mesh);
-            if (isFaceMesh) faceMeshes.push(mesh);
-            initialAssetConfigs.push({ id: id, type: 'image', url: url, initialPosition: initialPosition.clone(), initialLayer: initialLayer, initialScale: { width: planeWidth, height: planeHeight }, removed: false });
 
-            if (id === 'rightEye' || id === 'leftEye') {
-                if (id === 'rightEye') rightEyeMesh = mesh;
-                if (id === 'leftEye') leftEyeMesh = mesh;
-                const redactionWidth = planeWidth * 0.8;
-                const redactionHeight = planeHeight * 0.5;
-                const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
-                const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-                const rect = new THREE.Mesh(redactionGeometry, redactionMaterial);
-                rect.position.set(mesh.position.x, mesh.position.y, mesh.position.z + (1.5 * depthStep));
-                rect.visible = (effectControls.redacted || effectControls.redactedGlitch || effectControls.anon);
-                if (id === 'rightEye') rightEyeRedactionRect = rect;
-                if (id === 'leftEye') leftEyeRedactionRect = rect;
-                scene.add(rect);
+            if (isFaceMesh) {
+                faceMeshes.push(mesh);
             }
+
+            // Store config for reset (store the calculated Z in initialPosition)
+            initialAssetConfigs.push({
+                id: id,
+                type: 'image',
+                url: url,
+                initialPosition: finalPosition.clone(), // Store the updated position
+                initialLayer: initialLayer,
+                initialScale: { width: planeWidth, height: planeHeight },
+                removed: false
+            });
+
+            return mesh;
         });
     };
 
-    const jensenHuangHairInitialPosition = new THREE.Vector3(0, (0 + 3.25) * .9, (4 - 1) * depthStep + (7 * depthStep));
-    createFaceMesh('jensenHuangHair', URL_JENSEN_HUANG_HAIR, jensenHuangHairInitialPosition, 1 + 3, 1);
+    // Add Jensen-Huang-hair.gif
+    const jensenHuangHairInitialLayer = 4; // Layer 4 (closest)
+    const jensenHuangHairInitialZ = (totalDepthLayers - jensenHuangHairInitialLayer) * depthStep; // Z=2.2
+    const jensenHuangHairInitialPosition = new THREE.Vector3(0, (0 + 3.25) * .9, jensenHuangHairInitialZ);
+    createFaceMesh('jensenHuangHair', URL_JENSEN_HUANG_HAIR, jensenHuangHairInitialPosition, jensenHuangHairInitialLayer, 1);
 
-    const foreheadImageUrls = [URL_FHEAD01, URL_FHEAD02, URL_FHEAD03, URL_FHEAD04, URL_FHEAD05];
-    const foreheadInitialZ = (8 - 1) * depthStep;
+    // Add the 5 forehead images (non-face meshes, regular texture loading)
+    const foreheadInitialLayer = 7; // Layer 4 (closest)
+    const foreheadInitialZ = (totalDepthLayers - foreheadInitialLayer) * depthStep; // Z=2.2
     const foreheadBasePosition = new THREE.Vector3(0.2, 2.75, foreheadInitialZ);
+
     foreheadImageUrls.forEach((url, index) => {
         textureLoader.load(url, (texture) => {
+            // --- Texture Configuration Start ---
             texture.colorSpace = THREE.SRGBColorSpace;
             texture.minFilter = THREE.LinearFilter;
             texture.magFilter = THREE.LinearFilter;
             texture.generateMipmaps = false;
             texture.anisotropy = maxAnisotropy;
+            // --- Texture Configuration End ---
+
             const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-            const scaleFactor = baseScale * 2 * 0.56;
+            // Scale down by 20% from the previous size (baseScale * 2 * 0.7) -> (baseScale * 2 * 0.7 * 0.8)
+            const scaleFactor = baseScale * 2 * 0.56; // Adjusted scaleFactor
             const planeWidth = texture.image.width * scaleFactor;
             const planeHeight = texture.image.height * scaleFactor;
             const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
             const foreheadMesh = new THREE.Mesh(geometry, material);
+
             foreheadMesh.position.copy(foreheadBasePosition);
-            foreheadMesh.userData.currentLayer = 11;
+            foreheadMesh.userData.currentLayer = foreheadInitialLayer;
             foreheadMesh.userData.initialPosition = foreheadBasePosition.clone();
-            foreheadMesh.userData.initialLayer = 11;
-            foreheadMesh.userData.id = `forehead${index + 1}`;
+            foreheadMesh.userData.initialLayer = foreheadInitialLayer;
+            foreheadMesh.userData.id = `forehead${index + 1}`; // Unique ID for each forehead image
             foreheadMesh.userData.initialScale = { width: planeWidth, height: planeHeight };
             foreheadMesh.userData.isFaceMesh = false;
             scene.add(foreheadMesh);
             draggableObjects.push(foreheadMesh);
             cameraAnimationTargets.push(foreheadMesh);
+
             foreheadMeshes.push(foreheadMesh);
-            foreheadMesh.visible = (index === 0);
-            initialAssetConfigs.push({ id: `forehead${index + 1}`, type: 'image', url: url, initialPosition: foreheadBasePosition.clone(), initialLayer: 11, initialScale: { width: planeWidth, height: planeHeight }, removed: false });
+            foreheadMesh.visible = (index === 0); // Only the first one is visible initially
+
+            initialAssetConfigs.push({
+                id: `forehead${index + 1}`,
+                type: 'image',
+                url: url,
+                initialPosition: foreheadBasePosition.clone(),
+                initialLayer: foreheadInitialLayer,
+                initialScale: { width: planeWidth, height: planeHeight },
+                removed: false
+            });
         });
     });
 
-    const gridRows = 3, gridCols = 3, gridStartX = -3.0, gridStartY = -3.0, gridSpacingX = 2.5, gridSpacingY = 2.5;
+    // Create a 3x3 grid of card images with randomized Z layers (non-face meshes)
+    const gridRows = 2;
+    const gridCols = 3;
+    const gridStartX = -2; // Start X position for the grid
+    const gridStartY = 0; // Start Y position for the grid
+    const gridSpacingX = 4; // Spacing between cards horizontally
+    const gridSpacingY = 4; // Spacing between cards vertically
+
     for (let row = 0; row < gridRows; row++) {
         for (let col = 0; col < gridCols; col++) {
-            const randomLayer = Math.floor(Math.random() * (12 - (-10) + 1)) + (-10);
-            const cardZ = (randomLayer - 1) * depthStep;
+            // Generate a random layer between 1 and 15
+            const randomLayer = Math.floor(Math.random() * totalDepthLayers) + 1;
+            const cardZ = (totalDepthLayers - randomLayer) * depthStep; // New Z calculation
+
             const cardX = gridStartX + col * gridSpacingX;
             const cardY = gridStartY + row * gridSpacingY;
-            const cardPosition = new THREE.Vector3(cardX, cardY, cardZ);
+            const cardPosition = new THREE.Vector3(cardX, cardY, cardZ); // Use new Z
+
+            // Load the first card image initially. Its texture will be swapped in animate.
             textureLoader.load(cardImageUrls[0], (texture) => {
+                // --- Texture Configuration Start ---
                 texture.colorSpace = THREE.SRGBColorSpace;
                 texture.minFilter = THREE.LinearFilter;
                 texture.magFilter = THREE.LinearFilter;
                 texture.generateMipmaps = false;
                 texture.anisotropy = maxAnisotropy;
+                // --- Texture Configuration End ---
+
                 const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-                const scaleFactor = baseScale * 2 * 0.56;
+                const scaleFactor = baseScale * 2 * 0.56; // Consistent scale
                 const planeWidth = texture.image.width * scaleFactor;
                 const planeHeight = texture.image.height * scaleFactor;
                 const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
                 const cardMesh = new THREE.Mesh(geometry, material);
+
                 cardMesh.position.copy(cardPosition);
                 cardMesh.userData.currentLayer = randomLayer;
-                cardMesh.userData.initialPosition = cardPosition.clone();
+                cardMesh.userData.initialPosition = cardPosition.clone(); // Store new Z
                 cardMesh.userData.initialLayer = randomLayer;
-                cardMesh.userData.id = `cardGrid_${row}_${col}`;
+                cardMesh.userData.id = `cardGrid_${row}_${col}`; // Unique ID for each grid card
                 cardMesh.userData.initialScale = { width: planeWidth, height: planeHeight };
                 cardMesh.userData.isFaceMesh = false;
                 scene.add(cardMesh);
                 draggableObjects.push(cardMesh);
                 cameraAnimationTargets.push(cardMesh);
-                shufflingCardMeshes.push(cardMesh);
-                initialAssetConfigs.push({ id: `cardGrid_${row}_${col}`, type: 'image', url: cardImageUrls[0], initialPosition: cardPosition.clone(), initialLayer: randomLayer, initialScale: { width: planeWidth, height: planeHeight }, removed: false });
+                shufflingCardMeshes.push(cardMesh); // Add to the new array for shuffling
+
+                initialAssetConfigs.push({
+                    id: `cardGrid_${row}_${col}`,
+                    type: 'image',
+                    url: cardImageUrls[0], // Store the initial URL
+                    initialPosition: cardPosition.clone(), // Store new Z
+                    initialLayer: randomLayer,
+                    initialScale: { width: planeWidth, height: planeHeight },
+                    removed: false
+                });
             });
         }
     }
 
-    const rightEyeInitialPosition = new THREE.Vector3(.7 * .1 * 1, (0.175 * 1 * 1) + 2.0 + -2, (14 - 1) * depthStep);
-    createFaceMesh('rightEye', URL_RIGHT_EYE, rightEyeInitialPosition, 7, 1);
+    // --- FIX: Explicitly load right eye to correctly initialize redaction bar ---
+    const rightEyeInitialLayer = 4;
+    const rightEyeInitialZ = (totalDepthLayers - rightEyeInitialLayer) * depthStep; // Z=1.6
+    const rightEyeInitialPosition = new THREE.Vector3(.7 * .1 * 1, (0.175 * 1 * 1) + 2.0 + -2, rightEyeInitialZ);
 
-    const cheekInitialPosition = new THREE.Vector3(1.6, -0.6, (5 - 1) * depthStep);
-    createFaceMesh('jensenHuangCheek', URL_JENSEN_HUANG_CHEEK, cheekInitialPosition, 5, 1.5);
+    if (URL_RIGHT_EYE) {
+        textureLoader.load(URL_RIGHT_EYE, (texture) => {
+            texture.colorSpace = THREE.SRGBColorSpace;
+            texture.minFilter = THREE.LinearFilter;
+            texture.magFilter = THREE.LinearFilter;
+            texture.generateMipmaps = false;
+            texture.anisotropy = maxAnisotropy;
 
-    const mouthInitialPosition = new THREE.Vector3(0, -3.5, (10 - 1.25) * depthStep);
-    createFaceMesh('mouth', URL_MOUTH, mouthInitialPosition, 9, 1);
+            const scaleFactor = 1;
+            const planeWidth = texture.image.width * baseScale * scaleFactor;
+            const planeHeight = texture.image.height * baseScale * scaleFactor;
+            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
 
-    const noseInitialPosition = new THREE.Vector3(0, -.25, (13 - 1) * depthStep);
-    createFaceMesh('nose', URL_NOSE, noseInitialPosition, 11, 0.93);
+            const defaultMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+            const brightMaterial = new THREE.ShaderMaterial({
+                uniforms: { tDiffuse: { value: texture }, brightness: { value: 1.2 } },
+                vertexShader: BrightenTextureShader.vertexShader,
+                fragmentShader: BrightenTextureShader.fragmentShader,
+                transparent: true,
+                side: THREE.DoubleSide,
+                alphaTest: 0.5
+            });
+            defaultMaterialMap.set('rightEye', defaultMaterial);
+            brightMaterialMap.set('rightEye', brightMaterial);
 
-    const signatureInitialLayer = 5;
-    const signatureInitialPosition = new THREE.Vector3(-5, -4.7, (5 - 1) * depthStep);
+            const mesh = new THREE.Mesh(geometry, defaultMaterial);
+            mesh.position.copy(rightEyeInitialPosition);
+            mesh.userData.currentLayer = rightEyeInitialLayer;
+            mesh.userData.initialPosition = rightEyeInitialPosition.clone();
+            mesh.userData.initialLayer = rightEyeInitialLayer;
+            mesh.userData.id = 'rightEye';
+            mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
+            mesh.userData.isFaceMesh = true;
+
+            scene.add(mesh);
+            draggableObjects.push(mesh);
+            cameraAnimationTargets.push(mesh);
+            faceMeshes.push(mesh);
+            rightEyeMesh = mesh; // Assign global reference
+
+            // Create and add the redaction rectangle for the right eye
+            const redactionWidth = planeWidth * .8;
+            const redactionHeight = planeHeight * 0.5;
+            const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
+            const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            rightEyeRedactionRect = new THREE.Mesh(redactionGeometry, redactionMaterial);
+            // Position it at the same X, Y as the eye, but 1.5 levels in front
+            rightEyeRedactionRect.position.set(
+                rightEyeMesh.position.x,
+                rightEyeMesh.position.y,
+                rightEyeMesh.position.z + (1.5 * depthStep)
+            );
+            rightEyeRedactionRect.visible = false;
+            scene.add(rightEyeRedactionRect);
+
+            // Store config for reset
+            initialAssetConfigs.push({
+                id: 'rightEye',
+                type: 'image',
+                url: URL_RIGHT_EYE,
+                initialPosition: rightEyeInitialPosition.clone(),
+                initialLayer: rightEyeInitialLayer,
+                initialScale: { width: planeWidth, height: planeHeight },
+                removed: false
+            });
+        });
+    }
+
+    // --- Add Left Eye logic (will only run if URL_LEFT_EYE is non-empty) ---
+    const leftEyeInitialLayer = 4;
+    const leftEyeInitialZ = (totalDepthLayers - leftEyeInitialLayer) * depthStep;
+    const leftEyeInitialPosition = new THREE.Vector3(-.7 * .1 * 1, (0.175 * 1 * 1) + 2.0 + -2, leftEyeInitialZ);
+
+    if (URL_LEFT_EYE) {
+        textureLoader.load(URL_LEFT_EYE, (texture) => {
+            texture.colorSpace = THREE.SRGBColorSpace;
+            texture.minFilter = THREE.LinearFilter;
+            texture.magFilter = THREE.LinearFilter;
+            texture.generateMipmaps = false;
+            texture.anisotropy = maxAnisotropy;
+
+            const scaleFactor = 1;
+            const planeWidth = texture.image.width * baseScale * scaleFactor;
+            const planeHeight = texture.image.height * baseScale * scaleFactor;
+            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+
+            const defaultMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+            const brightMaterial = new THREE.ShaderMaterial({
+                uniforms: { tDiffuse: { value: texture }, brightness: { value: 1.2 } },
+                vertexShader: BrightenTextureShader.vertexShader,
+                fragmentShader: BrightenTextureShader.fragmentShader,
+                transparent: true,
+                side: THREE.DoubleSide,
+                alphaTest: 0.5
+            });
+            defaultMaterialMap.set('leftEye', defaultMaterial);
+            brightMaterialMap.set('leftEye', brightMaterial);
+
+            const mesh = new THREE.Mesh(geometry, defaultMaterial);
+            mesh.position.copy(leftEyeInitialPosition);
+            mesh.userData.currentLayer = leftEyeInitialLayer;
+            mesh.userData.initialPosition = leftEyeInitialPosition.clone();
+            mesh.userData.initialLayer = leftEyeInitialLayer;
+            mesh.userData.id = 'leftEye';
+            mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
+            mesh.userData.isFaceMesh = true;
+
+            scene.add(mesh);
+            draggableObjects.push(mesh);
+            cameraAnimationTargets.push(mesh);
+            faceMeshes.push(mesh);
+            leftEyeMesh = mesh; // Assign global reference
+
+            // Create and add the redaction rectangle for the left eye
+            const redactionWidth = planeWidth * .8;
+            const redactionHeight = planeHeight * 0.5;
+            const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
+            const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            leftEyeRedactionRect = new THREE.Mesh(redactionGeometry, redactionMaterial);
+            leftEyeRedactionRect.position.set(
+                leftEyeMesh.position.x,
+                leftEyeMesh.position.y,
+                leftEyeMesh.position.z + (1.5 * depthStep)
+            );
+            leftEyeRedactionRect.visible = false;
+            scene.add(leftEyeRedactionRect);
+
+            // Store config for reset
+            initialAssetConfigs.push({
+                id: 'leftEye',
+                type: 'image',
+                url: URL_LEFT_EYE,
+                initialPosition: leftEyeInitialPosition.clone(),
+                initialLayer: leftEyeInitialLayer,
+                initialScale: { width: planeWidth, height: planeHeight },
+                removed: false
+            });
+        });
+    }
+
+    // --- NEW ASSET: Jensen Huang Cheek Image ---
+    const cheekLayer = 10; // Layer 5
+    const cheekZ = (totalDepthLayers - cheekLayer) * depthStep; // Z=2.0
+    const cheekInitialPosition = new THREE.Vector3(1.6, -0.6, cheekZ);
+    createFaceMesh('jensenHuangCheek', URL_JENSEN_HUANG_CHEEK, cheekInitialPosition, cheekLayer, 1.5);
+
+
+    // Load and add the mouth image
+    const mouthInitialLayer = 7;
+    const mouthInitialZ = (totalDepthLayers - mouthInitialLayer) * depthStep; // Z=1.2
+    const mouthInitialPosition = new THREE.Vector3(0, -3.5, mouthInitialZ);
+    createFaceMesh('mouth', URL_MOUTH, mouthInitialPosition, mouthInitialLayer, 1);
+
+    // Load and add the nose image
+    const noseInitialLayer = 5;
+    const noseInitialZ = (totalDepthLayers - noseInitialLayer) * depthStep; // Z=0.8
+    const noseInitialPosition = new THREE.Vector3(0, -.25, noseInitialZ);
+    createFaceMesh('nose', URL_NOSE, noseInitialPosition, noseInitialLayer, 0.93);
+
+    // Load and add the signature image
+    const signatureInitialLayer = 3; 
+    const signatureInitialZ = (totalDepthLayers - signatureInitialLayer) * depthStep; // Z=2.0
+    const signatureInitialX = -4; // Center X
+    const signatureInitialY = -4.7; // Bottom Y position
+    const signatureInitialPosition = new THREE.Vector3(signatureInitialX, signatureInitialY, signatureInitialZ);
+
     textureLoader.load(URL_SIGNATURE, (signatureTexture) => {
+        // --- Texture Configuration Start ---
         signatureTexture.colorSpace = THREE.SRGBColorSpace;
         signatureTexture.minFilter = THREE.LinearFilter;
         signatureTexture.magFilter = THREE.LinearFilter;
         signatureTexture.generateMipmaps = false;
         signatureTexture.anisotropy = maxAnisotropy;
+        // --- Texture Configuration End ---
+
         const signatureMaterial = new THREE.MeshBasicMaterial({ map: signatureTexture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const signatureAspectRatio = signatureTexture.image.width / signatureTexture.image.height;
         const signatureHeight = 1.0;
         const signatureWidth = signatureHeight * signatureAspectRatio;
         const signatureGeometry = new THREE.PlaneGeometry(signatureWidth, signatureHeight);
         const signature = new THREE.Mesh(signatureGeometry, signatureMaterial);
+
         signature.position.copy(signatureInitialPosition);
+
         signature.userData.currentLayer = signatureInitialLayer;
-        signature.userData.initialPosition = signatureInitialPosition.clone();
+        signature.userData.initialPosition = signatureInitialPosition.clone(); // Store new Z
         signature.userData.initialLayer = signatureInitialLayer;
-        signature.userData.id = 'signature';
-        signature.userData.initialScale = { width: signatureWidth, height: signatureHeight };
+        signature.userData.id = 'signature'; // Added ID
+        signature.userData.initialScale = { width: signatureWidth, height: signatureHeight }; // Store initial scale
         signature.userData.isFaceMesh = false;
         scene.add(signature);
-        initialAssetConfigs.push({ id: 'signature', type: 'image', url: URL_SIGNATURE, initialPosition: signatureInitialPosition.clone(), initialLayer: signatureInitialLayer, initialScale: { width: signatureWidth, height: signatureHeight }, removed: false });
+
+        initialAssetConfigs.push({
+            id: 'signature',
+            type: 'image',
+            url: URL_SIGNATURE,
+            initialPosition: signatureInitialPosition.clone(), // Store new Z
+            initialLayer: signatureInitialLayer,
+            initialScale: { width: signatureWidth, height: signatureHeight },
+            removed: false // Add removed flag
+        });
     });
 
+    // Initialize the Marquee Text (for XRAY effect)
     marqueeTexture = createMarqueeTexture();
     const marqueeMaterial = new THREE.MeshBasicMaterial({ map: marqueeTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
-    const marqueeGeometry = new THREE.PlaneGeometry(20, 20 / (marqueeTexture.image.width / marqueeTexture.image.height));
+    const marqueePlaneWidth = 20;
+    const marqueePlaneHeight = marqueePlaneWidth / (marqueeTexture.image.width / marqueeTexture.image.height);
+    const marqueeGeometry = new THREE.PlaneGeometry(marqueePlaneWidth, marqueePlaneHeight);
+    const marqueeTextMeshInitialPosition = new THREE.Vector3(0, 0, -3 * depthStep); // Z is kept outside layer system
+
     marqueeTextMesh = new THREE.Mesh(marqueeGeometry, marqueeMaterial);
-    marqueeTextMesh.position.set(0, 0, -3 * depthStep);
+    marqueeTextMesh.position.copy(marqueeTextMeshInitialPosition);
     marqueeTextMesh.visible = false;
     marqueeTextMesh.userData.initialPosition = marqueeTextMesh.position.clone();
     marqueeTextMesh.userData.initialLayer = -3;
-    marqueeTextMesh.userData.id = 'marqueeTextMesh';
+    marqueeTextMesh.userData.id = 'marqueeTextMesh'; // Added ID
     scene.add(marqueeTextMesh);
-    initialAssetConfigs.push({ id: 'marqueeTextMesh', type: 'textMesh', initialPosition: marqueeTextMesh.position.clone(), initialLayer: -3, removed: false });
 
-    biometricMarqueeTexture = createBiometricMarqueeTexture();
+    initialAssetConfigs.push({
+        id: 'marqueeTextMesh',
+        type: 'textMesh',
+        initialPosition: marqueeTextMeshInitialPosition.clone(),
+        initialLayer: -3,
+        geometry: marqueeGeometry.clone(),
+        material: marqueeMaterial.clone(),
+        removed: false // Add removed flag
+    });
+
+    // Initialize the new Biometric Marquee Text
+    const biometricMarqueeInitialLayer = 5;
+    const biometricMarqueeTexture = createBiometricMarqueeTexture();
     const biometricMarqueeMaterial = new THREE.MeshBasicMaterial({ map: biometricMarqueeTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
-    const biometricMarqueeGeometry = new THREE.PlaneGeometry(20, 20 / (biometricMarqueeTexture.image.width / biometricMarqueeTexture.image.height));
-    biometricMarqueeTextMesh = new THREE.Mesh(biometricMarqueeGeometry, biometricMarqueeMaterial);
-    biometricMarqueeTextMesh.position.set(0, 0, (5 - 1) * depthStep);
-    biometricMarqueeTextMesh.visible = false;
-    biometricMarqueeTextMesh.userData.initialPosition = biometricMarqueeTextMesh.position.clone();
-    biometricMarqueeTextMesh.userData.initialLayer = 5;
-    biometricMarqueeTextMesh.userData.id = 'biometricMarqueeTextMesh';
-    scene.add(biometricMarqueeTextMesh);
-    initialAssetConfigs.push({ id: 'biometricMarqueeTextMesh', type: 'textMesh', initialPosition: biometricMarqueeTextMesh.position.clone(), initialLayer: 5, removed: false });
+    const biometricMarqueePlaneWidth = 20; // Same width as main marquee for consistency
+    const biometricMarqueePlaneHeight = biometricMarqueePlaneWidth / (biometricMarqueeTexture.image.width / biometricMarqueeTexture.image.height);
+    const biometricMarqueeGeometry = new THREE.PlaneGeometry(biometricMarqueePlaneWidth, biometricMarqueePlaneHeight);
+    const biometricMarqueeZ = (totalDepthLayers - biometricMarqueeInitialLayer) * depthStep; // Z=2.0
+    const distance_from_camera_biometric = camera.position.z - biometricMarqueeZ;
+    const world_height_biometric = 2 * distance_from_camera_biometric * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const pixelToUnitFactorX_biometric = (world_height_biometric * camera.aspect) / window.innerWidth;
+    const moveRightUnits_biometric = 30 * pixelToUnitFactorX_biometric;
+    const biometricMarqueeTextMeshInitialPosition = new THREE.Vector3(moveRightUnits_biometric, 0, biometricMarqueeZ);
 
+    biometricMarqueeTextMesh = new THREE.Mesh(biometricMarqueeGeometry, biometricMarqueeMaterial);
+    biometricMarqueeTextMesh.position.copy(biometricMarqueeTextMeshInitialPosition);
+    biometricMarqueeTextMesh.visible = false; // Initially hidden
+    biometricMarqueeTextMesh.userData.initialPosition = biometricMarqueeTextMeshInitialPosition.clone();
+    biometricMarqueeTextMesh.userData.initialLayer = biometricMarqueeInitialLayer;
+    biometricMarqueeTextMesh.userData.id = 'biometricMarqueeTextMesh'; // Added ID
+    scene.add(biometricMarqueeTextMesh);
+
+    initialAssetConfigs.push({
+        id: 'biometricMarqueeTextMesh',
+        type: 'textMesh',
+        initialPosition: biometricMarqueeTextMeshInitialPosition.clone(),
+        initialLayer: biometricMarqueeInitialLayer,
+        geometry: biometricMarqueeGeometry.clone(),
+        material: biometricMarqueeMaterial.clone(),
+        removed: false // Add removed flag
+    });
+
+    // Initialize the new Blood Text
+    const bloodTextInitialLayer = 8;
     bloodTexture = createBloodTextTexture();
     const bloodTextMaterial = new THREE.MeshBasicMaterial({ map: bloodTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
-    const bloodTextGeometry = new THREE.PlaneGeometry(20, 20 / (bloodTexture.image.width / bloodTexture.image.height));
-    bloodTextMesh = new THREE.Mesh(bloodTextGeometry, bloodTextMaterial);
-    bloodTextMesh.position.set(0, 30, (8 - 1) * depthStep);
-    bloodTextMesh.visible = false;
-    bloodTextMesh.userData.initialPosition = bloodTextMesh.position.clone();
-    bloodTextMesh.userData.initialLayer = 8;
-    bloodTextMesh.userData.id = 'bloodTextMesh';
-    scene.add(bloodTextMesh);
-    initialAssetConfigs.push({ id: 'bloodTextMesh', type: 'textMesh', initialPosition: bloodTextMesh.position.clone(), initialLayer: 8, removed: false });
+    const bloodTextPlaneWidth = 20; // Similar width to other marquees
+    const bloodTextPlaneHeight = bloodTextPlaneWidth / (bloodTexture.image.width / bloodTexture.image.height);
+    const bloodTextGeometry = new THREE.PlaneGeometry(bloodTextPlaneWidth, bloodTextPlaneHeight);
+    const bloodTextZ = (totalDepthLayers - bloodTextInitialLayer) * depthStep; // Z=1.4
+    const bloodTextMeshInitialPosition = new THREE.Vector3(0, 30, bloodTextZ);
 
+    bloodTextMesh = new THREE.Mesh(bloodTextGeometry, bloodTextMaterial);
+    bloodTextMesh.position.copy(bloodTextMeshInitialPosition);
+    bloodTextMesh.visible = false; // Initially hidden
+    bloodTextMesh.userData.initialPosition = bloodTextMeshInitialPosition.clone();
+    bloodTextMesh.userData.initialLayer = bloodTextInitialLayer;
+    bloodTextMesh.userData.id = 'bloodTextMesh'; // Added ID
+    scene.add(bloodTextMesh);
+
+    initialAssetConfigs.push({
+        id: 'bloodTextMesh',
+        type: 'textMesh',
+        initialPosition: bloodTextMeshInitialPosition.clone(),
+        initialLayer: bloodTextInitialLayer,
+        geometry: bloodTextGeometry.clone(),
+        material: bloodTextMaterial.clone(),
+        removed: false // Add removed flag
+    });
+
+    // Initialize the new Redacted Glitch Text
+    const redactedGlitchTextInitialLayer = 16; 
     redactedGlitchTexture = createRedactedGlitchTexture();
     const redactedGlitchMaterial = new THREE.MeshBasicMaterial({ map: redactedGlitchTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
-    const redactedGlitchGeometry = new THREE.PlaneGeometry(15, 15 / (redactedGlitchTexture.image.width / redactedGlitchTexture.image.height));
-    redactedGlitchTextMesh = new THREE.Mesh(redactedGlitchGeometry, redactedGlitchMaterial);
-    redactedGlitchTextMesh.position.set(0, 0, (1 - 1) * depthStep);
-    redactedGlitchTextMesh.visible = false;
-    redactedGlitchTextMesh.userData.initialPosition = redactedGlitchTextMesh.position.clone();
-    redactedGlitchTextMesh.userData.initialLayer = 1;
-    redactedGlitchTextMesh.userData.id = 'redactedGlitchTextMesh';
-    scene.add(redactedGlitchTextMesh);
-    initialAssetConfigs.push({ id: 'redactedGlitchTextMesh', type: 'textMesh', initialPosition: redactedGlitchTextMesh.position.clone(), initialLayer: 1, removed: false });
+    const redactedGlitchPlaneWidth = 15; // Width for the text block
+    const redactedGlitchPlaneHeight = redactedGlitchPlaneWidth / (redactedGlitchTexture.image.width / redactedGlitchTexture.image.height);
+    const redactedGlitchGeometry = new THREE.PlaneGeometry(redactedGlitchPlaneWidth, redactedGlitchPlaneHeight);
+    const redactedGlitchTextZ = (totalDepthLayers - redactedGlitchTextInitialLayer) * depthStep; // (15 - 16) * 0.2 = -0.2
+    const distance_from_camera_redacted = camera.position.z - redactedGlitchTextZ;
+    const world_height_redacted = 2 * distance_from_camera_redacted * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const pixelToUnitFactorX_redacted = (world_height_redacted * camera.aspect) / window.innerWidth;
+    const moveRightUnits_redacted = 40 * pixelToUnitFactorX_redacted;
+    const redactedGlitchTextMeshInitialPosition = new THREE.Vector3(-5 + moveRightUnits_redacted, 0, redactedGlitchTextZ);
 
-    initializeRedactedGlitchPhraseData();
+    redactedGlitchTextMesh = new THREE.Mesh(redactedGlitchGeometry, redactedGlitchMaterial);
+    redactedGlitchTextMesh.position.copy(redactedGlitchTextMeshInitialPosition);
+    redactedGlitchTextMesh.visible = false; // Initially hidden
+    redactedGlitchTextMesh.userData.initialPosition = redactedGlitchTextMeshInitialPosition.clone();
+    redactedGlitchTextMesh.userData.initialLayer = redactedGlitchTextInitialLayer; // Layer 16
+    redactedGlitchTextMesh.userData.id = 'redactedGlitchTextMesh'; // Added ID
+    scene.add(redactedGlitchTextMesh);
+
+    initialAssetConfigs.push({
+        id: 'redactedGlitchTextMesh',
+        type: 'textMesh',
+        initialPosition: redactedGlitchTextMeshInitialPosition.clone(),
+        initialLayer: redactedGlitchTextInitialLayer,
+        geometry: redactedGlitchGeometry.clone(),
+        material: redactedGlitchMaterial.clone(),
+        removed: false // Add removed flag
+    });
+
+    initializeRedactedGlitchPhraseData(); 
+
     window.addEventListener('resize', onWindowResize);
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
     renderer.domElement.addEventListener('pointermove', onPointerMove);
@@ -1847,36 +2435,494 @@ function init() {
     const addButtonToggle = (parentContainer, label, property, pass) => {
         const button = document.createElement('button');
         button.textContent = label.toUpperCase();
-        button.style.cssText = `background-color: black; color: white; padding: 4px; margin: 0; border: 0.5px solid ${effectControls[property] ? '#4CAF50' : 'white'}; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; box-sizing: border-box;`;
-        button.onmouseover = () => { button.style.borderColor = effectControls[property] ? '#66CC66' : '#777'; };
-        button.onmouseout = () => { button.style.borderColor = effectControls[property] ? '#4CAF50' : 'white'; };
+        button.style.cssText = `
+            background-color: black;
+            color: white;
+            padding: 4px;
+            margin: 0;
+            border: 0.5px solid ${effectControls[property] ? '#4CAF50' : 'white'};
+            border-radius: 0;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 7px;
+            outline: none;
+            box-sizing: border-box;
+        `;
+        button.onmouseover = () => {
+            if (effectControls[property]) {
+                button.style.borderColor = '#66CC66'; // Brighter green for active hover
+            } else {
+                button.style.borderColor = '#777';
+            }
+        };
+        button.onmouseout = () => {
+            if (effectControls[property]) {
+                button.style.borderColor = '#4CAF50'; // Green for active
+            } else {
+                button.style.borderColor = 'white'; // White for inactive
+            }
+        };
+
         button.onclick = (event) => {
             event.stopPropagation();
-            let targetProperty = property;
-            if (property === 'hacker') { effectControls.og = !effectControls.og; effectControls.hacker = effectControls.og; targetProperty = 'og'; }
-            if (!effectControls[targetProperty]) {
-                if (effectControls.anon && targetProperty !== 'anon') { effectControls.anon = false; thresholdPass.enabled = false; bloodPass.enabled = false; glitchPass.enabled = false; if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false; if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false; updateUIButtonState('anon', false); }
-                if (targetProperty === 'cctvFeed') { effectControls.heatmap = false; heatmapPass.enabled = false; updateUIButtonState('heatmap', false); effectControls.blood = false; bloodPass.enabled = false; updateUIButtonState('blood', false); }
-                else if (targetProperty === 'heatmap') { effectControls.cctvFeed = false; cctvFeedPass.enabled = false; updateUIButtonState('cctvFeed', false); effectControls.blood = false; bloodPass.enabled = false; updateUIButtonState('blood', false); }
-                else if (targetProperty === 'blood' || targetProperty === 'bloodText') { effectControls.heatmap = false; heatmapPass.enabled = false; updateUIButtonState('heatmap', false); effectControls.cctvFeed = false; cctvFeedPass.enabled = false; updateUIButtonState('cctvFeed', false); }
+
+            let targetProperty = property; 
+
+            if (property === 'hacker') {
+                effectControls.og = !effectControls.og;
+                effectControls.hacker = effectControls.og;
+                targetProperty = 'og'; 
+            }
+
+            if (!effectControls[targetProperty]) { 
+                if (effectControls.anon && targetProperty !== 'anon') {
+                    effectControls.anon = false;
+                    thresholdPass.enabled = false;
+                    bloodPass.enabled = false;
+                    glitchPass.enabled = false;
+                    if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false;
+                    if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false;
+                    updateUIButtonState('anon', false);
+                }
+
+                if (targetProperty === 'cctvFeed') {
+                    if (effectControls.heatmap) { effectControls.heatmap = false; heatmapPass.enabled = false; updateUIButtonState('heatmap', false); }
+                    if (effectControls.blood) { effectControls.blood = false; bloodPass.enabled = false; updateUIButtonState('blood', false); } 
+                    if (effectControls.bloodText) { effectControls.bloodText = false; bloodTextMesh.visible = false; updateUIButtonState('bloodText', false); } 
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); } 
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); } 
+                    if (effectControls.redactedGlitch) { effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false); } 
+                } else if (targetProperty === 'heatmap') {
+                    if (effectControls.cctvFeed) { effectControls.cctvFeed = false; cctvFeedPass.enabled = false; updateUIButtonState('cctvFeed', false); }
+                    if (effectControls.blood) { effectControls.blood = false; bloodPass.enabled = false; updateUIButtonState('blood', false); } 
+                    if (effectControls.bloodText) { effectControls.bloodText = false; bloodTextMesh.visible = false; updateUIButtonState('bloodText', false); } 
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); } 
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); } 
+                    if (effectControls.redactedGlitch) { effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false); } 
+                } else if (targetProperty === 'blood' || targetProperty === 'bloodText') { 
+                    if (effectControls.heatmap) { effectControls.heatmap = false; heatmapPass.enabled = false; updateUIButtonState('heatmap', false); }
+                    if (effectControls.cctvFeed) { effectControls.cctvFeed = false; cctvFeedPass.enabled = false; updateUIButtonState('cctvFeed', false); }
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); } 
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); } 
+                    if (effectControls.redactedGlitch) { effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false); } 
+                } else if (targetProperty === 'redactedGlitch') {
+                    if (effectControls.redacted) { effectControls.redacted = false; updateUIButtonState('redacted', false); } 
+                    if (effectControls.glitch) { effectControls.glitch = false; glitchPass.enabled = false; updateUIButtonState('glitch', false); } 
+                    if (effectControls.xray) { effectControls.xray = false; xrayPass.enabled = false; updateUIButtonState('xray', false); } 
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); } 
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); } 
+                    if (effectControls.cctvFeed) { effectControls.cctvFeed = false; cctvFeedPass.enabled = false; updateUIButtonState('cctvFeed', false); } 
+                    if (effectControls.heatmap) { effectControls.heatmap = false; heatmapPass.enabled = false; updateUIButtonState('heatmap', false); } 
+                    if (effectControls.blood) { effectControls.blood = false; bloodPass.enabled = false; updateUIButtonState('blood', false); } 
+                    if (effectControls.bloodText) { effectControls.bloodText = false; bloodTextMesh.visible = false; updateUIButtonState('bloodText', false); } 
+                    if (effectControls.biometricMarquee) { effectControls.biometricMarquee = false; biometricMarqueeTextMesh.visible = false; updateUIButtonState('biometricMarquee', false); } 
+                    if (effectControls.marqueeText) { effectControls.marqueeText = false; marqueeTextMesh.visible = false; updateUIButtonState('marqueeText', false); } 
+                    if (effectControls.matrix) { effectControls.matrix = false; matrixPass.enabled = false; updateUIButtonState('matrix', false); } 
+                    if (effectControls.pixelation) { effectControls.pixelation = false; pixelationPass.enabled = false; updateUIButtonState('pixelation', false); } 
+                    if (effectControls.ascii) { effectControls.ascii = false; asciiPass.enabled = false; updateUIButtonState('ascii', false); } 
+                } else if (targetProperty === 'redacted') {
+                    if (effectControls.redactedGlitch) { effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false); } 
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); } 
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); } 
+                } else if (targetProperty === 'glitch') {
+                    if (effectControls.redactedGlitch) { effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false); } 
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); } 
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); } 
+                } else if (targetProperty === 'xray') {
+                    if (effectControls.redactedGlitch) { effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false); } 
+                    if (effectControls.biometricMarquee) {
+                        effectControls.biometricMarquee = false;
+                        biometricMarqueeTextMesh.visible = false;
+                        updateUIButtonState('biometricMarquee', false);
+                    }
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); } 
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); } 
+                } else if (targetProperty === 'biometricMarquee') {
+                    if (effectControls.redactedGlitch) { effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false); } 
+                    if (effectControls.xray) {
+                        effectControls.xray = false;
+                        xrayPass.enabled = false;
+                        marqueeTextMesh.visible = false; 
+                        updateUIButtonState('xray', false);
+                    }
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); } 
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); } 
+                } else if (targetProperty === 'threshold') {
+                    if (effectControls.shadow) { effectControls.shadow = false; darkPass.enabled = false; updateUIButtonState('shadow', false); } 
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); } 
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); } 
+                } else if (targetProperty === 'shadow') {
+                    if (effectControls.threshold) { effectControls.threshold = false; thresholdPass.enabled = false; updateUIButtonState('threshold', false); }
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); } 
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); } 
+                }
+
                 if (targetProperty === 'anon') {
-                    for (const key in effectControls) { if (effectControls.hasOwnProperty(key) && !['anon', 'redacted', 'redactedGlitch', 'threshold', 'blood', 'glitch', 'yRotation', 'cameraAnimation', 'og', 'bloodText', 'hacker', 'surveillance', 'greed'].includes(key)) { if (effectControls[key]) { effectControls[key] = false; const p = getPassByName(key); if (p) p.enabled = false; updateUIButtonState(key, false); } } }
+                    for (const key in effectControls) {
+                        if (effectControls.hasOwnProperty(key) && key !== 'anon' && key !== 'redacted' && key !== 'redactedGlitch' && key !== 'threshold' && key !== 'blood' && key !== 'glitch' && key !== 'marqueeText' && key !== 'biometricMarquee' && key !== 'yRotation' && key !== 'cameraAnimation' && key !== 'og' && key !== 'bloodText' && key !== 'hacker' && key !== 'surveillance' && key !== 'greed') { 
+                            if (effectControls[key]) {
+                                effectControls[key] = false;
+                                const p = getPassByName(key);
+                                if (p) p.enabled = false;
+                                updateUIButtonState(key, false);
+                            }
+                        }
+                    }
+                    effectControls.redacted = false; updateUIButtonState('redacted', false);
+                    effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false);
+
+                    effectControls.marqueeText = false; marqueeTextMesh.visible = false;
+                    effectControls.biometricMarquee = false; biometricMarqueeTextMesh.visible = false;
+                    effectControls.bloodText = false; bloodTextMesh.visible = false;
+                    updateUIButtonState('marqueeText', false);
+                    updateUIButtonState('biometricMarquee', false);
+                    updateUIButtonState('bloodText', false);
+
+                    if (effectControls.og) {
+                        effectControls.og = false;
+                        asciiPass.enabled = false;
+                        heatmapPass.enabled = false;
+                        biometricMarqueeTextMesh.visible = false;
+                        updateUIButtonState('og', false);
+                    }
+                    if (effectControls.hacker) {
+                        effectControls.hacker = false;
+                        updateUIButtonState('hacker', false);
+                    }
+                    if (effectControls.surveillance) {
+                        effectControls.surveillance = false;
+                        updateUIButtonState('surveillance', false);
+                    }
+                    if (effectControls.greed) {
+                        effectControls.greed = false;
+                        updateUIButtonState('greed', false);
+                    }
+                }
+
+                if (targetProperty === 'og') {
+                    for (const key in effectControls) {
+                        if (effectControls.hasOwnProperty(key) && key !== 'og' && key !== 'hacker' && key !== 'yRotation' && key !== 'cameraAnimation' && key !== 'bloodText' && key !== 'surveillance' && key !== 'greed') { 
+                            if (effectControls[key]) {
+                                effectControls[key] = false;
+                                const p = getPassByName(key);
+                                if (p) p.enabled = false;
+                                updateUIButtonState(key, false);
+                            }
+                        }
+                    }
+                    if (marqueeTextMesh) marqueeTextMesh.visible = false; updateUIButtonState('marqueeText', false);
+                    if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false; updateUIButtonState('redacted', false);
+                    if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false; updateUIButtonState('redactedGlitch', false);
+                    if (bloodTextMesh) bloodTextMesh.visible = false; updateUIButtonState('bloodText', false);
+                    if (biometricMarqueeTextMesh) biometricMarqueeTextMesh.visible = false; updateUIButtonState('biometricMarquee', false); 
+                    if (redactedGlitchTextMesh) redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false); 
+
+                    if (effectControls.surveillance) {
+                        effectControls.surveillance = false;
+                        updateUIButtonState('surveillance', false);
+                    }
+                    if (effectControls.greed) {
+                        effectControls.greed = false;
+                        updateUIButtonState('greed', false);
+                    }
+                }
+
+                if (targetProperty === 'surveillance') {
+                    for (const key in effectControls) {
+                        if (effectControls.hasOwnProperty(key) &&
+                            key !== 'surveillance' &&
+                            key !== 'heatmap' &&
+                            key !== 'biometricMarquee' &&
+                            key !== 'glitch' && 
+                            key !== 'yRotation' &&
+                            key !== 'cameraAnimation' &&
+                            key !== 'greed' 
+                        ) {
+                            if (effectControls[key]) {
+                                effectControls[key] = false;
+                                const p = getPassByName(key);
+                                if (p) p.enabled = false;
+                                updateUIButtonState(key, false);
+                            }
+                        }
+                    }
+                    if (marqueeTextMesh) marqueeTextMesh.visible = false; updateUIButtonState('marqueeText', false);
+                    if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false; updateUIButtonState('redacted', false);
+                    if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false; updateUIButtonState('redactedGlitch', false);
+                    if (bloodTextMesh) bloodTextMesh.visible = false; updateUIButtonState('bloodText', false);
+                    if (redactedGlitchTextMesh) redactedGlitchTextMesh.visible = false; 
+
+                    if (effectControls.anon) {
+                        effectControls.anon = false;
+                        updateUIButtonState('anon', false);
+                    }
+                    if (effectControls.og) {
+                        effectControls.og = false;
+                        updateUIButtonState('og', false);
+                    }
+                    if (effectControls.hacker) {
+                        effectControls.hacker = false;
+                        updateUIButtonState('hacker', false);
+                    }
+                }
+
+                if (targetProperty === 'greed') {
+                    for (const key in effectControls) {
+                        if (effectControls.hasOwnProperty(key) &&
+                            key !== 'greed' &&
+                            key !== 'blood' &&
+                            key !== 'bloodText' &&
+                            key !== 'yRotation' &&
+                            key !== 'cameraAnimation'
+                        ) {
+                            if (effectControls[key]) {
+                                effectControls[key] = false;
+                                const p = getPassByName(key);
+                                if (p) p.enabled = false;
+                                updateUIButtonState(key, false);
+                            }
+                        }
+                    }
+                    if (marqueeTextMesh) marqueeTextMesh.visible = false; updateUIButtonState('marqueeText', false);
+                    if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false; updateUIButtonState('redacted', false);
+                    if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false; updateUIButtonState('redactedGlitch', false);
+                    if (biometricMarqueeTextMesh) biometricMarqueeTextMesh.visible = false; updateUIButtonState('biometricMarquee', false);
+                    if (redactedGlitchTextMesh) redactedGlitchTextMesh.visible = false; 
+
+                    if (effectControls.anon) {
+                        effectControls.anon = false;
+                        updateUIButtonState('anon', false);
+                    }
+                    if (effectControls.og) {
+                        effectControls.og = false;
+                        updateUIButtonState('og', false);
+                    }
+                    if (effectControls.hacker) {
+                        effectControls.hacker = false;
+                        updateUIButtonState('hacker', false);
+                    }
+                    if (effectControls.surveillance) {
+                        effectControls.surveillance = false;
+                        updateUIButtonState('surveillance', false);
+                    }
+                    if (effectControls.cctvFeed) {
+                        effectControls.cctvFeed = false;
+                        updateUIButtonState('cctvFeed', false);
+                    }
+                    if (effectControls.heatmap) {
+                        effectControls.heatmap = false;
+                        updateUIButtonState('heatmap', false);
+                    }
+                }
+
+            } else if (targetProperty === 'shadow') { 
+                if (effectControls.glitch) { 
+                    if (!effectControls.anon && !effectControls.redactedGlitch && !effectControls.og && !effectControls.hacker && !effectControls.surveillance && !effectControls.greed) {
+                        effectControls.glitch = false;
+                        glitchPass.enabled = false;
+                        updateUIButtonState('glitch', false);
+                    }
                 }
             }
-            if (property !== 'hacker') effectControls[property] = !effectControls[property];
-            if (targetProperty === 'shadow') { darkPass.enabled = effectControls.shadow; effectControls.glitch = effectControls.shadow; glitchPass.enabled = effectControls.shadow; updateUIButtonState('shadow', effectControls.shadow); updateUIButtonState('glitch', effectControls.glitch); }
-            else if (targetProperty === 'redactedGlitch' || targetProperty === 'redacted') {
-                const vis = (effectControls.redacted || effectControls.redactedGlitch || effectControls.anon);
-                if (rightEyeRedactionRect) rightEyeRedactionRect.visible = vis;
-                if (leftEyeRedactionRect) leftEyeRedactionRect.visible = vis;
-                if (targetProperty === 'redactedGlitch') { glitchPass.enabled = effectControls.redactedGlitch; redactedGlitchTextMesh.visible = effectControls.redactedGlitch; updateUIButtonState('glitch', effectControls.redactedGlitch); }
-                if (vis) { effectControls.threshold = true; thresholdPass.enabled = true; updateUIButtonState('threshold', true); }
+
+            if (property !== 'hacker') {
+                effectControls[property] = !effectControls[property];
             }
-            if (targetProperty === 'anon') { thresholdPass.enabled = effectControls.anon; bloodPass.enabled = effectControls.anon; glitchPass.enabled = effectControls.anon; if (rightEyeRedactionRect) rightEyeRedactionRect.visible = effectControls.anon; if (leftEyeRedactionRect) leftEyeRedactionRect.visible = effectControls.anon; updateUIButtonState('threshold', effectControls.anon); updateUIButtonState('blood', effectControls.anon); updateUIButtonState('glitch', effectControls.anon); }
-            if (property === 'cameraAnimation') { cameraAnimationActive = effectControls.cameraAnimation; controls.enabled = !cameraAnimationActive; if (cameraAnimationActive) { if (effectControls.yRotation) { effectControls.yRotation = false; updateUIButtonState('yRotation', false); } initialGlobalCameraPos.copy(camera.position); initialGlobalCameraLookAt.copy(controls.target); startCameraAnimation(performance.now()); } else { camera.position.copy(initialGlobalCameraPos); controls.target.copy(initialGlobalCameraLookAt); camera.lookAt(controls.target); } }
-            if (property === 'yRotation') { if (effectControls.yRotation) { controls.enabled = false; cameraAnimationActive = false; updateUIButtonState('cameraAnimation', false); yBounceInitialCameraX = camera.position.x; yBounceInitialCameraY = camera.position.y; yBounceInitialCameraZ = camera.position.z; yRotationStartTime = performance.now(); } else { controls.enabled = true; } }
+
+            if (targetProperty === 'shadow') {
+                darkPass.enabled = effectControls.shadow;
+                if (effectControls.shadow) {
+                    effectControls.glitch = true;
+                    glitchPass.enabled = true;
+                } else { 
+                    if (!effectControls.anon && !effectControls.redactedGlitch && !effectControls.og && !effectControls.hacker && !effectControls.surveillance && !effectControls.greed) {
+                        effectControls.glitch = false;
+                        glitchPass.enabled = false;
+                    }
+                }
+                updateUIButtonState('shadow', effectControls.shadow);
+                updateUIButtonState('glitch', effectControls.glitch);
+            } else if (targetProperty === 'og') {
+                asciiPass.enabled = effectControls.og;
+                heatmapPass.enabled = effectControls.og;
+                biometricMarqueeTextMesh.visible = effectControls.og;
+                updateUIButtonState('ascii', effectControls.og);
+                updateUIButtonState('heatmap', effectControls.og);
+                updateUIButtonState('biometricMarquee', effectControls.og);
+                updateUIButtonState('og', effectControls.og);
+                updateUIButtonState('hacker', effectControls.og); 
+            } else if (targetProperty === 'bloodText') {
+                if (effectControls.bloodText) {
+                    effectControls.blood = true;
+                    bloodPass.enabled = true;
+                    updateUIButtonState('blood', true);
+                    if (bloodTextMesh && bloodTextMesh.material.map) {
+                        bloodScrollOffset = bloodTextMesh.material.map.image.height; 
+                        shuffledBloodPhrases = shuffleArray([...BLOOD_TEXT_PHRASES]);
+                    }
+                }
+                bloodTextMesh.visible = effectControls.bloodText;
+                updateUIButtonState('bloodText', effectControls.bloodText);
+            } else if (targetProperty === 'surveillance') {
+                effectControls.heatmap = effectControls.surveillance;
+                heatmapPass.enabled = effectControls.surveillance;
+                updateUIButtonState('heatmap', effectControls.surveillance);
+
+                effectControls.biometricMarquee = effectControls.surveillance;
+                biometricMarqueeTextMesh.visible = effectControls.surveillance;
+                updateUIButtonState('biometricMarquee', effectControls.surveillance);
+
+                effectControls.glitch = effectControls.surveillance; 
+                glitchPass.enabled = effectControls.surveillance; 
+                updateUIButtonState('glitch', effectControls.surveillance); 
+
+                updateUIButtonState('surveillance', effectControls.surveillance);
+
+            } else if (targetProperty === 'greed') {
+                effectControls.blood = effectControls.greed;
+                bloodPass.enabled = effectControls.greed;
+                updateUIButtonState('blood', effectControls.greed);
+
+                effectControls.bloodText = effectControls.greed;
+                bloodTextMesh.visible = effectControls.greed;
+                updateUIButtonState('bloodText', effectControls.greed);
+
+                if (effectControls.greed) {
+                    if (bloodTextMesh && bloodTextMesh.material.map) {
+                        bloodScrollOffset = bloodTextMesh.material.map.image.height; 
+                        shuffledBloodPhrases = shuffleArray([...BLOOD_TEXT_PHRASES]);
+                    }
+                }
+
+                updateUIButtonState('greed', effectControls.greed);
+
+            } else if (targetProperty === 'redactedGlitch') { 
+                if (rightEyeRedactionRect) rightEyeRedactionRect.visible = effectControls.redactedGlitch;
+                if (leftEyeRedactionRect) leftEyeRedactionRect.visible = effectControls.redactedGlitch;
+                glitchPass.enabled = effectControls.redactedGlitch;
+                redactedGlitchTextMesh.visible = effectControls.redactedGlitch;
+
+                if (effectControls.redactedGlitch) {
+                    effectControls.threshold = true;
+                    thresholdPass.enabled = true;
+                    updateUIButtonState('threshold', true);
+                    if (effectControls.shadow) {
+                        effectControls.shadow = false;
+                        darkPass.enabled = false;
+                        updateUIButtonState('shadow', false);
+                    }
+                }
+                else { 
+                    if (!effectControls.redacted && !effectControls.anon && !effectControls.og && !effectControls.hacker && !effectControls.surveillance && !effectControls.greed) {
+                        effectControls.threshold = false;
+                        thresholdPass.enabled = false;
+                        updateUIButtonState('threshold', false);
+                    }
+                }
+                updateUIButtonState('redactedGlitch', effectControls.redactedGlitch);
+                updateUIButtonState('glitch', effectControls.redactedGlitch); 
+
+            } else if (targetProperty === 'redacted') {
+                if (rightEyeRedactionRect) rightEyeRedactionRect.visible = effectControls.redacted;
+                if (leftEyeRedactionRect) leftEyeRedactionRect.visible = effectControls.redacted;
+                if (effectControls.redacted) {
+                    effectControls.threshold = true;
+                    thresholdPass.enabled = true;
+                    updateUIButtonState('threshold', true);
+                    if (effectControls.shadow) {
+                        effectControls.shadow = false;
+                        darkPass.enabled = false;
+                        updateUIButtonState('shadow', false);
+                        if (!effectControls.anon && !effectControls.redactedGlitch && !effectControls.og && !effectControls.hacker && !effectControls.surveillance && !effectControls.greed) {
+                            effectControls.glitch = false;
+                            glitchPass.enabled = false;
+                            updateUIButtonState('glitch', false);
+                        }
+                    }
+                } else {
+                    if (!effectControls.redactedGlitch && !effectControls.anon && !effectControls.og && !effectControls.hacker && !effectControls.surveillance && !effectControls.greed) {
+                        effectControls.threshold = false;
+                        thresholdPass.enabled = false;
+                        updateUIButtonState('threshold', false);
+                    }
+                }
+            }
+
+            if (targetProperty === 'anon') {
+                if (effectControls.anon) {
+                    thresholdPass.enabled = true;
+                    bloodPass.enabled = true;
+                    glitchPass.enabled = true;
+                    if (rightEyeRedactionRect) rightEyeRedactionRect.visible = true;
+                    if (leftEyeRedactionRect) leftEyeRedactionRect.visible = true;
+
+                    if (effectControls.shadow) {
+                        effectControls.shadow = false;
+                        darkPass.enabled = false;
+                        updateUIButtonState('shadow', false);
+                    }
+                }
+                else {
+                    thresholdPass.enabled = false;
+                    bloodPass.enabled = false;
+                    glitchPass.enabled = false;
+                    if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false;
+                    if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false;
+                }
+                updateUIButtonState('threshold', effectControls.anon);
+                updateUIButtonState('blood', effectControls.anon);
+                updateUIButtonState('glitch', effectControls.anon);
+            }
+
+            if (property === 'cameraAnimation') {
+                cameraAnimationActive = effectControls.cameraAnimation;
+                controls.enabled = !cameraAnimationActive;
+                if (cameraAnimationActive) {
+                    if (effectControls.yRotation) {
+                        effectControls.yRotation = false;
+                        updateUIButtonState('yRotation', false);
+                    }
+                    initialGlobalCameraPos.copy(camera.position);
+                    initialGlobalCameraLookAt.copy(controls.target);
+                    cameraPreviousPos.copy(initialGlobalCameraPos);
+                    cameraPreviousLookAt.copy(initialGlobalCameraLookAt);
+                    assetsVisitedCount = 0;
+                    startCameraAnimation(performance.now());
+                } else {
+                    camera.position.copy(initialGlobalCameraPos);
+                    controls.target.copy(initialGlobalCameraLookAt);
+                    camera.lookAt(controls.target);
+                    cameraAnimationState = 'idle';
+                    assetsVisitedCount = 0;
+                    if (!effectControls.yRotation) {
+                        controls.enabled = true;
+                    }
+                }
+                yRotationStartTime = 0; 
+            }
+
+            if (property === 'yRotation') {
+                if (effectControls.yRotation) {
+                    controls.enabled = false;
+                    cameraAnimationActive = false;
+                    updateUIButtonState('cameraAnimation', false);
+                    yBounceInitialCameraX = camera.position.x;
+                    yBounceInitialCameraY = camera.position.y;
+                    yBounceInitialCameraZ = camera.position.z;
+                    yRotationStartTime = performance.now(); 
+                } else {
+                    if (!cameraAnimationActive) {
+                        controls.enabled = true;
+                    }
+                    camera.position.set(yBounceInitialCameraX, yBounceInitialCameraY, yBounceInitialCameraZ);
+                    controls.target.set(0, 0, (totalDepthLayers - 1) * depthStep); 
+                    camera.lookAt(controls.target);
+                    yRotationStartTime = 0; 
+                }
+                lastActivityTime = performance.now();
+            }
+
             updateFaceMaterialBrightness();
-            updateUIButtonState(property, effectControls[property]);
         };
         button.setAttribute('data-effect', property);
         parentContainer.appendChild(button);
@@ -1898,7 +2944,7 @@ function init() {
             default: return null;
         }
     };
-
+    
     const buttonsConfig = [
         { label: '3D', property: 'yRotation', pass: null },
         { label: 'FLY', property: 'cameraAnimation', pass: null },
@@ -1921,38 +2967,116 @@ function init() {
         { label: 'Matrix', property: 'matrix', pass: matrixPass },
         { label: 'XRAY', property: 'xray', pass: xrayPass },
         { label: 'CCTV FEED', property: 'cctvFeed', pass: cctvFeedPass },
+
     ];
 
-    leftUiContainer = document.createElement('div');
+    leftUiContainer = document.createElement('div'); 
     leftUiContainer.id = 'left-ui-container';
-    leftUiContainer.style.cssText = 'position: absolute; top: -190px; left: 10px; padding: 10px; border-radius: 5px; font-family: monospace; z-index: 100; display: flex; flex-direction: column; gap: 5px; transition: top 0.5s ease-in-out;';
+    leftUiContainer.style.position = 'absolute';
+    leftUiContainer.style.top = '-190px'; 
+    leftUiContainer.style.left = '10px';
+    leftUiContainer.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+    leftUiContainer.style.color = 'white';
+    leftUiContainer.style.padding = '10px'; 
+    leftUiContainer.style.borderRadius = '5px';
+    leftUiContainer.style.fontFamily = 'monospace';
+    leftUiContainer.style.zIndex = '100';
+    leftUiContainer.style.display = 'flex';
+    leftUiContainer.style.flexDirection = 'column'; 
+    leftUiContainer.style.flexWrap = 'nowrap'; 
+    leftUiContainer.style.gap = '5px'; 
+    leftUiContainer.style.transition = 'top 0.5s ease-in-out'; 
     document.body.appendChild(leftUiContainer);
+
     const rightUiContainer = document.createElement('div');
     rightUiContainer.id = 'right-ui-container';
-    rightUiContainer.style.cssText = 'position: absolute; top: 10px; right: 10px; padding: 10px; display: none; flex-direction: column; gap: 5px;';
+    rightUiContainer.style.position = 'absolute';
+    rightUiContainer.style.top = '10px';
+    rightUiContainer.style.right = '10px';
+    rightUiContainer.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+    rightUiContainer.style.color = 'white';
+    rightUiContainer.style.padding = '10px';
+    rightUiContainer.style.borderRadius = '5px';
+    rightUiContainer.style.fontFamily = 'monospace';
+    rightUiContainer.style.zIndex = '100';
+    rightUiContainer.style.display = 'none'; 
+    rightUiContainer.style.flexDirection = 'column';
+    rightUiContainer.style.gap = '5px';
     document.body.appendChild(rightUiContainer);
 
-    const leftUiOrder = ['yRotation', 'cameraAnimation', 'surveillance', 'greed', 'hacker', 'shadow', 'redactedGlitch'];
+    const leftUiOrder = [
+        'yRotation', 
+        'cameraAnimation', 
+        'surveillance', 
+        'greed', 
+        'hacker', 
+        'shadow',
+        'redactedGlitch'
+    ];
+
     const buttonConfigMap = new Map(buttonsConfig.map(config => [config.property, config]));
-    leftUiOrder.forEach(p => { const c = buttonConfigMap.get(p); if (c) addButtonToggle(leftUiContainer, c.label, c.property, c.pass); });
-    buttonsConfig.forEach(c => { if (!leftUiOrder.includes(c.property)) addButtonToggle(rightUiContainer, c.label, c.property, c.pass); });
+
+    leftUiOrder.forEach(propertyName => {
+        const config = buttonConfigMap.get(propertyName);
+        if (config) {
+            addButtonToggle(leftUiContainer, config.label, config.property, config.pass);
+        }
+    });
+
+    buttonsConfig.forEach(config => {
+        if (!leftUiOrder.includes(config.property)) { 
+            addButtonToggle(rightUiContainer, config.label, config.property, config.pass);
+        }
+    });
 
     const createResetButton = () => {
-        const b = document.createElement('button');
-        b.textContent = 'RESET';
-        b.style.cssText = 'background-color: black; color: white; padding: 4px; margin-top: 10px; border: 0.5px solid rgba(0,0,0,0.8); cursor: pointer; font-family: monospace; font-size: 7px;';
-        b.onclick = (e) => { e.stopPropagation(); resetPiecesToOriginalPositions(); };
-        return b;
+        const button = document.createElement('button');
+        button.textContent = 'RESET';
+        button.style.cssText = `
+            background-color: black; 
+            color: white;
+            padding: 4px;
+            margin-top: 10px;
+            border: 0.5px solid rgba(0, 0, 0, 0.8);
+            border-radius: 0;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 7px;
+            outline: none;
+            white-space: nowrap;
+            box-sizing: border-box;
+        `;
+        button.onmouseover = () => { button.style.borderColor = 'rgba(0, 0, 0, 1.0)'; };
+        button.onmouseout = () => { button.style.borderColor = 'rgba(0, 0, 0, 0.8)'; };
+        button.onclick = (event) => { event.stopPropagation(); resetPiecesToOriginalPositions(); };
+        return button;
     };
     leftUiContainer.appendChild(createResetButton());
     rightUiContainer.appendChild(createResetButton());
+
     const createTrashButton = () => {
-        const b = document.createElement('button');
-        b.id = 'trash-button'; b.innerHTML = 'TRASH';
-        b.style.cssText = 'background-color: black; color: white; padding: 4px; margin-top: 10px; cursor: pointer; font-family: monospace; font-size: 7px;';
-        return b;
+        const button = document.createElement('button');
+        button.id = 'trash-button'; 
+        button.innerHTML = 'TRASH'; 
+        button.style.cssText = `
+            background-color: black; 
+            color: white;
+            padding: 4px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 7px;
+            outline: none;
+            white-space: nowrap;
+            box-sizing: border-box;
+        `;
+        button.onmouseover = () => { }; 
+        button.onmouseout = () => { }; 
+        return button;
     };
-    trashButtonElement = createTrashButton();
+    trashButtonElement = createTrashButton(); 
     leftUiContainer.appendChild(trashButtonElement);
 
     // Create and append the EXPORT button below TRASH
@@ -1972,7 +3096,11 @@ function init() {
     arrowContainer = document.createElement('div');
     arrowContainer.style.cssText = 'position: absolute; top: 0px; left: 20px; background-color: black; width: 60px; height: 15px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 101; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; transition: top 0.5s ease-in-out;';
     const arrowSpan = document.createElement('span');
-    arrowSpan.style.color = 'white'; arrowSpan.style.fontSize = '10px'; arrowSpan.innerHTML = '&#x25BC;';
+    arrowSpan.style.cssText = `
+        color: white;
+        font-size: 10px; 
+    `;
+    arrowSpan.innerHTML = '&#x25BC;'; 
     arrowContainer.appendChild(arrowSpan);
     document.body.appendChild(arrowContainer);
     arrowContainer.onclick = (e) => {
@@ -1980,148 +3108,537 @@ function init() {
         if (leftUiContainer.style.top === '10px') { leftUiContainer.style.top = '-190px'; trashButtonElement.style.display = 'none'; exportButtonElement.style.display = 'none'; arrowContainer.style.top = '0px'; arrowSpan.innerHTML = '&#x25BC;'; }
         else { leftUiContainer.style.top = '10px'; trashButtonElement.style.display = 'block'; arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; arrowSpan.innerHTML = '&#x25B2'; }
     };
+
     trashButtonElement.style.display = 'none';
 }
 
 function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight);
-    if (composer) composer.setSize(window.innerWidth, window.innerHeight);
-    if (pixelationPass) pixelationPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
-    if (asciiPass) asciiPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
-    if (cctvFeedPass) cctvFeedPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
-    if (leftUiContainer.style.top === '10px') arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
-    lastActivityTime = performance.now(); stopCameraAnimationAndReset();
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    if (composer) {
+        composer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    if (pixelationPass) {
+        pixelationPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
+    }
+    if (asciiPass) {
+        asciiPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
+    }
+    if (cctvFeedPass) {
+        cctvFeedPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
+    }
+
+    if (leftUiContainer.style.top === '10px') {
+        arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
+    }
+
+    lastActivityTime = performance.now();
+    stopCameraAnimationAndReset();
 }
 
 function onPointerDown(event) {
-    lastActivityTime = performance.now(); isDragging = false; pointerDownPosition.set(event.clientX, event.clientY);
-    if (event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) { selectedObject = null; controls.enabled = true; return; }
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    lastActivityTime = performance.now();
+    isDragging = false;
+    pointerDownPosition.set(event.clientX, event.clientY);
+
+    if (event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) {
+        selectedObject = null;
+        controls.enabled = true;
+        return;
+    }
+
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(draggableObjects, true);
+
+    const intersects = raycaster.intersectObjects(draggableObjects, true); 
+
     for (const intersect of intersects) {
-        const object = intersect.object; const material = object.material;
-        if (material && material.map && material.transparent) { if (getAlphaAtUV(material.map, intersect.uv) > 0.1) { selectedObject = object; controls.enabled = false; initialObjectZ = selectedObject.position.z; offset.copy(intersect.point).sub(selectedObject.position); break; } }
-        else if (material instanceof THREE.ShaderMaterial && material.alphaTest !== undefined && material.alphaTest > 0) { selectedObject = object; controls.enabled = false; initialObjectZ = selectedObject.position.z; offset.copy(intersect.point).sub(selectedObject.position); break; }
-        else if (material && !material.transparent) { selectedObject = object; controls.enabled = false; initialObjectZ = selectedObject.position.z; offset.copy(intersect.point).sub(selectedObject.position); break; }
+        const object = intersect.object;
+        const material = object.material;
+
+        if (material && material.map && material.transparent) {
+            const uv = intersect.uv;
+            const alpha = getAlphaAtUV(material.map, uv);
+
+            if (alpha > 0.1) { 
+                selectedObject = object;
+                controls.enabled = false;
+                initialObjectZ = selectedObject.position.z;
+                offset.copy(intersect.point).sub(selectedObject.position);
+                break; 
+            }
+        } else if (material instanceof THREE.ShaderMaterial && material.alphaTest !== undefined && material.alphaTest > 0) {
+            selectedObject = object;
+            controls.enabled = false;
+            initialObjectZ = selectedObject.position.z;
+            offset.copy(intersect.point).sub(selectedObject.position);
+            break; 
+        } else if (material && !material.transparent) {
+            selectedObject = object;
+            controls.enabled = false;
+            initialObjectZ = selectedObject.position.z;
+            offset.copy(intersect.point).sub(selectedObject.position);
+            break; 
+        }
     }
 }
 
 function onPointerMove(event) {
     lastActivityTime = performance.now();
     if (selectedObject) {
-        if (new THREE.Vector2(event.clientX, event.clientY).distanceTo(pointerDownPosition) > DRAG_THRESHOLD) isDragging = true;
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        const currentPointerPosition = new THREE.Vector2(event.clientX, event.clientY);
+        if (currentPointerPosition.distanceTo(pointerDownPosition) > DRAG_THRESHOLD) {
+            isDragging = true;
+        }
+
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
         raycaster.setFromCamera(mouse, camera);
-        const plane = new THREE.Plane(); plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), new THREE.Vector3(0, 0, initialObjectZ));
+
+        const plane = new THREE.Plane();
+        plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), new THREE.Vector3(0, 0, initialObjectZ));
+
         const intersection = new THREE.Vector3();
         if (raycaster.ray.intersectPlane(plane, intersection)) {
-            const oldX = selectedObject.position.x, oldY = selectedObject.position.y;
-            selectedObject.position.x = intersection.x - offset.x; selectedObject.position.y = intersection.y - offset.y; selectedObject.position.z = initialObjectZ;
-            const deltaX = selectedObject.position.x - oldX, deltaY = selectedObject.position.y - oldY;
-            if (foreheadMeshes.includes(selectedObject)) { foreheadMeshes.forEach(mesh => { if (mesh !== selectedObject) { mesh.position.x += deltaX; mesh.position.y += deltaY; mesh.position.z = initialObjectZ; } }); }
-            if (selectedObject === rightEyeMesh && rightEyeRedactionRect) { rightEyeRedactionRect.position.x = selectedObject.position.x; rightEyeRedactionRect.position.y = selectedObject.position.y; }
-            if (selectedObject === leftEyeMesh && leftEyeRedactionRect) { leftEyeRedactionRect.position.x = selectedObject.position.x; leftEyeRedactionRect.position.y = selectedObject.position.y; }
+            const oldX = selectedObject.position.x;
+            const oldY = selectedObject.position.y;
+
+            selectedObject.position.x = intersection.x - offset.x;
+            selectedObject.position.y = intersection.y - offset.y;
+            selectedObject.position.z = initialObjectZ;
+
+            const deltaX = selectedObject.position.x - oldX;
+            const deltaY = selectedObject.position.y - oldY;
+
+            if (foreheadMeshes.includes(selectedObject)) {
+                foreheadMeshes.forEach(mesh => {
+                    if (mesh !== selectedObject) { 
+                        mesh.position.x += deltaX;
+                        mesh.position.y += deltaY;
+                        mesh.position.z = initialObjectZ; 
+                    }
+                });
+            }
+
+            if (selectedObject === rightEyeMesh) {
+                if (rightEyeRedactionRect) {
+                    rightEyeRedactionRect.position.x = selectedObject.position.x;
+                    rightEyeRedactionRect.position.y = selectedObject.position.y;
+                }
+            } else if (selectedObject === leftEyeMesh) {
+                if (leftEyeRedactionRect) {
+                    leftEyeRedactionRect.position.x = selectedObject.position.x;
+                    leftEyeRedactionRect.position.y = selectedObject.position.y;
+                }
+            }
         }
     }
 }
 
 function onPointerUp(event) {
     lastActivityTime = performance.now();
-    if (isDragging && selectedObject && trashButtonElement) {
-        const rect = trashButtonElement.getBoundingClientRect();
-        if (event.clientX >= rect.left - 20 && event.clientX <= rect.right + 20 && event.clientY >= rect.top - 20 && event.clientY <= rect.bottom + 20) {
-            const configIndex = initialAssetConfigs.findIndex(config => config.id === selectedObject.userData.id);
-            if (configIndex !== -1) initialAssetConfigs[configIndex].removed = true;
-            scene.remove(selectedObject); draggableObjects = draggableObjects.filter(obj => obj !== selectedObject);
-            cameraAnimationTargets = cameraAnimationTargets.filter(obj => obj !== selectedObject);
-            foreheadMeshes = foreheadMeshes.filter(mesh => mesh !== selectedObject);
-            shufflingCardMeshes = shufflingCardMeshes.filter(mesh => mesh !== selectedObject);
-            if (selectedObject.userData.id === 'rightEye' && rightEyeRedactionRect) { scene.remove(rightEyeRedactionRect); rightEyeMesh = null; rightEyeRedactionRect = null; }
-            if (selectedObject.userData.id === 'leftEye' && leftEyeRedactionRect) { scene.remove(leftEyeRedactionRect); leftEyeMesh = null; leftEyeRedactionRect = null; }
+
+    if (isDragging && selectedObject) {
+        if (trashButtonElement) {
+            const rect = trashButtonElement.getBoundingClientRect();
+
+            const expandedRect = {
+                left: rect.left - 20, 
+                right: rect.right + 20, 
+                top: rect.top - 20, 
+                bottom: rect.bottom + 20 
+            };
+
+            if (event.clientX >= expandedRect.left && event.clientX <= expandedRect.right &&
+                event.clientY >= expandedRect.top && event.clientY <= expandedRect.bottom) {
+
+                const configIndex = initialAssetConfigs.findIndex(config => config.id === selectedObject.userData.id);
+                if (configIndex !== -1) {
+                    initialAssetConfigs[configIndex].removed = true;
+                }
+
+                scene.remove(selectedObject);
+                draggableObjects = draggableObjects.filter(obj => obj !== selectedObject);
+                cameraAnimationTargets = cameraAnimationTargets.filter(obj => obj !== selectedObject);
+
+                foreheadMeshes = foreheadMeshes.filter(mesh => mesh !== selectedObject);
+
+                shufflingCardMeshes = shufflingCardMeshes.filter(mesh => mesh !== selectedObject);
+
+                if (selectedObject.geometry) selectedObject.geometry.dispose();
+                if (selectedObject.userData.isFaceMesh) {
+                    defaultMaterialMap.delete(selectedObject.userData.id);
+                    brightMaterialMap.delete(selectedObject.userData.id);
+                    faceMeshes = faceMeshes.filter(mesh => mesh !== selectedObject);
+                } else if (selectedObject.material) {
+                    if (Array.isArray(selectedObject.material)) {
+                        selectedObject.material.forEach(m => m.dispose());
+                    } else {
+                        selectedObject.material.dispose();
+                    }
+                }
+
+                if (selectedObject.userData.id === 'rightEye') {
+                    if (rightEyeRedactionRect) { scene.remove(rightEyeRedactionRect); rightEyeRedactionRect.geometry.dispose(); rightEyeRedactionRect.material.dispose(); }
+                    rightEyeMesh = null;
+                    rightEyeRedactionRect = null;
+                }
+                if (selectedObject.userData.id === 'leftEye') {
+                    if (leftEyeRedactionRect) { scene.remove(leftEyeRedactionRect); leftEyeRedactionRect.geometry.dispose(); leftEyeRedactionRect.material.dispose(); }
+                    leftEyeMesh = null;
+                    leftEyeRedactionRect = null;
+                }
+            }
         }
     }
-    selectedObject = null; if (!cameraAnimationActive && !effectControls.yRotation) controls.enabled = true;
+
+    selectedObject = null;
+    if (!cameraAnimationActive && !effectControls.yRotation) {
+        controls.enabled = true;
+    }
 }
 
 function onClick(event) {
     lastActivityTime = performance.now();
-    if (isDragging || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) return;
-    stopCameraAnimationAndReset();
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    const currentTime = performance.now();
+    if (isDragging || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) {
+        return;
+    }
+
+    stopCameraAnimationAndReset(); 
+
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(draggableObjects, true);
+
+    const intersects = raycaster.intersectObjects(draggableObjects, true); 
+
     let clickedObject = null;
     for (const intersect of intersects) {
-        const object = intersect.object; const material = object.material;
-        if (material instanceof THREE.ShaderMaterial && material.alphaTest !== undefined && material.alphaTest > 0) { clickedObject = object; break; }
-        else if (material && material.map && material.transparent) { if (getAlphaAtUV(material.map, intersect.uv) > 0.1) { clickedObject = object; break; } }
-        else if (material && !material.transparent) { clickedObject = object; break; }
+        const object = intersect.object;
+        const material = object.material;
+
+        if (material instanceof THREE.ShaderMaterial && material.alphaTest !== undefined && material.alphaTest > 0) {
+            clickedObject = object;
+            break;
+        } else if (material && material.map && material.transparent) {
+            const uv = intersect.uv;
+            const alpha = getAlphaAtUV(material.map, uv);
+
+            if (alpha > 0.1) { 
+                clickedObject = object;
+                break;
+            }
+        }
+        else if (material && !material.transparent) {
+            clickedObject = object;
+            break;
+        }
     }
-    if (clickedObject && !['backgroundMesh', 'rightEyeRedactionRect', 'leftEyeRedactionRect', 'marqueeTextMesh', 'biometricMarqueeTextMesh', 'bloodTextMesh', 'redactedGlitchTextMesh'].includes(clickedObject.userData.id)) {
+
+    if (clickedObject) {
+
+        if (clickedObject === backgroundMesh || clickedObject === rightEyeRedactionRect || clickedObject === leftEyeRedactionRect || clickedObject === marqueeTextMesh || clickedObject === biometricMarqueeTextMesh || clickedObject === bloodTextMesh || clickedObject === redactedGlitchTextMesh) { 
+            return;
+        }
+
+        const isForeheadMesh = foreheadMeshes.includes(clickedObject);
+        const isShufflingCardMesh = shufflingCardMeshes.includes(clickedObject);
+
         let currentLayer = clickedObject.userData.currentLayer || 1;
-        currentLayer--; if (currentLayer < 1) currentLayer = totalDepthLayers;
-        if (foreheadMeshes.includes(clickedObject)) { foreheadMeshes.forEach(mesh => { mesh.userData.currentLayer = currentLayer; mesh.position.z = (currentLayer - 1) * depthStep; }); }
-        else { clickedObject.userData.currentLayer = currentLayer; clickedObject.position.z = (currentLayer - 1) * depthStep; }
-        if (clickedObject === rightEyeMesh && rightEyeRedactionRect) rightEyeRedactionRect.position.z = clickedObject.position.z + (1.5 * depthStep);
-        if (clickedObject === leftEyeMesh && leftEyeRedactionRect) leftEyeRedactionRect.position.z = clickedObject.position.z + (1.5 * depthStep);
+        
+        currentLayer++; 
+
+        if (currentLayer > totalDepthLayers) {
+            currentLayer = 1; 
+        }
+        
+        const newZ = (totalDepthLayers - currentLayer) * depthStep;
+
+        if (isForeheadMesh) {
+            foreheadMeshes.forEach(mesh => {
+                mesh.userData.currentLayer = currentLayer;
+                mesh.position.z = newZ;
+            });
+        } else {
+            clickedObject.userData.currentLayer = currentLayer;
+            clickedObject.position.z = newZ;
+        }
+
+        if (clickedObject === rightEyeMesh) {
+            if (rightEyeRedactionRect) {
+                rightEyeRedactionRect.position.z = clickedObject.position.z + (1.5 * depthStep);
+            }
+        }
+        else if (clickedObject === leftEyeMesh) {
+            if (leftEyeRedactionRect) {
+                leftEyeRedactionRect.position.z = clickedObject.position.z + (1.5 * depthStep);
+            }
+        }
     }
 }
 
-function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
 
 function startCameraAnimation(currentTime) {
     if (!cameraAnimationActive || cameraAnimationTargets.length === 0) return;
-    cameraPreviousPos.copy(camera.position); cameraPreviousLookAt.copy(controls.target); cameraAnimationStartTime = currentTime;
-    cameraAnimationState = 'exploring'; assetsVisitedCount++;
+
+    cameraPreviousPos.copy(camera.position);
+    cameraPreviousLookAt.copy(controls.target);
+    cameraAnimationStartTime = currentTime;
+
+    let duration = 0;
+    if (cameraAnimationState === 'exploring') {
+        duration = cameraExplorationDuration;
+    }
+    else if (cameraAnimationState === 'returningToGlobalStart') {
+        duration = cameraReturnDuration;
+    }
+
     const validTargets = cameraAnimationTargets;
-    let newTarget; do { newTarget = validTargets[Math.floor(Math.random() * validTargets.length)]; } while (newTarget === cameraTargetObject && validTargets.length > 1);
-    cameraTargetObject = newTarget;
-    const center = new THREE.Box3().setFromObject(cameraTargetObject).getCenter(new THREE.Vector3());
-    const baseDistance = Math.max(new THREE.Box3().setFromObject(cameraTargetObject).getSize(new THREE.Vector3()).x, new THREE.Box3().setFromObject(cameraTargetObject).getSize(new THREE.Vector3()).y) / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2));
-    cameraCurrentTargetPos.set(center.x + (Math.random() - 0.5) * baseDistance, center.y + (Math.random() - 0.5) * baseDistance, cameraTargetObject.position.z + baseDistance * (0.8 + Math.random() * 0.7));
-    cameraCurrentTargetLookAt.copy(center);
+
+    if (validTargets.length === 0) {
+        cameraAnimationActive = false;
+        effectControls.cameraAnimation = false;
+        updateUIButtonState('cameraAnimation', false);
+        controls.enabled = true;
+        return;
+    }
+
+    if (cameraAnimationState === 'returningToGlobalStart' || assetsVisitedCount >= ASSETS_PER_GLOBAL_RETURN) {
+        cameraAnimationState = 'exploring';
+        assetsVisitedCount = 0;
+
+        let newTarget;
+        do {
+            newTarget = validTargets[Math.floor(Math.random() * validTargets.length)];
+        } while (newTarget === cameraTargetObject && validTargets.length > 1);
+        cameraTargetObject = newTarget;
+
+        const targetPos = cameraTargetObject.position;
+        const targetBounds = new THREE.Box3().setFromObject(cameraTargetObject);
+        const center = targetBounds.getCenter(new THREE.Vector3());
+        const size = targetBounds.getSize(new THREE.Vector3());
+
+        const fovRad = THREE.MathUtils.degToRad(camera.fov);
+        const baseDistance = Math.max(size.x, size.y) / (2 * Math.tan(fovRad / 2));
+
+        const minZOffset = baseDistance * 0.8;
+        const maxZOffset = baseDistance * 1.5;
+        const randomZOffset = minZOffset + (Math.random() * (maxZOffset - minZOffset));
+
+        const lateralOffsetRange = baseDistance * 0.5;
+        const randomOffsetX = (Math.random() - 0.5) * lateralOffsetRange;
+        const randomOffsetY = (Math.random() - 0.5) * lateralOffsetRange;
+
+        cameraCurrentTargetPos.set(
+            center.x + randomOffsetX,
+            center.y + randomOffsetY,
+            targetPos.z + randomZOffset
+        );
+
+        cameraCurrentTargetLookAt.copy(center);
+
+        cameraCurrentTargetPos.z = THREE.MathUtils.clamp(cameraCurrentTargetPos.z, -5, 15);
+
+    } else { 
+        cameraAnimationState = 'exploring';
+        assetsVisitedCount++;
+
+        let newTarget;
+        do {
+            newTarget = validTargets[Math.floor(Math.random() * validTargets.length)];
+        } while (newTarget === cameraTargetObject && validTargets.length > 1);
+        cameraTargetObject = newTarget;
+
+        const targetPos = cameraTargetObject.position;
+        const targetBounds = new THREE.Box3().setFromObject(cameraTargetObject);
+        const center = targetBounds.getCenter(new THREE.Vector3());
+        const size = targetBounds.getSize(new THREE.Vector3());
+
+        const fovRad = THREE.MathUtils.degToRad(camera.fov);
+        const baseDistance = Math.max(size.x, size.y) / (2 * Math.tan(fovRad / 2));
+
+        const minZOffset = baseDistance * 0.8;
+        const maxZOffset = baseDistance * 1.5;
+        const randomZOffset = minZOffset + (Math.random() * (maxZOffset - minZOffset));
+
+        const lateralOffsetRange = baseDistance * 0.5;
+        const randomOffsetX = (Math.random() - 0.5) * lateralOffsetRange;
+        const randomOffsetY = (Math.random() - 0.5) * lateralOffsetRange;
+
+        cameraCurrentTargetPos.set(
+            center.x + randomOffsetX,
+            center.y + randomOffsetY,
+            targetPos.z + randomZOffset
+        );
+
+        cameraCurrentTargetLookAt.copy(center);
+
+        cameraCurrentTargetPos.z = THREE.MathUtils.clamp(cameraCurrentTargetPos.z, -5, 15);
+    }
 }
 
 function updateCameraAnimation(currentTime) {
     if (cameraAnimationState === 'idle' || !cameraAnimationActive) return;
+
     const elapsed = currentTime - cameraAnimationStartTime;
-    const duration = cameraAnimationState === 'exploring' ? cameraExplorationDuration : cameraReturnDuration;
-    let t = Math.min(1, elapsed / duration); t = easeInOutCubic(t);
+
+    let duration = 0;
+    if (cameraAnimationState === 'exploring') {
+        duration = cameraExplorationDuration;
+    }
+    else if (cameraAnimationState === 'returningToGlobalStart') {
+        duration = cameraReturnDuration;
+    }
+
+    let t = Math.min(1, elapsed / duration);
+    t = easeInOutCubic(t);
+
     camera.position.lerpVectors(cameraPreviousPos, cameraCurrentTargetPos, t);
     controls.target.lerpVectors(cameraPreviousLookAt, cameraCurrentTargetLookAt, t);
-    if (elapsed >= duration) startCameraAnimation(currentTime);
+
+    if (elapsed >= duration) {
+        if (cameraAnimationState === 'returningToGlobalStart') {
+            cameraAnimationState = 'exploring';
+            assetsVisitedCount = 0;
+        }
+        startCameraAnimation(currentTime);
+    }
     camera.lookAt(controls.target);
 }
 
-const cardTextures = [];
+const cardTextures = []; 
+
 function preloadCardTextures(callback) {
-    const loader = new THREE.TextureLoader(); let loadedCount = 0; const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
-    cardImageUrls.forEach((url, index) => { loader.load(url, (texture) => { texture.colorSpace = THREE.SRGBColorSpace; texture.minFilter = THREE.LinearFilter; texture.magFilter = THREE.LinearFilter; texture.generateMipmaps = false; texture.anisotropy = maxAnisotropy; cardTextures[index] = texture; loadedCount++; if (loadedCount === cardImageUrls.length && callback) callback(); }); });
+    const loader = new THREE.TextureLoader();
+    let loadedCount = 0;
+    const maxAnisotropy = renderer.capabilities.getMaxAnisotropy(); 
+
+    cardImageUrls.forEach((url, index) => {
+        loader.load(url, (texture) => {
+            texture.colorSpace = THREE.SRGBColorSpace;
+            texture.minFilter = THREE.LinearFilter;
+            texture.magFilter = THREE.LinearFilter;
+            texture.generateMipmaps = false;
+            texture.anisotropy = maxAnisotropy;
+
+            cardTextures[index] = texture;
+            loadedCount++;
+            if (loadedCount === cardImageUrls.length) {
+                if (callback) callback();
+            }
+        });
+    });
 }
 
 function animate(currentTime) {
     requestAnimationFrame(animate);
-    if (effectControls.yRotation) { controls.enabled = false; camera.position.x = yBounceInitialCameraX + yBounceRangeX * Math.sin(currentTime * yBounceSpeed); camera.lookAt(new THREE.Vector3(0, 0, 0)); }
-    else if (cameraAnimationActive) { controls.enabled = false; updateCameraAnimation(currentTime); } else controls.update();
-    if (foreheadMeshes.length > 0 && currentTime - lastFlashTime > FLASH_INTERVAL) { foreheadMeshes[currentForeheadIndex].visible = false; currentForeheadIndex = (currentForeheadIndex + 1) % foreheadMeshes.length; foreheadMeshes[currentForeheadIndex].visible = true; lastFlashTime = currentTime; }
-    if (shufflingCardMeshes.length > 0 && cardTextures.length === cardImageUrls.length && currentTime - lastCardFlashTime > FLASH_INTERVAL) { currentCardImageIndex = (currentCardImageIndex + 1) % cardTextures.length; shufflingCardMeshes.forEach(mesh => { mesh.material.map = cardTextures[currentCardImageIndex]; mesh.material.needsUpdate = true; }); lastCardFlashTime = currentTime; }
-    if (effectControls.xray) { marqueeScrollOffset -= MARQUEE_SCROLL_SPEED; if (marqueeScrollOffset <= -MARQUEE_LINE_HEIGHT * MARQUEE_TOTAL_LINES) marqueeScrollOffset = 0; updateMarqueeTexture(); }
-    if (effectControls.biometricMarquee || effectControls.og || effectControls.hacker || effectControls.surveillance || effectControls.greed) { biometricMarqueeScrollOffset -= BIOMETRIC_MARQUEE_SCROLL_SPEED; if (biometricMarqueeScrollOffset <= -BIOMETRIC_MARQUEE_LINE_HEIGHT * BIOMETRIC_MARQUEE_TOTAL_LINES) biometricMarqueeScrollOffset = 0; updateBiometricMarqueeTexture(currentTime); }
-    if (effectControls.bloodText) { bloodScrollOffset -= BLOOD_TEXT_SCROLL_SPEED; if (bloodScrollOffset <= -(BLOOD_TEXT_LINE_HEIGHT * BLOOD_TEXT_TOTAL_LINES)) bloodScrollOffset += (BLOOD_TEXT_LINE_HEIGHT * BLOOD_TEXT_TOTAL_LINES * 3); updateBloodTextTexture(); }
-    if (effectControls.redactedGlitch) { redactedGlitchScrollOffset -= REDACTED_GLITCH_SCROLL_SPEED; if (redactedGlitchScrollOffset <= -(REDACTED_GLITCH_LINE_HEIGHT * REDACTED_GLITCH_TOTAL_LINES)) { redactedGlitchScrollOffset = 0; initializeRedactedGlitchPhraseData(); } updateRedactedGlitchTexture(); }
+
+    if (effectControls.yRotation) {
+        if (cameraAnimationActive) {
+            cameraAnimationActive = false;
+            updateUIButtonState('cameraAnimation', false);
+        }
+        controls.enabled = false;
+        const convergencePoint = new THREE.Vector3(0, 0, (totalDepthLayers - 1) * depthStep); 
+        camera.position.x = yBounceInitialCameraX + yBounceRangeX * Math.sin(currentTime * yBounceSpeed);
+        camera.position.y = yBounceInitialCameraY;
+        camera.position.z = yBounceInitialCameraZ;
+        camera.lookAt(convergencePoint);
+    }
+
+    if (cameraAnimationActive) {
+        if (effectControls.yRotation) {
+            effectControls.yRotation = false;
+            updateUIButtonState('yRotation', false);
+        }
+        controls.enabled = false;
+        updateCameraAnimation(currentTime);
+    } else if (!effectControls.yRotation) {
+        controls.update();
+    }
+
+    if (foreheadMeshes.length > 0) {
+        if (currentTime - lastFlashTime > FLASH_INTERVAL) {
+            foreheadMeshes[currentForeheadIndex].visible = false;
+            currentForeheadIndex = (currentForeheadIndex + 1) % foreheadMeshes.length;
+            foreheadMeshes[currentForeheadIndex].visible = true;
+            lastFlashTime = currentTime;
+        }
+    }
+
+    if (shufflingCardMeshes.length > 0 && cardTextures.length === cardImageUrls.length) {
+        if (currentTime - lastCardFlashTime > FLASH_INTERVAL) {
+            currentCardImageIndex = (currentCardImageIndex + 1) % cardTextures.length;
+            shufflingCardMeshes.forEach(mesh => {
+                mesh.material.map = cardTextures[currentCardImageIndex];
+                mesh.material.needsUpdate = true;
+            });
+            lastCardFlashTime = currentTime;
+        }
+    }
+
+    if (effectControls.xray) { 
+        marqueeScrollOffset -= MARQUEE_SCROLL_SPEED;
+        if (marqueeScrollOffset <= -MARQUEE_LINE_HEIGHT * MARQUEE_TOTAL_LINES) {
+            marqueeScrollOffset = 0;
+        }
+        updateMarqueeTexture();
+    }
+
+    if (effectControls.biometricMarquee || effectControls.og || effectControls.hacker || effectControls.surveillance || effectControls.greed) { 
+        biometricMarqueeScrollOffset -= BIOMETRIC_MARQUEE_SCROLL_SPEED;
+        if (biometricMarqueeScrollOffset <= -BIOMETRIC_MARQUEE_LINE_HEIGHT * BIOMETRIC_MARQUEE_TOTAL_LINES) {
+            biometricMarqueeScrollOffset = 0;
+        }
+        updateBiometricMarqueeTexture(currentTime);
+    }
+
+    if (effectControls.bloodText) {
+        bloodScrollOffset -= BLOOD_TEXT_SCROLL_SPEED;
+        const singleSetHeight = BLOOD_TEXT_LINE_HEIGHT * BLOOD_TEXT_TOTAL_LINES;
+
+        if (bloodScrollOffset <= -singleSetHeight) {
+            bloodScrollOffset += singleSetHeight * 3; 
+            shuffledBloodPhrases = shuffleArray([...BLOOD_TEXT_PHRASES]); 
+        }
+
+        updateBloodTextTexture();
+    }
+
+    if (effectControls.redactedGlitch) {
+        redactedGlitchScrollOffset -= REDACTED_GLITCH_SCROLL_SPEED;
+        const singleSetHeight = REDACTED_GLITCH_LINE_HEIGHT * REDACTED_GLITCH_TOTAL_LINES;
+        if (redactedGlitchScrollOffset <= -singleSetHeight) {
+            redactedGlitchScrollOffset = 0;
+            initializeRedactedGlitchPhraseData();
+        }
+        updateRedactedGlitchTexture();
+    }
+
     composer.render();
 }
 
 init();
-preloadCardTextures(() => animate());
+preloadCardTextures(() => {
+    animate();
+});
 
-setTimeout(() => {
+setTimeout(function () {
     window.animate = typeof animate == "function" ? animate : () => { };
     window.camera = typeof camera != "undefined" ? camera : undefined;
     window.renderer = typeof renderer != "undefined" ? renderer : undefined;
     window.scene = typeof scene != "undefined" ? scene : undefined;
-}, 1000);
+}, 1000)
     
     // Expose for dae hooks
     setTimeout(function() {
