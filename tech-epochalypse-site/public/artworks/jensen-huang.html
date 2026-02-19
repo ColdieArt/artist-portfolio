@@ -482,6 +482,8 @@ let lastCardFlashTime = 0;
 
 let faceMeshes = [];
 
+const CLEAR_COLOR = new THREE.Color(0x1e1e1e);
+
 const BrightenTextureShader = {
     uniforms: {
         'tDiffuse': { value: null },
@@ -585,7 +587,8 @@ const GreyScaleShader = {
 const ThresholdShader = {
     uniforms: {
         'tDiffuse': { value: null },
-        'threshold': { value: 0.5 }
+        'threshold': { value: 0.5 },
+        'clearColor': { value: CLEAR_COLOR }
     },
     vertexShader: /* glsl */`
         varying vec2 vUv;
@@ -597,11 +600,13 @@ const ThresholdShader = {
     fragmentShader: /* glsl */`
         uniform sampler2D tDiffuse;
         uniform float threshold;
+        uniform vec3 clearColor;
         varying vec2 vUv;
         void main() {
             vec4 texel = texture2D(tDiffuse, vUv);
             float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
-            gl_FragColor = vec4(step(threshold, luma));
+            float binary = step(threshold, luma);
+            gl_FragColor = vec4(vec3(binary), texel.a);
         }
     `
 };
@@ -609,7 +614,8 @@ const ThresholdShader = {
 const DarkShader = {
     uniforms: {
         'tDiffuse': { value: null },
-        'threshold': { value: 0.5 }
+        'threshold': { value: 0.5 },
+        'clearColor': { value: CLEAR_COLOR }
     },
     vertexShader: /* glsl */`
         varying vec2 vUv;
@@ -621,11 +627,13 @@ const DarkShader = {
     fragmentShader: /* glsl */`
         uniform sampler2D tDiffuse;
         uniform float threshold;
+        uniform vec3 clearColor;
         varying vec2 vUv;
         void main() {
             vec4 texel = texture2D(tDiffuse, vUv);
             float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
-            gl_FragColor = vec4(step(threshold, luma) * 0.04);
+            vec3 outputColor = mix(clearColor, vec3(0.04), step(threshold, luma));
+            gl_FragColor = vec4(outputColor, texel.a);
         }
     `
 };
@@ -919,6 +927,16 @@ function updateFaceMaterialBrightness() {
     });
 }
 
+function applyTextureSettings(texture, renderer) {
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = false;
+    if (renderer) {
+        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    }
+}
+
 function createTextTexture(text, fontSize = 60, color = 'white', backgroundColor = 'rgba(0,0,0,0.5)', font = 'monospace') {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
@@ -934,6 +952,7 @@ function createTextTexture(text, fontSize = 60, color = 'white', backgroundColor
     context.fillStyle = color;
     context.fillText(text, 10, fontSize + 10);
     const texture = new THREE.CanvasTexture(canvas);
+    applyTextureSettings(texture, renderer);
     texture.needsUpdate = true;
     return texture;
 }
@@ -949,12 +968,9 @@ function createMarqueeTexture() {
     canvas.width = maxWidth + 50;
     canvas.height = MARQUEE_LINE_HEIGHT * (MARQUEE_TOTAL_LINES * 2);
     marqueeTexture = new THREE.CanvasTexture(canvas);
+    applyTextureSettings(marqueeTexture, renderer);
     marqueeTexture.wrapS = THREE.RepeatWrapping;
     marqueeTexture.wrapT = THREE.RepeatWrapping;
-    marqueeTexture.colorSpace = THREE.SRGBColorSpace;
-    marqueeTexture.minFilter = THREE.LinearFilter;
-    marqueeTexture.magFilter = THREE.LinearFilter;
-    marqueeTexture.generateMipmaps = false;
     marqueeTexture.needsUpdate = true;
     return marqueeTexture;
 }
@@ -994,12 +1010,9 @@ function createBiometricMarqueeTexture() {
     canvas.width = Math.max(canvas.width, maxWidth + 50);
     canvas.height = BIOMETRIC_MARQUEE_LINE_HEIGHT * (BIOMETRIC_MARQUEE_TOTAL_LINES * 2);
     biometricMarqueeTexture = new THREE.CanvasTexture(canvas);
+    applyTextureSettings(biometricMarqueeTexture, renderer);
     biometricMarqueeTexture.wrapS = THREE.RepeatWrapping;
     biometricMarqueeTexture.wrapT = THREE.RepeatWrapping;
-    biometricMarqueeTexture.colorSpace = THREE.SRGBColorSpace;
-    biometricMarqueeTexture.minFilter = THREE.LinearFilter;
-    biometricMarqueeTexture.magFilter = THREE.LinearFilter;
-    biometricMarqueeTexture.generateMipmaps = false;
     biometricMarqueeTexture.needsUpdate = true;
     return biometricMarqueeTexture;
 }
@@ -1140,12 +1153,9 @@ function createBloodTextTexture() {
     canvas.width = maxWidth + 100;
     canvas.height = BLOOD_TEXT_LINE_HEIGHT * (BLOOD_TEXT_TOTAL_LINES * 2);
     bloodTexture = new THREE.CanvasTexture(canvas);
+    applyTextureSettings(bloodTexture, renderer);
     bloodTexture.wrapS = THREE.RepeatWrapping;
     bloodTexture.wrapT = THREE.RepeatWrapping;
-    bloodTexture.colorSpace = THREE.SRGBColorSpace;
-    bloodTexture.minFilter = THREE.LinearFilter;
-    bloodTexture.magFilter = THREE.LinearFilter;
-    bloodTexture.generateMipmaps = false;
     bloodTexture.needsUpdate = true;
     return bloodTexture;
 }
@@ -1185,12 +1195,9 @@ function createRedactedGlitchTexture() {
     canvas.width = maxWidth + 50;
     canvas.height = REDACTED_GLITCH_LINE_HEIGHT * (REDACTED_GLITCH_TOTAL_LINES * 2);
     redactedGlitchTexture = new THREE.CanvasTexture(canvas);
+    applyTextureSettings(redactedGlitchTexture, renderer);
     redactedGlitchTexture.wrapS = THREE.RepeatWrapping;
     redactedGlitchTexture.wrapT = THREE.RepeatWrapping;
-    redactedGlitchTexture.colorSpace = THREE.SRGBColorSpace;
-    redactedGlitchTexture.minFilter = THREE.LinearFilter;
-    redactedGlitchTexture.magFilter = THREE.LinearFilter;
-    redactedGlitchTexture.generateMipmaps = false;
     redactedGlitchTexture.needsUpdate = true;
     return redactedGlitchTexture;
 }
@@ -1289,7 +1296,6 @@ function resetPiecesToOriginalPositions() {
 
     turnOffAllEffects();
 
-    const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
     const baseScale = 0.005;
 
     initialAssetConfigs.forEach(config => {
@@ -1306,11 +1312,7 @@ function resetPiecesToOriginalPositions() {
                 if (config.removed) return;
 
                 textureLoader.load(config.url, (texture) => {
-                    texture.colorSpace = THREE.SRGBColorSpace;
-                    texture.minFilter = THREE.LinearFilter;
-                    texture.magFilter = THREE.LinearFilter;
-                    texture.generateMipmaps = false;
-                    texture.anisotropy = maxAnisotropy;
+                    applyTextureSettings(texture, renderer);
 
                     let currentMaterial;
                     const isFaceMesh = ['rightEye', 'leftEye', 'mouth', 'nose', 'jensenHuangCheek', 'jensenHuangHair'].includes(config.id);
@@ -1554,9 +1556,9 @@ function init() {
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 10;
     camera.userData.yRotationAngle = 0;
-    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x1e1e1e);
+    renderer.setClearColor(CLEAR_COLOR);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     document.body.appendChild(renderer.domElement);
     renderer.sortObjects = true;
@@ -1574,7 +1576,6 @@ function init() {
     initialGlobalCameraPos.copy(camera.position);
     initialGlobalCameraLookAt.copy(controls.target);
 
-    const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
     greyscalePass = new ShaderPass(GreyScaleShader);
@@ -1582,10 +1583,12 @@ function init() {
     greyscalePass.enabled = effectControls.greyscale;
     thresholdPass = new ShaderPass(ThresholdShader);
     thresholdPass.uniforms['threshold'].value = effectControls.thresholdValue;
+    thresholdPass.uniforms['clearColor'].value = CLEAR_COLOR;
     composer.addPass(thresholdPass);
     thresholdPass.enabled = effectControls.threshold;
     darkPass = new ShaderPass(DarkShader);
     darkPass.uniforms['threshold'].value = effectControls.thresholdValue;
+    darkPass.uniforms['clearColor'].value = CLEAR_COLOR;
     composer.addPass(darkPass);
     darkPass.enabled = effectControls.shadow;
     pixelationPass = new ShaderPass(PixelationShader);
@@ -1628,11 +1631,7 @@ function init() {
     const createFaceMesh = (id, url, initialPosition, initialLayer, scaleFactor) => {
         const isFaceMesh = ['rightEye', 'leftEye', 'mouth', 'nose', 'jensenHuangCheek', 'jensenHuangHair'].includes(id);
         textureLoader.load(url, (texture) => {
-            texture.colorSpace = THREE.SRGBColorSpace;
-            texture.minFilter = THREE.LinearFilter;
-            texture.magFilter = THREE.LinearFilter;
-            texture.generateMipmaps = false;
-            texture.anisotropy = maxAnisotropy;
+            applyTextureSettings(texture, renderer);
             const planeWidth = texture.image.width * baseScale * scaleFactor;
             const planeHeight = texture.image.height * baseScale * scaleFactor;
             const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
@@ -1689,11 +1688,7 @@ function init() {
     const foreheadBasePosition = new THREE.Vector3(0.2, 2.75, foreheadInitialZ);
     foreheadImageUrls.forEach((url, index) => {
         textureLoader.load(url, (texture) => {
-            texture.colorSpace = THREE.SRGBColorSpace;
-            texture.minFilter = THREE.LinearFilter;
-            texture.magFilter = THREE.LinearFilter;
-            texture.generateMipmaps = false;
-            texture.anisotropy = maxAnisotropy;
+            applyTextureSettings(texture, renderer);
             const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
             const scaleFactor = baseScale * 2 * 0.56;
             const planeWidth = texture.image.width * scaleFactor;
@@ -1725,11 +1720,7 @@ function init() {
             const cardY = gridStartY + row * gridSpacingY;
             const cardPosition = new THREE.Vector3(cardX, cardY, cardZ);
             textureLoader.load(cardImageUrls[0], (texture) => {
-                texture.colorSpace = THREE.SRGBColorSpace;
-                texture.minFilter = THREE.LinearFilter;
-                texture.magFilter = THREE.LinearFilter;
-                texture.generateMipmaps = false;
-                texture.anisotropy = maxAnisotropy;
+                applyTextureSettings(texture, renderer);
                 const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
                 const scaleFactor = baseScale * 2 * 0.56;
                 const planeWidth = texture.image.width * scaleFactor;
@@ -1767,11 +1758,7 @@ function init() {
     const signatureInitialLayer = 5;
     const signatureInitialPosition = new THREE.Vector3(-5, -4.7, (5 - 1) * depthStep);
     textureLoader.load(URL_SIGNATURE, (signatureTexture) => {
-        signatureTexture.colorSpace = THREE.SRGBColorSpace;
-        signatureTexture.minFilter = THREE.LinearFilter;
-        signatureTexture.magFilter = THREE.LinearFilter;
-        signatureTexture.generateMipmaps = false;
-        signatureTexture.anisotropy = maxAnisotropy;
+        applyTextureSettings(signatureTexture, renderer);
         const signatureMaterial = new THREE.MeshBasicMaterial({ map: signatureTexture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const signatureAspectRatio = signatureTexture.image.width / signatureTexture.image.height;
         const signatureHeight = 1.0;
@@ -2096,8 +2083,8 @@ function updateCameraAnimation(currentTime) {
 
 const cardTextures = [];
 function preloadCardTextures(callback) {
-    const loader = new THREE.TextureLoader(); let loadedCount = 0; const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
-    cardImageUrls.forEach((url, index) => { loader.load(url, (texture) => { texture.colorSpace = THREE.SRGBColorSpace; texture.minFilter = THREE.LinearFilter; texture.magFilter = THREE.LinearFilter; texture.generateMipmaps = false; texture.anisotropy = maxAnisotropy; cardTextures[index] = texture; loadedCount++; if (loadedCount === cardImageUrls.length && callback) callback(); }); });
+    const loader = new THREE.TextureLoader(); let loadedCount = 0;
+    cardImageUrls.forEach((url, index) => { loader.load(url, (texture) => { applyTextureSettings(texture, renderer); cardTextures[index] = texture; loadedCount++; if (loadedCount === cardImageUrls.length && callback) callback(); }); });
 }
 
 function animate(currentTime) {
