@@ -47,13 +47,17 @@ export default function HomePage() {
             </p>
           </div>
 
-          <h1 className="animate-fade-in delay-200 font-display text-6xl md:text-8xl lg:text-9xl text-white leading-[0.9] mb-6 uppercase tracking-[0.05em]">
+          <h1 className="animate-fade-in delay-200 font-display text-6xl md:text-8xl lg:text-9xl text-white leading-[0.9] mb-2 uppercase tracking-[0.05em]">
             Tech
             <br />
             <span className="text-gradient font-display italic tracking-[0.02em]">
               Epochalypse
             </span>
           </h1>
+
+          <p className="animate-fade-in delay-200 font-display text-3xl md:text-4xl lg:text-[2.8rem] text-white/60 uppercase tracking-[0.05em] mb-6">
+            Know Your Overlord
+          </p>
 
           {/* Redacted document line */}
           <div className="animate-fade-in delay-300 flex items-center justify-center gap-3 mb-8">
@@ -74,7 +78,7 @@ export default function HomePage() {
 
           <div className="animate-fade-in delay-700">
             <Link href="/overlords" className="btn-primary">
-              <span>Know Your Overlord</span>
+              <span>Touch the Art</span>
               <svg
                 width="16"
                 height="16"
