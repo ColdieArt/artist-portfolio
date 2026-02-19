@@ -1,46 +1,18 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import ScrollReveal from '@/components/ScrollReveal'
-import PulseOverview from '@/components/pulse/PulseOverview'
-import PulseChart from '@/components/pulse/PulseChart'
-import PulseNarrative from '@/components/pulse/PulseNarrative'
 import UserExports from '@/components/UserExports'
-import {
-  fetchPulseData,
-  getSamplePulseData,
-  type PulseData,
-} from '@/lib/pulse-client'
 import overlords from '@/data/overlords.json'
 import collectors from '@/data/collectors.json'
 
 const overlordMap = Object.fromEntries(overlords.map((o) => [o.slug, o]))
 
 export default function MainframePage() {
-  const [pulseData, setPulseData] = useState<PulseData | null>(null)
-  const [pulseLoading, setPulseLoading] = useState(true)
-
   const overlordNames = Object.fromEntries(
     overlords.map((o) => [o.slug, o.name])
   )
   const overlordSlugs = overlords.map((o) => o.slug)
-
-  const loadPulse = useCallback(async () => {
-    setPulseLoading(true)
-    try {
-      const data = await fetchPulseData()
-      const hasData = data.overlords.some((o) => o.pulse_count > 0)
-      setPulseData(hasData ? data : getSamplePulseData())
-    } catch {
-      setPulseData(getSamplePulseData())
-    }
-    setPulseLoading(false)
-  }, [])
-
-  useEffect(() => {
-    loadPulse()
-  }, [loadPulse])
 
   return (
     <div className="min-h-screen bg-void">
@@ -57,9 +29,9 @@ export default function MainframePage() {
                 The Mainframe
               </h1>
               <p className="font-mono text-sm text-white mt-4 max-w-2xl mx-auto leading-relaxed">
-                The nerve center of Tech Epochalypse. Live intelligence,
-                community iterations, collectors, and artist dossier &mdash; all
-                in one feed.
+                The nerve center of Tech Epochalypse. Community iterations,
+                active exploits, collectors, and artist dossier &mdash; all in
+                one feed.
               </p>
             </div>
           </ScrollReveal>
@@ -68,63 +40,142 @@ export default function MainframePage() {
 
       <div className="line-accent" />
 
-      {/* ── Section 1: The Pulse ── */}
+      {/* ── Section 1: Exploits ── */}
       <section className="py-12 md:py-16 section-padding">
         <div className="page-container">
           <ScrollReveal>
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <div className="classified-header">
-                  Intelligence Feed &mdash;{' '}
-                  <span className="redacted">Live</span>
-                </div>
-                <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
-                  The Pulse
-                </h2>
+            <div className="mb-8">
+              <div className="classified-header">
+                Active Operations &mdash;{' '}
+                <span className="redacted">Directives</span>
               </div>
-              <Link href="/the-pulse" className="btn-secondary">
-                <span>Full Dashboard</span>
-              </Link>
+              <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
+                Exploits
+              </h2>
             </div>
           </ScrollReveal>
 
-          {pulseLoading && (
-            <div className="text-center py-12">
-              <div className="inline-flex items-center gap-3">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white/30" />
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-white/20" />
-                </span>
-                <p className="font-mono text-sm text-white animate-pulse">
-                  Intercepting transmissions...
+          <ScrollReveal>
+            <div className="bg-white p-8 md:p-12">
+              {/* Exploit header block */}
+              <div className="font-mono text-xs text-black uppercase tracking-[0.2em] mb-8">
+                <h3 className="font-display text-2xl md:text-3xl text-black uppercase tracking-[0.03em] mb-6">
+                  EXPLOIT #001 &mdash; &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;
+                </h3>
+                <div className="space-y-1 mb-8 border-b border-black/10 pb-6">
+                  <p>STATUS: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ACTIVE</p>
+                  <p>CLASSIFICATION: &nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; BOUNTY</p>
+                  <p>THREAT LEVEL: &nbsp;&nbsp;&nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
+                  <p>TARGET: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ALL OVERLORD &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
+                  <p>OPERATIVE CLEARANCE: &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
+                </div>
+              </div>
+
+              {/* Exploit body */}
+              <div className="font-mono text-sm text-black leading-relaxed space-y-6">
+                <p className="text-black/40 text-xs uppercase tracking-widest">
+                  // INTERCEPTED &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; &mdash; ORIGIN &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;
                 </p>
+
+                <p>
+                  The &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; has been &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. The Overlords&rsquo; &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; files are exposed. For the &#9608;&#9608;&#9608;&#9608; time, their &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; are vulnerable to outside &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
+                </p>
+
+                <p>
+                  We are issuing an open &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; to all operatives &mdash; artists, &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;, creators, &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Your mission: &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; any Overlord node and &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; your own &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; into the system.
+                </p>
+
+                {/* Decrypted section */}
+                <div className="border-t border-b border-black/10 py-6 my-6">
+                  <p className="text-black/40 text-xs uppercase tracking-widest mb-4">
+                    [CONTROL LAYER PARTIALLY DECRYPTED &mdash; READABLE TEXT FOLLOWS]
+                  </p>
+
+                  <p>
+                    This is not a copy job. We don&rsquo;t need &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. We need your code inside their code. Your visual language fused with their architecture. Take an Overlord&rsquo;s portrait and make it unrecognizable as theirs alone. &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; it with your style. Merge your aesthetic &#9608;&#9608;&#9608; into the system until the two are inseparable.
+                  </p>
+
+                  <p className="mt-4">
+                    Glitch artists. Painters. 3D sculptors. Illustrators. &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Collagists. Pixel pushers. Whatever your method &mdash; that method is your &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
+                  </p>
+                </div>
+
+                {/* The brief */}
+                <p>
+                  <span className="font-bold">THE &#9608;&#9608;&#9608;&#9608;:</span> Choose any Overlord &mdash; Musk, Zuckerberg, Altman, Bezos, Huang. Access their node on the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Interact with the piece. Then take what you &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; and remix it through your own creative practice. The final &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; should be a collision between the Overlord&rsquo;s system and &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
+                </p>
+
+                {/* Examples */}
+                <div className="mt-6">
+                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">
+                    EXAMPLES OF &#9608;&#9608;&#9608;&#9608;&#9608; BREACHES:
+                  </p>
+                  <ul className="space-y-2 ml-1">
+                    <li className="flex gap-2">
+                      <span className="shrink-0">*</span>
+                      <span>Take a still export and &#9608;&#9608;&#9608;&#9608; over it &mdash; digital, physical, or both</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0">*</span>
+                      <span>&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;, distort, or corrupt the output through your own tools and &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0">*</span>
+                      <span>Collage elements of the Overlord into &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; compositions</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0">*</span>
+                      <span>Use the export as a &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; layer and build an entirely new piece on top</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0">*</span>
+                      <span>&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;, reanimate, or restructure the motion output into something &#9608;&#9608;&#9608;</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0">*</span>
+                      <span>Print it, &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; it, photograph the remains, submit the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <p className="italic">There are no wrong methods. Only &#9608;&#9608;&#9608;&#9608; signals.</p>
+
+                {/* Payload specs */}
+                <div className="border-t border-black/10 pt-6 mt-6">
+                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">
+                    PAYLOAD &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;:
+                  </p>
+                  <ul className="space-y-2 ml-1">
+                    <li className="flex gap-2">
+                      <span className="shrink-0">*</span>
+                      <span>Final artifact: JPEG or GIF (2MB Max)</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0">*</span>
+                      <span>Must contain &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; source material from at least one Overlord &#9608;&#9608;&#9608;&#9608;</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0">*</span>
+                      <span>Must contain your own &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; creative intervention &mdash; this is a &#9608;&#9608;&#9608;&#9608;&#9608;, not a repost</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* CTA */}
+                <div className="mt-10 text-center">
+                  <Link
+                    href="/overlords"
+                    className="inline-flex items-center gap-3 px-8 py-4 bg-black text-white font-mono text-sm uppercase tracking-[0.2em] hover:bg-black/80 transition-colors"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Access Overlord Nodes
+                  </Link>
+                </div>
               </div>
             </div>
-          )}
-
-          {!pulseLoading && pulseData && pulseData.overlords.length > 0 && (
-            <div className="space-y-8">
-              <ScrollReveal>
-                <PulseOverview
-                  overlords={pulseData.overlords}
-                  hottest={pulseData.hottest}
-                />
-              </ScrollReveal>
-              <ScrollReveal>
-                <div className="border border-white/5 bg-white/[0.01] p-4 md:p-6">
-                  <PulseChart overlords={pulseData.overlords} />
-                </div>
-              </ScrollReveal>
-              <ScrollReveal>
-                <PulseNarrative
-                  overlords={pulseData.overlords}
-                  hottest={pulseData.hottest}
-                  most_negative={pulseData.most_negative}
-                  quietest={pulseData.quietest}
-                />
-              </ScrollReveal>
-            </div>
-          )}
+          </ScrollReveal>
         </div>
       </section>
 
