@@ -2,6 +2,8 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Gallery API — update this URL after deploying the Cloudflare Worker -->
+  <script>window.GALLERY_API_URL = 'https://te-gallery-api.YOUR_SUBDOMAIN.workers.dev';</script>
   <script type="importmap">
     {
       "imports": {
@@ -34,6 +36,164 @@
     canvas {
       cursor: grab;
     }
+
+    /* ─── EXPORT PANEL ─── */
+    #export-panel {
+      position: fixed;
+      left: 10px;
+      z-index: 201;
+      background: rgba(0,0,0,0.88);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px;
+      padding: 12px 14px;
+      font-family: monospace;
+      color: #ccc;
+      font-size: 10px;
+      width: 200px;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    }
+    #export-panel.open { display: flex; }
+
+    #export-panel .panel-title {
+      color: #fff;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      padding-bottom: 6px;
+      margin-bottom: 2px;
+    }
+
+    #export-panel .export-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #export-panel .export-row label {
+      flex: 1;
+      color: #aaa;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+    }
+    #export-panel .export-row select,
+    #export-panel .export-row input[type="number"] {
+      background: #111;
+      color: #ddd;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 2px;
+      padding: 3px 5px;
+      font-family: monospace;
+      font-size: 10px;
+      width: 58px;
+      outline: none;
+    }
+    #export-panel .export-row select:focus,
+    #export-panel .export-row input[type="number"]:focus {
+      border-color: rgba(255,255,255,0.5);
+    }
+
+    #export-panel .export-btn {
+      background: #000;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 2px;
+      padding: 5px 0;
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    #export-panel .export-btn:hover { border-color: #fff; background: #1a1a1a; }
+    #export-panel .export-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    #export-panel .export-btn.recording {
+      border-color: #e33;
+      animation: rec-pulse 1s infinite;
+    }
+    @keyframes rec-pulse {
+      0%,100% { border-color: #e33; }
+      50%      { border-color: #f88; }
+    }
+
+    #export-panel .status-line {
+      color: #666;
+      font-size: 9px;
+      text-align: center;
+      min-height: 11px;
+      letter-spacing: 0.5px;
+    }
+    #export-panel .status-line.active { color: #4c4; }
+    #export-panel .status-line.error   { color: #e66; }
+
+    /* ─── SUBMIT TO THE OVERLORD BUTTON ─── */
+    #submit-overlord-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 200;
+      background: #000;
+      color: #fff;
+      border: 2px solid #fff;
+      padding: 14px 24px;
+      font-family: monospace;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    #submit-overlord-btn:hover {
+      background: #1a1a1a;
+      border-color: #ccc;
+    }
+
+    /* ─── POST TO X MODAL ─── */
+    #post-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 300;
+    }
+    #post-modal.open { display: flex; }
+    #post-modal-content {
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      padding: 30px 36px;
+      text-align: center;
+      font-family: monospace;
+      color: #fff;
+      max-width: 340px;
+    }
+    #post-modal-content h2 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
+      letter-spacing: 1.5px;
+    }
+    #post-modal-btn {
+      background: #000;
+      color: #fff;
+      border: 2px solid #1da1f2;
+      padding: 12px 30px;
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: background 0.2s;
+      width: 100%;
+    }
+    #post-modal-btn:hover { background: #0d1117; }
   </style>
   <title>JENSEN-HUANG-AWS-FINAL-WORKING | Made on juno.transient.xyz</title>
 </head>
@@ -786,9 +946,10 @@ const effectControls = {
 
 let greyscalePass, thresholdPass, darkPass, pixelationPass, glitchPass, matrixPass, asciiPass, xrayPass, heatmapPass, bloodPass, cctvFeedPass;
 
-let trashButtonElement = null; // Global reference for the trash button UI element
-let leftUiContainer = null; // Global reference for the left UI container
-let arrowContainer = null; // Global reference for the arrow container
+let trashButtonElement = null;
+let exportButtonElement = null;
+let leftUiContainer = null;
+let arrowContainer = null;
 
 // Array to store initial configurations of assets for reloading
 const initialAssetConfigs = [];
@@ -2918,25 +3079,22 @@ function init() {
     trashButtonElement = createTrashButton(); 
     leftUiContainer.appendChild(trashButtonElement);
 
-    arrowContainer = document.createElement('div'); 
-    arrowContainer.id = 'arrow-container'; 
-    arrowContainer.style.cssText = `
-        position: absolute; 
-        top: 0px; 
-        left: 20px;
-        background-color: black;
-        width: 60px; 
-        height: 15px; 
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        z-index: 101; 
-        border-bottom-left-radius: 5px; 
-        border-bottom-right-radius: 5px;
-        transition: top 0.5s ease-in-out; 
-        box-sizing: border-box; 
-    `;
+    // Create and append the EXPORT button below TRASH
+    const createExportButton = () => {
+        const button = document.createElement('button');
+        button.id = 'export-toggle';
+        button.innerHTML = 'RCS';
+        button.style.cssText = `
+            display: none !important;
+        `;
+        return button;
+    };
+    exportButtonElement = createExportButton();
+    exportButtonElement.style.display = 'none';
+    leftUiContainer.appendChild(exportButtonElement);
+
+    arrowContainer = document.createElement('div');
+    arrowContainer.style.cssText = 'position: absolute; top: 0px; left: 20px; background-color: black; width: 60px; height: 15px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 101; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; transition: top 0.5s ease-in-out;';
     const arrowSpan = document.createElement('span');
     arrowSpan.style.cssText = `
         color: white;
@@ -2944,21 +3102,11 @@ function init() {
     `;
     arrowSpan.innerHTML = '&#x25BC;'; 
     arrowContainer.appendChild(arrowSpan);
-    document.body.appendChild(arrowContainer); 
-
-    arrowContainer.onclick = (event) => {
-        event.stopPropagation(); 
-        if (leftUiContainer.style.top === '10px') {
-            leftUiContainer.style.top = '-190px'; 
-            trashButtonElement.style.display = 'none'; 
-            arrowContainer.style.top = '0px'; 
-            arrowSpan.innerHTML = '&#x25BC;'; 
-        } else {
-            leftUiContainer.style.top = '10px'; 
-            trashButtonElement.style.display = 'block'; 
-            arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; 
-            arrowSpan.innerHTML = '&#x25B2'; 
-        }
+    document.body.appendChild(arrowContainer);
+    arrowContainer.onclick = (e) => {
+        e.stopPropagation();
+        if (leftUiContainer.style.top === '10px') { leftUiContainer.style.top = '-190px'; trashButtonElement.style.display = 'none'; exportButtonElement.style.display = 'none'; arrowContainer.style.top = '0px'; arrowSpan.innerHTML = '&#x25BC;'; }
+        else { leftUiContainer.style.top = '10px'; trashButtonElement.style.display = 'block'; arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; arrowSpan.innerHTML = '&#x25B2'; }
     };
 
     trashButtonElement.style.display = 'none';
@@ -3494,11 +3642,398 @@ setTimeout(function () {
     
     // Expose for dae hooks
     setTimeout(function() {
-      window.animate = typeof animate == "function" ? animate : () => {}; 
-      window.camera = typeof camera != "undefined" ? camera : undefined; 
-      window.renderer = typeof renderer != "undefined" ? renderer : undefined; 
-      window.scene = typeof scene != "undefined" ? scene : undefined; 
+      window.animate = typeof animate == "function" ? animate : () => {};
+      window.camera = typeof camera != "undefined" ? camera : undefined;
+      window.renderer = typeof renderer != "undefined" ? renderer : undefined;
+      window.scene = typeof scene != "undefined" ? scene : undefined;
+      window.composer = typeof composer != "undefined" ? composer : undefined;
     }, 1000)
+  </script>
+
+  <!-- ─── EXPORT PANEL HTML ─── -->
+  <button id="submit-overlord-btn">SUBMIT YOURSELF</button>
+
+  <div id="export-panel">
+    <div class="panel-title">EXPORT</div>
+
+    <div class="export-row" style="display:none;">
+      <label>Format</label>
+      <select id="export-format">
+        <option value="png">PNG</option>
+      </select>
+    </div>
+
+    <!-- Video duration row (hidden — PNG only) -->
+    <div class="export-row" id="duration-row" style="display:none;">
+      <label>Duration (sec)</label>
+      <input type="number" id="export-duration" value="5" min="1" max="60" step="1">
+    </div>
+
+    <button class="export-btn" id="export-start-btn">EXPORT</button>
+    <div class="status-line" id="export-status"></div>
+  </div>
+
+  <!-- ─── POST TO X MODAL ─── -->
+  <div id="post-modal">
+    <div id="post-modal-content">
+      <h2>Share your overlord</h2>
+      <p style="margin: 0 0 20px 0; font-size: 12px; color: #aaa;">Attach your downloaded file before posting</p>
+      <button id="post-modal-btn">POST TO X</button>
+
+      <div style="margin: 20px 0; color: #666; font-size: 11px; text-align: center;">
+        ── OR ──
+      </div>
+
+      <button id="judgment-btn" style="
+        background: #000;
+        color: #fff;
+        border: 2px solid #fff;
+        padding: 12px 30px;
+        font-family: monospace;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        letter-spacing: 1px;
+        transition: background 0.2s;
+        width: 100%;
+      ">SUBMIT TO JUDGMENT PROTOCOL</button>
+
+      <p style="margin: 15px 0 0 0; font-size: 10px; color: #888; line-height: 1.4;">
+        Submit your capture for collector review.<br>
+        Top submissions will be minted as official subseries.
+      </p>
+    </div>
+  </div>
+
+  <!-- ─── EXPORT ENGINE ─── -->
+  <script>
+  (function(){
+    function setupExport() {
+    // ── Detect if embedded in iframe ──
+    const isEmbedded = (window.self !== window.top);
+
+    // ── DOM refs ──
+    const toggle    = document.getElementById('export-toggle');
+    if (!toggle) { setTimeout(setupExport, 50); return; } // wait for init() to create it
+
+    // If embedded, hide RCS button and SUBMIT TO THE OVERLORD button, then exit
+    if (isEmbedded) {
+      toggle.style.display = 'none';
+      const modal = document.getElementById('post-modal');
+      if (modal) modal.style.display = 'none';
+      const submitOverlordBtn = document.getElementById('submit-overlord-btn');
+      if (submitOverlordBtn) submitOverlordBtn.style.display = 'none';
+      return;
+    }
+
+    const panel     = document.getElementById('export-panel');
+    const fmtSel    = document.getElementById('export-format');
+    const durInput  = document.getElementById('export-duration');
+    const startBtn  = document.getElementById('export-start-btn');
+    const status    = document.getElementById('export-status');
+    const durRow    = document.getElementById('duration-row');
+    const modal     = document.getElementById('post-modal');
+    const modalBtn  = document.getElementById('post-modal-btn');
+
+    // ── Show POST TO X modal ──
+    function showPostModal() {
+      modal.classList.add('open');
+      // Close export panel
+      panel.classList.remove('open');
+    }
+
+    // Wire modal button to open Twitter compose page with pre-filled text
+    modalBtn.onclick = () => {
+      const text = encodeURIComponent('Know your overlord.\nTech Epochalypse by @Coldie');
+      window.open(`https://x.com/intent/post?text=${text}`, '_blank');
+      // Close modal
+      modal.classList.remove('open');
+    };
+
+    // Wire judgment protocol button to open Airtable form
+    const judgmentBtn = document.getElementById('judgment-btn');
+    judgmentBtn.onclick = () => {
+      window.open('https://airtable.com/app28BSDaZwDpDw4m/pagUJlx4mF1vkSgO4/form', '_blank');
+      // Close modal
+      modal.classList.remove('open');
+    };
+
+    // Close modal on background click
+    modal.onclick = (e) => {
+      if (e.target === modal) modal.classList.remove('open');
+    };
+
+    // ── Toggle panel ──
+    toggle.onclick = (e) => {
+      e.stopPropagation();
+      if (panel.classList.contains('open')) {
+        panel.classList.remove('open');
+      } else {
+        // Position panel directly below the EXPORT button
+        const rect = toggle.getBoundingClientRect();
+        panel.style.top = (rect.bottom + 4) + 'px';
+        panel.style.left = rect.left + 'px';
+        panel.classList.add('open');
+      }
+    };
+    document.addEventListener('click', (e) => {
+      if (!panel.contains(e.target) && e.target !== toggle) panel.classList.remove('open');
+    });
+
+    // ── SUBMIT YOURSELF button — capture PNG then show post modal ──
+    const submitOverlordBtn = document.getElementById('submit-overlord-btn');
+    submitOverlordBtn.onclick = (e) => {
+      e.stopPropagation();
+      exportPNG();
+    };
+
+    // ── Format is PNG-only, duration row stays hidden ──
+    fmtSel.onchange = () => {
+      durRow.style.display = 'none';
+    };
+
+    // ── Helpers ──
+    function setStatus(msg, cls) {
+      status.textContent = msg;
+      status.className = 'status-line' + (cls ? ' ' + cls : '');
+    }
+    function lockUI(on) {
+      startBtn.disabled = on;
+      fmtSel.disabled   = on;
+      durInput.disabled  = on;
+    }
+    function triggerDownload(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href    = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    // Wait for window.renderer to be available (exposed after 1 s by the app)
+    function getRenderer() {
+      return new Promise((resolve) => {
+        const check = () => {
+          if (window.renderer && window.renderer.domElement) resolve(window.renderer);
+          else setTimeout(check, 100);
+        };
+        check();
+      });
+    }
+
+    // ── Gallery API endpoint (update after deploying your Cloudflare Worker) ──
+    const GALLERY_API = window.GALLERY_API_URL || '';
+
+    // ── Save to community gallery via Cloudflare R2 ──
+    function saveToGallery(canvas) {
+      if (!GALLERY_API) {
+        console.warn('Gallery API not configured — set window.GALLERY_API_URL');
+        return;
+      }
+      try {
+        const thumbCanvas = document.createElement('canvas');
+        const MAX = 1200;
+        const scale = Math.min(MAX / canvas.width, MAX / canvas.height, 1);
+        thumbCanvas.width = Math.round(canvas.width * scale);
+        thumbCanvas.height = Math.round(canvas.height * scale);
+        const ctx = thumbCanvas.getContext('2d');
+        ctx.drawImage(canvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
+
+        thumbCanvas.toBlob(async (blob) => {
+          if (!blob) return;
+          const form = new FormData();
+          form.append('image', blob, 'export.jpg');
+          form.append('overlord', 'jensen-huang');
+          try {
+            const res = await fetch(GALLERY_API + '/upload', { method: 'POST', body: form });
+            if (!res.ok) console.warn('Gallery upload response:', res.status);
+          } catch (e) {
+            console.warn('Gallery upload failed:', e);
+          }
+        }, 'image/jpeg', 0.85);
+      } catch (e) {
+        console.warn('Gallery save failed:', e);
+      }
+    }
+
+    // ── PNG export ──
+    async function exportPNG() {
+      setStatus('Capturing…', 'active');
+      lockUI(true);
+      const r = await getRenderer();
+      // Force a fresh render so the buffer has the current frame
+      if (window.composer) {
+        window.composer.render();
+      } else if (window.scene && window.camera) {
+        r.render(window.scene, window.camera);
+      }
+      r.domElement.toBlob((blob) => {
+        if (blob) {
+          triggerDownload(blob, 'jensen-huang-coldie.png');
+          saveToGallery(r.domElement);
+          setStatus('PNG saved ✓ — added to gallery', 'active');
+          showPostModal();
+        } else {
+          setStatus('Capture failed', 'error');
+        }
+        lockUI(false);
+      }, 'image/png');
+    }
+    // ── Video (MP4) export ──────────────────────────────────────────
+    async function exportVideo() {
+      const duration = parseInt(durInput.value) * 1000; // ms
+
+      const r = await getRenderer();
+      const canvas = r.domElement;
+      const stream = canvas.captureStream(30);
+
+      const candidates = [
+        'video/mp4;codecs=avc1.42E01E',
+        'video/mp4;codecs=avc1.640028',
+        'video/mp4',
+        'video/webm;codecs=vp9',
+        'video/webm;codecs=vp8',
+        'video/webm'
+      ];
+      let usedMime = '';
+      for (const m of candidates) {
+        if (MediaRecorder.isTypeSupported(m)) { usedMime = m; break; }
+      }
+      if (!usedMime) { setStatus('No supported codec found', 'error'); return; }
+
+      const nativeMp4 = usedMime.startsWith('video/mp4');
+
+      const chunks = [];
+      const mr = new MediaRecorder(stream, { mimeType: usedMime, videoBitsPerSecond: 2500000 });
+
+      lockUI(true);
+      startBtn.classList.add('recording');
+      setStatus(`Recording… ${duration/1000}s`, 'active');
+
+      mr.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+      mr.onstop = async () => {
+        startBtn.classList.remove('recording');
+        const raw = new Blob(chunks, { type: usedMime });
+
+        if (nativeMp4) {
+          triggerDownload(raw, 'jensen-huang-coldie.mp4');
+          setStatus('MP4 saved ✓', 'active');
+          lockUI(false);
+          return;
+        }
+
+        setStatus('Muxing WebM → MP4…', 'active');
+        try {
+          const buf = await raw.arrayBuffer();
+          const mp4 = webmToMp4(new Uint8Array(buf), canvas.width, canvas.height);
+          triggerDownload(new Blob([mp4], { type: 'video/mp4' }), 'jensen-huang-coldie.mp4');
+          setStatus('MP4 saved ✓', 'active');
+        } catch (err) {
+          console.error('Mux failed, falling back to .webm', err);
+          triggerDownload(raw, 'jensen-huang-coldie.webm');
+          setStatus('Saved as .webm (mux failed)', 'error');
+        }
+        lockUI(false);
+      };
+
+      mr.start();
+      setTimeout(() => mr.stop(), duration);
+    }
+
+    // ── Minimal WebM→MP4 re-muxer ──
+    function webmToMp4(webmBytes, width, height) {
+      function tag(s) { return [s.charCodeAt(0),s.charCodeAt(1),s.charCodeAt(2),s.charCodeAt(3)]; }
+      function u32(v) { return [(v>>>24)&0xff,(v>>>16)&0xff,(v>>>8)&0xff,v&0xff]; }
+      function u16(v) { return [(v>>>8)&0xff,v&0xff]; }
+      function concat(...arrs) {
+        const t = arrs.reduce((a,b)=>a+b.length,0);
+        const r = new Uint8Array(t); let o=0;
+        for (const a of arrs) { r.set(a,o); o+=a.length; }
+        return r;
+      }
+      function box(type, payload) {
+        const s = 8 + payload.length;
+        return new Uint8Array([...u32(s),...tag(type),...payload]);
+      }
+      function fullBox(type, version, flags, payload) {
+        return box(type, new Uint8Array([version,(flags>>16)&0xff,(flags>>8)&0xff,flags&0xff,...payload]));
+      }
+
+      const payload = webmBytes;
+
+      const ftyp = box('ftyp', new Uint8Array([
+        ...tag('isom'),...u32(0x200),...tag('isom'),...tag('iso2'),...tag('mp41')
+      ]));
+
+      const mvhd = fullBox('mvhd',0,0,new Uint8Array([
+        ...u32(0),...u32(0),...u32(1000),...u32(0),
+        0,1,0,0, 0x01,0x00, 0,0,
+        ...new Uint8Array(8),
+        0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0x40,0,0,0,
+        ...new Uint8Array(24),
+        ...u32(2)
+      ]));
+
+      const tkhd = fullBox('tkhd',0,3,new Uint8Array([
+        ...u32(0),...u32(0),...u32(1),...u32(0),...u32(0),
+        ...new Uint8Array(8),
+        0,0, 0,0,
+        0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0x40,0,0,0,
+        ...u16(width),0,0,...u16(height),0,0
+      ]));
+
+      const mdhd = fullBox('mdhd',0,0,new Uint8Array([
+        ...u32(0),...u32(0),...u32(30000),...u32(0),
+        0x55,0xC4, 0,0
+      ]));
+      const hdlr = fullBox('hdlr',0,0,new Uint8Array([
+        ...u32(0),...tag('vide'),...new Uint8Array(12),0
+      ]));
+      const vmhd = fullBox('vmhd',0,1,new Uint8Array(8));
+      const dinf = box('dinf', fullBox('dref',0,0,new Uint8Array([...u32(1),...Array.from(fullBox('url ',0,1,new Uint8Array(0)))])));
+      const stts = fullBox('stts',0,0,new Uint8Array([...u32(0)]));
+      const stsc = fullBox('stsc',0,0,new Uint8Array([...u32(0)]));
+      const stsz = fullBox('stsz',0,0,new Uint8Array([...u32(0),...u32(0)]));
+      const stco = fullBox('stco',0,0,new Uint8Array([...u32(0)]));
+      const stbl = box('stbl', concat(
+        fullBox('stsd',0,0,new Uint8Array([...u32(1),
+          ...Array.from(box('mp4v', new Uint8Array([
+            ...new Uint8Array(6), ...u16(1),
+            ...new Uint8Array(16),
+            ...u16(width),...u16(height),
+            0,0x48,0,0, 0,0x48,0,0,
+            ...new Uint8Array(4), ...u16(1),
+            ...new Uint8Array(32),
+            0,0x18, 0xff,0xff
+          ])))])),
+        stts, stsc, stsz, stco
+      ));
+
+      const mdia = box('mdia', concat(mdhd, hdlr, box('minf', concat(vmhd, dinf, stbl))));
+      const trak = box('trak', concat(tkhd, mdia));
+
+      const trex = fullBox('trex',0,0,new Uint8Array([...u32(1),...u32(1),...u32(0),...u32(0),...u32(0)]));
+      const mvex = box('mvex', trex);
+
+      const moov = box('moov', concat(mvhd, trak, mvex));
+
+      const mdatSize = 8 + payload.length;
+      const mdat = new Uint8Array([...u32(mdatSize), ...tag('mdat'), ...payload]);
+
+      return concat(ftyp, moov, mdat);
+    }
+
+    // ── Main dispatcher ──
+    startBtn.onclick = () => {
+      const f = fmtSel.value;
+      if      (f === 'png') exportPNG();
+      else if (f === 'mp4') exportVideo();
+    };
+    } // end setupExport
+    setupExport();
+  })();
   </script>
 
 </body></html>
