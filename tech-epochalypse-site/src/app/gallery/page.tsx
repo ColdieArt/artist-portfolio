@@ -54,13 +54,7 @@ export default function GalleryPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a href="/overlords" className="btn-primary">
-                <span>Create an Export</span>
-              </a>
-              <a
-                href="mailto:gallery@techepochalypse.com?subject=Gallery Submission"
-                className="btn-secondary"
-              >
-                <span>Submit Your Work</span>
+                <span>Submit an Overlord</span>
               </a>
             </div>
           </div>
