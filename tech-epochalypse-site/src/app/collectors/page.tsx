@@ -5,9 +5,9 @@ import collectors from '@/data/collectors.json'
 import overlords from '@/data/overlords.json'
 
 export const metadata: Metadata = {
-  title: 'Patrons & Collectors — Tech Epochalypse',
+  title: 'Founding Signals — Tech Epochalypse',
   description:
-    'Honoring the collectors and patrons who own original Tech Epochalypse artworks.',
+    'Every network starts with its first connection. Honoring the founding signals of Tech Epochalypse.',
 }
 
 const overlordMap = Object.fromEntries(
@@ -21,23 +21,16 @@ export default function CollectorsPage() {
         {/* Header */}
         <ScrollReveal>
           <div className="text-center mb-16 md:mb-24">
-            <p className="font-mono text-xs uppercase tracking-[0.4em] text-white mb-4">
-              The Inner Circle
-            </p>
             <h1 className="font-display text-5xl md:text-7xl text-white mb-4 uppercase tracking-[0.05em]">
-              Patrons &amp; Collectors
+              Founding Signals
             </h1>
             <p className="font-mono text-sm text-white max-w-2xl mx-auto">
-              The visionaries who recognized the signal in the noise. Honoring
-              those who collected the original Tech Epochalypse artworks.
+              Every network starts with its first connection. These collectors
+              didn&apos;t just acquire art, they invested in a vision: that digital
+              art should be kinetic, interactive, and alive. They showed up before
+              the signal was strong and helped build it into something worth
+              broadcasting.
             </p>
-            <div className="flex items-center justify-center gap-3 mt-4">
-              <div className="w-12 h-px bg-white/10" />
-              <span className="font-mono text-xs text-white uppercase tracking-wider">
-                Access: <span className="redacted">VERIFIED</span>
-              </span>
-              <div className="w-12 h-px bg-white/10" />
-            </div>
           </div>
         </ScrollReveal>
 
