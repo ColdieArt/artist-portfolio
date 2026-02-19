@@ -4,20 +4,20 @@ import Footer from '@/components/Footer'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Tech Epochalypse — Interactive Digital Art by Coldie',
+  title: 'KnowYourOverlord.art',
   description:
     'Five overlords. One network. Infinite iterations. An interactive digital art series featuring kinetic 3D portraits of technology\'s most influential figures.',
   keywords: ['digital art', 'NFT', 'interactive art', '3D', 'Coldie', 'Tech Epochalypse', 'crypto art'],
   openGraph: {
-    title: 'Tech Epochalypse — Interactive Digital Art by Coldie',
+    title: 'KnowYourOverlord.art',
     description:
       'Five overlords. One network. Infinite iterations. Explore kinetic 3D portraits you can interact with, remix, and export.',
     type: 'website',
-    siteName: 'Tech Epochalypse',
+    siteName: 'KnowYourOverlord.art',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Tech Epochalypse — Interactive Digital Art by Coldie',
+    title: 'KnowYourOverlord.art',
     description:
       'Five overlords. One network. Infinite iterations.',
   },
