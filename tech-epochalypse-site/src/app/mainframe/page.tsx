@@ -64,6 +64,7 @@ export default function MainframePage() {
                 </h3>
                 <div className="space-y-1 mb-8 border-b border-black/10 pb-6">
                   <p>STATUS: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ACTIVE</p>
+                  <p>DEADLINE: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MARCH 06, 2026</p>
                   <p>CLASSIFICATION: &nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; BOUNTY</p>
                   <p>THREAT LEVEL: &nbsp;&nbsp;&nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
                   <p>TARGET: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ALL OVERLORD &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
