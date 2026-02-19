@@ -279,7 +279,7 @@ export default function MainframePage() {
                   Active Exploit &mdash; Submissions
                 </div>
                 <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
-                  Exploit Gallery
+                  Exploit Transmissions
                 </h2>
               </div>
             </div>
