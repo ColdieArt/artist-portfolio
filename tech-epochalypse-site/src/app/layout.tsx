@@ -34,7 +34,7 @@ export default function RootLayout({
         <div className="grain-overlay" />
         <div className="scanline" />
         <Navigation />
-        <main>{children}</main>
+        <main className="flex-1">{children}</main>
         <Footer />
       </body>
     </html>

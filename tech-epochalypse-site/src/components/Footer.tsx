@@ -13,7 +13,7 @@ export default function Footer() {
             <p className="text-white text-sm font-mono leading-relaxed max-w-xs">
               Five overlords. One network. Infinite iterations.
               <br />
-              An interactive digital art series by{' '}
+              A kinetic 3D interactive art series by{' '}
               <span className="text-white">Coldie</span>.
             </p>
             <div className="mt-4 font-mono text-xs text-white uppercase tracking-[0.15em]">

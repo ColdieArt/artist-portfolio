@@ -11,11 +11,14 @@
 
   html {
     scroll-behavior: smooth;
-    perspective: 1000px;
+    height: 100%;
   }
 
   body {
     @apply bg-void text-bone font-body antialiased;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
     overflow-x: hidden;
     cursor: crosshair;
   }
