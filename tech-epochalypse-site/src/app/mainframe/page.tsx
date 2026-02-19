@@ -161,6 +161,93 @@ export default function MainframePage() {
                   </ul>
                 </div>
 
+                {/* Broadcast protocol */}
+                <div className="border-t border-black/10 pt-6 mt-6">
+                  <p>
+                    &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; PROTOCOL: Your payload is only as &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; as its reach. After submission, broadcast your artifact on X with <span className="font-bold">#KnowYourOverlord</span>. Log your transmissions on The &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. The Overlord &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; both craft and &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; when selecting the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
+                  </p>
+                </div>
+
+                {/* Reward */}
+                <div className="border-t border-black/10 pt-6 mt-6">
+                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">
+                    &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;:
+                  </p>
+                  <p>
+                    &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;: One operative will be &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Not by &#9608;&#9608;&#9608;&#9608;. Not by &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. The Overlord reviews every &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; personally.
+                  </p>
+                </div>
+
+                {/* How to submit */}
+                <div className="border-t border-black/10 pt-6 mt-6">
+                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">
+                    HOW TO &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;:
+                  </p>
+                  <ol className="space-y-2 ml-1 list-none">
+                    <li className="flex gap-2">
+                      <span className="shrink-0 font-bold">1.</span>
+                      <span>Access an Overlord node &rarr; &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.art</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0 font-bold">2.</span>
+                      <span>Interact with the &#9608;&#9608;&#9608;&#9608;&#9608; &rarr; extract your source &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0 font-bold">3.</span>
+                      <span>&#9608;&#9608;&#9608;&#9608;&#9608; through your own practice &rarr; create the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0 font-bold">4.</span>
+                      <span>Submit your &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; &rarr; The Mainframe &gt; &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; &gt; SUBMIT PACKET</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0 font-bold">5.</span>
+                      <span>&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; &rarr; post on X with #KnowYourOverlord &rarr; log your &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span>
+                    </li>
+                  </ol>
+                </div>
+
+                {/* Bounty details */}
+                <div className="border-t border-black/10 pt-6 mt-6">
+                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">
+                    &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; &mdash; WHAT THE &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; RECEIVES
+                  </p>
+                  <p className="text-black/40 text-xs uppercase tracking-widest mb-4">
+                    BOUNTY DETAILS: &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; DECRYPTING... &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;
+                  </p>
+                  <p className="text-black/40 text-xs uppercase tracking-widest mb-4">[DECRYPTED]</p>
+                  <p className="mb-6">
+                    The chosen &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; becomes the first entry in <span className="font-bold">The Usual Suspects</span> &mdash; a permanent gallery of the most &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; breaches in the network. You are not just winning a contest. You are &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; a record. A dossier. Every future Exploit winner joins after you, but you are Suspect #001. This builds &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; over time. This becomes something &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; that &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
+                  </p>
+
+                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">THE BOUNTY:</p>
+
+                  <div className="space-y-4 mb-6">
+                    <p>
+                      <span className="font-bold">ARTIST PROOF MINI PRINT</span> &mdash; Your winning artifact, produced as an official artist proof mini print, stamped as an official Tech Epochalypse collaboration, signed by Coldie. This is not a reproduction. This is a verified artifact &mdash; proof that your code infiltrated the system and was recognized by the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
+                    </p>
+
+                    <p>
+                      <span className="font-bold">PRINT EDITION</span> &mdash; 60 mini prints of the winning piece will be produced. Purchase priority goes first to Moments holders of the depicted Overlord. Kinetic token holders of the selected overlord will each receive one print free of charge &mdash; no action required, the network rewards its own. Remaining prints will be available to the public.
+                    </p>
+
+                    <p>
+                      <span className="font-bold">REVENUE SPLIT</span> &mdash; All proceeds from print sales are split between Coldie and the winning artist. You don&rsquo;t just get recognized. You get &#9608;&#9608;&#9608;&#9608;.
+                    </p>
+                  </div>
+
+                  <p className="text-black/40 text-xs uppercase tracking-widest my-6">
+                    &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; THE USUAL SUSPECTS DOSSIER OPENS WITH YOU. THERE IS NO #002 WITHOUT #001. &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;
+                  </p>
+
+                  <p className="text-black/40 text-xs italic">
+                    // The Overlords built the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. You are the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
+                  </p>
+                  <p className="text-black/40 text-xs italic">
+                    // END &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;
+                  </p>
+                </div>
+
                 {/* CTA */}
                 <div className="mt-10 text-center">
                   <Link
