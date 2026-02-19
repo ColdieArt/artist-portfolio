@@ -30,8 +30,6 @@ export default function Footer() {
               {[
                 { href: '/overlords', label: 'Overlords' },
                 { href: '/mainframe', label: 'Mainframe' },
-                { href: '/collectors', label: 'Collectors' },
-                { href: '/about', label: 'Dossier' },
               ].map((link) => (
                 <Link
                   key={link.href}
@@ -59,7 +57,7 @@ export default function Footer() {
                 Twitter / X
               </a>
               <a
-                href="https://instagram.com/coldie"
+                href="https://www.instagram.com/coldie3dart"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white text-sm font-mono hover:text-white transition-colors duration-300 uppercase tracking-wider"

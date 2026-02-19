@@ -96,7 +96,7 @@ export default function AboutPage() {
                   <span className="font-mono text-[10px] uppercase tracking-wider">@Coldie</span>
                 </a>
                 <a
-                  href="https://instagram.com/coldie"
+                  href="https://www.instagram.com/coldie3dart"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-white transition-colors"
