@@ -276,10 +276,10 @@ export default function MainframePage() {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <div className="classified-header">
-                  Archive &mdash; Community Exports
+                  Transmissions Collected Data Packets
                 </div>
                 <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
-                  The Gallery
+                  RAW SIGNALS
                 </h2>
               </div>
               <Link href="/gallery" className="btn-secondary">
