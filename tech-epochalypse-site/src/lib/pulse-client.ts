@@ -36,11 +36,11 @@ export interface PulseData {
 }
 
 export const OVERLORD_CONFIGS = [
-  { key: 'musk', name: 'Elon Musk', query: '"Elon Musk"', color: '#3b82f6' },
-  { key: 'zuckerberg', name: 'Mark Zuckerberg', query: '"Mark Zuckerberg" OR "Zuckerberg" Meta', color: '#06b6d4' },
-  { key: 'altman', name: 'Sam Altman', query: '"Sam Altman" OR "Altman" OpenAI', color: '#a3a3a3' },
-  { key: 'bezos', name: 'Jeff Bezos', query: '"Jeff Bezos"', color: '#f97316' },
-  { key: 'huang', name: 'Jensen Huang', query: '"Jensen Huang" OR "Huang" Nvidia', color: '#84cc16' },
+  { key: 'musk', slug: 'elon-musk', name: 'Elon Musk', query: '"Elon Musk"', color: '#3b82f6' },
+  { key: 'zuckerberg', slug: 'mark-zuckerberg', name: 'Mark Zuckerberg', query: '"Mark Zuckerberg" OR "Zuckerberg" Meta', color: '#06b6d4' },
+  { key: 'altman', slug: 'sam-altman', name: 'Sam Altman', query: '"Sam Altman" OR "Altman" OpenAI', color: '#a3a3a3' },
+  { key: 'bezos', slug: 'jeff-bezos', name: 'Jeff Bezos', query: '"Jeff Bezos"', color: '#f97316' },
+  { key: 'huang', slug: 'jensen-huang', name: 'Jensen Huang', query: '"Jensen Huang" OR "Huang" Nvidia', color: '#84cc16' },
 ] as const
 
 // Simple sentiment keywords
@@ -364,5 +364,44 @@ export function getSamplePulseData(): PulseData {
     most_negative: 'musk',
     quietest: 'bezos',
     updated_at: new Date().toISOString(),
+  }
+}
+
+/**
+ * Fetch pulse data for a single overlord by slug.
+ * Falls back to sample data on failure.
+ */
+export async function fetchSingleOverlordPulse(slug: string): Promise<OverlordPulse | null> {
+  const config = OVERLORD_CONFIGS.find((c) => c.slug === slug)
+  if (!config) return null
+
+  try {
+    const data = await fetchGoogleNewsRSS(config.query)
+
+    const headlines: Headline[] = data.articles.slice(0, 10).map((a) => ({
+      title: a.title,
+      source_name: a.source,
+      url: a.url,
+      published_at: a.pubDate ? new Date(a.pubDate).toISOString() : new Date().toISOString(),
+      description: a.description.substring(0, 200),
+    }))
+
+    const allText = data.articles.map((a) => `${a.title} ${a.description}`).join(' ')
+    const sentimentScore = scoreSentiment(allText)
+
+    return {
+      key: config.key,
+      name: config.name,
+      color: config.color,
+      pulse_count: data.totalResults,
+      sentiment_score: Math.round(sentimentScore * 100) / 100,
+      sentiment_label: labelSentiment(sentimentScore),
+      trend_direction: 'stable',
+      headlines,
+    }
+  } catch {
+    // Fall back to sample data for this overlord
+    const sample = getSamplePulseData()
+    return sample.overlords.find((o) => o.key === config.key) || null
   }
 }

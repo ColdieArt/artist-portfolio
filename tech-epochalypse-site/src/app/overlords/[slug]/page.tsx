@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import overlords from '@/data/overlords.json'
 import ArtworkViewer from '@/components/ArtworkViewer'
+import OverlordNewsFeed from '@/components/OverlordNewsFeed'
 
 interface PageProps {
   params: { slug: string }
@@ -106,6 +107,7 @@ export default function OverlordPage({ params }: PageProps) {
               <p className="text-white/20 text-xs font-mono mt-4">
                 File: <span className="redacted">DOC-{overlord.number}-2024</span>
               </p>
+              <OverlordNewsFeed slug={overlord.slug} />
             </div>
 
             <div className="space-y-6">
