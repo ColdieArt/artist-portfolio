@@ -50,7 +50,7 @@ export default function HomePage() {
           <h1 className="animate-fade-in delay-200 text-6xl md:text-8xl lg:text-9xl text-white leading-[0.9] mb-2 uppercase tracking-[0.05em]" style={{ fontFamily: 'Arial Black, Arial, Helvetica, sans-serif', fontWeight: 900 }}>
             Know Your
             <br />
-            <span className="text-gradient italic tracking-[0.02em]" style={{ fontFamily: 'Arial Black, Arial, Helvetica, sans-serif', fontWeight: 900 }}>
+            <span className="text-white italic tracking-[0.02em]" style={{ fontFamily: 'Arial Black, Arial, Helvetica, sans-serif', fontWeight: 900 }}>
               Overlord
             </span>
           </h1>
