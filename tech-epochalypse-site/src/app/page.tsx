@@ -99,7 +99,7 @@ export default function HomePage() {
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 animate-fade-in delay-1000">
+        <div className="absolute bottom-2 right-[25%] flex flex-col items-center gap-3 animate-fade-in delay-1000">
           <p className="font-mono text-sm uppercase tracking-[0.3em] text-white/80 animate-bounce">
             Scroll Down
           </p>
