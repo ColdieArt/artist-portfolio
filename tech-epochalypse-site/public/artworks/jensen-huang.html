@@ -1838,30 +1838,504 @@ function init() {
         button.onmouseover = () => { button.style.borderColor = effectControls[property] ? '#66CC66' : '#777'; };
         button.onmouseout = () => { button.style.borderColor = effectControls[property] ? '#4CAF50' : 'white'; };
         button.onclick = (event) => {
+            // Prevent event from bubbling up to document and triggering other handlers
             event.stopPropagation();
-            let targetProperty = property;
-            if (property === 'hacker') { effectControls.og = !effectControls.og; effectControls.hacker = effectControls.og; targetProperty = 'og'; }
-            if (!effectControls[targetProperty]) {
-                if (effectControls.anon && targetProperty !== 'anon') { effectControls.anon = false; thresholdPass.enabled = false; bloodPass.enabled = false; glitchPass.enabled = false; if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false; if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false; updateUIButtonState('anon', false); }
-                if (targetProperty === 'cctvFeed') { effectControls.heatmap = false; heatmapPass.enabled = false; updateUIButtonState('heatmap', false); effectControls.blood = false; bloodPass.enabled = false; updateUIButtonState('blood', false); }
-                else if (targetProperty === 'heatmap') { effectControls.cctvFeed = false; cctvFeedPass.enabled = false; updateUIButtonState('cctvFeed', false); effectControls.blood = false; bloodPass.enabled = false; updateUIButtonState('blood', false); }
-                else if (targetProperty === 'blood' || targetProperty === 'bloodText') { effectControls.heatmap = false; heatmapPass.enabled = false; updateUIButtonState('heatmap', false); effectControls.cctvFeed = false; cctvFeedPass.enabled = false; updateUIButtonState('cctvFeed', false); }
+
+            let targetProperty = property; // Default to the button's own property
+
+            // If HACKER is clicked, toggle the 'og' effect and keep hacker state in sync for UI update
+            if (property === 'hacker') {
+                effectControls.og = !effectControls.og;
+                effectControls.hacker = effectControls.og;
+                targetProperty = 'og'; // Process as if 'og' was clicked
+            }
+
+            // If this effect is being turned on, turn off conflicting effects
+            if (!effectControls[targetProperty]) { // If turning the effect ON (or the underlying 'og' effect for 'hacker')
+
+                // Turn off 'Anon' if any other effect is explicitly turned on
+                if (effectControls.anon && targetProperty !== 'anon') {
+                    effectControls.anon = false;
+                    thresholdPass.enabled = false;
+                    bloodPass.enabled = false;
+                    glitchPass.enabled = false;
+                    if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false;
+                    if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false;
+                    updateUIButtonState('anon', false);
+                }
+
+                // Turn off conflicting visual effects
+                if (targetProperty === 'cctvFeed') {
+                    if (effectControls.heatmap) { effectControls.heatmap = false; heatmapPass.enabled = false; updateUIButtonState('heatmap', false); }
+                    if (effectControls.blood) { effectControls.blood = false; bloodPass.enabled = false; updateUIButtonState('blood', false); }
+                    if (effectControls.bloodText) { effectControls.bloodText = false; bloodTextMesh.visible = false; updateUIButtonState('bloodText', false); }
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); }
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); }
+                    if (effectControls.redactedGlitch) { effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false); }
+                } else if (targetProperty === 'heatmap') {
+                    if (effectControls.cctvFeed) { effectControls.cctvFeed = false; cctvFeedPass.enabled = false; updateUIButtonState('cctvFeed', false); }
+                    if (effectControls.blood) { effectControls.blood = false; bloodPass.enabled = false; updateUIButtonState('blood', false); }
+                    if (effectControls.bloodText) { effectControls.bloodText = false; bloodTextMesh.visible = false; updateUIButtonState('bloodText', false); }
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); }
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); }
+                    if (effectControls.redactedGlitch) { effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false); }
+                } else if (targetProperty === 'blood' || targetProperty === 'bloodText') {
+                    if (effectControls.heatmap) { effectControls.heatmap = false; heatmapPass.enabled = false; updateUIButtonState('heatmap', false); }
+                    if (effectControls.cctvFeed) { effectControls.cctvFeed = false; cctvFeedPass.enabled = false; updateUIButtonState('cctvFeed', false); }
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); }
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); }
+                    if (effectControls.redactedGlitch) { effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false); }
+                } else if (targetProperty === 'redactedGlitch') {
+                    if (effectControls.redacted) { effectControls.redacted = false; updateUIButtonState('redacted', false); }
+                    if (effectControls.glitch) { effectControls.glitch = false; glitchPass.enabled = false; updateUIButtonState('glitch', false); }
+                    if (effectControls.xray) { effectControls.xray = false; xrayPass.enabled = false; updateUIButtonState('xray', false); }
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); }
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); }
+                    if (effectControls.cctvFeed) { effectControls.cctvFeed = false; cctvFeedPass.enabled = false; updateUIButtonState('cctvFeed', false); }
+                    if (effectControls.heatmap) { effectControls.heatmap = false; heatmapPass.enabled = false; updateUIButtonState('heatmap', false); }
+                    if (effectControls.blood) { effectControls.blood = false; bloodPass.enabled = false; updateUIButtonState('blood', false); }
+                    if (effectControls.bloodText) { effectControls.bloodText = false; bloodTextMesh.visible = false; updateUIButtonState('bloodText', false); }
+                    if (effectControls.biometricMarquee) { effectControls.biometricMarquee = false; biometricMarqueeTextMesh.visible = false; updateUIButtonState('biometricMarquee', false); }
+                    if (effectControls.marqueeText) { effectControls.marqueeText = false; marqueeTextMesh.visible = false; updateUIButtonState('marqueeText', false); }
+                    if (effectControls.matrix) { effectControls.matrix = false; matrixPass.enabled = false; updateUIButtonState('matrix', false); }
+                    if (effectControls.pixelation) { effectControls.pixelation = false; pixelationPass.enabled = false; updateUIButtonState('pixelation', false); }
+                    if (effectControls.ascii) { effectControls.ascii = false; asciiPass.enabled = false; updateUIButtonState('ascii', false); }
+                } else if (targetProperty === 'redacted') {
+                    if (effectControls.redactedGlitch) { effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false); }
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); }
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); }
+                } else if (targetProperty === 'glitch') {
+                    if (effectControls.redactedGlitch) { effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false); }
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); }
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); }
+                } else if (targetProperty === 'xray') {
+                    if (effectControls.redactedGlitch) { effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false); }
+                    if (effectControls.biometricMarquee) {
+                        effectControls.biometricMarquee = false;
+                        biometricMarqueeTextMesh.visible = false;
+                        updateUIButtonState('biometricMarquee', false);
+                    }
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); }
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); }
+                } else if (targetProperty === 'biometricMarquee') {
+                    if (effectControls.redactedGlitch) { effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false); }
+                    if (effectControls.xray) {
+                        effectControls.xray = false;
+                        xrayPass.enabled = false;
+                        marqueeTextMesh.visible = false;
+                        updateUIButtonState('xray', false);
+                    }
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); }
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); }
+                } else if (targetProperty === 'threshold') {
+                    if (effectControls.shadow) { effectControls.shadow = false; darkPass.enabled = false; updateUIButtonState('shadow', false); }
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); }
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); }
+                } else if (targetProperty === 'shadow') {
+                    if (effectControls.threshold) { effectControls.threshold = false; thresholdPass.enabled = false; updateUIButtonState('threshold', false); }
+                    if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); }
+                    if (effectControls.greed) { effectControls.greed = false; updateUIButtonState('greed', false); }
+                }
+
+                // Turn off all other non-combined visual effects if 'Anon' is being turned ON
                 if (targetProperty === 'anon') {
-                    for (const key in effectControls) { if (effectControls.hasOwnProperty(key) && !['anon', 'redacted', 'redactedGlitch', 'threshold', 'blood', 'glitch', 'yRotation', 'cameraAnimation', 'og', 'bloodText', 'hacker', 'surveillance', 'greed'].includes(key)) { if (effectControls[key]) { effectControls[key] = false; const p = getPassByName(key); if (p) p.enabled = false; updateUIButtonState(key, false); } } }
+                    for (const key in effectControls) {
+                        if (effectControls.hasOwnProperty(key) && key !== 'anon' && key !== 'redacted' && key !== 'redactedGlitch' && key !== 'threshold' && key !== 'blood' && key !== 'glitch' && key !== 'marqueeText' && key !== 'biometricMarquee' && key !== 'yRotation' && key !== 'cameraAnimation' && key !== 'og' && key !== 'bloodText' && key !== 'hacker' && key !== 'surveillance' && key !== 'greed') {
+                            if (effectControls[key]) {
+                                effectControls[key] = false;
+                                const p = getPassByName(key);
+                                if (p) p.enabled = false;
+                                updateUIButtonState(key, false);
+                            }
+                        }
+                    }
+                    // Ensure redacted and redactedGlitch are off
+                    effectControls.redacted = false; updateUIButtonState('redacted', false);
+                    effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false);
+
+                    // Turn off both marquees and blood text
+                    effectControls.marqueeText = false; marqueeTextMesh.visible = false;
+                    effectControls.biometricMarquee = false; biometricMarqueeTextMesh.visible = false;
+                    effectControls.bloodText = false; bloodTextMesh.visible = false;
+                    updateUIButtonState('marqueeText', false);
+                    updateUIButtonState('biometricMarquee', false);
+                    updateUIButtonState('bloodText', false);
+
+                    // Turn off OG and Hacker and Surveillance and Greed if they're on
+                    if (effectControls.og) {
+                        effectControls.og = false;
+                        asciiPass.enabled = false;
+                        heatmapPass.enabled = false;
+                        biometricMarqueeTextMesh.visible = false;
+                        updateUIButtonState('og', false);
+                    }
+                    if (effectControls.hacker) {
+                        effectControls.hacker = false;
+                        updateUIButtonState('hacker', false);
+                    }
+                    if (effectControls.surveillance) {
+                        effectControls.surveillance = false;
+                        updateUIButtonState('surveillance', false);
+                    }
+                    if (effectControls.greed) {
+                        effectControls.greed = false;
+                        updateUIButtonState('greed', false);
+                    }
+                }
+
+                // Handle turning on 'OG' effect (now also triggered by 'HACKER')
+                if (targetProperty === 'og') {
+                    // Turn off all other visual effects, excluding camera/y-rotation
+                    for (const key in effectControls) {
+                        if (effectControls.hasOwnProperty(key) && key !== 'og' && key !== 'hacker' && key !== 'yRotation' && key !== 'cameraAnimation' && key !== 'bloodText' && key !== 'surveillance' && key !== 'greed') {
+                            if (effectControls[key]) {
+                                effectControls[key] = false;
+                                const p = getPassByName(key);
+                                if (p) p.enabled = false;
+                                updateUIButtonState(key, false);
+                            }
+                        }
+                    }
+                    // Specific cleanups for effects that don't have a pass or have special visibility
+                    if (marqueeTextMesh) marqueeTextMesh.visible = false; updateUIButtonState('marqueeText', false);
+                    if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false; updateUIButtonState('redacted', false);
+                    if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false; updateUIButtonState('redactedGlitch', false);
+                    if (bloodTextMesh) bloodTextMesh.visible = false; updateUIButtonState('bloodText', false);
+                    if (biometricMarqueeTextMesh) biometricMarqueeTextMesh.visible = false; updateUIButtonState('biometricMarquee', false);
+                    if (redactedGlitchTextMesh) redactedGlitchTextMesh.visible = false;
+
+                    // Turn off surveillance if OG is turned on
+                    if (effectControls.surveillance) {
+                        effectControls.surveillance = false;
+                        updateUIButtonState('surveillance', false);
+                    }
+                    // Turn off greed if OG is turned on
+                    if (effectControls.greed) {
+                        effectControls.greed = false;
+                        updateUIButtonState('greed', false);
+                    }
+                }
+
+                // Handle turning on 'SURVEILLANCE' effect
+                if (targetProperty === 'surveillance') {
+                    // Turn off all other visual effects, excluding camera/y-rotation
+                    for (const key in effectControls) {
+                        if (effectControls.hasOwnProperty(key) &&
+                            key !== 'surveillance' &&
+                            key !== 'heatmap' &&
+                            key !== 'biometricMarquee' &&
+                            key !== 'glitch' &&
+                            key !== 'yRotation' &&
+                            key !== 'cameraAnimation' &&
+                            key !== 'greed'
+                        ) {
+                            if (effectControls[key]) {
+                                effectControls[key] = false;
+                                const p = getPassByName(key);
+                                if (p) p.enabled = false;
+                                updateUIButtonState(key, false);
+                            }
+                        }
+                    }
+                    // Specific cleanups for effects that don't have a pass or have special visibility
+                    if (marqueeTextMesh) marqueeTextMesh.visible = false; updateUIButtonState('marqueeText', false);
+                    if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false; updateUIButtonState('redacted', false);
+                    if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false; updateUIButtonState('redactedGlitch', false);
+                    if (bloodTextMesh) bloodTextMesh.visible = false; updateUIButtonState('bloodText', false);
+                    if (redactedGlitchTextMesh) redactedGlitchTextMesh.visible = false;
+
+                    // Ensure Anon, OG, Hacker are off
+                    if (effectControls.anon) {
+                        effectControls.anon = false;
+                        updateUIButtonState('anon', false);
+                    }
+                    if (effectControls.og) {
+                        effectControls.og = false;
+                        updateUIButtonState('og', false);
+                    }
+                    if (effectControls.hacker) {
+                        effectControls.hacker = false;
+                        updateUIButtonState('hacker', false);
+                    }
+                }
+
+                // Handle turning on 'GREED' effect
+                if (targetProperty === 'greed') {
+                    // Turn off all other visual effects, excluding camera/y-rotation
+                    for (const key in effectControls) {
+                        if (effectControls.hasOwnProperty(key) &&
+                            key !== 'greed' &&
+                            key !== 'blood' &&
+                            key !== 'bloodText' &&
+                            key !== 'yRotation' &&
+                            key !== 'cameraAnimation'
+                        ) {
+                            if (effectControls[key]) {
+                                effectControls[key] = false;
+                                const p = getPassByName(key);
+                                if (p) p.enabled = false;
+                                updateUIButtonState(key, false);
+                            }
+                        }
+                    }
+                    // Specific cleanups for effects that don't have a pass or have special visibility
+                    if (marqueeTextMesh) marqueeTextMesh.visible = false; updateUIButtonState('marqueeText', false);
+                    if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false; updateUIButtonState('redacted', false);
+                    if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false; updateUIButtonState('redactedGlitch', false);
+                    if (biometricMarqueeTextMesh) biometricMarqueeTextMesh.visible = false; updateUIButtonState('biometricMarquee', false);
+                    if (redactedGlitchTextMesh) redactedGlitchTextMesh.visible = false;
+
+                    // Ensure Anon, OG, Hacker, Surveillance, CCTV, Heatmap are off
+                    if (effectControls.anon) {
+                        effectControls.anon = false;
+                        updateUIButtonState('anon', false);
+                    }
+                    if (effectControls.og) {
+                        effectControls.og = false;
+                        updateUIButtonState('og', false);
+                    }
+                    if (effectControls.hacker) {
+                        effectControls.hacker = false;
+                        updateUIButtonState('hacker', false);
+                    }
+                    if (effectControls.surveillance) {
+                        effectControls.surveillance = false;
+                        updateUIButtonState('surveillance', false);
+                    }
+                    if (effectControls.cctvFeed) {
+                        effectControls.cctvFeed = false;
+                        updateUIButtonState('cctvFeed', false);
+                    }
+                    if (effectControls.heatmap) {
+                        effectControls.heatmap = false;
+                        updateUIButtonState('heatmap', false);
+                    }
+                }
+
+            } else if (targetProperty === 'shadow') { // If turning SHADOW OFF, also turn off Glitch if it was enabled by SHADOW
+                if (effectControls.glitch) {
+                    if (!effectControls.anon && !effectControls.redactedGlitch && !effectControls.og && !effectControls.hacker && !effectControls.surveillance && !effectControls.greed) {
+                        effectControls.glitch = false;
+                        glitchPass.enabled = false;
+                        updateUIButtonState('glitch', false);
+                    }
                 }
             }
-            if (property !== 'hacker') effectControls[property] = !effectControls[property];
-            if (targetProperty === 'shadow') { darkPass.enabled = effectControls.shadow; effectControls.glitch = effectControls.shadow; glitchPass.enabled = effectControls.shadow; updateUIButtonState('shadow', effectControls.shadow); updateUIButtonState('glitch', effectControls.glitch); }
-            else if (targetProperty === 'redactedGlitch' || targetProperty === 'redacted') {
-                const vis = (effectControls.redacted || effectControls.redactedGlitch || effectControls.anon);
-                if (rightEyeRedactionRect) rightEyeRedactionRect.visible = vis;
-                if (leftEyeRedactionRect) leftEyeRedactionRect.visible = vis;
-                if (targetProperty === 'redactedGlitch') { glitchPass.enabled = effectControls.redactedGlitch; redactedGlitchTextMesh.visible = effectControls.redactedGlitch; updateUIButtonState('glitch', effectControls.redactedGlitch); }
-                if (vis) { effectControls.threshold = true; thresholdPass.enabled = true; updateUIButtonState('threshold', true); }
+
+            // Toggle the effect control state if it wasn't already toggled by 'hacker' logic
+            if (property !== 'hacker') {
+                effectControls[property] = !effectControls[property];
             }
-            if (targetProperty === 'anon') { thresholdPass.enabled = effectControls.anon; bloodPass.enabled = effectControls.anon; glitchPass.enabled = effectControls.anon; if (rightEyeRedactionRect) rightEyeRedactionRect.visible = effectControls.anon; if (leftEyeRedactionRect) leftEyeRedactionRect.visible = effectControls.anon; updateUIButtonState('threshold', effectControls.anon); updateUIButtonState('blood', effectControls.anon); updateUIButtonState('glitch', effectControls.anon); }
-            if (property === 'cameraAnimation') { cameraAnimationActive = effectControls.cameraAnimation; controls.enabled = !cameraAnimationActive; if (cameraAnimationActive) { if (effectControls.yRotation) { effectControls.yRotation = false; updateUIButtonState('yRotation', false); } initialGlobalCameraPos.copy(camera.position); initialGlobalCameraLookAt.copy(controls.target); startCameraAnimation(performance.now()); } else { camera.position.copy(initialGlobalCameraPos); controls.target.copy(initialGlobalCameraLookAt); camera.lookAt(controls.target); } }
-            if (property === 'yRotation') { if (effectControls.yRotation) { controls.enabled = false; cameraAnimationActive = false; updateUIButtonState('cameraAnimation', false); yBounceInitialCameraX = camera.position.x; yBounceInitialCameraY = camera.position.y; yBounceInitialCameraZ = camera.position.z; yRotationStartTime = performance.now(); } else { controls.enabled = true; } }
+
+            if (targetProperty === 'shadow') {
+                darkPass.enabled = effectControls.shadow;
+                // If SHADOW is active, also activate Glitch
+                if (effectControls.shadow) {
+                    effectControls.glitch = true;
+                    glitchPass.enabled = true;
+                } else { // If SHADOW is being turned off
+                    if (!effectControls.anon && !effectControls.redactedGlitch && !effectControls.og && !effectControls.hacker && !effectControls.surveillance && !effectControls.greed) {
+                        effectControls.glitch = false;
+                        glitchPass.enabled = false;
+                    }
+                }
+                updateUIButtonState('shadow', effectControls.shadow);
+                updateUIButtonState('glitch', effectControls.glitch);
+            } else if (targetProperty === 'og') {
+                asciiPass.enabled = effectControls.og;
+                heatmapPass.enabled = effectControls.og;
+                biometricMarqueeTextMesh.visible = effectControls.og;
+                updateUIButtonState('ascii', effectControls.og);
+                updateUIButtonState('heatmap', effectControls.og);
+                updateUIButtonState('biometricMarquee', effectControls.og);
+                updateUIButtonState('og', effectControls.og);
+                updateUIButtonState('hacker', effectControls.og); // Update HACKER button state
+            } else if (targetProperty === 'bloodText') {
+                // When bloodText is turned on, also ensure blood effect is on
+                if (effectControls.bloodText) {
+                    effectControls.blood = true;
+                    bloodPass.enabled = true;
+                    updateUIButtonState('blood', true);
+                    if (bloodTextMesh && bloodTextMesh.material.map) {
+                        bloodScrollOffset = bloodTextMesh.material.map.image.height;
+                        shuffledBloodPhrases = shuffleArray([...BLOOD_TEXT_PHRASES]);
+                    }
+                }
+                bloodTextMesh.visible = effectControls.bloodText;
+                updateUIButtonState('bloodText', effectControls.bloodText);
+            } else if (targetProperty === 'surveillance') {
+                // When SURVEILLANCE is turned on/off, toggle heatmap, biometric marquee, AND glitch
+                effectControls.heatmap = effectControls.surveillance;
+                heatmapPass.enabled = effectControls.surveillance;
+                updateUIButtonState('heatmap', effectControls.surveillance);
+
+                effectControls.biometricMarquee = effectControls.surveillance;
+                biometricMarqueeTextMesh.visible = effectControls.surveillance;
+                updateUIButtonState('biometricMarquee', effectControls.surveillance);
+
+                effectControls.glitch = effectControls.surveillance;
+                glitchPass.enabled = effectControls.surveillance;
+                updateUIButtonState('glitch', effectControls.surveillance);
+
+                // Update the button for surveillance itself
+                updateUIButtonState('surveillance', effectControls.surveillance);
+
+            } else if (targetProperty === 'greed') {
+                // When GREED is turned on/off, toggle blood and bloodText
+                effectControls.blood = effectControls.greed;
+                bloodPass.enabled = effectControls.greed;
+                updateUIButtonState('blood', effectControls.greed);
+
+                effectControls.bloodText = effectControls.greed;
+                bloodTextMesh.visible = effectControls.greed;
+                updateUIButtonState('bloodText', effectControls.greed);
+
+                // If turning on, ensure text starts from bottom and reshuffle
+                if (effectControls.greed) {
+                    if (bloodTextMesh && bloodTextMesh.material.map) {
+                        bloodScrollOffset = bloodTextMesh.material.map.image.height;
+                        shuffledBloodPhrases = shuffleArray([...BLOOD_TEXT_PHRASES]);
+                    }
+                }
+
+                // Update the button for greed itself
+                updateUIButtonState('greed', effectControls.greed);
+
+            } else if (targetProperty === 'redactedGlitch') { // Handle Redacted Glitch effect toggle
+                if (rightEyeRedactionRect) rightEyeRedactionRect.visible = effectControls.redactedGlitch;
+                if (leftEyeRedactionRect) leftEyeRedactionRect.visible = effectControls.redactedGlitch;
+                glitchPass.enabled = effectControls.redactedGlitch;
+                redactedGlitchTextMesh.visible = effectControls.redactedGlitch;
+
+                // When redactedGlitch is active, force threshold effect on
+                if (effectControls.redactedGlitch) {
+                    effectControls.threshold = true;
+                    thresholdPass.enabled = true;
+                    updateUIButtonState('threshold', true);
+                    // Ensure shadow is off if threshold is forced on
+                    if (effectControls.shadow) {
+                        effectControls.shadow = false;
+                        darkPass.enabled = false;
+                        updateUIButtonState('shadow', false);
+                    }
+                }
+                else { // If turning off redactedGlitch
+                    if (!effectControls.redacted && !effectControls.anon && !effectControls.og && !effectControls.hacker && !effectControls.surveillance && !effectControls.greed) {
+                        effectControls.threshold = false;
+                        thresholdPass.enabled = false;
+                        updateUIButtonState('threshold', false);
+                    }
+                }
+                updateUIButtonState('redactedGlitch', effectControls.redactedGlitch);
+                updateUIButtonState('glitch', effectControls.redactedGlitch);
+
+            } else if (pass) {
+                pass.enabled = effectControls[targetProperty];
+                updateUIButtonState(targetProperty, effectControls[targetProperty]);
+            }
+
+            // Update marquee text visibility based on XRAY only
+            const shouldMarqueeBeVisible = effectControls.xray;
+            if (effectControls.marqueeText !== shouldMarqueeBeVisible) {
+                effectControls.marqueeText = shouldMarqueeBeVisible;
+                marqueeTextMesh.visible = shouldMarqueeBeVisible;
+            }
+
+            // Toggle biometric marquee visibility (if not controlled by surveillance/OG/HACKER/GREED)
+            if (targetProperty === 'biometricMarquee' && !effectControls.surveillance && !effectControls.og && !effectControls.hacker && !effectControls.greed) {
+                biometricMarqueeTextMesh.visible = effectControls.biometricMarquee;
+            }
+
+            // Handle redacted effect toggle
+            if (targetProperty === 'redacted') {
+                if (rightEyeRedactionRect) rightEyeRedactionRect.visible = effectControls.redacted;
+                if (leftEyeRedactionRect) leftEyeRedactionRect.visible = effectControls.redacted;
+                if (effectControls.redacted) {
+                    effectControls.threshold = true;
+                    thresholdPass.enabled = true;
+                    updateUIButtonState('threshold', true);
+                    if (effectControls.shadow) {
+                        effectControls.shadow = false;
+                        darkPass.enabled = false;
+                        updateUIButtonState('shadow', false);
+                        if (!effectControls.anon && !effectControls.redactedGlitch && !effectControls.og && !effectControls.hacker && !effectControls.surveillance && !effectControls.greed) {
+                            effectControls.glitch = false;
+                            glitchPass.enabled = false;
+                            updateUIButtonState('glitch', false);
+                        }
+                    }
+                } else {
+                    if (!effectControls.redactedGlitch && !effectControls.anon && !effectControls.og && !effectControls.hacker && !effectControls.surveillance && !effectControls.greed) {
+                        effectControls.threshold = false;
+                        thresholdPass.enabled = false;
+                        updateUIButtonState('threshold', false);
+                    }
+                }
+            }
+
+            // Handle Anon effect toggle
+            if (targetProperty === 'anon') {
+                if (effectControls.anon) {
+                    thresholdPass.enabled = true;
+                    bloodPass.enabled = true;
+                    glitchPass.enabled = true;
+                    if (rightEyeRedactionRect) rightEyeRedactionRect.visible = true;
+                    if (leftEyeRedactionRect) leftEyeRedactionRect.visible = true;
+
+                    if (effectControls.shadow) {
+                        effectControls.shadow = false;
+                        darkPass.enabled = false;
+                        updateUIButtonState('shadow', false);
+                    }
+                }
+                else {
+                    thresholdPass.enabled = false;
+                    bloodPass.enabled = false;
+                    glitchPass.enabled = false;
+                    if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false;
+                    if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false;
+                }
+                updateUIButtonState('threshold', effectControls.anon);
+                updateUIButtonState('blood', effectControls.anon);
+                updateUIButtonState('glitch', effectControls.anon);
+            }
+
+            // Handle camera animation toggle
+            if (property === 'cameraAnimation') {
+                cameraAnimationActive = effectControls.cameraAnimation;
+                controls.enabled = !cameraAnimationActive;
+                if (cameraAnimationActive) {
+                    if (effectControls.yRotation) {
+                        effectControls.yRotation = false;
+                        updateUIButtonState('yRotation', false);
+                    }
+                    initialGlobalCameraPos.copy(camera.position);
+                    initialGlobalCameraLookAt.copy(controls.target);
+                    cameraPreviousPos.copy(initialGlobalCameraPos);
+                    cameraPreviousLookAt.copy(initialGlobalCameraLookAt);
+                    assetsVisitedCount = 0;
+                    startCameraAnimation(performance.now());
+                } else {
+                    camera.position.copy(initialGlobalCameraPos);
+                    controls.target.copy(initialGlobalCameraLookAt);
+                    camera.lookAt(controls.target);
+                }
+            }
+
+            if (property === 'yRotation') {
+                if (effectControls.yRotation) {
+                    controls.enabled = false;
+                    cameraAnimationActive = false;
+                    updateUIButtonState('cameraAnimation', false);
+                    yBounceInitialCameraX = camera.position.x;
+                    yBounceInitialCameraY = camera.position.y;
+                    yBounceInitialCameraZ = camera.position.z;
+                    yRotationStartTime = performance.now();
+                } else {
+                    controls.enabled = true;
+                }
+            }
+
             updateFaceMaterialBrightness();
             updateUIButtonState(property, effectControls[property]);
         };
