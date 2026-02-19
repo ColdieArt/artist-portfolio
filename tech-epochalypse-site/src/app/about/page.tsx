@@ -14,7 +14,7 @@ export default function AboutPage() {
         {/* Header */}
         <ScrollReveal>
           <div className="text-center mb-16 md:mb-24">
-            <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/40 mb-4">
+            <p className="font-mono text-xs uppercase tracking-[0.4em] text-white mb-4">
               Behind the Network
             </p>
             <h1 className="font-display text-4xl md:text-6xl text-white mb-4 uppercase tracking-[0.05em]">
@@ -22,7 +22,7 @@ export default function AboutPage() {
             </h1>
             <div className="flex items-center justify-center gap-3 mt-2">
               <div className="w-12 h-px bg-white/10" />
-              <span className="font-mono text-[9px] text-white/10 uppercase tracking-wider">
+              <span className="font-mono text-[9px] text-white uppercase tracking-wider">
                 File: <span className="redacted">ARTIST-001</span>
               </span>
               <div className="w-12 h-px bg-white/10" />
@@ -37,9 +37,9 @@ export default function AboutPage() {
               <div className="w-full h-full flex items-center justify-center border border-white/5">
                 <div className="text-center">
                   <div className="w-32 h-32 rounded-full bg-charcoal border border-white/5 mx-auto mb-4 flex items-center justify-center">
-                    <span className="font-display text-4xl text-white/10">C</span>
+                    <span className="font-display text-4xl text-white">C</span>
                   </div>
-                  <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/10">
+                  <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-white">
                     Artist Photo
                   </p>
                 </div>
@@ -58,7 +58,7 @@ export default function AboutPage() {
               <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
                 Coldie
               </h2>
-              <div className="space-y-4 text-white/50 text-sm font-mono leading-relaxed">
+              <div className="space-y-4 text-white text-sm font-mono leading-relaxed">
                 <p>
                   Coldie is a pioneering digital artist and one of the earliest
                   creators in the NFT and crypto art movement. Working at the
@@ -81,9 +81,9 @@ export default function AboutPage() {
                 </p>
               </div>
 
-              <p className="text-white/20 text-xs font-mono mt-4">
+              <p className="text-white text-xs font-mono mt-4">
                 Clearance: <span className="redacted">FULL ACCESS</span> &mdash;
-                Status: <span className="text-white/40">ACTIVE</span>
+                Status: <span className="text-white">ACTIVE</span>
               </p>
 
               {/* Social links */}
@@ -92,7 +92,7 @@ export default function AboutPage() {
                   href="https://twitter.com/Coldie"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-white/35 hover:text-white/60 transition-colors"
+                  className="flex items-center gap-2 text-white transition-colors"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -103,7 +103,7 @@ export default function AboutPage() {
                   href="https://instagram.com/coldie"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-white/35 hover:text-white/60 transition-colors"
+                  className="flex items-center gap-2 text-white transition-colors"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="2" y="2" width="20" height="20" rx="5"/>
@@ -131,7 +131,7 @@ export default function AboutPage() {
               <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
                 What is Tech Epochalypse?
               </h2>
-              <div className="space-y-4 text-white/50 text-sm font-mono leading-relaxed">
+              <div className="space-y-4 text-white text-sm font-mono leading-relaxed">
                 <p>
                   Tech Epochalypse is an interactive digital art series exploring
                   the figures who defined &mdash; and disrupted &mdash; the technological
@@ -183,7 +183,7 @@ export default function AboutPage() {
               <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
                 How They&rsquo;re Made
               </h2>
-              <div className="space-y-4 text-white/50 text-sm font-mono leading-relaxed">
+              <div className="space-y-4 text-white text-sm font-mono leading-relaxed">
                 <p>
                   Each artwork begins as a 3D scan or photographic reference,
                   then undergoes a process of digital manipulation, shader
@@ -210,7 +210,7 @@ export default function AboutPage() {
         <ScrollReveal>
           <div className="line-accent mb-16" />
           <div className="text-center mb-12">
-            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-white/15 mb-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-white mb-4">
               Interviews &amp; Conversations
             </p>
             <h2 className="font-display text-3xl md:text-4xl text-white uppercase tracking-[0.03em]">
@@ -224,13 +224,13 @@ export default function AboutPage() {
               rel="noopener noreferrer"
               className="group block p-6 border border-white/5 hover:border-white/15 bg-white/[0.02] hover:bg-white/[0.04] transition-all"
             >
-              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/25 mb-3">
+              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-white mb-3">
                 OpenSea
               </p>
-              <h3 className="font-display text-sm md:text-base text-white/70 group-hover:text-white/90 uppercase tracking-wide mb-2 transition-colors">
+              <h3 className="font-display text-sm md:text-base text-white uppercase tracking-wide mb-2 transition-colors">
                 In Conversation With Coldie
               </h3>
-              <p className="font-mono text-[10px] text-white/30 leading-relaxed">
+              <p className="font-mono text-[10px] text-white leading-relaxed">
                 Written interview on the Tech Epochalypse drop &mdash; 250 1/1 stills critiquing tech power and the systems shaping modern life.
               </p>
             </a>
@@ -240,13 +240,13 @@ export default function AboutPage() {
               rel="noopener noreferrer"
               className="group block p-6 border border-white/5 hover:border-white/15 bg-white/[0.02] hover:bg-white/[0.04] transition-all"
             >
-              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/25 mb-3">
+              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-white mb-3">
                 Carrot Lane
               </p>
-              <h3 className="font-display text-sm md:text-base text-white/70 group-hover:text-white/90 uppercase tracking-wide mb-2 transition-colors">
+              <h3 className="font-display text-sm md:text-base text-white uppercase tracking-wide mb-2 transition-colors">
                 How Coldie Built Iconic Status in Crypto Art
               </h3>
-              <p className="font-mono text-[10px] text-white/30 leading-relaxed">
+              <p className="font-mono text-[10px] text-white leading-relaxed">
                 Podcast deep dive on building a legacy in crypto art, from the Snoop Dogg collaboration to the Decentral Eyes series.
               </p>
             </a>
@@ -256,13 +256,13 @@ export default function AboutPage() {
               rel="noopener noreferrer"
               className="group block p-6 border border-white/5 hover:border-white/15 bg-white/[0.02] hover:bg-white/[0.04] transition-all"
             >
-              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/25 mb-3">
+              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-white mb-3">
                 PROOF Podcast
               </p>
-              <h3 className="font-display text-sm md:text-base text-white/70 group-hover:text-white/90 uppercase tracking-wide mb-2 transition-colors">
+              <h3 className="font-display text-sm md:text-base text-white uppercase tracking-wide mb-2 transition-colors">
                 Seeing Through Decentral Eyes
               </h3>
-              <p className="font-mono text-[10px] text-white/30 leading-relaxed">
+              <p className="font-mono text-[10px] text-white leading-relaxed">
                 Artist spotlight on stereoscopic 3D art, blockchain-native creation, and the vision behind the portraits.
               </p>
             </a>
@@ -276,7 +276,7 @@ export default function AboutPage() {
             <h3 className="font-display text-2xl md:text-3xl text-white mb-4 uppercase tracking-[0.03em]">
               Get in Touch
             </h3>
-            <p className="text-white/40 text-sm font-mono max-w-lg mx-auto mb-8 leading-relaxed">
+            <p className="text-white text-sm font-mono max-w-lg mx-auto mb-8 leading-relaxed">
               For commissions, collaborations, press inquiries, or collecting
               opportunities, reach out through social channels or email.
             </p>

@@ -204,15 +204,15 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
     <>
       {/* ── Filter Bar ── */}
       <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
-        <span className="font-mono text-xs uppercase tracking-[0.2em] text-white/30 mr-2">
+        <span className="font-mono text-xs uppercase tracking-[0.2em] text-white mr-2">
           Filter:
         </span>
         <button
           onClick={() => setFilter('all')}
           className={`font-mono text-xs uppercase tracking-wider px-4 py-2 border transition-colors ${
             filter === 'all'
-              ? 'border-white/30 text-white/70 bg-white/5'
-              : 'border-white/5 text-white/25 hover:border-white/15 hover:text-white/45'
+              ? 'border-white/30 text-white bg-white/5'
+              : 'border-white/5 text-white hover:border-white/15 hover:text-white'
           }`}
         >
           All
@@ -223,8 +223,8 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
             onClick={() => setFilter(slug)}
             className={`font-mono text-xs uppercase tracking-wider px-4 py-2 border transition-colors ${
               filter === slug
-                ? 'border-white/30 text-white/70 bg-white/5'
-                : 'border-white/5 text-white/25 hover:border-white/15 hover:text-white/45'
+                ? 'border-white/30 text-white bg-white/5'
+                : 'border-white/5 text-white hover:border-white/15 hover:text-white'
             }`}
           >
             {overlordNames[slug] ?? slug}
@@ -250,7 +250,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-black border border-white/15 z-50 min-w-[200px]">
               <button
                 onClick={() => startSlideshow('all')}
-                className="w-full text-left px-4 py-3 font-mono text-xs uppercase tracking-wider text-white/60 hover:bg-white/5 hover:text-white transition-colors border-b border-white/5"
+                className="w-full text-left px-4 py-3 font-mono text-xs uppercase tracking-wider text-white hover:bg-white/5 hover:text-white transition-colors border-b border-white/5"
               >
                 All Overlords
               </button>
@@ -258,7 +258,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                 <button
                   key={slug}
                   onClick={() => startSlideshow(slug)}
-                  className="w-full text-left px-4 py-3 font-mono text-xs uppercase tracking-wider text-white/60 hover:bg-white/5 hover:text-white transition-colors border-b border-white/5 last:border-b-0"
+                  className="w-full text-left px-4 py-3 font-mono text-xs uppercase tracking-wider text-white hover:bg-white/5 hover:text-white transition-colors border-b border-white/5 last:border-b-0"
                 >
                   {overlordNames[slug] ?? slug}
                 </button>
@@ -289,7 +289,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                 <img
                   src={item.src}
                   alt={item.title}
-                  className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 opacity-70 group-hover:opacity-90"
+                  className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 opacity-100"
                   loading="lazy"
                   style={{ filter: 'contrast(1.15)' }}
                 />
@@ -298,7 +298,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                 {/* Hover overlay */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="w-12 h-12 border border-white/40 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/80">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                       <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
                     </svg>
                   </div>
@@ -310,10 +310,10 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                     {item.title}
                   </p>
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs text-white/40">
+                    <span className="font-mono text-xs text-white">
                       {item.contributor}
                     </span>
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-white/25">
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-white">
                       {overlordNames[item.overlord] ?? item.overlord}
                     </span>
                   </div>
@@ -324,7 +324,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
         </div>
       ) : (
         <div className="text-center py-20 border border-dashed border-white/5">
-          <p className="font-mono text-sm text-white/30">
+          <p className="font-mono text-sm text-white">
             No pieces found for this filter.
           </p>
         </div>
@@ -347,24 +347,24 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                 <p className="font-mono" style={{ fontSize: '13px', color: 'white', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {currentItem.title}
                 </p>
-                <span className="font-mono" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)' }}>
+                <span className="font-mono" style={{ fontSize: '12px', color: 'white' }}>
                   by {currentItem.contributor}
                 </span>
                 {slideshow && (
-                  <span className="font-mono" style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '2px 8px' }}>
+                  <span className="font-mono" style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'white', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '2px 8px' }}>
                     Slideshow
                   </span>
                 )}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
-                <span className="font-mono" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)', marginRight: '8px' }}>
+                <span className="font-mono" style={{ fontSize: '11px', color: 'white', marginRight: '8px' }}>
                   {lightboxIndex! + 1} / {activeList.length}
                 </span>
 
                 {/* Slideshow toggle */}
                 <button
                   onClick={() => setSlideshow(!slideshow)}
-                  style={{ padding: '8px', background: 'none', border: 'none', cursor: 'pointer', color: slideshow ? 'white' : 'rgba(255,255,255,0.3)' }}
+                  style={{ padding: '8px', background: 'none', border: 'none', cursor: 'pointer', color: 'white' }}
                   title={slideshow ? 'Stop slideshow' : 'Start slideshow'}
                 >
                   {slideshow ? (
@@ -382,7 +382,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                 {/* Fullscreen toggle */}
                 <button
                   onClick={toggleFullscreen}
-                  style={{ padding: '8px', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)' }}
+                  style={{ padding: '8px', background: 'none', border: 'none', cursor: 'pointer', color: 'white' }}
                   title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
                 >
                   {isFullscreen ? (
@@ -399,7 +399,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                 {/* Close */}
                 <button
                   onClick={closeLightbox}
-                  style={{ padding: '8px', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', marginLeft: '4px' }}
+                  style={{ padding: '8px', background: 'none', border: 'none', cursor: 'pointer', color: 'white', marginLeft: '4px' }}
                   title="Close (Esc)"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -431,7 +431,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
               />
 
               {/* Contributor overlay */}
-              <span className="font-mono" style={{ position: 'absolute', bottom: '12px', right: '12px', fontSize: '11px', color: 'rgba(255,255,255,0.5)', background: 'rgba(0,0,0,0.6)', padding: '2px 8px', zIndex: 2 }}>
+              <span className="font-mono" style={{ position: 'absolute', bottom: '12px', right: '12px', fontSize: '11px', color: 'white', background: 'rgba(0,0,0,0.6)', padding: '2px 8px', zIndex: 2 }}>
                 {currentItem.contributor}
               </span>
 
@@ -457,14 +457,14 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
             {/* Bottom bar */}
             <div className="lightbox-bar" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <span className="font-mono" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.3)' }}>
+                <span className="font-mono" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'white' }}>
                   {overlordNames[currentItem.overlord] ?? currentItem.overlord}
                 </span>
-                <span className="font-mono" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.2)' }}>
+                <span className="font-mono" style={{ fontSize: '11px', color: 'white' }}>
                   {currentItem.date}
                 </span>
               </div>
-              <div className="font-mono" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.15)', display: 'flex', gap: '16px' }}>
+              <div className="font-mono" style={{ fontSize: '10px', color: 'white', display: 'flex', gap: '16px' }}>
                 <span>Arrow keys to navigate</span>
                 <span>F for fullscreen</span>
                 <span>Esc to close</span>
@@ -557,11 +557,11 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
           background: none;
           border: none;
           cursor: pointer;
-          color: rgba(255, 255, 255, 0.2);
+          color: white;
           transition: color 0.2s;
         }
         .lightbox-nav:hover {
-          color: rgba(255, 255, 255, 0.6);
+          color: white;
         }
         .lightbox-nav-prev {
           left: 4px;

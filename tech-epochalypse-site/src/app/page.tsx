@@ -42,7 +42,7 @@ export default function HomePage() {
         {/* Content */}
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
           <div className="animate-fade-in">
-            <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/50 mb-8">
+            <p className="font-mono text-xs uppercase tracking-[0.4em] text-white mb-8">
               Classified &mdash; Kinetic 3D Interactive Art Series
             </p>
           </div>
@@ -55,25 +55,25 @@ export default function HomePage() {
             </span>
           </h1>
 
-          <p className="animate-fade-in delay-200 font-display text-3xl md:text-4xl lg:text-[2.8rem] text-white/60 uppercase tracking-[0.05em] mb-6">
+          <p className="animate-fade-in delay-200 font-display text-3xl md:text-4xl lg:text-[2.8rem] text-white uppercase tracking-[0.05em] mb-6">
             Know Your Overlord
           </p>
 
           {/* Redacted document line */}
           <div className="animate-fade-in delay-300 flex items-center justify-center gap-3 mb-8">
             <div className="w-16 h-px bg-white/20" />
-            <span className="font-mono text-xs uppercase tracking-[0.3em] text-white/40">
+            <span className="font-mono text-xs uppercase tracking-[0.3em] text-white">
               Document <span className="redacted">REF-0042</span>
             </span>
             <div className="w-16 h-px bg-white/20" />
           </div>
 
-          <p className="animate-fade-in delay-400 font-mono text-lg md:text-xl text-white/70 mb-4 max-w-2xl mx-auto tracking-wide">
+          <p className="animate-fade-in delay-400 font-mono text-lg md:text-xl text-white mb-4 max-w-2xl mx-auto tracking-wide">
             Five overlords. One network. Infinite iterations.
           </p>
 
-          <p className="animate-fade-in delay-500 font-mono text-sm text-white/30 mb-12 max-w-lg mx-auto">
-            Protocol: <span className="redacted">REDACTED</span> &mdash; Status: <span className="text-white/50">ACTIVE</span> &mdash; Clearance: <span className="redacted">████</span>
+          <p className="animate-fade-in delay-500 font-mono text-sm text-white mb-12 max-w-lg mx-auto">
+            Protocol: <span className="redacted">REDACTED</span> &mdash; Status: <span className="text-white">ACTIVE</span> &mdash; Clearance: <span className="redacted">████</span>
           </p>
 
           <div className="animate-fade-in delay-700">
@@ -100,7 +100,7 @@ export default function HomePage() {
 
         {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-fade-in delay-1000">
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-white/30">
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-white">
             Scroll
           </p>
           <div className="w-px h-8 bg-gradient-to-b from-white/30 to-transparent animate-pulse-glow" />
@@ -112,7 +112,7 @@ export default function HomePage() {
         <div className="page-container">
           <ScrollReveal>
             <div className="text-center mb-20">
-              <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/40 mb-4">
+              <p className="font-mono text-xs uppercase tracking-[0.4em] text-white mb-4">
                 Overlord Files
               </p>
               <h2 className="font-display text-4xl md:text-6xl text-white uppercase tracking-[0.05em]">
@@ -120,7 +120,7 @@ export default function HomePage() {
               </h2>
               <div className="flex items-center justify-center gap-3 mt-4">
                 <div className="w-12 h-px bg-white/15" />
-                <span className="font-mono text-xs text-white/30 uppercase tracking-wider">
+                <span className="font-mono text-xs text-white uppercase tracking-wider">
                   5 nodes identified
                 </span>
                 <div className="w-12 h-px bg-white/15" />
@@ -143,7 +143,7 @@ export default function HomePage() {
                         <img
                           src={overlord.previewImage}
                           alt={overlord.name}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-60 group-hover:opacity-80 grayscale"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-100 grayscale"
                           loading="lazy"
                           style={{ imageRendering: 'auto', filter: 'grayscale(1) contrast(1.2)' }}
                         />
@@ -152,7 +152,7 @@ export default function HomePage() {
 
                       {/* Status badge */}
                       {overlord.status === 'coming-soon' && (
-                        <div className="absolute top-4 right-4 font-mono text-xs uppercase tracking-wider text-white/50 bg-black/80 border border-white/15 px-3 py-1">
+                        <div className="absolute top-4 right-4 font-mono text-xs uppercase tracking-wider text-white bg-black/80 border border-white/15 px-3 py-1">
                           Pending
                         </div>
                       )}
@@ -184,15 +184,15 @@ export default function HomePage() {
                     <h3 className="font-display text-4xl md:text-5xl text-white mb-3 uppercase tracking-[0.03em]">
                       {overlord.name}
                     </h3>
-                    <p className="font-mono text-sm text-white/50 mb-6 uppercase tracking-wider">
+                    <p className="font-mono text-sm text-white mb-6 uppercase tracking-wider">
                       Designation: {overlord.title}
                     </p>
-                    <p className="text-white/50 text-base font-mono leading-relaxed mb-4 max-w-md">
+                    <p className="text-white text-base font-mono leading-relaxed mb-4 max-w-md">
                       {overlord.lore}
                     </p>
-                    <p className="text-white/20 text-sm font-mono mb-8">
+                    <p className="text-white text-sm font-mono mb-8">
                       Ref: <span className="redacted">DOC-{overlord.number}-2024</span> &mdash;
-                      Status: <span className={overlord.status === 'live' ? 'text-white/60' : 'text-white/25'}>{overlord.status === 'live' ? 'ACTIVE' : 'PENDING'}</span>
+                      Status: <span className={overlord.status === 'live' ? 'text-white' : 'text-white'}>{overlord.status === 'live' ? 'ACTIVE' : 'PENDING'}</span>
                     </p>
                     {overlord.status === 'live' ? (
                       <Link
@@ -222,17 +222,17 @@ export default function HomePage() {
         <div className="page-container text-center">
           <ScrollReveal>
             <div className="line-accent mb-16" />
-            <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/40 mb-6">
+            <p className="font-mono text-xs uppercase tracking-[0.4em] text-white mb-6">
               Access Protocol
             </p>
             <h2 className="font-display text-4xl md:text-6xl text-white mb-8 uppercase tracking-[0.03em]">
               Enter the Epochalypse
             </h2>
-            <p className="text-white/50 text-base font-mono max-w-xl mx-auto mb-4">
+            <p className="text-white text-base font-mono max-w-xl mx-auto mb-4">
               Drag, rotate, distort, and export. Every interaction creates a
               unique iteration &mdash; your own fragment of the network.
             </p>
-            <p className="text-white/20 text-sm font-mono max-w-md mx-auto mb-12">
+            <p className="text-white text-sm font-mono max-w-md mx-auto mb-12">
               Authorization: <span className="redacted">GRANTED</span> &mdash; Proceed with <span className="redacted">caution</span>
             </p>
             <Link href="/overlords" className="btn-primary">

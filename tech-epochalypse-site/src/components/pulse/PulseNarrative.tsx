@@ -67,13 +67,13 @@ export default function PulseNarrative({
         {lines.map((line, i) => (
           <p
             key={i}
-            className="font-mono text-sm text-white/50 italic leading-relaxed"
+            className="font-mono text-sm text-white italic leading-relaxed"
           >
             &ldquo;{line}&rdquo;
           </p>
         ))}
       </div>
-      <p className="font-mono text-[10px] text-white/15 mt-6 uppercase tracking-widest">
+      <p className="font-mono text-[10px] text-white mt-6 uppercase tracking-widest">
         // Auto-generated from Pulse data
       </p>
     </div>

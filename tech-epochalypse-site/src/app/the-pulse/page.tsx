@@ -53,12 +53,12 @@ export default function ThePulsePage() {
               <h1 className="font-display text-4xl md:text-6xl text-white uppercase tracking-[0.05em] mt-4">
                 The Pulse
               </h1>
-              <p className="font-mono text-sm text-white/40 mt-4 max-w-2xl mx-auto leading-relaxed">
+              <p className="font-mono text-sm text-white mt-4 max-w-2xl mx-auto leading-relaxed">
                 Real-time tracking of how much each Tech Epochalypse overlord is
                 dominating the news cycle. The data never lies.
               </p>
               {data?.updated_at && (
-                <p className="font-mono text-[10px] text-white/20 mt-3 uppercase tracking-widest">
+                <p className="font-mono text-[10px] text-white mt-3 uppercase tracking-widest">
                   Last updated:{' '}
                   {new Date(data.updated_at).toLocaleString('en-US', {
                     month: 'short',
@@ -70,7 +70,7 @@ export default function ThePulsePage() {
                 </p>
               )}
               {usingSample && (
-                <p className="font-mono text-[10px] text-white/15 mt-2 uppercase tracking-widest">
+                <p className="font-mono text-[10px] text-white mt-2 uppercase tracking-widest">
                   Displaying sample data &mdash; live feed unavailable
                 </p>
               )}
@@ -90,7 +90,7 @@ export default function ThePulsePage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white/30" />
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-white/20" />
               </span>
-              <p className="font-mono text-sm text-white/30 animate-pulse">
+              <p className="font-mono text-sm text-white animate-pulse">
                 Intercepting transmissions...
               </p>
             </div>

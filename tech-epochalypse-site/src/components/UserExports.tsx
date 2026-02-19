@@ -99,7 +99,7 @@ export default function UserExports({ overlordNames, overlordSlugs }: Props) {
     return (
       <div className="mb-16 text-center py-12">
         <div className="w-6 h-6 border border-white/20 border-t-white/60 rounded-full animate-spin mx-auto mb-3" />
-        <p className="font-mono text-xs text-white/30 uppercase tracking-wider">Loading community exports...</p>
+        <p className="font-mono text-xs text-white uppercase tracking-wider">Loading community exports...</p>
       </div>
     )
   }
@@ -109,11 +109,11 @@ export default function UserExports({ overlordNames, overlordSlugs }: Props) {
   return (
     <div className="mb-20">
       <div className="flex items-center gap-4 mb-8">
-        <h2 className="font-mono text-sm uppercase tracking-[0.2em] text-white/50">
+        <h2 className="font-mono text-sm uppercase tracking-[0.2em] text-white">
           The Tribute Wall
         </h2>
         <div className="flex-1 h-px bg-white/5" />
-        <span className="font-mono text-xs text-white/25">
+        <span className="font-mono text-xs text-white">
           {exports.length} submission{exports.length !== 1 ? 's' : ''}
         </span>
       </div>

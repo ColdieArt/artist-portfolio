@@ -43,14 +43,14 @@ export default function OverlordCard({ overlord }: Props) {
             {overlord.name}
           </h3>
           <div className="flex items-center gap-4">
-            <span className="font-mono text-sm text-white/60">
+            <span className="font-mono text-sm text-white">
               {overlord.pulse_count} articles
             </span>
-            <span className="font-mono text-xs text-white/40">
+            <span className="font-mono text-xs text-white">
               {trendArrow} {trendLabel}
             </span>
             <span
-              className={`font-mono text-xs transition-transform duration-200 text-white/30 ${
+              className={`font-mono text-xs transition-transform duration-200 text-white ${
                 expanded ? 'rotate-180' : ''
               }`}
             >
@@ -63,7 +63,7 @@ export default function OverlordCard({ overlord }: Props) {
       {expanded && overlord.headlines.length > 0 && (
         <div className="px-4 pb-5 space-y-3 animate-fade-in">
           <div className="flex items-center gap-3 mb-3">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-white/30">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-white">
               Sentiment: {overlord.sentiment_label}
             </span>
           </div>
@@ -76,14 +76,14 @@ export default function OverlordCard({ overlord }: Props) {
               className="block group"
             >
               <div className="flex items-start gap-3">
-                <span className="font-mono text-[10px] text-white/20 mt-1 shrink-0">
+                <span className="font-mono text-[10px] text-white mt-1 shrink-0">
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <div>
-                  <p className="font-mono text-sm text-white/70 group-hover:text-white/90 transition-colors leading-snug">
+                  <p className="font-mono text-sm text-white transition-colors leading-snug">
                     {hl.title}
                   </p>
-                  <p className="font-mono text-[10px] text-white/30 mt-1 uppercase tracking-wider">
+                  <p className="font-mono text-[10px] text-white mt-1 uppercase tracking-wider">
                     {hl.source_name}
                   </p>
                 </div>
@@ -95,7 +95,7 @@ export default function OverlordCard({ overlord }: Props) {
 
       {expanded && overlord.headlines.length === 0 && (
         <div className="px-4 pb-4">
-          <p className="font-mono text-xs text-white/25">
+          <p className="font-mono text-xs text-white">
             No headlines available.
           </p>
         </div>

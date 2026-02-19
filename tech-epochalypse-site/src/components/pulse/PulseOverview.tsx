@@ -28,7 +28,7 @@ export default function PulseOverview({ overlords, hottest }: Props) {
         <span className="redacted-partial">Live</span>
       </div>
 
-      <p className="font-mono text-xs text-white/30 mt-3 mb-6">
+      <p className="font-mono text-xs text-white mt-3 mb-6">
         {totalArticles} total articles tracked across {sorted.length} overlords
       </p>
 
@@ -49,7 +49,7 @@ export default function PulseOverview({ overlords, hottest }: Props) {
               }}
             />
             <div className="relative z-10">
-              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/30 block mb-3">
+              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-white block mb-3">
                 Dominating the News Cycle
               </span>
               <span
@@ -64,11 +64,11 @@ export default function PulseOverview({ overlords, hottest }: Props) {
               >
                 {leader.name}
               </h2>
-              <p className="font-mono text-sm text-white/50 mt-2">
+              <p className="font-mono text-sm text-white mt-2">
                 {leader.pulse_count} articles tracked
               </p>
               <div className="flex items-center justify-center gap-2 mt-3">
-                <span className="font-mono text-[10px] uppercase tracking-widest text-white/25">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-white">
                   Sentiment: {leader.sentiment_label}
                 </span>
                 <span className="text-xs">
@@ -95,7 +95,7 @@ export default function PulseOverview({ overlords, hottest }: Props) {
                   {/* Rank badge */}
                   <span
                     className="font-display text-lg w-10 text-right shrink-0 uppercase tracking-wide"
-                    style={{ color: overlord.color, opacity: 0.8 }}
+                    style={{ color: overlord.color, opacity: 1 }}
                   >
                     {ordinal(rank)}
                   </span>
@@ -110,7 +110,7 @@ export default function PulseOverview({ overlords, hottest }: Props) {
                       >
                         {overlord.name}
                       </span>
-                      <span className="font-mono text-xs text-white/40 shrink-0 ml-2">
+                      <span className="font-mono text-xs text-white shrink-0 ml-2">
                         {overlord.pulse_count} articles
                       </span>
                     </div>
@@ -126,7 +126,7 @@ export default function PulseOverview({ overlords, hottest }: Props) {
                         }}
                       />
                       {/* Percentage marker */}
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-white/30">
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-white">
                         {Math.round(pct)}%
                       </span>
                     </div>
