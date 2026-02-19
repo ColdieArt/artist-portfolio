@@ -36,11 +36,11 @@ export interface PulseData {
 }
 
 export const OVERLORD_CONFIGS = [
-  { key: 'musk', name: 'Elon Musk', query: 'Elon Musk', color: '#3b82f6' },
-  { key: 'zuckerberg', name: 'Mark Zuckerberg', query: 'Mark Zuckerberg', color: '#06b6d4' },
-  { key: 'altman', name: 'Sam Altman', query: 'Sam Altman', color: '#a3a3a3' },
-  { key: 'bezos', name: 'Jeff Bezos', query: 'Jeff Bezos', color: '#f97316' },
-  { key: 'huang', name: 'Jensen Huang', query: 'Jensen Huang', color: '#84cc16' },
+  { key: 'musk', name: 'Elon Musk', query: '"Elon Musk"', color: '#3b82f6' },
+  { key: 'zuckerberg', name: 'Mark Zuckerberg', query: '"Mark Zuckerberg" OR "Zuckerberg" Meta', color: '#06b6d4' },
+  { key: 'altman', name: 'Sam Altman', query: '"Sam Altman" OR "Altman" OpenAI', color: '#a3a3a3' },
+  { key: 'bezos', name: 'Jeff Bezos', query: '"Jeff Bezos"', color: '#f97316' },
+  { key: 'huang', name: 'Jensen Huang', query: '"Jensen Huang" OR "Huang" Nvidia', color: '#84cc16' },
 ] as const
 
 // Simple sentiment keywords
@@ -95,39 +95,21 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim()
 }
 
-/**
- * Count the number of article links inside a Google News RSS description.
- * Each <item> is a story cluster — the description HTML contains <a> tags
- * linking to every article covering that story (main + related).
- * Counting these gives us a real total article count per overlord.
- */
-function countArticlesInDescription(rawHtml: string): number {
-  // Count <a href="..."> tags — each is one article in the cluster
-  // Also handle HTML-entity-encoded versions (&lt;a)
-  const decoded = rawHtml
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
-  const matches = decoded.match(/<a\s/gi)
-  return matches ? matches.length : 1 // at least 1 (the item itself)
-}
-
 interface RssArticle {
   title: string
   source: string
   url: string
   pubDate: string
   description: string
-  clusterSize: number  // how many articles in this story cluster
 }
 
 /**
- * Strategy 1: Use rss2json.com to convert Google News RSS to JSON.
- * Free, CORS-safe, no XML parsing needed.
+ * Strategy: Use rss2json.com to convert Google News RSS to JSON.
+ * Free, CORS-safe, no XML parsing needed. Free tier caps at ~10 items.
  */
 async function fetchViaRss2Json(rssUrl: string): Promise<RssArticle[]> {
   const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`
-  const res = await fetch(apiUrl)
+  const res = await fetch(apiUrl, { signal: AbortSignal.timeout(8000) })
   if (!res.ok) throw new Error(`rss2json ${res.status}`)
   const json = await res.json()
   if (json.status !== 'ok' || !Array.isArray(json.items)) {
@@ -144,24 +126,25 @@ async function fetchViaRss2Json(rssUrl: string): Promise<RssArticle[]> {
       url: item.link || '',
       pubDate: item.pubDate || '',
       description: stripHtml(rawDesc),
-      clusterSize: countArticlesInDescription(rawDesc),
     }
   }).filter((a: RssArticle) => a.title.length > 0)
 }
 
 /**
- * Strategy 2: Fetch RSS via CORS proxy and parse XML with DOMParser.
+ * Fetch RSS via CORS proxy and parse XML with DOMParser.
+ * Tries multiple proxy services for reliability.
+ * Returns the full feed (often 50-100+ items).
  */
-async function fetchViaProxy(rssUrl: string): Promise<RssArticle[]> {
-  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`
-  const res = await fetch(proxyUrl)
-  if (!res.ok) throw new Error(`proxy ${res.status}`)
-  const xml = await res.text()
+const CORS_PROXIES = [
+  (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+]
 
+function parseRssXml(xml: string): RssArticle[] {
   const parser = new DOMParser()
   const doc = parser.parseFromString(xml, 'text/xml')
 
-  // Check for XML parse errors
   if (doc.querySelector('parsererror')) {
     throw new Error('XML parse error')
   }
@@ -173,14 +156,11 @@ async function fetchViaProxy(rssUrl: string): Promise<RssArticle[]> {
     const rawTitle = item.querySelector('title')?.textContent || ''
     const { cleanTitle, source: titleSource } = extractSource(rawTitle)
 
-    // Google News RSS has a <source> element with the publisher name
     const sourceEl = item.querySelector('source')
     const source = sourceEl?.textContent || titleSource
 
-    // <link> in RSS XML: textContent can be tricky, try nextSibling text
     let url = item.querySelector('link')?.textContent?.trim() || ''
     if (!url) {
-      // Fallback: extract link from raw XML text between <link> tags
       const itemXml = new XMLSerializer().serializeToString(item)
       const linkMatch = itemXml.match(/<link[^>]*>([\s\S]*?)<\/link>/)
       if (linkMatch) url = linkMatch[1].trim()
@@ -189,33 +169,56 @@ async function fetchViaProxy(rssUrl: string): Promise<RssArticle[]> {
     const pubDate = item.querySelector('pubDate')?.textContent || ''
     const rawDesc = item.querySelector('description')?.textContent || ''
     const description = stripHtml(rawDesc)
-    const clusterSize = countArticlesInDescription(rawDesc)
 
     if (cleanTitle) {
-      articles.push({ title: cleanTitle, source, url, pubDate, description, clusterSize })
+      articles.push({ title: cleanTitle, source, url, pubDate, description })
     }
   })
 
   return articles
 }
 
+async function fetchViaProxy(rssUrl: string): Promise<RssArticle[]> {
+  let lastError: Error | null = null
+
+  for (const makeProxyUrl of CORS_PROXIES) {
+    try {
+      const proxyUrl = makeProxyUrl(rssUrl)
+      const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) })
+      if (!res.ok) throw new Error(`proxy ${res.status}`)
+      const xml = await res.text()
+      const articles = parseRssXml(xml)
+      if (articles.length > 0) return articles
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err))
+      continue
+    }
+  }
+
+  throw lastError || new Error('All proxies failed')
+}
+
 /**
  * Fetch Google News RSS for a search query.
- * Tries CORS proxy first (returns ALL items, often 50-100+), then falls
- * back to rss2json.com (free tier caps at 10 items).
+ * Tries multiple CORS proxies first (full feed, 50-100+ items),
+ * then falls back to rss2json.com (capped at ~10 items).
+ *
+ * Uses when:7d to limit to the past week for recent trending data.
+ * Counts each RSS item (story) as 1 in the pulse count — this gives
+ * clean, honest numbers that naturally vary between overlords based
+ * on actual news volume.
  */
 async function fetchGoogleNewsRSS(query: string): Promise<{
   totalResults: number
   articles: RssArticle[]
 }> {
-  const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`
+  const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query + ' when:7d')}&hl=en-US&gl=US&ceid=US:en`
 
-  // Strategy 1: CORS proxy + XML parsing (returns full feed, 50-100+ items)
+  // Strategy 1: CORS proxy + XML parsing (full feed)
   try {
     const articles = await fetchViaProxy(rssUrl)
     if (articles.length > 0) {
-      const totalArticles = articles.reduce((sum, a) => sum + a.clusterSize, 0)
-      return { totalResults: totalArticles, articles }
+      return { totalResults: articles.length, articles }
     }
   } catch (err) {
     console.warn('proxy fetch failed, trying rss2json:', err)
@@ -225,8 +228,7 @@ async function fetchGoogleNewsRSS(query: string): Promise<{
   try {
     const articles = await fetchViaRss2Json(rssUrl)
     if (articles.length > 0) {
-      const totalArticles = articles.reduce((sum, a) => sum + a.clusterSize, 0)
-      return { totalResults: totalArticles, articles }
+      return { totalResults: articles.length, articles }
     }
   } catch (err) {
     console.warn('rss2json also failed:', err)
@@ -236,13 +238,21 @@ async function fetchGoogleNewsRSS(query: string): Promise<{
 }
 
 /**
+ * Determine trend direction relative to the group leader.
+ */
+function trendDirection(count: number, maxCount: number): string {
+  const ratio = maxCount > 0 ? count / maxCount : 0
+  if (ratio > 0.85) return 'surging'
+  if (ratio > 0.5) return 'rising'
+  return 'stable'
+}
+
+/**
  * Fetch live Pulse data for all overlords from Google News RSS.
  * No API key required.
  */
 export async function fetchPulseData(): Promise<PulseData> {
-  const results: OverlordPulse[] = []
-
-  // Fetch all overlords in parallel for speed
+  // Fetch all overlords in parallel
   const fetches = OVERLORD_CONFIGS.map(async (config) => {
     try {
       const data = await fetchGoogleNewsRSS(config.query)
@@ -265,7 +275,7 @@ export async function fetchPulseData(): Promise<PulseData> {
         pulse_count: data.totalResults,
         sentiment_score: Math.round(sentimentScore * 100) / 100,
         sentiment_label: labelSentiment(sentimentScore),
-        trend_direction: data.totalResults > 80 ? 'surging' : data.totalResults > 40 ? 'rising' : 'stable',
+        trend_direction: 'stable', // placeholder — set relative to group below
         headlines,
       } as OverlordPulse
     } catch (err) {
@@ -283,8 +293,13 @@ export async function fetchPulseData(): Promise<PulseData> {
     }
   })
 
-  const overlordResults = await Promise.all(fetches)
-  results.push(...overlordResults)
+  const results = await Promise.all(fetches)
+
+  // Set trend directions relative to the leader
+  const maxCount = Math.max(...results.map((r) => r.pulse_count))
+  for (const r of results) {
+    r.trend_direction = trendDirection(r.pulse_count, maxCount)
+  }
 
   // Sort by pulse count
   results.sort((a, b) => b.pulse_count - a.pulse_count)
@@ -292,7 +307,7 @@ export async function fetchPulseData(): Promise<PulseData> {
   const hottest = results[0]?.key || null
   const quietest = results[results.length - 1]?.key || null
   const mostNeg = [...results].sort((a, b) => a.sentiment_score - b.sentiment_score)[0]?.key || null
-  const bigSurge = [...results].sort((a, b) => b.pulse_count - a.pulse_count)[0]?.key || null
+  const bigSurge = results[0]?.key || null
 
   return {
     overlords: results,
@@ -335,11 +350,11 @@ export function getSamplePulseData(): PulseData {
   }
 
   const overlords: OverlordPulse[] = [
-    { key: 'musk', name: 'Elon Musk', color: '#3b82f6', pulse_count: 683, sentiment_score: -0.15, sentiment_label: 'leaning negative', trend_direction: 'rising', headlines: sampleHeadlines.musk },
-    { key: 'altman', name: 'Sam Altman', color: '#a3a3a3', pulse_count: 654, sentiment_score: 0.25, sentiment_label: 'leaning positive', trend_direction: 'surging', headlines: sampleHeadlines.altman },
-    { key: 'huang', name: 'Jensen Huang', color: '#84cc16', pulse_count: 480, sentiment_score: 0.35, sentiment_label: 'positive', trend_direction: 'rising', headlines: sampleHeadlines.huang },
-    { key: 'zuckerberg', name: 'Mark Zuckerberg', color: '#06b6d4', pulse_count: 401, sentiment_score: -0.05, sentiment_label: 'leaning negative', trend_direction: 'surging', headlines: sampleHeadlines.zuckerberg },
-    { key: 'bezos', name: 'Jeff Bezos', color: '#f97316', pulse_count: 323, sentiment_score: 0.05, sentiment_label: 'leaning positive', trend_direction: 'surging', headlines: sampleHeadlines.bezos },
+    { key: 'musk', name: 'Elon Musk', color: '#3b82f6', pulse_count: 94, sentiment_score: -0.15, sentiment_label: 'leaning negative', trend_direction: 'surging', headlines: sampleHeadlines.musk },
+    { key: 'altman', name: 'Sam Altman', color: '#a3a3a3', pulse_count: 81, sentiment_score: 0.25, sentiment_label: 'leaning positive', trend_direction: 'surging', headlines: sampleHeadlines.altman },
+    { key: 'huang', name: 'Jensen Huang', color: '#84cc16', pulse_count: 67, sentiment_score: 0.35, sentiment_label: 'positive', trend_direction: 'rising', headlines: sampleHeadlines.huang },
+    { key: 'zuckerberg', name: 'Mark Zuckerberg', color: '#06b6d4', pulse_count: 48, sentiment_score: -0.05, sentiment_label: 'neutral', trend_direction: 'rising', headlines: sampleHeadlines.zuckerberg },
+    { key: 'bezos', name: 'Jeff Bezos', color: '#f97316', pulse_count: 31, sentiment_score: 0.05, sentiment_label: 'leaning positive', trend_direction: 'stable', headlines: sampleHeadlines.bezos },
   ]
 
   return {
