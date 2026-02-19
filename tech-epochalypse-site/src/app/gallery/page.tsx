@@ -4,7 +4,7 @@ import UserExports from '@/components/UserExports'
 import overlords from '@/data/overlords.json'
 
 export const metadata: Metadata = {
-  title: 'Community Gallery — Tech Epochalypse',
+  title: 'The Mainframe — Tech Epochalypse',
   description:
     'A living gallery of visitor-created remixes and exported iterations from the Tech Epochalypse series.',
 }
@@ -25,7 +25,7 @@ export default function GalleryPage() {
               Archive
             </p>
             <h1 className="font-display text-4xl md:text-6xl text-white mb-4 uppercase tracking-[0.05em]">
-              Community Gallery
+              The Mainframe
             </h1>
             <p className="font-mono text-sm text-white max-w-2xl mx-auto mb-2">
               Every interaction creates a unique iteration. This gallery
