@@ -34,16 +34,12 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16 mb-24 md:mb-32">
           <ScrollReveal className="lg:col-span-2">
             <div className="aspect-[3/4] relative overflow-hidden bg-charcoal dossier-border">
-              <div className="w-full h-full flex items-center justify-center border border-white/5">
-                <div className="text-center">
-                  <div className="w-32 h-32 rounded-full bg-charcoal border border-white/5 mx-auto mb-4 flex items-center justify-center">
-                    <span className="font-display text-4xl text-white">C</span>
-                  </div>
-                  <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-white">
-                    Artist Photo
-                  </p>
-                </div>
-              </div>
+              <img
+                src="/Coldie-artist-headshot.jpg"
+                alt="Coldie — Artist"
+                className="w-full h-full object-cover"
+                style={{ filter: 'grayscale(1) contrast(1.2)' }}
+              />
               {/* Pixelated corruption */}
               <div className="absolute top-4 right-4 w-16 h-8 bg-white/[0.04] animate-pixel-drift" style={{ imageRendering: 'pixelated' as const }} />
               <div className="absolute bottom-8 left-4 w-24 h-3 bg-white/[0.03] animate-pixel-drift-slow" />
