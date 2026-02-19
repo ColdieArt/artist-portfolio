@@ -50,7 +50,7 @@ export default function HomePage() {
           <h1 className="animate-fade-in delay-200 text-6xl md:text-8xl lg:text-9xl text-white leading-[0.9] mb-2 uppercase tracking-[0.05em]" style={{ fontFamily: 'Arial Black, Arial, Helvetica, sans-serif', fontWeight: 900 }}>
             Know Your
             <br />
-            <span className="text-white italic tracking-[0.02em]" style={{ fontFamily: 'Arial Black, Arial, Helvetica, sans-serif', fontWeight: 900 }}>
+            <span className="text-white tracking-[0.02em]" style={{ fontFamily: 'Arial Black, Arial, Helvetica, sans-serif', fontWeight: 900 }}>
               Overlord
             </span>
           </h1>
@@ -99,11 +99,13 @@ export default function HomePage() {
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-fade-in delay-1000">
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-white">
-            Scroll
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 animate-fade-in delay-1000">
+          <p className="font-mono text-sm uppercase tracking-[0.3em] text-white/80 animate-bounce">
+            Scroll Down
           </p>
-          <div className="w-px h-8 bg-gradient-to-b from-white/30 to-transparent animate-pulse-glow" />
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="none" className="animate-bounce">
+            <path d="M4 6l4 4 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.8"/>
+          </svg>
         </div>
       </section>
 
