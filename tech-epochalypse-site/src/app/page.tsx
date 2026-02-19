@@ -74,8 +74,8 @@ export default function HomePage() {
 
 
           <div className="animate-fade-in delay-700">
-            <Link href="/overlords" className="btn-primary">
-              <span>Touch the Art</span>
+            <Link href="/mainframe" className="btn-primary btn-pulse">
+              <span>ENTER THE MAINFRAME</span>
               <svg
                 width="16"
                 height="16"
