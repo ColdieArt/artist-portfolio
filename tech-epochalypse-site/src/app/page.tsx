@@ -72,9 +72,6 @@ export default function HomePage() {
             Five overlords. One network. Infinite iterations.
           </p>
 
-          <p className="animate-fade-in delay-500 font-mono text-sm text-white mb-12 max-w-lg mx-auto">
-            Protocol: <span className="redacted">REDACTED</span> &mdash; Status: <span className="text-white">ACTIVE</span> &mdash; Clearance: <span className="redacted">████</span>
-          </p>
 
           <div className="animate-fade-in delay-700">
             <Link href="/overlords" className="btn-primary">
