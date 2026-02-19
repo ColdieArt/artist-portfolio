@@ -34,7 +34,7 @@ export default function RootLayout({
         <div className="grain-overlay" />
         <div className="scanline" />
         <Navigation />
-        <main className="min-h-screen">{children}</main>
+        <main>{children}</main>
         <Footer />
       </body>
     </html>
