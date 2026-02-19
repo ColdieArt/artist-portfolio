@@ -52,6 +52,9 @@ export default function MainframePage() {
               <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
                 Exploits
               </h2>
+              <p className="font-mono text-sm text-white/70 leading-relaxed mt-4">
+                Pay attention to exploits that are listed. Can happen at any time. They are of utmost importance and offer those willing to accept the challenge an opportunity to build the dossier against the overlords.
+              </p>
             </div>
           </ScrollReveal>
 
