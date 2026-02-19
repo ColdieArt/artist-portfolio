@@ -72,10 +72,10 @@ export default function Footer() {
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-white text-xs font-mono uppercase tracking-wider">
-            &copy; {new Date().getFullYear()} Coldie. All rights reserved.
+            &copy; 2026 Coldie, LLC. All rights reserved.
           </p>
           <p className="text-white text-xs font-mono uppercase tracking-wider">
-            Digital art, endlessly reimagined
+            Kinetic 3D art, endlessly reimagined
           </p>
         </div>
       </div>
