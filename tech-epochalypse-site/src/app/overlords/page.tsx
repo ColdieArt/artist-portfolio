@@ -11,11 +11,11 @@ export const metadata: Metadata = {
 
 export default function OverlordsPage() {
   return (
-    <section className="pt-28 md:pt-36 pb-24 section-padding bg-black grid-lines">
-      <div className="page-container">
-        <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-start">
+    <section className="pt-28 md:pt-36 pb-24 lg:pb-8 section-padding bg-black grid-lines lg:h-screen lg:overflow-hidden">
+      <div className="page-container h-full">
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-10 items-start h-full">
           {/* Left column — headline & text */}
-          <div className="w-full lg:w-5/12 lg:sticky lg:top-36">
+          <div className="w-full lg:w-5/12 flex items-center">
             <ScrollReveal>
               <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/40 mb-4">
                 Overlord Files
@@ -36,11 +36,11 @@ export default function OverlordsPage() {
             </ScrollReveal>
           </div>
 
-          {/* Right column — overlord grid, 2 wide */}
-          <div className="w-full lg:w-7/12">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Right column — overlord grid, 2 wide, fits viewport */}
+          <div className="w-full lg:w-7/12 lg:h-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:grid-rows-3 lg:h-full">
               {overlords.map((overlord, i) => (
-                <ScrollReveal key={overlord.slug} delay={i * 100}>
+                <ScrollReveal key={overlord.slug} delay={i * 100} className="lg:min-h-0 lg:h-full">
                   <OverlordCard overlord={overlord} />
                 </ScrollReveal>
               ))}
@@ -68,9 +68,9 @@ function OverlordCard({ overlord }: { overlord: Overlord }) {
   const isLive = overlord.status === 'live'
 
   const content = (
-    <div className="group relative bg-charcoal/50 border border-white/5 overflow-hidden card-hover cursor-pointer">
+    <div className="group relative bg-charcoal/50 border border-white/5 overflow-hidden card-hover cursor-pointer h-full">
       {/* Image */}
-      <div className="aspect-[3/4] relative overflow-hidden">
+      <div className="aspect-[3/4] lg:aspect-auto lg:h-full relative overflow-hidden">
         {overlord.previewImage ? (
           <img
             src={overlord.previewImage}
@@ -118,11 +118,11 @@ function OverlordCard({ overlord }: { overlord: Overlord }) {
         )}
 
         {/* Bottom info */}
-        <div className="absolute bottom-0 left-0 right-0 p-6">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/40 mb-1">
+        <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-3">
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/40 mb-0.5">
             Overlord {overlord.number}
           </p>
-          <h3 className="font-display text-2xl md:text-3xl text-white mb-1 uppercase tracking-[0.03em]">
+          <h3 className="font-display text-xl lg:text-lg text-white mb-0.5 uppercase tracking-[0.03em]">
             {overlord.name}
           </h3>
           <p className="font-mono text-xs text-white/35">
@@ -130,7 +130,7 @@ function OverlordCard({ overlord }: { overlord: Overlord }) {
           </p>
 
           {/* Interact prompt */}
-          <div className="mt-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="mt-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <span className="font-mono text-xs uppercase tracking-[0.15em] text-white/60">
               {isLive ? 'Take Control' : 'Restricted'}
             </span>
