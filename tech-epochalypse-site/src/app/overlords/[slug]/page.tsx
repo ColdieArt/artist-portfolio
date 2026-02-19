@@ -111,6 +111,7 @@ export default function OverlordPage({ params }: PageProps) {
             </div>
 
             <div className="space-y-6">
+              <ArtworkViewer overlord={overlord} />
               <div>
                 <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white/40 mb-2 border-b border-white/10 pb-1">
                   Medium
@@ -134,11 +135,6 @@ export default function OverlordPage({ params }: PageProps) {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Launch artwork button */}
-      <div className="flex-1 flex items-center justify-center bg-black">
-        <ArtworkViewer overlord={overlord} />
       </div>
     </div>
   )
