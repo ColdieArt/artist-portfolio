@@ -30,7 +30,7 @@ export default function MainframePage() {
               </h1>
               <p className="font-mono text-sm text-white mt-4 max-w-2xl mx-auto leading-relaxed">
                 The nerve center of Tech Epochalypse. Community iterations,
-                active exploits, collectors, and artist dossier &mdash; all in
+                active exploits, and founding signals &mdash; all in
                 one feed.
               </p>
             </div>
@@ -297,21 +297,18 @@ export default function MainframePage() {
 
       <div className="line-accent" />
 
-      {/* ── Section 3: Collectors ── */}
+      {/* ── Section 3: Founding Signals ── */}
       <section className="py-12 md:py-16 section-padding">
         <div className="page-container">
           <ScrollReveal>
             <div className="flex items-center justify-between mb-8">
               <div>
-                <div className="classified-header">
-                  The Inner Circle &mdash; Verified
-                </div>
                 <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
-                  Collectors
+                  Founding Signals
                 </h2>
               </div>
               <Link href="/collectors" className="btn-secondary">
-                <span>All Collectors</span>
+                <span>All Founding Signals</span>
               </Link>
             </div>
           </ScrollReveal>
