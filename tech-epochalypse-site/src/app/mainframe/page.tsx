@@ -321,6 +321,7 @@ export default function MainframePage() {
           <UserExports
             overlordNames={overlordNames}
             overlordSlugs={overlordSlugs}
+            category="general submission"
           />
         </div>
       </section>
