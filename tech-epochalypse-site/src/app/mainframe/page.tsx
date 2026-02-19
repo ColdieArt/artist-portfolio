@@ -174,7 +174,7 @@ export default function MainframePage() {
                     &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;:
                   </p>
                   <p>
-                    &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;: One operative will be &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Not by &#9608;&#9608;&#9608;&#9608;. Not by &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. The Overlord reviews every &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; personally.
+                    &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;: One operative will be &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Not by &#9608;&#9608;&#9608;&#9608;. Not by &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; reviews every &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; personally.
                   </p>
                 </div>
 
@@ -257,7 +257,7 @@ export default function MainframePage() {
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    Access Overlord Nodes
+                    EXPLOIT YOUR OVERLORD
                   </Link>
                 </div>
               </div>
