@@ -525,11 +525,23 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
         .lightbox-img {
           max-width: 100%;
           max-height: 100%;
-          width: auto;
-          height: auto;
           object-fit: contain;
           display: block;
           filter: contrast(1.1);
+        }
+        /* Landscape: fill 100% height, auto width, centered */
+        @media (orientation: landscape) {
+          .lightbox-img {
+            height: 100%;
+            width: auto;
+          }
+        }
+        /* Portrait: fill 100% width, auto height, centered */
+        @media (orientation: portrait) {
+          .lightbox-img {
+            width: 100%;
+            height: auto;
+          }
         }
         .lightbox-nav {
           position: absolute;
