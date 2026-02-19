@@ -531,9 +531,14 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
         }
         /* Landscape: fill 100% height, auto width, centered */
         @media (orientation: landscape) {
+          .lightbox-image-area {
+            align-items: stretch;
+            justify-items: center;
+          }
           .lightbox-img {
             height: 100%;
             width: auto;
+            object-position: center;
           }
         }
         /* Portrait: fill 100% width, auto height, centered */
