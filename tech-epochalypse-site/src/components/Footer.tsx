@@ -17,7 +17,7 @@ export default function Footer() {
               <span className="text-white">Coldie</span>.
             </p>
             <div className="mt-4 font-mono text-xs text-white uppercase tracking-[0.15em]">
-              Classification: <span className="redacted-white">LEVEL 5</span>
+              Classification: FAFO <span className="redacted-white">REDACTED</span>
             </div>
           </div>
 
