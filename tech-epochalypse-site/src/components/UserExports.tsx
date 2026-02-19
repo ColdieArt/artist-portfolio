@@ -29,6 +29,7 @@ interface GalleryRecord {
     Date?: string
     Contributor?: string
     Approved?: boolean
+    Category?: string
   }
   createdTime: string
 }
@@ -60,9 +61,11 @@ function parseRecords(records: GalleryRecord[], nameToSlug: Record<string, strin
 interface Props {
   overlordNames: Record<string, string>
   overlordSlugs: string[]
+  category?: string
+  headerText?: string
 }
 
-export default function UserExports({ overlordNames, overlordSlugs }: Props) {
+export default function UserExports({ overlordNames, overlordSlugs, category, headerText }: Props) {
   // Reverse mapping: overlord name -> slug (e.g. "Elon Musk" -> "elon-musk")
   const nameToSlug: Record<string, string> = {}
   for (const [slug, name] of Object.entries(overlordNames)) {
@@ -75,7 +78,10 @@ export default function UserExports({ overlordNames, overlordSlugs }: Props) {
   useEffect(() => {
     async function fetchGallery() {
       try {
-        const filter = encodeURIComponent('{Approved}=1')
+        const formula = category
+          ? `AND({Approved}=1,{Category}="${category}")`
+          : '{Approved}=1'
+        const filter = encodeURIComponent(formula)
         const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}?sort%5B0%5D%5Bfield%5D=Date&sort%5B0%5D%5Bdirection%5D=desc&filterByFormula=${filter}`
         const res = await fetch(url, {
           headers: {
@@ -110,7 +116,7 @@ export default function UserExports({ overlordNames, overlordSlugs }: Props) {
     <div className="mb-20">
       <div className="flex items-center gap-4 mb-8">
         <h2 className="font-mono text-sm uppercase tracking-[0.2em] text-white">
-          Items of interest collected via community submissions. Still to be dissected and classified. Viewer discretion advised. Data unfiltered.
+          {headerText ?? 'Items of interest collected via community submissions. Still to be dissected and classified. Viewer discretion advised. Data unfiltered.'}
         </h2>
         <div className="flex-1 h-px bg-white/5" />
         <span className="font-mono text-xs text-white">

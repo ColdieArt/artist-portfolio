@@ -269,6 +269,33 @@ export default function MainframePage() {
 
       <div className="line-accent" />
 
+      {/* ── Section 1b: Current Exploit Submissions ── */}
+      <section className="py-12 md:py-16 section-padding">
+        <div className="page-container">
+          <ScrollReveal>
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <div className="classified-header">
+                  Active Exploit &mdash; Submissions
+                </div>
+                <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
+                  Exploit Gallery
+                </h2>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <UserExports
+            overlordNames={overlordNames}
+            overlordSlugs={overlordSlugs}
+            category="Current Exploit"
+            headerText="Submissions for the current active exploit. These operatives have breached the network."
+          />
+        </div>
+      </section>
+
+      <div className="line-accent" />
+
       {/* ── Section 2: Gallery ── */}
       <section className="py-12 md:py-16 section-padding">
         <div className="page-container">
