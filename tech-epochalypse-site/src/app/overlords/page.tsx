@@ -17,18 +17,18 @@ export default function OverlordsPage() {
           {/* Left column — headline & text */}
           <div className="w-full lg:w-5/12 flex items-center">
             <ScrollReveal>
-              <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/40 mb-4">
+              <p className="font-mono text-xs uppercase tracking-[0.4em] text-white mb-4">
                 Overlord Files
               </p>
               <h1 className="font-display text-5xl md:text-7xl text-white mb-4 uppercase tracking-[0.05em]">
                 The Overlords
               </h1>
-              <p className="font-mono text-sm text-white/50 max-w-md">
+              <p className="font-mono text-sm text-white max-w-md">
                 Know the people who know everything about you.
               </p>
               <div className="flex items-center gap-3 mt-4">
                 <div className="w-12 h-px bg-white/15" />
-                <span className="font-mono text-xs text-white/25 uppercase tracking-wider">
+                <span className="font-mono text-xs text-white uppercase tracking-wider">
                   Clearance: <span className="redacted">LEVEL 3</span>
                 </span>
                 <div className="w-12 h-px bg-white/15" />
@@ -75,13 +75,13 @@ function OverlordCard({ overlord }: { overlord: Overlord }) {
           <img
             src={overlord.previewImage}
             alt={overlord.name}
-            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 opacity-50 group-hover:opacity-70"
+            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 opacity-100"
             loading="lazy"
             style={{ filter: 'grayscale(1) contrast(1.2)' }}
           />
         ) : (
           <div className="w-full h-full bg-charcoal flex items-center justify-center">
-            <span className="font-display text-8xl text-white/[0.06]">
+            <span className="font-display text-8xl text-white">
               {overlord.number}
             </span>
           </div>
@@ -95,7 +95,7 @@ function OverlordCard({ overlord }: { overlord: Overlord }) {
 
         {/* Number watermark */}
         <div className="absolute top-4 right-4">
-          <span className="font-display text-5xl font-light text-white/[0.07] group-hover:text-white/[0.12] transition-colors duration-500">
+          <span className="font-display text-5xl font-light text-white transition-colors duration-500">
             {overlord.number}
           </span>
         </div>
@@ -105,7 +105,7 @@ function OverlordCard({ overlord }: { overlord: Overlord }) {
 
         {/* Status badge */}
         {!isLive && (
-          <div className="absolute top-4 left-4 font-mono text-xs uppercase tracking-wider text-white/40 bg-black/80 border border-white/15 px-3 py-1 backdrop-blur-sm">
+          <div className="absolute top-4 left-4 font-mono text-xs uppercase tracking-wider text-white bg-black/80 border border-white/15 px-3 py-1 backdrop-blur-sm">
             Classified
           </div>
         )}
@@ -119,23 +119,23 @@ function OverlordCard({ overlord }: { overlord: Overlord }) {
 
         {/* Bottom info */}
         <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-3">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/40 mb-0.5">
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-0.5">
             Overlord {overlord.number}
           </p>
           <h3 className="font-display text-xl lg:text-lg text-white mb-0.5 uppercase tracking-[0.03em]">
             {overlord.name}
           </h3>
-          <p className="font-mono text-xs text-white/35">
+          <p className="font-mono text-xs text-white">
             {overlord.title}
           </p>
 
           {/* Interact prompt */}
           <div className="mt-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="font-mono text-xs uppercase tracking-[0.15em] text-white/60">
+            <span className="font-mono text-xs uppercase tracking-[0.15em] text-white">
               {isLive ? 'Take Control' : 'Restricted'}
             </span>
             {isLive && (
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="text-white/60">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="text-white">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             )}

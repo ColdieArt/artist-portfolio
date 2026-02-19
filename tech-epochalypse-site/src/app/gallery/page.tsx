@@ -21,17 +21,17 @@ export default function GalleryPage() {
         {/* Header */}
         <ScrollReveal>
           <div className="text-center mb-12 md:mb-16">
-            <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/40 mb-4">
+            <p className="font-mono text-xs uppercase tracking-[0.4em] text-white mb-4">
               Archive
             </p>
             <h1 className="font-display text-4xl md:text-6xl text-white mb-4 uppercase tracking-[0.05em]">
               Community Gallery
             </h1>
-            <p className="font-mono text-sm text-white/50 max-w-2xl mx-auto mb-2">
+            <p className="font-mono text-sm text-white max-w-2xl mx-auto mb-2">
               Every interaction creates a unique iteration. This gallery
               showcases remixes and exports from visitors around the world.
             </p>
-            <p className="font-mono text-xs text-white/25 max-w-lg mx-auto">
+            <p className="font-mono text-xs text-white max-w-lg mx-auto">
               Click any piece to view full size. Play slideshow to cycle through the collection.
             </p>
           </div>
@@ -47,7 +47,7 @@ export default function GalleryPage() {
             <h3 className="font-display text-2xl md:text-3xl text-white mb-4 uppercase tracking-[0.03em]">
               Share Your Iteration
             </h3>
-            <p className="text-white/40 text-sm font-mono max-w-lg mx-auto mb-8 leading-relaxed">
+            <p className="text-white text-sm font-mono max-w-lg mx-auto mb-8 leading-relaxed">
               Create your unique export from any overlord artwork, then share it
               with the community. Every iteration is a new perspective on the
               network.

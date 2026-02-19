@@ -38,7 +38,7 @@ export default function Navigation() {
       <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-14 md:h-16">
         <Link
           href="/"
-          className="font-display text-base md:text-lg tracking-[0.15em] text-white/90 hover:text-white transition-colors duration-300 uppercase"
+          className="font-display text-base md:text-lg tracking-[0.15em] text-white hover:text-white transition-colors duration-300 uppercase"
         >
           Tech Epochalypse
         </Link>
@@ -52,7 +52,7 @@ export default function Navigation() {
               className={`font-mono text-xs uppercase tracking-[0.2em] transition-colors duration-300 ${
                 pathname === link.href || pathname?.startsWith(link.href + '/')
                   ? 'text-white'
-                  : 'text-white/40 hover:text-white/70'
+                  : 'text-white'
               }`}
             >
               {link.label}
@@ -67,17 +67,17 @@ export default function Navigation() {
           aria-label="Toggle menu"
         >
           <span
-            className={`w-5 h-px bg-white/70 transition-all duration-300 ${
+            className={`w-5 h-px bg-white transition-all duration-300 ${
               mobileOpen ? 'rotate-45 translate-y-[3.5px]' : ''
             }`}
           />
           <span
-            className={`w-5 h-px bg-white/70 transition-all duration-300 ${
+            className={`w-5 h-px bg-white transition-all duration-300 ${
               mobileOpen ? 'opacity-0' : ''
             }`}
           />
           <span
-            className={`w-5 h-px bg-white/70 transition-all duration-300 ${
+            className={`w-5 h-px bg-white transition-all duration-300 ${
               mobileOpen ? '-rotate-45 -translate-y-[3.5px]' : ''
             }`}
           />
@@ -100,7 +100,7 @@ export default function Navigation() {
               className={`font-mono text-sm uppercase tracking-[0.2em] py-2 transition-colors duration-300 ${
                 pathname === link.href
                   ? 'text-white'
-                  : 'text-white/40 hover:text-white/70'
+                  : 'text-white'
               }`}
             >
               {link.label}

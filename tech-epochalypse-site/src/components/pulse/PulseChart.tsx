@@ -43,7 +43,7 @@ export default function PulseChart({ overlords }: Props) {
                 y={y + barHeight / 2 + 4}
                 textAnchor="end"
                 className="font-mono"
-                fill="rgba(255,255,255,0.5)"
+                fill="white"
                 fontSize="11"
               >
                 {overlord.name.toUpperCase()}
@@ -81,7 +81,7 @@ export default function PulseChart({ overlords }: Props) {
               <text
                 x={labelWidth + barW + 8}
                 y={y + barHeight / 2 + 4}
-                fill="rgba(255,255,255,0.6)"
+                fill="white"
                 fontSize="11"
                 className="font-mono"
               >

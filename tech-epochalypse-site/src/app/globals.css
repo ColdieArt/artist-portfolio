@@ -231,7 +231,7 @@
 
   .classified-header {
     @apply font-mono text-sm uppercase tracking-[0.3em];
-    color: #888;
+    color: white;
     border-bottom: 1px solid #333;
     padding-bottom: 6px;
     margin-bottom: 14px;
@@ -295,12 +295,12 @@
 
   .btn-secondary {
     @apply relative inline-flex items-center gap-3 px-6 py-3 font-mono text-sm uppercase tracking-[0.15em]
-           border border-white/15 text-white/60
+           border border-white/15 text-white
            transition-all duration-300 ease-out;
   }
 
   .btn-secondary:hover {
-    @apply border-white/30 text-white/80 bg-white/5;
+    @apply border-white/30 text-white bg-white/5;
   }
 
   /* ── Corrupted / Glitch Text ── */

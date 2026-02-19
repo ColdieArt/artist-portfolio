@@ -43,7 +43,7 @@ export default function OverlordPage({ params }: PageProps) {
         <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-12">
           <Link
             href="/overlords"
-            className="font-mono text-xs uppercase tracking-[0.2em] text-white/40 hover:text-white/70 transition-colors flex items-center gap-2"
+            className="font-mono text-xs uppercase tracking-[0.2em] text-white hover:text-white transition-colors flex items-center gap-2"
           >
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
               <path
@@ -58,13 +58,13 @@ export default function OverlordPage({ params }: PageProps) {
           </Link>
 
           <div className="flex items-center gap-1">
-            <span className="font-mono text-xs text-white/35 mr-4">
+            <span className="font-mono text-xs text-white mr-4">
               Overlord {overlord.number} &mdash; {overlord.name}
             </span>
             {prev && (
               <Link
                 href={`/overlords/${prev.slug}`}
-                className="p-2 text-white/30 hover:text-white/60 transition-colors"
+                className="p-2 text-white hover:text-white transition-colors"
                 title={`Previous: ${prev.name}`}
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -75,7 +75,7 @@ export default function OverlordPage({ params }: PageProps) {
             {next && (
               <Link
                 href={`/overlords/${next.slug}`}
-                className="p-2 text-white/30 hover:text-white/60 transition-colors"
+                className="p-2 text-white hover:text-white transition-colors"
                 title={`Next: ${next.name}`}
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -98,13 +98,13 @@ export default function OverlordPage({ params }: PageProps) {
               <h1 className="font-display text-4xl md:text-5xl text-white mb-3 uppercase tracking-[0.03em]">
                 {overlord.name}
               </h1>
-              <p className="font-mono text-sm text-white/45 mb-6 uppercase tracking-wider">
+              <p className="font-mono text-sm text-white mb-6 uppercase tracking-wider">
                 Designation: {overlord.title}
               </p>
-              <p className="text-white/50 text-base font-mono leading-relaxed">
+              <p className="text-white text-base font-mono leading-relaxed">
                 {overlord.lore}
               </p>
-              <p className="text-white/20 text-xs font-mono mt-4">
+              <p className="text-white text-xs font-mono mt-4">
                 File: <span className="redacted">DOC-{overlord.number}-2024</span>
               </p>
               <OverlordNewsFeed slug={overlord.slug} />
@@ -113,22 +113,22 @@ export default function OverlordPage({ params }: PageProps) {
             <div className="space-y-6">
               <ArtworkViewer overlord={overlord} />
               <div>
-                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white/40 mb-2 border-b border-white/10 pb-1">
+                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-2 border-b border-white/10 pb-1">
                   Medium
                 </h3>
-                <p className="text-white/50 text-sm font-mono">{overlord.medium}</p>
+                <p className="text-white text-sm font-mono">{overlord.medium}</p>
               </div>
               <div>
-                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white/40 mb-2 border-b border-white/10 pb-1">
+                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-2 border-b border-white/10 pb-1">
                   Year
                 </h3>
-                <p className="text-white/50 text-sm font-mono">{overlord.year}</p>
+                <p className="text-white text-sm font-mono">{overlord.year}</p>
               </div>
               <div>
-                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white/40 mb-2 border-b border-white/10 pb-1">
+                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-2 border-b border-white/10 pb-1">
                   Interaction Protocol
                 </h3>
-                <p className="text-white/50 text-sm font-mono">
+                <p className="text-white text-sm font-mono">
                   Drag to rotate. Use the built-in controls to apply control layer effects. Submit your unique iteration to the overlords for total judgement.
                 </p>
               </div>
