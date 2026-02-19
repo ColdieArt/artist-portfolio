@@ -13,35 +13,39 @@ export default function OverlordsPage() {
   return (
     <section className="pt-28 md:pt-36 pb-24 section-padding bg-black grid-lines">
       <div className="page-container">
-        {/* Header */}
-        <ScrollReveal>
-          <div className="text-center mb-16 md:mb-24">
-            <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/40 mb-4">
-              Overlord Files
-            </p>
-            <h1 className="font-display text-5xl md:text-7xl text-white mb-4 uppercase tracking-[0.05em]">
-              The Overlords
-            </h1>
-            <p className="font-mono text-sm text-white/50 max-w-xl mx-auto">
-              Know the people who know everything about you.
-            </p>
-            <div className="flex items-center justify-center gap-3 mt-4">
-              <div className="w-12 h-px bg-white/15" />
-              <span className="font-mono text-xs text-white/25 uppercase tracking-wider">
-                Clearance: <span className="redacted">LEVEL 3</span>
-              </span>
-              <div className="w-12 h-px bg-white/15" />
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-start">
+          {/* Left column — headline & text */}
+          <div className="w-full lg:w-5/12 lg:sticky lg:top-36">
+            <ScrollReveal>
+              <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/40 mb-4">
+                Overlord Files
+              </p>
+              <h1 className="font-display text-5xl md:text-7xl text-white mb-4 uppercase tracking-[0.05em]">
+                The Overlords
+              </h1>
+              <p className="font-mono text-sm text-white/50 max-w-md">
+                Know the people who know everything about you.
+              </p>
+              <div className="flex items-center gap-3 mt-4">
+                <div className="w-12 h-px bg-white/15" />
+                <span className="font-mono text-xs text-white/25 uppercase tracking-wider">
+                  Clearance: <span className="redacted">LEVEL 3</span>
+                </span>
+                <div className="w-12 h-px bg-white/15" />
+              </div>
+            </ScrollReveal>
+          </div>
+
+          {/* Right column — overlord grid, 2 wide */}
+          <div className="w-full lg:w-7/12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {overlords.map((overlord, i) => (
+                <ScrollReveal key={overlord.slug} delay={i * 100}>
+                  <OverlordCard overlord={overlord} />
+                </ScrollReveal>
+              ))}
             </div>
           </div>
-        </ScrollReveal>
-
-        {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {overlords.map((overlord, i) => (
-            <ScrollReveal key={overlord.slug} delay={i * 100}>
-              <OverlordCard overlord={overlord} />
-            </ScrollReveal>
-          ))}
         </div>
       </div>
     </section>
