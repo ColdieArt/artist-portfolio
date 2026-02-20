@@ -136,6 +136,9 @@ export default function HomePage() {
             <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 relative">
               {/* Interactive face viewer */}
               <div className="w-full md:w-1/2 relative group">
+                <p className="font-mono text-sm uppercase tracking-[0.2em] text-white/70 mb-3">
+                  👉 Touch the Art 🎨
+                </p>
                 <div className="aspect-[4/3] relative overflow-hidden bg-charcoal dossier-border">
                   <InteractiveFaceViewer />
                 </div>

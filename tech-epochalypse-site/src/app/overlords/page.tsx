@@ -11,28 +11,48 @@ export const metadata: Metadata = {
 
 export default function OverlordsPage() {
   return (
-    <section className="pt-28 md:pt-36 pb-24 lg:pb-8 section-padding bg-black grid-lines lg:h-screen lg:overflow-hidden">
+    <section className="pt-28 md:pt-36 pb-24 lg:pb-8 section-padding bg-black grid-lines">
       <div className="page-container h-full">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-10 items-start h-full">
           {/* Left column — headline & text */}
-          <div className="w-full lg:w-5/12 flex items-center">
+          <div className="w-full lg:w-5/12 flex items-start">
             <ScrollReveal>
               <p className="font-mono text-xs uppercase tracking-[0.4em] text-white mb-4">
                 Overlord Files
               </p>
-              <h1 className="font-display text-5xl md:text-7xl text-white mb-4 uppercase tracking-[0.05em]">
+              <h1 className="font-display text-5xl md:text-7xl text-white mb-6 uppercase tracking-[0.05em]">
                 The Overlords
               </h1>
-              <p className="font-mono text-sm text-white max-w-md">
+              <p className="font-mono text-sm text-white leading-relaxed mb-4 max-w-md">
                 Know the people who know everything about you.
               </p>
-              <div className="flex items-center gap-3 mt-4">
-                <div className="w-12 h-px bg-white/15" />
-                <span className="font-mono text-xs text-white uppercase tracking-wider">
-                  Clearance: <span className="redacted">LEVEL 3</span>
-                </span>
-                <div className="w-12 h-px bg-white/15" />
-              </div>
+              <p className="font-mono text-sm text-white/70 leading-relaxed mb-4 max-w-md">
+                Tech Epochalypse is an interactive digital art series by Coldie featuring
+                the faces behind the systems we live inside &mdash; Elon Musk, Mark Zuckerberg,
+                Sam Altman, Jeff Bezos, and Jensen Huang. These are not static images.
+                They are living, dimensional compositions built to be taken apart.
+              </p>
+              <p className="font-mono text-sm text-white/70 leading-relaxed mb-4 max-w-md">
+                Each portrait exists in 3D space. Move it. Stack the layers. Push elements
+                into depth. Pull them forward. Apply Control Layers that shift the image in
+                ways the subject never intended. The piece responds to you &mdash; every rotation,
+                every arrangement, every decision creates something that didn&rsquo;t exist before
+                you touched it.
+              </p>
+              <p className="font-mono text-sm text-white/70 leading-relaxed mb-4 max-w-md">
+                When you find the version that speaks in your voice, export it. That artifact
+                is yours. Submit it to The Mainframe as a general entry for the community
+                gallery, or deploy it during an active Exploit &mdash; a bounty event where the
+                most powerful breach earns a collaboration with the Tech Epochalypse project,
+                and extends to opportunities for special releases for token.
+              </p>
+              <p className="font-mono text-sm text-white leading-relaxed mb-6 max-w-md">
+                The Overlords built their empires on controlling what you see.
+                Here, you control how they&rsquo;re seen.
+              </p>
+              <p className="font-mono text-xs uppercase tracking-[0.3em] text-white/50 max-w-md">
+                Choose an overlord now and touch the art.
+              </p>
             </ScrollReveal>
           </div>
 
