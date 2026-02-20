@@ -1,8 +1,14 @@
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import ParticleNetwork from '@/components/ParticleNetwork'
 import BioCoder from '@/components/BioCoder'
 import ScrollReveal from '@/components/ScrollReveal'
 import overlords from '@/data/overlords.json'
+
+const InteractiveFaceViewer = dynamic(
+  () => import('@/components/InteractiveFaceViewer'),
+  { ssr: false }
+)
 
 export default function HomePage() {
   return (
@@ -135,8 +141,20 @@ export default function HomePage() {
                     i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
                   } items-center gap-8 md:gap-16 relative`}
                 >
-                  {/* Preview image */}
-                  {overlord.status === 'live' ? (
+                  {/* Preview image / Interactive viewer */}
+                  {overlord.slug === 'elon-musk' ? (
+                  <div className="w-full md:w-1/2 relative group">
+                    <div className="aspect-[4/3] relative overflow-hidden bg-charcoal dossier-border">
+                      <InteractiveFaceViewer />
+                      {/* Overlord number — faint watermark */}
+                      <div className="absolute bottom-4 left-4 pointer-events-none">
+                        <span className="font-display text-6xl md:text-7xl text-white/[0.08]">
+                          {overlord.number}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  ) : overlord.status === 'live' ? (
                   <Link href={`/overlords/${overlord.slug}`} className="w-full md:w-1/2 relative group block">
                     <div className="aspect-[4/3] relative overflow-hidden bg-charcoal dossier-border cursor-pointer">
                       {overlord.previewImage && (
