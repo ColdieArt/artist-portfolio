@@ -216,7 +216,34 @@ export default function HomePage() {
                   </div>
                   )}
 
-                  {/* Info — dossier style */}
+                  {/* Info — dossier style / Kinetic art description */}
+                  {overlord.slug === 'elon-musk' ? (
+                  <div className="w-full md:w-1/2">
+                    <div className="classified-header">
+                      Kinetic 3D Interactive Art
+                    </div>
+                    <p className="text-white text-base font-mono leading-relaxed mb-6 max-w-md">
+                      You are looking at a living portrait. Not a photograph. Not a rendering.
+                      A kinetic 3D artifact built from the public face of power &mdash; fractured,
+                      reassembled, and set in motion. Move it. The face shifts. The layers
+                      separate. What was hidden becomes visible.
+                    </p>
+                    <p className="text-white text-base font-mono leading-relaxed mb-8 max-w-md">
+                      This is the surface. The full experience lets you tear the image apart,
+                      rebuild it in your own language, and broadcast what you find.
+                      The Overlords are waiting.
+                    </p>
+                    <Link
+                      href="/mainframe"
+                      className="btn-primary"
+                    >
+                      <span>Remix the Overlords</span>
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </Link>
+                  </div>
+                  ) : (
                   <div className="w-full md:w-1/2">
                     <div className="classified-header">
                       Overlord {overlord.number} &mdash; File Active
@@ -250,6 +277,7 @@ export default function HomePage() {
                       </span>
                     )}
                   </div>
+                  )}
                 </div>
               </ScrollReveal>
             ))}
