@@ -231,6 +231,9 @@ export default function HomePage() {
                     <Link href="/mainframe" className="flex items-center gap-2 text-white font-mono text-xs uppercase tracking-wider hover:text-white/70 transition-colors">
                       <span className="text-white/40">&rsaquo;</span> The Wire &mdash; Live Feed
                     </Link>
+                    <Link href="/series" className="flex items-center gap-2 text-white font-mono text-xs uppercase tracking-wider hover:text-white/70 transition-colors">
+                      <span className="text-white/40">&rsaquo;</span> The Collection &mdash; OpenSea
+                    </Link>
                   </div>
                   <div className="mt-auto">
                     <Link href="/mainframe" className="btn-primary">
