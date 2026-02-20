@@ -42,7 +42,7 @@ export default function MainframePage() {
       <div className="line-accent" />
 
       {/* ── Section 1: Exploits ── */}
-      <section className="py-12 md:py-16 section-padding">
+      <section id="exploits" className="py-12 md:py-16 section-padding">
         <div className="page-container">
           <ScrollReveal>
             <div className="mb-8">
