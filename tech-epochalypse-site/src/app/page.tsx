@@ -3,7 +3,6 @@ import dynamic from 'next/dynamic'
 import ParticleNetwork from '@/components/ParticleNetwork'
 import BioCoder from '@/components/BioCoder'
 import ScrollReveal from '@/components/ScrollReveal'
-import overlords from '@/data/overlords.json'
 
 const InteractiveFaceViewer = dynamic(
   () => import('@/components/InteractiveFaceViewer'),
@@ -133,155 +132,43 @@ export default function HomePage() {
             </div>
           </ScrollReveal>
 
-          <div className="space-y-24 md:space-y-32">
-            {overlords.map((overlord, i) => (
-              <ScrollReveal key={overlord.slug} delay={i * 100}>
-                <div
-                  className={`flex flex-col ${
-                    i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                  } items-center gap-8 md:gap-16 relative`}
-                >
-                  {/* Preview image / Interactive viewer */}
-                  {overlord.slug === 'elon-musk' ? (
-                  <div className="w-full md:w-1/2 relative group">
-                    <div className="aspect-[4/3] relative overflow-hidden bg-charcoal dossier-border">
-                      <InteractiveFaceViewer />
-                      {/* Overlord number — faint watermark */}
-                      <div className="absolute bottom-4 left-4 pointer-events-none">
-                        <span className="font-display text-6xl md:text-7xl text-white/[0.08]">
-                          {overlord.number}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  ) : overlord.status === 'live' ? (
-                  <Link href={`/overlords/${overlord.slug}`} className="w-full md:w-1/2 relative group block">
-                    <div className="aspect-[4/3] relative overflow-hidden bg-charcoal dossier-border cursor-pointer">
-                      {overlord.previewImage && (
-                        <img
-                          src={overlord.previewImage}
-                          alt={overlord.name}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-100 grayscale"
-                          loading="lazy"
-                          style={{ imageRendering: 'auto', filter: 'grayscale(1) contrast(1.2)' }}
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/20" />
-
-                      {/* Overlord number — faint watermark */}
-                      <div className="absolute bottom-4 left-4">
-                        <span className="font-display text-6xl md:text-7xl text-white/[0.08]">
-                          {overlord.number}
-                        </span>
-                      </div>
-
-                      {/* Pixelated corruption block */}
-                      <div className="absolute top-8 left-8 w-20 h-6 bg-white/[0.05] animate-pixel-drift" style={{ imageRendering: 'pixelated' as const }} />
-                    </div>
-                  </Link>
-                  ) : (
-                  <div className="w-full md:w-1/2 relative group">
-                    <div className="aspect-[4/3] relative overflow-hidden bg-charcoal dossier-border">
-                      {overlord.previewImage && (
-                        <img
-                          src={overlord.previewImage}
-                          alt={overlord.name}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-100 grayscale"
-                          loading="lazy"
-                          style={{ imageRendering: 'auto', filter: 'grayscale(1) contrast(1.2)' }}
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/20" />
-
-                      {/* Status badge */}
-                      <div className="absolute top-4 right-4 font-mono text-xs uppercase tracking-wider text-white bg-black/80 border border-white/15 px-3 py-1">
-                        Pending
-                      </div>
-
-                      {/* Overlord number — faint watermark */}
-                      <div className="absolute bottom-4 left-4">
-                        <span className="font-display text-6xl md:text-7xl text-white/[0.08]">
-                          {overlord.number}
-                        </span>
-                      </div>
-
-                      {/* Pixelated corruption block */}
-                      <div className="absolute top-8 left-8 w-20 h-6 bg-white/[0.05] animate-pixel-drift" style={{ imageRendering: 'pixelated' as const }} />
-
-                      {/* Stamp overlay for non-live */}
-                      <div className="stamp top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                        CLASSIFIED
-                      </div>
-                    </div>
-                  </div>
-                  )}
-
-                  {/* Info — dossier style / Kinetic art description */}
-                  {overlord.slug === 'elon-musk' ? (
-                  <div className="w-full md:w-1/2">
-                    <div className="classified-header">
-                      Kinetic 3D Interactive Art
-                    </div>
-                    <p className="text-white text-base font-mono leading-relaxed mb-6 max-w-md">
-                      You are looking at a living portrait. Not a photograph. Not a rendering.
-                      A kinetic 3D artifact built from the public face of power &mdash; fractured,
-                      reassembled, and set in motion. Move it. The face shifts. The layers
-                      separate. What was hidden becomes visible.
-                    </p>
-                    <p className="text-white text-base font-mono leading-relaxed mb-8 max-w-md">
-                      This is the surface. The full experience lets you tear the image apart,
-                      rebuild it in your own language, and broadcast what you find.
-                      The Overlords are waiting.
-                    </p>
-                    <Link
-                      href="/mainframe"
-                      className="btn-primary"
-                    >
-                      <span>Remix the Overlords</span>
-                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </Link>
-                  </div>
-                  ) : (
-                  <div className="w-full md:w-1/2">
-                    <div className="classified-header">
-                      Overlord {overlord.number} &mdash; File Active
-                    </div>
-                    <h3 className="font-display text-4xl md:text-5xl text-white mb-3 uppercase tracking-[0.03em]">
-                      {overlord.name}
-                    </h3>
-                    <p className="font-mono text-sm text-white mb-6 uppercase tracking-wider">
-                      Designation: {overlord.title}
-                    </p>
-                    <p className="text-white text-base font-mono leading-relaxed mb-4 max-w-md">
-                      {overlord.lore}
-                    </p>
-                    <p className="text-white text-sm font-mono mb-8">
-                      Ref: <span className="redacted">DOC-{overlord.number}-2024</span> &mdash;
-                      Status: <span className={overlord.status === 'live' ? 'text-white' : 'text-white'}>{overlord.status === 'live' ? 'ACTIVE' : 'PENDING'}</span>
-                    </p>
-                    {overlord.status === 'live' ? (
-                      <Link
-                        href={`/overlords/${overlord.slug}`}
-                        className="btn-primary"
-                      >
-                        <span>Access File</span>
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </Link>
-                    ) : (
-                      <span className="btn-secondary cursor-default opacity-50">
-                        Restricted
-                      </span>
-                    )}
-                  </div>
-                  )}
+          <ScrollReveal delay={100}>
+            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 relative">
+              {/* Interactive face viewer */}
+              <div className="w-full md:w-1/2 relative group">
+                <div className="aspect-[4/3] relative overflow-hidden bg-charcoal dossier-border">
+                  <InteractiveFaceViewer />
                 </div>
-              </ScrollReveal>
-            ))}
-          </div>
+              </div>
+
+              {/* Kinetic art description */}
+              <div className="w-full md:w-1/2">
+                <div className="classified-header">
+                  Kinetic 3D Interactive Art
+                </div>
+                <p className="text-white text-base font-mono leading-relaxed mb-6 max-w-md">
+                  You are looking at a living portrait. Not a photograph. Not a rendering.
+                  A kinetic 3D artifact built from the public face of power &mdash; fractured,
+                  reassembled, and set in motion. Move it. The face shifts. The layers
+                  separate. What was hidden becomes visible.
+                </p>
+                <p className="text-white text-base font-mono leading-relaxed mb-8 max-w-md">
+                  This is the surface. The full experience lets you tear the image apart,
+                  rebuild it in your own language, and broadcast what you find.
+                  The Overlords are waiting.
+                </p>
+                <Link
+                  href="/mainframe"
+                  className="btn-primary"
+                >
+                  <span>Remix the Overlords</span>
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </Link>
+              </div>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
