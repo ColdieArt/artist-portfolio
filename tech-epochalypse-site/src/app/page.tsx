@@ -136,6 +136,32 @@ export default function HomePage() {
                   } items-center gap-8 md:gap-16 relative`}
                 >
                   {/* Preview image */}
+                  {overlord.status === 'live' ? (
+                  <Link href={`/overlords/${overlord.slug}`} className="w-full md:w-1/2 relative group block">
+                    <div className="aspect-[4/3] relative overflow-hidden bg-charcoal dossier-border cursor-pointer">
+                      {overlord.previewImage && (
+                        <img
+                          src={overlord.previewImage}
+                          alt={overlord.name}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-100 grayscale"
+                          loading="lazy"
+                          style={{ imageRendering: 'auto', filter: 'grayscale(1) contrast(1.2)' }}
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/20" />
+
+                      {/* Overlord number — faint watermark */}
+                      <div className="absolute bottom-4 left-4">
+                        <span className="font-display text-6xl md:text-7xl text-white/[0.08]">
+                          {overlord.number}
+                        </span>
+                      </div>
+
+                      {/* Pixelated corruption block */}
+                      <div className="absolute top-8 left-8 w-20 h-6 bg-white/[0.05] animate-pixel-drift" style={{ imageRendering: 'pixelated' as const }} />
+                    </div>
+                  </Link>
+                  ) : (
                   <div className="w-full md:w-1/2 relative group">
                     <div className="aspect-[4/3] relative overflow-hidden bg-charcoal dossier-border">
                       {overlord.previewImage && (
@@ -150,11 +176,9 @@ export default function HomePage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/20" />
 
                       {/* Status badge */}
-                      {overlord.status === 'coming-soon' && (
-                        <div className="absolute top-4 right-4 font-mono text-xs uppercase tracking-wider text-white bg-black/80 border border-white/15 px-3 py-1">
-                          Pending
-                        </div>
-                      )}
+                      <div className="absolute top-4 right-4 font-mono text-xs uppercase tracking-wider text-white bg-black/80 border border-white/15 px-3 py-1">
+                        Pending
+                      </div>
 
                       {/* Overlord number — faint watermark */}
                       <div className="absolute bottom-4 left-4">
@@ -167,13 +191,12 @@ export default function HomePage() {
                       <div className="absolute top-8 left-8 w-20 h-6 bg-white/[0.05] animate-pixel-drift" style={{ imageRendering: 'pixelated' as const }} />
 
                       {/* Stamp overlay for non-live */}
-                      {overlord.status === 'coming-soon' && (
-                        <div className="stamp top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                          CLASSIFIED
-                        </div>
-                      )}
+                      <div className="stamp top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                        CLASSIFIED
+                      </div>
                     </div>
                   </div>
+                  )}
 
                   {/* Info — dossier style */}
                   <div className="w-full md:w-1/2">
