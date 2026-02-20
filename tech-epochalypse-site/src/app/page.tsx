@@ -115,7 +115,7 @@ export default function HomePage() {
                 Overlord Files
               </p>
               <h2 className="font-display text-4xl md:text-6xl text-white uppercase tracking-[0.05em]">
-                The Overlords
+                Expose the Overlords
               </h2>
               <div className="flex items-center justify-center gap-3 mt-4">
                 <div className="w-12 h-px bg-white/15" />
