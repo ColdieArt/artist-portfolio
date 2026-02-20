@@ -160,6 +160,29 @@ export default function HomePage() {
                   rebuild it in your own language, and broadcast what you find.
                   The Overlords are waiting.
                 </p>
+
+                <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em] mb-4">
+                  User-enabled Composition
+                </h2>
+                <ul className="text-white text-sm font-mono leading-relaxed mb-8 max-w-md space-y-2 list-disc list-inside">
+                  <li>
+                    <span className="font-bold">X/Y movement:</span> Pieces of the portrait can be moved and customized by clicking and dragging.
+                  </li>
+                  <li>
+                    <span className="font-bold">Z Depth movement:</span> Clicking a piece moves it back one depth level at a time. Once the 15th and final depth level is reached, the piece loops back to the start.
+                  </li>
+                </ul>
+
+                <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em] mb-4">
+                  Drop-down Menu Interactions
+                </h2>
+                <ul className="text-white text-sm font-mono leading-relaxed mb-8 max-w-md space-y-2 list-disc list-inside">
+                  <li>Animations are engaged using the &ldquo;3D&rdquo; and &ldquo;FLY&rdquo; buttons.</li>
+                  <li>All 5 control layers can be toggled, some in combination.</li>
+                  <li>Pieces can be removed from the canvas by dragging them over the trash icon.</li>
+                  <li>The composition returns to its original state via the &ldquo;RESET&rdquo; button.</li>
+                </ul>
+
                 <Link
                   href="/mainframe"
                   className="btn-primary"
