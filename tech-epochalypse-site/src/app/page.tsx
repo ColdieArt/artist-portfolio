@@ -1,13 +1,7 @@
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
 import ParticleNetwork from '@/components/ParticleNetwork'
 import BioCoder from '@/components/BioCoder'
 import ScrollReveal from '@/components/ScrollReveal'
-
-const InteractiveFaceViewer = dynamic(
-  () => import('@/components/InteractiveFaceViewer'),
-  { ssr: false }
-)
 
 export default function HomePage() {
   return (
@@ -132,39 +126,57 @@ export default function HomePage() {
             </div>
           </ScrollReveal>
 
+          {/* Full-width video */}
           <ScrollReveal delay={100}>
-            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 relative">
-              {/* Interactive face viewer */}
-              <div className="w-full md:w-1/2 relative group">
-                <p className="font-mono text-sm uppercase tracking-[0.2em] text-white/70 mb-3">
-                  👉 Touch the Art 🎨
-                </p>
-                <div className="aspect-[4/3] relative overflow-hidden bg-charcoal dossier-border">
-                  <InteractiveFaceViewer />
-                </div>
-              </div>
+            <div className="relative w-full overflow-hidden dossier-border">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-auto block"
+              >
+                <source src="/images/overlords/Bezos-WIP-Base-web.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </ScrollReveal>
 
-              {/* Kinetic art description */}
-              <div className="w-full md:w-1/2">
+          {/* Two-column text below video */}
+          <ScrollReveal delay={200}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 mt-12">
+              {/* Left column */}
+              <div>
                 <div className="classified-header">
                   Kinetic 3D Interactive Art
                 </div>
-                <p className="text-white text-base font-mono leading-relaxed mb-6 max-w-md">
+                <p className="text-white text-base font-mono leading-relaxed mb-6">
                   You are looking at a living portrait. Not a photograph. Not a rendering.
                   A kinetic 3D artifact built from the public face of power &mdash; fractured,
                   reassembled, and set in motion. Move it. The face shifts. The layers
                   separate. What was hidden becomes visible.
                 </p>
-                <p className="text-white text-base font-mono leading-relaxed mb-8 max-w-md">
+                <p className="text-white text-base font-mono leading-relaxed mb-8">
                   This is the surface. The full experience lets you tear the image apart,
                   rebuild it in your own language, and broadcast what you find.
                   The Overlords are waiting.
                 </p>
+                <Link
+                  href="/overlords"
+                  className="btn-primary"
+                >
+                  <span>Remix the Overlords</span>
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </Link>
+              </div>
 
+              {/* Right column */}
+              <div>
                 <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em] mb-4">
                   User-enabled Composition
                 </h2>
-                <ul className="text-white text-sm font-mono leading-relaxed mb-8 max-w-md space-y-2 list-disc list-inside">
+                <ul className="text-white text-sm font-mono leading-relaxed mb-8 space-y-2 list-disc list-inside">
                   <li>
                     <span className="font-bold">X/Y movement:</span> Pieces of the portrait can be moved and customized by clicking and dragging.
                   </li>
@@ -176,22 +188,12 @@ export default function HomePage() {
                 <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em] mb-4">
                   Drop-down Menu Interactions
                 </h2>
-                <ul className="text-white text-sm font-mono leading-relaxed mb-8 max-w-md space-y-2 list-disc list-inside">
+                <ul className="text-white text-sm font-mono leading-relaxed mb-8 space-y-2 list-disc list-inside">
                   <li>Animations are engaged using the &ldquo;3D&rdquo; and &ldquo;FLY&rdquo; buttons.</li>
                   <li>All 5 control layers can be toggled, some in combination.</li>
                   <li>Pieces can be removed from the canvas by dragging them over the trash icon.</li>
                   <li>The composition returns to its original state via the &ldquo;RESET&rdquo; button.</li>
                 </ul>
-
-                <Link
-                  href="/mainframe"
-                  className="btn-primary"
-                >
-                  <span>Remix the Overlords</span>
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </Link>
               </div>
             </div>
           </ScrollReveal>
@@ -230,6 +232,9 @@ export default function HomePage() {
                     </Link>
                     <Link href="/mainframe" className="flex items-center gap-2 text-white font-mono text-xs uppercase tracking-wider hover:text-white/70 transition-colors">
                       <span className="text-white/40">&rsaquo;</span> The Wire &mdash; Live Feed
+                    </Link>
+                    <Link href="/series" className="flex items-center gap-2 text-white font-mono text-xs uppercase tracking-wider hover:text-white/70 transition-colors">
+                      <span className="text-white/40">&rsaquo;</span> The Collection &mdash; OpenSea
                     </Link>
                   </div>
                   <div className="mt-auto">

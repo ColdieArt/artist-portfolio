@@ -29,6 +29,7 @@ export default function Footer() {
             <div className="flex flex-col gap-3">
               {[
                 { href: '/overlords', label: 'Overlords' },
+                { href: '/series', label: 'Series' },
                 { href: '/mainframe', label: 'Mainframe' },
               ].map((link) => (
                 <Link

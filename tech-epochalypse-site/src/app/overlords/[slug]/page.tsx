@@ -132,6 +132,21 @@ export default function OverlordPage({ params }: PageProps) {
                   Drag to rotate. Use the built-in controls to apply control layer effects. Submit your unique iteration to the overlords for total judgement.
                 </p>
               </div>
+              <div>
+                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-2 border-b border-white/10 pb-1">
+                  Control Layers
+                </h3>
+                <p className="text-white text-sm font-mono mb-3">
+                  Symbolic of the many ways we are all tracked and harvested from on a daily basis, each of these visual control layers shine a light so we can become aware of what is happening around and to us.
+                </p>
+                <ul className="space-y-1">
+                  <li className="text-white text-sm font-mono uppercase tracking-wider">Bio-Coder</li>
+                  <li className="text-white text-sm font-mono uppercase tracking-wider">Hidden Hand</li>
+                  <li className="text-white text-sm font-mono uppercase tracking-wider">Data Scraper</li>
+                  <li className="text-white text-sm font-mono uppercase tracking-wider">Shadow</li>
+                  <li className="text-white text-sm font-mono uppercase tracking-wider">Redacted</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
