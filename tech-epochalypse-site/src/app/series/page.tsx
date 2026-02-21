@@ -7,6 +7,12 @@ import overlords from '@/data/overlords.json'
 
 const OPENSEA_COLLECTION_SLUG = 'tech-epochalypse-moments-decentral-eyes'
 const OPENSEA_COLLECTION_URL = `https://opensea.io/collection/${OPENSEA_COLLECTION_SLUG}`
+const OPENSEA_API_KEY = process.env.NEXT_PUBLIC_OPENSEA_API_KEY || ''
+
+const osHeaders: HeadersInit = {
+  accept: 'application/json',
+  ...(OPENSEA_API_KEY ? { 'x-api-key': OPENSEA_API_KEY } : {}),
+}
 
 interface CollectionStats {
   total: {
@@ -29,18 +35,36 @@ interface OpenSeaEvent {
   buyer?: string
 }
 
+interface OpenSeaListing {
+  order_hash: string
+  price: { current: { currency: string; decimals: number; value: string } }
+  protocol_data: {
+    parameters: {
+      offer: Array<{ token: string; identifierOrCriteria: string }>
+    }
+  }
+}
+
+interface ListingWithMeta extends OpenSeaListing {
+  nftName?: string
+  nftImage?: string
+  nftUrl?: string
+}
+
 export default function SeriesPage() {
   const [stats, setStats] = useState<CollectionStats | null>(null)
   const [events, setEvents] = useState<OpenSeaEvent[]>([])
+  const [listings, setListings] = useState<ListingWithMeta[]>([])
   const [statsLoading, setStatsLoading] = useState(true)
   const [eventsLoading, setEventsLoading] = useState(true)
+  const [listingsLoading, setListingsLoading] = useState(true)
 
   useEffect(() => {
     async function fetchStats() {
       try {
         const res = await fetch(
           `https://api.opensea.io/api/v2/collections/${OPENSEA_COLLECTION_SLUG}/stats`,
-          { headers: { accept: 'application/json' } }
+          { headers: osHeaders }
         )
         if (res.ok) {
           const data = await res.json()
@@ -57,7 +81,7 @@ export default function SeriesPage() {
       try {
         const res = await fetch(
           `https://api.opensea.io/api/v2/events/collection/${OPENSEA_COLLECTION_SLUG}?event_type=sale&limit=10`,
-          { headers: { accept: 'application/json' } }
+          { headers: osHeaders }
         )
         if (res.ok) {
           const data = await res.json()
@@ -70,8 +94,62 @@ export default function SeriesPage() {
       }
     }
 
+    async function fetchListings() {
+      try {
+        const res = await fetch(
+          `https://api.opensea.io/api/v2/listings/collection/${OPENSEA_COLLECTION_SLUG}/all?limit=12`,
+          { headers: osHeaders }
+        )
+        if (res.ok) {
+          const data = await res.json()
+          const raw: OpenSeaListing[] = data.listings || []
+
+          // Sort by price ascending
+          const sorted = raw.sort((a, b) => {
+            const priceA = Number(a.price.current.value) / Math.pow(10, a.price.current.decimals)
+            const priceB = Number(b.price.current.value) / Math.pow(10, b.price.current.decimals)
+            return priceA - priceB
+          })
+
+          // Fetch NFT metadata for each listing
+          const enriched: ListingWithMeta[] = await Promise.all(
+            sorted.slice(0, 6).map(async (listing) => {
+              const offer = listing.protocol_data?.parameters?.offer?.[0]
+              if (!offer) return { ...listing }
+              const tokenId = offer.identifierOrCriteria
+              const contract = offer.token
+              try {
+                const nftRes = await fetch(
+                  `https://api.opensea.io/api/v2/chain/ethereum/contract/${contract}/nfts/${tokenId}`,
+                  { headers: osHeaders }
+                )
+                if (nftRes.ok) {
+                  const nftData = await nftRes.json()
+                  return {
+                    ...listing,
+                    nftName: nftData.nft?.name || `Moment #${tokenId}`,
+                    nftImage: nftData.nft?.image_url || nftData.nft?.display_image_url,
+                    nftUrl: nftData.nft?.opensea_url,
+                  }
+                }
+              } catch {
+                // metadata fetch failed
+              }
+              return { ...listing, nftName: `Moment #${tokenId}` }
+            })
+          )
+          setListings(enriched)
+        }
+      } catch {
+        // Listings unavailable
+      } finally {
+        setListingsLoading(false)
+      }
+    }
+
     fetchStats()
     fetchEvents()
+    fetchListings()
   }, [])
 
   return (
@@ -475,6 +553,139 @@ export default function SeriesPage() {
                   className="inline-flex items-center gap-3 px-6 py-3 bg-white text-black font-mono text-sm uppercase tracking-[0.15em] hover:bg-white/90 transition-colors"
                 >
                   View Activity on OpenSea
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M3 8h10M9 4l4 4-4 4"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </a>
+              </div>
+            )}
+          </ScrollReveal>
+        </div>
+      </section>
+
+      <div className="line-accent" />
+
+      {/* ── Lowest Priced Listings ── */}
+      <section className="py-16 md:py-24 section-padding">
+        <div className="page-container">
+          <ScrollReveal>
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <div className="classified-header">
+                  Market Intel &mdash;{' '}
+                  <span className="redacted">Lowest Ask</span>
+                </div>
+                <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
+                  Lowest Priced Listings
+                </h2>
+              </div>
+              <a
+                href={OPENSEA_COLLECTION_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary"
+              >
+                <span>Browse All</span>
+              </a>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={100}>
+            {listingsLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div
+                    key={i}
+                    className="animate-pulse bg-charcoal/30 border border-white/5"
+                  >
+                    <div className="aspect-square bg-white/5" />
+                    <div className="p-4 space-y-2">
+                      <div className="h-3 bg-white/10 rounded w-32" />
+                      <div className="h-5 bg-white/10 rounded w-20" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : listings.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {listings.map((listing, i) => {
+                  const price =
+                    Number(listing.price.current.value) /
+                    Math.pow(10, listing.price.current.decimals)
+                  const symbol = listing.price.current.currency
+                  return (
+                    <a
+                      key={listing.order_hash || i}
+                      href={listing.nftUrl || OPENSEA_COLLECTION_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group bg-charcoal/30 border border-white/5 hover:border-white/10 overflow-hidden transition-all duration-500"
+                    >
+                      <div className="aspect-square relative overflow-hidden bg-charcoal/50">
+                        {listing.nftImage ? (
+                          <img
+                            src={listing.nftImage}
+                            alt={listing.nftName || 'NFT'}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            style={{ filter: 'grayscale(0.6) contrast(1.1)' }}
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="font-mono text-xs text-white/30 uppercase">
+                              No Preview
+                            </span>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        <div className="absolute top-3 right-3 bg-black/70 border border-white/10 px-3 py-1">
+                          <p className="font-mono text-sm text-white font-bold">
+                            {price.toFixed(4)} {symbol}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="p-4 flex items-center justify-between gap-3">
+                        <p className="font-mono text-sm text-white truncate">
+                          {listing.nftName || 'Tech Epochalypse Moment'}
+                        </p>
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          className="text-white/30 group-hover:text-white/60 transition-colors shrink-0"
+                        >
+                          <path
+                            d="M3 8h10M9 4l4 4-4 4"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </div>
+                    </a>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="bg-charcoal/30 border border-white/5 p-8 text-center">
+                <p className="font-mono text-sm text-white/50 mb-4">
+                  Current listings are available directly on OpenSea.
+                </p>
+                <a
+                  href={OPENSEA_COLLECTION_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 px-6 py-3 bg-white text-black font-mono text-sm uppercase tracking-[0.15em] hover:bg-white/90 transition-colors"
+                >
+                  Browse on OpenSea
                   <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                     <path
                       d="M3 8h10M9 4l4 4-4 4"
