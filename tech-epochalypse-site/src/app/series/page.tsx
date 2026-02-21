@@ -28,11 +28,11 @@ interface CollectionStats {
 
 // Per-overlord Trail collection listing URLs (to be filled in)
 const OVERLORD_COLLECT_URLS: Record<string, string> = {
-  'elon-musk': '',
-  'mark-zuckerberg': '',
-  'sam-altman': '',
-  'jeff-bezos': '',
-  'jensen-huang': '',
+  'elon-musk': 'https://opensea.io/collection/tech-epochalypse-moments-decentral-eyes?traits=[{%22traitType%22:%22Overlord%22,%22values%22:[%22Elon+Musk%22]}]',
+  'mark-zuckerberg': 'https://opensea.io/collection/tech-epochalypse-moments-decentral-eyes?traits=%5B%7B%22traitType%22%3A%22Overlord%22%2C%22values%22%3A%5B%22Mark%20Zuckerberg%22%5D%7D%5D',
+  'sam-altman': 'https://opensea.io/collection/tech-epochalypse-moments-decentral-eyes?traits=[{%22traitType%22:%22Overlord%22,%22values%22:[%22Sam+Altman%22]}]',
+  'jeff-bezos': 'https://opensea.io/collection/tech-epochalypse-moments-decentral-eyes?traits=[{%22traitType%22:%22Overlord%22,%22values%22:[%22Jeff+Bezos%22]}]',
+  'jensen-huang': 'https://opensea.io/collection/tech-epochalypse-moments-decentral-eyes?traits=[{%22traitType%22:%22Overlord%22,%22values%22:[%22Jensen+Huang%22]}]',
 }
 
 export default function SeriesPage() {
