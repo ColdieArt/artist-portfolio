@@ -26,6 +26,10 @@ interface CollectionStats {
   }
 }
 
+interface CollectionInfo {
+  total_supply: number
+}
+
 // Per-overlord Trail collection listing URLs (to be filled in)
 const OVERLORD_COLLECT_URLS: Record<string, string> = {
   'elon-musk': 'https://opensea.io/collection/tech-epochalypse-moments-decentral-eyes?traits=[{%22traitType%22:%22Overlord%22,%22values%22:[%22Elon+Musk%22]}]',
@@ -37,27 +41,32 @@ const OVERLORD_COLLECT_URLS: Record<string, string> = {
 
 export default function SeriesPage() {
   const [stats, setStats] = useState<CollectionStats | null>(null)
+  const [collectionInfo, setCollectionInfo] = useState<CollectionInfo | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
 
   useEffect(() => {
-    async function fetchStats() {
-      try {
-        const res = await fetch(
-          `https://api.opensea.io/api/v2/collections/${OPENSEA_COLLECTION_SLUG}/stats`,
-          { headers: osHeaders }
-        )
-        if (res.ok) {
-          const data = await res.json()
-          setStats(data)
-        }
-      } catch {
-        // Stats unavailable — static fallback shown
-      } finally {
-        setStatsLoading(false)
+    const base = `https://api.opensea.io/api/v2/collections/${OPENSEA_COLLECTION_SLUG}`
+
+    async function fetchAll() {
+      const [statsRes, infoRes] = await Promise.allSettled([
+        fetch(`${base}/stats`, { headers: osHeaders }),
+        fetch(base, { headers: osHeaders }),
+      ])
+
+      if (statsRes.status === 'fulfilled' && statsRes.value.ok) {
+        const data = await statsRes.value.json()
+        setStats(data)
       }
+
+      if (infoRes.status === 'fulfilled' && infoRes.value.ok) {
+        const data = await infoRes.value.json()
+        setCollectionInfo(data)
+      }
+
+      setStatsLoading(false)
     }
 
-    fetchStats()
+    fetchAll()
   }, [])
 
   return (
@@ -182,7 +191,11 @@ export default function SeriesPage() {
                         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">
                           Items
                         </p>
-                        <p className="font-display text-2xl text-white">250</p>
+                        <p className="font-display text-2xl text-white">
+                          {collectionInfo?.total_supply != null
+                            ? collectionInfo.total_supply
+                            : '250'}
+                        </p>
                       </div>
                       <div>
                         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">
