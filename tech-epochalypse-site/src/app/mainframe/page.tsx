@@ -520,10 +520,10 @@ export default function MainframePage() {
               </ScrollReveal>
               <div className="overflow-y-auto max-h-[800px] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                 <link href="https://assets.juicer.io/embed.css" media="all" rel="stylesheet" type="text/css" />
-                <div id="juicer-feed" data-feed-id="knowyouroverlord" />
+                <ul className="juicer-feed" data-feed-id="knowyouroverlord" data-per="9" data-pages="1" />
                 <Script
                   src="https://assets.juicer.io/embed.js"
-                  strategy="lazyOnload"
+                  strategy="afterInteractive"
                 />
               </div>
             </div>
