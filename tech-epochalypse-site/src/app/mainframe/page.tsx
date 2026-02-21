@@ -516,6 +516,9 @@ export default function MainframePage() {
                   <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
                     The Wire
                   </h2>
+                  <p className="font-mono text-xs text-white/40 uppercase tracking-widest mt-2">
+                    #KnowYourOverlord
+                  </p>
                 </div>
               </ScrollReveal>
               <div>
