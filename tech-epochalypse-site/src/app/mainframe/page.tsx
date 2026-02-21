@@ -518,7 +518,7 @@ export default function MainframePage() {
                   </h2>
                 </div>
               </ScrollReveal>
-              <div className="overflow-y-auto max-h-[800px] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+              <div>
                 <link href="https://assets.juicer.io/embed.css" media="all" rel="stylesheet" type="text/css" />
                 <ul className="juicer-feed" data-feed-id="knowyouroverlord" data-per="9" data-pages="1" />
                 <Script
