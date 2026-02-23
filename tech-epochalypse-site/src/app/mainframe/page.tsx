@@ -516,9 +516,12 @@ export default function MainframePage() {
                   <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
                     The Wire
                   </h2>
+                  <p className="font-mono text-xs text-white/40 uppercase tracking-widest mt-2">
+                    #KnowYourOverlord
+                  </p>
                 </div>
               </ScrollReveal>
-              <div className="overflow-y-auto max-h-[800px] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+              <div>
                 <link href="https://assets.juicer.io/embed.css" media="all" rel="stylesheet" type="text/css" />
                 <ul className="juicer-feed" data-feed-id="knowyouroverlord" data-per="9" data-pages="1" />
                 <Script
