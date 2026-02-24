@@ -180,38 +180,13 @@ export default function SeriesPage() {
                     Available Listings
                   </h3>
 
-                  {/* Listing placeholder 1 */}
-                  <div className="border border-white/5 bg-white/[0.02] p-4 mb-3">
-                    <div className="aspect-[4/3] bg-white/5 flex items-center justify-center mb-3">
-                      <p className="font-mono text-[10px] uppercase tracking-wider text-white/20">
-                        Listing Embed Placeholder
-                      </p>
-                    </div>
-                    <div className="h-3 bg-white/5 rounded w-3/4 mb-2" />
-                    <div className="h-2 bg-white/5 rounded w-1/2" />
-                  </div>
-
-                  {/* Listing placeholder 2 */}
-                  <div className="border border-white/5 bg-white/[0.02] p-4 mb-3">
-                    <div className="aspect-[4/3] bg-white/5 flex items-center justify-center mb-3">
-                      <p className="font-mono text-[10px] uppercase tracking-wider text-white/20">
-                        Listing Embed Placeholder
-                      </p>
-                    </div>
-                    <div className="h-3 bg-white/5 rounded w-3/4 mb-2" />
-                    <div className="h-2 bg-white/5 rounded w-1/2" />
-                  </div>
-
-                  {/* Listing placeholder 3 */}
-                  <div className="border border-white/5 bg-white/[0.02] p-4">
-                    <div className="aspect-[4/3] bg-white/5 flex items-center justify-center mb-3">
-                      <p className="font-mono text-[10px] uppercase tracking-wider text-white/20">
-                        Listing Embed Placeholder
-                      </p>
-                    </div>
-                    <div className="h-3 bg-white/5 rounded w-3/4 mb-2" />
-                    <div className="h-2 bg-white/5 rounded w-1/2" />
-                  </div>
+                  {/* Transient Labs Buy Now Embed */}
+                  <div
+                    className="mb-3"
+                    dangerouslySetInnerHTML={{
+                      __html: '<tl-buy-now chain-id="1" contract-address="0x88024531acb6a8360bb3848fc77c095223e5df15" token-id="1"></tl-buy-now>',
+                    }}
+                  />
 
                   <div className="mt-6 pt-4 border-t border-white/10">
                     <a
