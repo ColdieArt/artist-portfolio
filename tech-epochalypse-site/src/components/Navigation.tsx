@@ -99,7 +99,7 @@ export default function Navigation() {
 
       {/* Mobile menu */}
       <div
-        className={`md:hidden absolute top-full left-0 right-0 bg-black/98 backdrop-blur-lg border-b border-white/5 transition-all duration-300 ${
+        className={`md:hidden fixed inset-0 top-14 bg-black transition-all duration-300 ${
           mobileOpen
             ? 'opacity-100 translate-y-0'
             : 'opacity-0 -translate-y-4 pointer-events-none'
