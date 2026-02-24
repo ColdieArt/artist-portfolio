@@ -173,29 +173,79 @@ export default function SeriesPage() {
                 </div>
               </div>
 
-              {/* Right: Available Listings */}
+              {/* Right: Collect */}
               <div className="lg:w-96 shrink-0">
                 <div className="bg-charcoal/30 border border-white/5 p-6">
                   <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-6 border-b border-white/10 pb-3">
-                    Available Listings
+                    Collection Overview
                   </h3>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-baseline">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">Overlords</span>
+                      <span className="font-display text-lg text-white">5</span>
+                    </div>
+                    <div className="flex justify-between items-baseline">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">Editions / Overlord</span>
+                      <span className="font-display text-lg text-white">10</span>
+                    </div>
+                    <div className="flex justify-between items-baseline">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">Price</span>
+                      <span className="font-display text-lg text-white">$6,000 <span className="font-mono text-[10px] text-white/50">(in ETH)</span></span>
+                    </div>
+                  </div>
+                </div>
 
-                  {/* Transient Labs Buy Now Embed */}
-                  <div
-                    className="mb-3"
-                    dangerouslySetInnerHTML={{
-                      __html: '<tl-buy-now chain-id="1" contract-address="0x88024531acb6a8360bb3848fc77c095223e5df15" token-id="1"></tl-buy-now>',
-                    }}
-                  />
+                {/* Full Sets */}
+                <div className="bg-charcoal/30 border border-white/5 p-6 mt-4">
+                  <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-4 border-b border-white/10 pb-3">
+                    Full Sets
+                  </h3>
+                  <div className="flex justify-between items-baseline mb-1">
+                    <span className="font-mono text-sm text-white">5 Total</span>
+                    <span className="font-mono text-sm text-white">3 Available</span>
+                  </div>
+                  <p className="font-mono text-[10px] text-white/40 mb-5">
+                    All 10 editions of one Overlord
+                  </p>
+                  <a
+                    href="mailto:coldie@coldie.com?subject=Full%20Set%20Inquiry%20%E2%80%94%20Tech%20Epochalypse%20Kinetic%203D"
+                    className="block w-full text-center font-mono text-xs uppercase tracking-[0.15em] text-black bg-white px-4 py-3 hover:bg-white/90 transition-colors"
+                  >
+                    Inquire to Collect Full Set
+                  </a>
+                </div>
 
-                  <div className="mt-6 pt-4 border-t border-white/10">
+                {/* Individual Tokens */}
+                <div className="bg-charcoal/30 border border-white/5 p-6 mt-4">
+                  <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-4 border-b border-white/10 pb-3">
+                    Individual Tokens
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-baseline">
+                      <span className="font-mono text-sm text-white">Elon Musk</span>
+                      <span className="font-mono text-[11px] text-white/60">5 ed. &mdash; <span className="text-white">2 avail</span></span>
+                    </div>
+                    <div className="flex justify-between items-baseline">
+                      <span className="font-mono text-sm text-white">Mark Zuckerberg</span>
+                      <span className="font-mono text-[11px] text-white/60">5 ed. &mdash; <span className="text-white">4 avail</span></span>
+                    </div>
+                    <div className="flex justify-between items-baseline">
+                      <span className="font-mono text-sm text-white">Sam Altman</span>
+                      <span className="font-mono text-[11px] text-white/60">5 ed. &mdash; <span className="text-white">4 avail</span></span>
+                    </div>
+                    <div className="flex justify-between items-baseline">
+                      <span className="font-mono text-sm text-white">Jensen Huang</span>
+                      <span className="font-mono text-[11px] text-white/60">5 ed. &mdash; <span className="text-white">4 avail</span></span>
+                    </div>
+                  </div>
+                  <div className="mt-5">
                     <a
-                      href={KINETIC_3D_COLLECTION_URL}
+                      href="https://gallery.transientlabs.xyz/shape-study"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-mono text-[10px] uppercase tracking-wider text-white/50 hover:text-white/80 transition-colors"
+                      className="block w-full text-center font-mono text-xs uppercase tracking-[0.15em] text-white border border-white/20 px-4 py-3 hover:bg-white/5 transition-colors"
                     >
-                      View all listings on OpenSea &rarr;
+                      View Available Individual Tokens
                     </a>
                   </div>
                 </div>
