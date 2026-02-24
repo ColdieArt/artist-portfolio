@@ -39,6 +39,143 @@ export default function MainframePage() {
 
       <div className="line-accent" />
 
+      {/* ── Section 1: Exploits ── */}
+      <section id="exploits" className="py-12 md:py-16 section-padding">
+        <div className="page-container">
+          <ScrollReveal>
+            <div className="mb-8">
+              <div className="classified-header">
+                Active Operations &mdash;{' '}
+                <span className="redacted">Directives</span>
+              </div>
+              <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
+                Exploits
+              </h2>
+              <p className="font-mono text-sm text-white/70 leading-relaxed mt-4">
+                Pay attention to exploits that are listed. Can happen at any time. They are of utmost importance and offer those willing to accept the challenge an opportunity to build the dossier against the overlords.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal>
+            <div className="bg-white p-8 md:p-12">
+              <div className="font-mono text-xs text-black uppercase tracking-[0.2em] mb-8">
+                <h3 className="font-display text-2xl md:text-3xl text-black uppercase tracking-[0.03em] mb-6">
+                  EXPLOITS &mdash; &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; BRIEFING
+                </h3>
+                <div className="space-y-1 mb-8 border-b border-black/10 pb-6">
+                  <p>CLASSIFICATION: &nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
+                  <p>INTELLIGENCE DIVISION: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DATA &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
+                  <p>STATUS: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MONITORING</p>
+                </div>
+              </div>
+
+              <div className="font-mono text-sm text-black leading-relaxed space-y-6">
+                <p className="text-black/40 text-xs uppercase tracking-widest">
+                  // DIRECTIVE FROM &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; COMMAND
+                </p>
+
+                <p className="font-bold">
+                  This is the extraction point.
+                </p>
+
+                <p>
+                  Exploits is where &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; is collected, processed, and &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; on the five Overlords. Every submission builds a living &#9608;&#9608;&#9608;&#9608;. A growing intelligence file of visual data that &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; their agendas, their motives, and the architectures of &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; they would rather you never &#9608;&#9608;&#9608;.
+                </p>
+
+                <p>
+                  Some of what you find will be &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Some will be damning. All of it matters.
+                </p>
+
+                <p>
+                  The &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; of their plans is the power we hold. Not capital. Not &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Sight. The ability to see what is &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; constructed around us and render it &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; for others. This information must be &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; with any who will have eyes to &#9608;&#9608;&#9608;.
+                </p>
+
+                {/* How the system operates */}
+                <div className="border-t border-b border-black/10 py-6 my-6">
+                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">
+                    HOW THE &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; OPERATES:
+                  </p>
+
+                  <p>
+                    When a new Exploit is &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; or a new bounty is issued, this is the node where the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; is published. Each operation comes with &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; directives and ground &#9608;&#9608;&#9608;&#9608; that must be followed. These are not &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. They are operational &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Deviation from the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; compromises the mission.
+                  </p>
+
+                  <p className="mt-4">
+                    Every Exploit is a &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. A targeted challenge designed to extract the highest-value &#9608;&#9608;&#9608;&#9608; from the network. Submit &#9608;&#9608;&#9608;&#9608;. Submit intelligence. Submit what the Overlord does not want &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
+                  </p>
+
+                  <p className="mt-4 italic">
+                    The best data &#9608;&#9608;&#9608;&#9608;.
+                  </p>
+                </div>
+
+                {/* Reward structure */}
+                <div className="border-b border-black/10 pb-6 mb-6">
+                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">
+                    &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; STRUCTURE:
+                  </p>
+                  <ul className="space-y-2 ml-1">
+                    <li className="flex gap-2">
+                      <span className="shrink-0">&rarr;</span>
+                      <span>Rewards are &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; between the operative, the community, and the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; who fund the network.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0">&rarr;</span>
+                      <span>No single entity &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; the output.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0">&rarr;</span>
+                      <span>The network &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; the network.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Current status */}
+                <div>
+                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">
+                    CURRENT STATUS:
+                  </p>
+                  <div className="font-mono text-xs text-black uppercase tracking-[0.2em] space-y-1 mb-6">
+                    <p>EXPLOIT #001: &nbsp;&nbsp;&nbsp;&nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
+                    <p>ANNOUNCEMENT: &nbsp;&nbsp;&nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
+                    <p>DIRECTIVE: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PENDING &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
+                    <p>REWARD TIER: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
+                  </div>
+
+                  <p>
+                    The first &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; is being &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Until the signal drops, your directive is &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Access the five Overlord nodes. Study the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Learn the canvas you will be &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; to breach.
+                  </p>
+
+                  <p className="mt-4">
+                    When the order &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;, you will be ready. Or you &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
+                  </p>
+                </div>
+
+                {/* CTA */}
+                <div className="mt-10 text-center">
+                  <Link
+                    href="/overlords"
+                    className="inline-flex items-center gap-3 px-8 py-4 bg-black text-white font-mono text-sm uppercase tracking-[0.2em] hover:bg-black/80 transition-colors"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    ACCESS THE OVERLORDS
+                  </Link>
+                </div>
+
+                <p className="text-black/40 text-xs italic mt-8">
+                  // END &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;
+                </p>
+              </div>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      <div className="line-accent" />
+
       {/* ── Section 1b: Current Exploit Submissions ── */}
       <section className="py-12 md:py-16 section-padding">
         <div className="page-container">
