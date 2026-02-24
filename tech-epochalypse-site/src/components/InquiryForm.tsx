@@ -105,18 +105,6 @@ export default function InquiryForm({ open, onClose, subject }: InquiryFormProps
     return () => window.removeEventListener('keydown', handleKey)
   }, [open, onClose])
 
-  function sendViaMailto() {
-    const subject = encodeURIComponent(`Collect Inquiry: ${inquiryType} — ${name}`)
-    const body = encodeURIComponent(
-      `Name: ${name}\nEmail: ${email}\nInquiry Type: ${inquiryType}\n\n${message}`
-    )
-    window.open(`mailto:coldieart@gmail.com?subject=${subject}&body=${body}`, '_self')
-    setStatus('sent')
-    setName('')
-    setEmail('')
-    setMessage('')
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!turnstileToken) {
@@ -127,35 +115,47 @@ export default function InquiryForm({ open, onClose, subject }: InquiryFormProps
     setStatus('sending')
     setErrorMsg('')
 
-    // If API endpoint is configured, try it first
-    if (CONTACT_API_URL) {
-      try {
-        const res = await fetch(CONTACT_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name,
-            email,
-            inquiryType,
-            message,
-            turnstileToken,
-          }),
-        })
+    try {
+      const endpoint = CONTACT_API_URL || 'https://formsubmit.co/ajax/coldieart@gmail.com'
+      const isFormSubmit = !CONTACT_API_URL
 
-        if (res.ok) {
-          setStatus('sent')
-          setName('')
-          setEmail('')
-          setMessage('')
-          return
-        }
-      } catch {
-        // API unreachable — fall through to mailto
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          isFormSubmit
+            ? {
+                name,
+                email,
+                message,
+                _subject: `Collect Inquiry: ${inquiryType}`,
+                _captcha: 'false',
+                _template: 'table',
+                inquiryType,
+              }
+            : {
+                name,
+                email,
+                inquiryType,
+                message,
+                turnstileToken,
+              }
+        ),
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || data.message || 'Failed to send inquiry')
       }
-    }
 
-    // Fallback: open pre-filled email
-    sendViaMailto()
+      setStatus('sent')
+      setName('')
+      setEmail('')
+      setMessage('')
+    } catch (err) {
+      setStatus('error')
+      setErrorMsg(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+    }
   }
 
   if (!open) return null
