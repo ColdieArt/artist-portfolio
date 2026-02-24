@@ -105,6 +105,18 @@ export default function InquiryForm({ open, onClose, subject }: InquiryFormProps
     return () => window.removeEventListener('keydown', handleKey)
   }, [open, onClose])
 
+  function sendViaMailto() {
+    const subject = encodeURIComponent(`Collect Inquiry: ${inquiryType} — ${name}`)
+    const body = encodeURIComponent(
+      `Name: ${name}\nEmail: ${email}\nInquiry Type: ${inquiryType}\n\n${message}`
+    )
+    window.open(`mailto:coldieart@gmail.com?subject=${subject}&body=${body}`, '_self')
+    setStatus('sent')
+    setName('')
+    setEmail('')
+    setMessage('')
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!turnstileToken) {
@@ -115,32 +127,35 @@ export default function InquiryForm({ open, onClose, subject }: InquiryFormProps
     setStatus('sending')
     setErrorMsg('')
 
-    try {
-      const res = await fetch(CONTACT_API_URL || '/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          email,
-          inquiryType,
-          message,
-          turnstileToken,
-        }),
-      })
+    // If API endpoint is configured, try it first
+    if (CONTACT_API_URL) {
+      try {
+        const res = await fetch(CONTACT_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            email,
+            inquiryType,
+            message,
+            turnstileToken,
+          }),
+        })
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || 'Failed to send inquiry')
+        if (res.ok) {
+          setStatus('sent')
+          setName('')
+          setEmail('')
+          setMessage('')
+          return
+        }
+      } catch {
+        // API unreachable — fall through to mailto
       }
-
-      setStatus('sent')
-      setName('')
-      setEmail('')
-      setMessage('')
-    } catch (err) {
-      setStatus('error')
-      setErrorMsg(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     }
+
+    // Fallback: open pre-filled email
+    sendViaMailto()
   }
 
   if (!open) return null
@@ -210,7 +225,7 @@ export default function InquiryForm({ open, onClose, subject }: InquiryFormProps
                   onChange={(e) => setInquiryType(e.target.value)}
                   className="w-full bg-charcoal border border-white/10 text-white font-mono text-sm px-3 py-2.5 focus:outline-none focus:border-white/30 transition-colors appearance-none cursor-pointer"
                 >
-                  <option value="Full Set">Full Set (All 10 editions of one Overlord)</option>
+                  <option value="Full Set">Full Set (Set of 5 Overlords)</option>
                   <option value="Individual Token">Individual Token</option>
                   <option value="General Inquiry">General Inquiry</option>
                 </select>
