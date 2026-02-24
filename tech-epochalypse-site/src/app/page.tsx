@@ -71,27 +71,6 @@ export default function HomePage() {
             Five overlords. One network. Infinite iterations.
           </p>
 
-
-          <div className="animate-fade-in delay-700">
-            <Link href="/mainframe" className="btn-primary btn-pulse">
-              <span>ENTER THE MAINFRAME</span>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                className="transition-transform duration-300 group-hover:translate-x-1"
-              >
-                <path
-                  d="M3 8h10M9 4l4 4-4 4"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </Link>
-          </div>
         </div>
 
         {/* Scroll indicator */}
@@ -194,6 +173,58 @@ export default function HomePage() {
                   <li>Pieces can be removed from the canvas by dragging them over the trash icon.</li>
                   <li>The composition returns to its original state via the &ldquo;RESET&rdquo; button.</li>
                 </ul>
+              </div>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ── The Series Overview ── */}
+      <section className="relative py-24 section-padding bg-black grid-lines">
+        <div className="page-container">
+          <ScrollReveal>
+            <div className="flex flex-col md:flex-row gap-12 md:gap-16 items-start">
+              <div className="flex-1">
+                <div className="classified-header">
+                  Digital Art Collections - <span className="redacted">On-Chain</span>
+                </div>
+                <h2 className="font-display text-4xl md:text-5xl text-white uppercase tracking-[0.05em] mb-6">
+                  The Series
+                </h2>
+                <p className="text-white text-sm font-mono leading-relaxed mb-4 max-w-xl">
+                  Each series within Tech Epochalypse lives on-chain as a permanent
+                  record. These are not prints. They are artifacts - kinetic
+                  stills captured from interactive 3D portraits, each one unique.
+                </p>
+                <p className="text-white text-sm font-mono leading-relaxed mb-8 max-w-xl">
+                  From the core Kinetic 3D Interactive collection to the 250
+                  Moments captured across all five Overlords - every piece is a
+                  fragment of the network, scattered across collectors worldwide.
+                </p>
+                <Link href="/series" className="btn-primary">
+                  <span>Explore the Series</span>
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </Link>
+              </div>
+              <div className="md:w-80 shrink-0 grid grid-cols-2 gap-3">
+                {[
+                  { src: '/images/overlords/elon-musk-coldie-kinetic-3d-digital.avif', alt: 'Elon Musk - Kinetic 3D' },
+                  { src: '/images/overlords/jeff-bezos-coldie-kinetic-collage.avif', alt: 'Jeff Bezos - Kinetic Collage' },
+                  { src: '/images/overlords/jensen-huang-coldie-digital-3d-art.avif', alt: 'Jensen Huang - Digital 3D' },
+                  { src: '/images/overlords/sam-altman-coldie-kinetic-3d.avif', alt: 'Sam Altman - Kinetic 3D' },
+                ].map((img) => (
+                  <div key={img.src} className="aspect-square relative overflow-hidden border border-white/5 hover:border-white/15 transition-all duration-500 group">
+                    <img
+                      src={img.src}
+                      alt={img.alt}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  </div>
+                ))}
               </div>
             </div>
           </ScrollReveal>
