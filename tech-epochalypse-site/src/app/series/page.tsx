@@ -54,6 +54,101 @@ export default function SeriesPage() {
 
       <div className="line-accent" />
 
+      {/* ── Overlord Breakdown ── */}
+      <section className="py-16 md:py-24 section-padding">
+        <div className="page-container">
+          <ScrollReveal>
+            <div className="mb-12">
+              <div className="classified-header">
+                Network Nodes &mdash;{' '}
+                <span className="redacted">Five Subjects</span>
+              </div>
+              <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
+                The Five Overlords
+              </h2>
+              <p className="font-mono text-sm text-white/70 leading-relaxed mt-4 max-w-xl">
+                Each Overlord is a fully interactive kinetic 3D portrait. The
+                Moments collection captures 50 unique stills from each subject
+                &mdash; 250 fragments total.
+              </p>
+              <p className="font-mono text-sm text-white/70 leading-relaxed mt-4 max-w-xl">
+                Moments works are access to each Overlord. You want to know your
+                Overlord and align with them. Exploits will feed into those who
+                collect Moments. For example, if there is an Elon Musk
+                Exploit/Bounty, the chosen piece will become a release that will
+                be available to Moments holders of Elon Musk.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            {overlords.map((overlord, i) => (
+              <ScrollReveal key={overlord.slug} delay={i * 100}>
+                <div className="group relative bg-charcoal/30 border border-white/5 hover:border-white/10 overflow-hidden transition-all duration-500">
+                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                  <div className="aspect-square relative overflow-hidden">
+                    <img
+                      src={overlord.previewImage}
+                      alt={overlord.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      style={{ filter: 'grayscale(1) contrast(1.1)' }}
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/60 mb-1">
+                        Node {overlord.number}
+                      </p>
+                      <h3 className="font-display text-lg text-white uppercase tracking-[0.03em]">
+                        {overlord.name}
+                      </h3>
+                      <p className="font-mono text-[10px] uppercase tracking-wider text-white/50">
+                        {overlord.title}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-4 flex flex-col gap-2">
+                    <p className="font-mono text-[10px] text-white/40 uppercase tracking-wider">
+                      50 Moments
+                    </p>
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/overlords/${overlord.slug}`}
+                        className="flex-1 text-center font-mono text-[10px] uppercase tracking-wider text-white border border-white/10 px-3 py-2 hover:bg-white/5 transition-colors"
+                      >
+                        Interact
+                      </Link>
+                      {OVERLORD_COLLECT_URLS[overlord.slug] ? (
+                        <a
+                          href={OVERLORD_COLLECT_URLS[overlord.slug]}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 text-center font-mono text-[10px] uppercase tracking-wider text-black bg-white px-3 py-2 hover:bg-white/90 transition-colors"
+                        >
+                          Collect
+                        </a>
+                      ) : (
+                        <a
+                          href={`${OPENSEA_COLLECTION_URL}?search[stringTraits][0][name]=Overlord&search[stringTraits][0][values][0]=${encodeURIComponent(overlord.name)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 text-center font-mono text-[10px] uppercase tracking-wider text-black bg-white px-3 py-2 hover:bg-white/90 transition-colors"
+                        >
+                          Collect
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="line-accent" />
+
       {/* ── Main Series: Kinetic 3D Portraits ── */}
       <section className="py-16 md:py-24 section-padding">
         <div className="page-container">
@@ -328,101 +423,6 @@ export default function SeriesPage() {
               </div>
             </div>
           </ScrollReveal>
-        </div>
-      </section>
-
-      <div className="line-accent" />
-
-      {/* ── Overlord Breakdown ── */}
-      <section className="py-16 md:py-24 section-padding">
-        <div className="page-container">
-          <ScrollReveal>
-            <div className="mb-12">
-              <div className="classified-header">
-                Network Nodes &mdash;{' '}
-                <span className="redacted">Five Subjects</span>
-              </div>
-              <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
-                The Five Overlords
-              </h2>
-              <p className="font-mono text-sm text-white/70 leading-relaxed mt-4 max-w-xl">
-                Each Overlord is a fully interactive kinetic 3D portrait. The
-                Moments collection captures 50 unique stills from each subject
-                &mdash; 250 fragments total.
-              </p>
-              <p className="font-mono text-sm text-white/70 leading-relaxed mt-4 max-w-xl">
-                Moments works are access to each Overlord. You want to know your
-                Overlord and align with them. Exploits will feed into those who
-                collect Moments. For example, if there is an Elon Musk
-                Exploit/Bounty, the chosen piece will become a release that will
-                be available to Moments holders of Elon Musk.
-              </p>
-            </div>
-          </ScrollReveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            {overlords.map((overlord, i) => (
-              <ScrollReveal key={overlord.slug} delay={i * 100}>
-                <div className="group relative bg-charcoal/30 border border-white/5 hover:border-white/10 overflow-hidden transition-all duration-500">
-                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                  <div className="aspect-square relative overflow-hidden">
-                    <img
-                      src={overlord.previewImage}
-                      alt={overlord.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      style={{ filter: 'grayscale(1) contrast(1.1)' }}
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/60 mb-1">
-                        Node {overlord.number}
-                      </p>
-                      <h3 className="font-display text-lg text-white uppercase tracking-[0.03em]">
-                        {overlord.name}
-                      </h3>
-                      <p className="font-mono text-[10px] uppercase tracking-wider text-white/50">
-                        {overlord.title}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="p-4 flex flex-col gap-2">
-                    <p className="font-mono text-[10px] text-white/40 uppercase tracking-wider">
-                      50 Moments
-                    </p>
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/overlords/${overlord.slug}`}
-                        className="flex-1 text-center font-mono text-[10px] uppercase tracking-wider text-white border border-white/10 px-3 py-2 hover:bg-white/5 transition-colors"
-                      >
-                        Interact
-                      </Link>
-                      {OVERLORD_COLLECT_URLS[overlord.slug] ? (
-                        <a
-                          href={OVERLORD_COLLECT_URLS[overlord.slug]}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 text-center font-mono text-[10px] uppercase tracking-wider text-black bg-white px-3 py-2 hover:bg-white/90 transition-colors"
-                        >
-                          Collect
-                        </a>
-                      ) : (
-                        <a
-                          href={`${OPENSEA_COLLECTION_URL}?search[stringTraits][0][name]=Overlord&search[stringTraits][0][values][0]=${encodeURIComponent(overlord.name)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 text-center font-mono text-[10px] uppercase tracking-wider text-black bg-white px-3 py-2 hover:bg-white/90 transition-colors"
-                        >
-                          Collect
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
         </div>
       </section>
 
