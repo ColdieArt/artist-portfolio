@@ -1,5 +1,8 @@
 interface Env {
   GALLERY_BUCKET: R2Bucket;
+  TURNSTILE_SECRET: string;
+  RESEND_API_KEY: string;
+  CONTACT_EMAIL: string;
 }
 
 const CORS_HEADERS = {
@@ -37,6 +40,11 @@ export default {
     // GET /image/:key — serve an image from R2
     if (request.method === 'GET' && url.pathname.startsWith('/image/')) {
       return handleImage(url.pathname.slice(7), env);
+    }
+
+    // POST /api/contact — inquiry form with Turnstile CAPTCHA
+    if (request.method === 'POST' && url.pathname === '/api/contact') {
+      return handleContact(request, env);
     }
 
     return json({ error: 'Not found' }, 404);
@@ -97,6 +105,96 @@ async function handleList(env: Env): Promise<Response> {
   items.sort((a, b) => b.id.localeCompare(a.id));
 
   return json(items);
+}
+
+async function handleContact(request: Request, env: Env): Promise<Response> {
+  try {
+    const body = await request.json() as {
+      name?: string;
+      email?: string;
+      inquiryType?: string;
+      message?: string;
+      turnstileToken?: string;
+    };
+
+    const { name, email, inquiryType, message, turnstileToken } = body;
+
+    if (!name || !email || !message || !turnstileToken) {
+      return json({ error: 'All fields are required' }, 400);
+    }
+
+    // Verify Turnstile CAPTCHA
+    const turnstileRes = await fetch(
+      'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          secret: env.TURNSTILE_SECRET,
+          response: turnstileToken,
+          remoteip: request.headers.get('CF-Connecting-IP') || '',
+        }),
+      }
+    );
+
+    const turnstileData = await turnstileRes.json() as { success: boolean };
+    if (!turnstileData.success) {
+      return json({ error: 'CAPTCHA verification failed' }, 403);
+    }
+
+    // Store inquiry in R2 as a backup record
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const inquiry = {
+      id,
+      name,
+      email,
+      inquiryType: inquiryType || 'General Inquiry',
+      message,
+      submittedAt: new Date().toISOString(),
+    };
+
+    await env.GALLERY_BUCKET.put(
+      `inquiries/${id}.json`,
+      JSON.stringify(inquiry, null, 2),
+      {
+        httpMetadata: { contentType: 'application/json' },
+        customMetadata: { type: 'inquiry', email },
+      }
+    );
+
+    // Send email via Resend if configured
+    const contactEmail = env.CONTACT_EMAIL || 'coldieart@gmail.com';
+    if (env.RESEND_API_KEY) {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: 'Tech Epochalypse <noreply@knowyouroverlord.art>',
+          to: [contactEmail],
+          reply_to: email,
+          subject: `Collect Inquiry: ${inquiryType || 'General'} — ${name}`,
+          text: [
+            `New collect inquiry from ${name}`,
+            `Email: ${email}`,
+            `Type: ${inquiryType || 'General Inquiry'}`,
+            '',
+            'Message:',
+            message,
+            '',
+            `Submitted: ${inquiry.submittedAt}`,
+            `ID: ${id}`,
+          ].join('\n'),
+        }),
+      });
+    }
+
+    return json({ ok: true, id });
+  } catch (e) {
+    return json({ error: 'Failed to process inquiry' }, 500);
+  }
 }
 
 async function handleImage(key: string, env: Env): Promise<Response> {

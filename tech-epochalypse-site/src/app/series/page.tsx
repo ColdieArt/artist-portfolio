@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import ScrollReveal from '@/components/ScrollReveal'
+import InquiryForm from '@/components/InquiryForm'
 import overlords from '@/data/overlords.json'
 
 const OPENSEA_COLLECTION_SLUG = 'tech-epochalypse-moments-decentral-eyes'
@@ -46,6 +47,8 @@ export default function SeriesPage() {
   const [stats, setStats] = useState<CollectionStats | null>(null)
   const [collectionInfo, setCollectionInfo] = useState<CollectionInfo | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
+  const [inquiryOpen, setInquiryOpen] = useState(false)
+  const [inquirySubject, setInquirySubject] = useState('Full Set')
 
   useEffect(() => {
     const base = `https://api.opensea.io/api/v2/collections/${OPENSEA_COLLECTION_SLUG}`
@@ -207,12 +210,12 @@ export default function SeriesPage() {
                   <p className="font-mono text-[10px] text-white/40 mb-5">
                     All 10 editions of one Overlord
                   </p>
-                  <a
-                    href="mailto:coldie@coldie.com?subject=Full%20Set%20Inquiry%20%E2%80%94%20Tech%20Epochalypse%20Kinetic%203D"
+                  <button
+                    onClick={() => { setInquirySubject('Full Set'); setInquiryOpen(true) }}
                     className="block w-full text-center font-mono text-xs uppercase tracking-[0.15em] text-black bg-white px-4 py-3 hover:bg-white/90 transition-colors"
                   >
                     Inquire to Collect Full Set
-                  </a>
+                  </button>
                 </div>
 
                 {/* Individual Tokens */}
@@ -227,7 +230,7 @@ export default function SeriesPage() {
                     </div>
                     <div className="flex justify-between items-baseline">
                       <span className="font-mono text-sm text-white">Mark Zuckerberg</span>
-                      <span className="font-mono text-[11px] text-white/60">5 ed. &mdash; <span className="text-white">4 avail</span></span>
+                      <span className="font-mono text-[11px] text-white/60">5 ed. &mdash; <span className="text-white">3 avail</span></span>
                     </div>
                     <div className="flex justify-between items-baseline">
                       <span className="font-mono text-sm text-white">Sam Altman</span>
@@ -569,6 +572,12 @@ export default function SeriesPage() {
       </section>
 
       <div className="h-16" />
+
+      <InquiryForm
+        open={inquiryOpen}
+        onClose={() => setInquiryOpen(false)}
+        subject={inquirySubject}
+      />
     </div>
   )
 }
