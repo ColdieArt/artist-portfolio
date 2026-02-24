@@ -2,43 +2,6 @@ interface Env {
   GALLERY_BUCKET: R2Bucket;
 }
 
-// ── Mint Drop Registry ──
-// Active ERC-721 drops served via /api/mint endpoints
-
-interface MintDrop {
-  slug: string;
-  name: string;
-  artist: string;
-  description: string;
-  chainId: number;
-  chainName: string;
-  contractAddress: string;
-  mintContractAddress: string;
-  tokenStandard: string;
-  allowlistUrl: string;
-  refreshInterval: number;
-  status: 'live' | 'upcoming' | 'ended';
-}
-
-const MINT_DROPS: MintDrop[] = [
-  {
-    slug: 'shape-study',
-    name: 'Shape Study',
-    artist: 'Coldie',
-    description:
-      'Shape Study — an exploration of form, structure, and the geometry of perception. ERC-721 on Base.',
-    chainId: 8453,
-    chainName: 'Base',
-    contractAddress: '0xb38bd444399cd76c3f91aa2455052834e3451911',
-    mintContractAddress: '0x384092784cfaa91efaa77870c04d958e20840242',
-    tokenStandard: 'ERC-721',
-    allowlistUrl:
-      'https://dv0xp0uwyoh8r.cloudfront.net/stacks/c8aeee8f-7d14-4403-a8b2-fe06f97a79cc/allowlist',
-    refreshInterval: 10000,
-    status: 'live',
-  },
-];
-
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -74,17 +37,6 @@ export default {
     // GET /image/:key — serve an image from R2
     if (request.method === 'GET' && url.pathname.startsWith('/image/')) {
       return handleImage(url.pathname.slice(7), env);
-    }
-
-    // GET /api/mint — list all active mint drops
-    if (request.method === 'GET' && url.pathname === '/api/mint') {
-      return handleMintDrops();
-    }
-
-    // GET /api/mint/:slug — get a specific drop by slug
-    if (request.method === 'GET' && url.pathname.startsWith('/api/mint/')) {
-      const slug = url.pathname.slice('/api/mint/'.length);
-      return handleMintDrop(slug);
     }
 
     return json({ error: 'Not found' }, 404);
@@ -145,24 +97,6 @@ async function handleList(env: Env): Promise<Response> {
   items.sort((a, b) => b.id.localeCompare(a.id));
 
   return json(items);
-}
-
-// ── Mint API handlers ──
-
-function handleMintDrops(): Response {
-  const live = MINT_DROPS.filter((d) => d.status === 'live');
-  return json({
-    drops: live,
-    total: live.length,
-  });
-}
-
-function handleMintDrop(slug: string): Response {
-  const drop = MINT_DROPS.find((d) => d.slug === slug);
-  if (!drop) {
-    return json({ error: 'Drop not found' }, 404);
-  }
-  return json(drop);
 }
 
 async function handleImage(key: string, env: Env): Promise<Response> {
