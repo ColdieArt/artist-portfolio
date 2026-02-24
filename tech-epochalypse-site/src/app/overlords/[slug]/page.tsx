@@ -21,7 +21,7 @@ export function generateMetadata({ params }: PageProps): Metadata {
   if (!overlord) return {}
 
   return {
-    title: `Overlord ${overlord.number} — ${overlord.name} | Tech Epochalypse`,
+    title: `Overlord ${overlord.number} - ${overlord.name} | Tech Epochalypse`,
     description: overlord.description,
   }
 }
@@ -60,7 +60,7 @@ export default function OverlordPage({ params }: PageProps) {
 
           <div className="flex items-center gap-1">
             <span className="font-mono text-xs text-white mr-4">
-              Overlord {overlord.number} &mdash; {overlord.name}
+              Overlord {overlord.number} - {overlord.name}
             </span>
             {prev && (
               <Link
@@ -88,13 +88,13 @@ export default function OverlordPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Info panel — dossier style */}
+      {/* Info panel - dossier style */}
       <div className="pt-[7rem] md:pt-[7.5rem] bg-abyss border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6 md:px-12 py-12 md:py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
               <div className="classified-header">
-                Overlord {overlord.number} &mdash; Active Dossier
+                Overlord {overlord.number} - Active Dossier
               </div>
               <h1 className="font-display text-4xl md:text-5xl text-white mb-3 uppercase tracking-[0.03em]">
                 {overlord.name}

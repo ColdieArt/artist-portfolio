@@ -21,7 +21,7 @@ export default function MainframePage() {
           <ScrollReveal>
             <div className="text-center">
               <div className="classified-header">
-                Central Hub &mdash;{' '}
+                Central Hub -{' '}
                 <span className="redacted">All Systems</span>
               </div>
               <h1 className="font-display text-4xl md:text-6xl text-white uppercase tracking-[0.05em] mt-4">
@@ -29,7 +29,7 @@ export default function MainframePage() {
               </h1>
               <p className="font-mono text-sm text-white mt-4 max-w-2xl mx-auto leading-relaxed">
                 The nerve center of Tech Epochalypse. Community iterations,
-                active exploits, and founding signals &mdash; all in
+                active exploits, and founding signals - all in
                 one feed.
               </p>
             </div>
@@ -45,7 +45,7 @@ export default function MainframePage() {
           <ScrollReveal>
             <div className="mb-8">
               <div className="classified-header">
-                Active Operations &mdash;{' '}
+                Active Operations -{' '}
                 <span className="redacted">Directives</span>
               </div>
               <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
@@ -61,7 +61,7 @@ export default function MainframePage() {
             <div className="bg-white p-8 md:p-12">
               <div className="font-mono text-xs text-black uppercase tracking-[0.2em] mb-8">
                 <h3 className="font-display text-2xl md:text-3xl text-black uppercase tracking-[0.03em] mb-6">
-                  EXPLOITS &mdash; &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; BRIEFING
+                  EXPLOITS - &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; BRIEFING
                 </h3>
                 <div className="space-y-1 mb-8 border-b border-black/10 pb-6">
                   <p>CLASSIFICATION: &nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
@@ -183,7 +183,7 @@ export default function MainframePage() {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <div className="classified-header">
-                  Active Exploit &mdash; Submissions
+                  Active Exploit - Submissions
                 </div>
                 <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
                   Exploit Transmissions
@@ -446,7 +446,7 @@ export default function MainframePage() {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <div className="classified-header">
-                  On-Chain Artifacts &mdash;{' '}
+                  On-Chain Artifacts -{' '}
                   <span className="redacted">Ethereum</span>
                 </div>
                 <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
@@ -471,7 +471,7 @@ export default function MainframePage() {
                 <p className="text-white text-sm font-mono leading-relaxed max-w-xl mb-6">
                   250 curated 1/1 stills from the kinetic 3D portrait series.
                   Each Moment is a still-frame capture from the interactive
-                  Overlord portraits &mdash; frozen instances of a composition
+                  Overlord portraits - frozen instances of a composition
                   that never sits still. Built on the Transient Labs ERC-7160
                   token standard.
                 </p>
@@ -522,7 +522,7 @@ export default function MainframePage() {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <div className="classified-header">
-                  The Artist &mdash; Active File
+                  The Artist - Active File
                 </div>
                 <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
                   Dossier
@@ -539,7 +539,7 @@ export default function MainframePage() {
               <div className="aspect-[3/4] relative overflow-hidden bg-charcoal dossier-border">
                 <img
                   src="/Coldie-artist-headshot.jpg"
-                  alt="Coldie — Artist"
+                  alt="Coldie - Artist"
                   className="w-full h-full object-cover"
                   style={{ filter: 'grayscale(1) contrast(1.2)' }}
                 />

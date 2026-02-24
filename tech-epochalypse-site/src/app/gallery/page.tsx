@@ -4,7 +4,7 @@ import UserExports from '@/components/UserExports'
 import overlords from '@/data/overlords.json'
 
 export const metadata: Metadata = {
-  title: 'The Mainframe — Tech Epochalypse',
+  title: 'The Mainframe - Tech Epochalypse',
   description:
     'A living gallery of visitor-created remixes and exported iterations from the Tech Epochalypse series.',
 }

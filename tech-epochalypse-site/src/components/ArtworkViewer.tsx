@@ -23,7 +23,7 @@ export default function ArtworkViewer({ overlord }: { overlord: Overlord }) {
         LAUNCH KINETIC 3D ARTWORK
       </a>
       <p className="mt-2 font-mono text-[10px] text-white tracking-wider uppercase">
-        Opens as full-page experience &mdash; drag, rotate, export
+        Opens as full-page experience - drag, rotate, export
       </p>
     </div>
   )

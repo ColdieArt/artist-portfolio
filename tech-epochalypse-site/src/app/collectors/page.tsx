@@ -5,7 +5,7 @@ import collectors from '@/data/collectors.json'
 import overlords from '@/data/overlords.json'
 
 export const metadata: Metadata = {
-  title: 'Founding Signals — Tech Epochalypse',
+  title: 'Founding Signals - Tech Epochalypse',
   description:
     'Every network starts with its first connection. Honoring the founding signals of Tech Epochalypse.',
 }

@@ -38,13 +38,13 @@ export default function SeriesPage() {
               <div className="flex items-center justify-center gap-3 mt-4">
                 <div className="w-12 h-px bg-white/10" />
                 <span className="font-mono text-[9px] text-white uppercase tracking-wider">
-                  Catalogued &mdash; <span className="redacted">On-Chain</span>
+                  Catalogued - <span className="redacted">On-Chain</span>
                 </span>
                 <div className="w-12 h-px bg-white/10" />
               </div>
               <p className="font-mono text-sm text-white mt-6 max-w-2xl mx-auto leading-relaxed">
                 Each series within Tech Epochalypse lives on-chain as a permanent
-                record. These are not prints. They are artifacts &mdash; kinetic
+                record. These are not prints. They are artifacts - kinetic
                 stills captured from interactive 3D portraits, each one unique.
               </p>
             </div>
@@ -60,7 +60,7 @@ export default function SeriesPage() {
           <ScrollReveal>
             <div className="mb-12">
               <div className="classified-header">
-                Network Nodes &mdash;{' '}
+                Network Nodes -{' '}
                 <span className="redacted">Five Subjects</span>
               </div>
               <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
@@ -69,7 +69,7 @@ export default function SeriesPage() {
               <p className="font-mono text-sm text-white/70 leading-relaxed mt-4 max-w-xl">
                 Each Overlord is a fully interactive kinetic 3D portrait. The
                 Moments collection captures 50 unique stills from each subject
-                &mdash; 250 fragments total.
+                - 250 fragments total.
               </p>
               <p className="font-mono text-sm text-white/70 leading-relaxed mt-4 max-w-xl">
                 Moments works are access to each Overlord. You want to know your
@@ -154,7 +154,7 @@ export default function SeriesPage() {
         <div className="page-container">
           <ScrollReveal>
             <div className="classified-header">
-              Primary Series &mdash;{' '}
+              Primary Series -{' '}
               <span className="redacted">Kinetic 3D</span>
             </div>
 
@@ -170,7 +170,7 @@ export default function SeriesPage() {
 
                 <div className="space-y-4 text-white text-sm font-mono leading-relaxed max-w-xl">
                   <p>
-                    The core of Tech Epochalypse &mdash; fully interactive kinetic
+                    The core of Tech Epochalypse - fully interactive kinetic
                     3D portraits of the five Overlords who shape our digital
                     reality. These are not static images. Each portrait is a
                     living, breathing composition that responds to the viewer.
@@ -185,7 +185,7 @@ export default function SeriesPage() {
                   <p>
                     Built by{' '}
                     <span className="text-white">Coldie</span>{' '}
-                    as the definitive statement on tech power &mdash; the
+                    as the definitive statement on tech power - the
                     Kinetic 3D series is the foundation of the entire
                     Epochalypse universe.
                   </p>
@@ -261,19 +261,19 @@ export default function SeriesPage() {
                   <div className="space-y-3">
                     <div className="flex justify-between items-baseline">
                       <span className="font-mono text-sm text-white">Elon Musk</span>
-                      <span className="font-mono text-[11px] text-white/60">5 ed. &mdash; <span className="text-white">2 avail</span></span>
+                      <span className="font-mono text-[11px] text-white/60">5 ed. - <span className="text-white">2 avail</span></span>
                     </div>
                     <div className="flex justify-between items-baseline">
                       <span className="font-mono text-sm text-white">Mark Zuckerberg</span>
-                      <span className="font-mono text-[11px] text-white/60">5 ed. &mdash; <span className="text-white">3 avail</span></span>
+                      <span className="font-mono text-[11px] text-white/60">5 ed. - <span className="text-white">3 avail</span></span>
                     </div>
                     <div className="flex justify-between items-baseline">
                       <span className="font-mono text-sm text-white">Sam Altman</span>
-                      <span className="font-mono text-[11px] text-white/60">5 ed. &mdash; <span className="text-white">4 avail</span></span>
+                      <span className="font-mono text-[11px] text-white/60">5 ed. - <span className="text-white">4 avail</span></span>
                     </div>
                     <div className="flex justify-between items-baseline">
                       <span className="font-mono text-sm text-white">Jensen Huang</span>
-                      <span className="font-mono text-[11px] text-white/60">5 ed. &mdash; <span className="text-white">4 avail</span></span>
+                      <span className="font-mono text-[11px] text-white/60">5 ed. - <span className="text-white">4 avail</span></span>
                     </div>
                   </div>
                   <div className="mt-5">
@@ -295,12 +295,12 @@ export default function SeriesPage() {
 
       <div className="line-accent" />
 
-      {/* ── Collection: Moments — Decentral Eyes ── */}
+      {/* ── Collection: Moments -Decentral Eyes ── */}
       <section className="py-10 md:py-16 section-padding">
         <div className="page-container">
           <ScrollReveal>
             <div className="classified-header">
-              Series 001 &mdash;{' '}
+              Series 001 -{' '}
               <span className="redacted">Active Collection</span>
             </div>
             <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 mt-6">
@@ -317,7 +317,7 @@ export default function SeriesPage() {
                   <p>
                     250 curated 1/1 stills from the kinetic 3D portrait series.
                     Each Moment is a still-frame capture from the interactive
-                    Overlord portraits &mdash; frozen instances of a composition
+                    Overlord portraits - frozen instances of a composition
                     that never sits still.
                   </p>
                   <p>
@@ -340,17 +340,17 @@ export default function SeriesPage() {
                 {/* Moments Gallery */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-8">
                   {[
-                    { src: '/images/overlords/elon-musk-coldie-kinetic-3d-digital.avif', alt: 'Elon Musk — Kinetic 3D Digital' },
-                    { src: '/images/overlords/elon-musk-typography-kinetic-collage.avif', alt: 'Elon Musk — Typography Kinetic Collage' },
-                    { src: '/images/overlords/jeff-bezos-coldie-kinetic-collage.avif', alt: 'Jeff Bezos — Kinetic Collage' },
-                    { src: '/images/overlords/jeff-bezos-kinetic-3d-collage.avif', alt: 'Jeff Bezos — Kinetic 3D Collage' },
-                    { src: '/images/overlords/jensen-huang-coldie-digital-3d-art.avif', alt: 'Jensen Huang — Digital 3D Art' },
-                    { src: '/images/overlords/jensen-huang-coldie-kinetic-art.avif', alt: 'Jensen Huang — Kinetic Art' },
-                    { src: '/images/overlords/jensen-huang-glitch-kinetic-art.avif', alt: 'Jensen Huang — Glitch Kinetic Art' },
-                    { src: '/images/overlords/Mark-Zuckerberg-coldie-kinetic-art.avif', alt: 'Mark Zuckerberg — Kinetic Art' },
-                    { src: '/images/overlords/mark-zuckerberg-3d-kinetic-art.avif', alt: 'Mark Zuckerberg — 3D Kinetic Art' },
-                    { src: '/images/overlords/sam-altman-coldie-kinetic-3d.avif', alt: 'Sam Altman — Kinetic 3D' },
-                    { src: '/images/overlords/sam-altman-overlord-3d-art-coldie.avif', alt: 'Sam Altman — Overlord 3D Art' },
+                    { src: '/images/overlords/elon-musk-coldie-kinetic-3d-digital.avif', alt: 'Elon Musk -Kinetic 3D Digital' },
+                    { src: '/images/overlords/elon-musk-typography-kinetic-collage.avif', alt: 'Elon Musk -Typography Kinetic Collage' },
+                    { src: '/images/overlords/jeff-bezos-coldie-kinetic-collage.avif', alt: 'Jeff Bezos -Kinetic Collage' },
+                    { src: '/images/overlords/jeff-bezos-kinetic-3d-collage.avif', alt: 'Jeff Bezos -Kinetic 3D Collage' },
+                    { src: '/images/overlords/jensen-huang-coldie-digital-3d-art.avif', alt: 'Jensen Huang -Digital 3D Art' },
+                    { src: '/images/overlords/jensen-huang-coldie-kinetic-art.avif', alt: 'Jensen Huang -Kinetic Art' },
+                    { src: '/images/overlords/jensen-huang-glitch-kinetic-art.avif', alt: 'Jensen Huang -Glitch Kinetic Art' },
+                    { src: '/images/overlords/Mark-Zuckerberg-coldie-kinetic-art.avif', alt: 'Mark Zuckerberg -Kinetic Art' },
+                    { src: '/images/overlords/mark-zuckerberg-3d-kinetic-art.avif', alt: 'Mark Zuckerberg -3D Kinetic Art' },
+                    { src: '/images/overlords/sam-altman-coldie-kinetic-3d.avif', alt: 'Sam Altman -Kinetic 3D' },
+                    { src: '/images/overlords/sam-altman-overlord-3d-art-coldie.avif', alt: 'Sam Altman -Overlord 3D Art' },
                   ].map((img) => (
                     <div key={img.src} className="aspect-square relative overflow-hidden border border-white/5 hover:border-white/15 transition-all duration-500 group">
                       <img
@@ -440,7 +440,7 @@ export default function SeriesPage() {
             </h2>
             <p className="text-white text-sm font-mono max-w-lg mx-auto mb-8 leading-relaxed">
               Own a fragment of the Epochalypse. Each Moment is a unique 1/1
-              artifact &mdash; a still from a kinetic portrait that never stops
+              artifact - a still from a kinetic portrait that never stops
               moving.
             </p>
             <a

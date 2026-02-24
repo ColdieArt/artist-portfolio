@@ -60,7 +60,7 @@ export default function ParticleNetwork() {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       time += 0.005
 
-      // Draw connections — thin white lines
+      // Draw connections - thin white lines
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x
@@ -93,7 +93,7 @@ export default function ParticleNetwork() {
         }
       }
 
-      // Draw particles — either dots or pixelated blocks
+      // Draw particles - either dots or pixelated blocks
       for (const p of particles) {
         // Parallax z-depth offset
         const parallaxX = Math.sin(time + p.z * 0.02) * (p.z * 0.15)
@@ -102,7 +102,7 @@ export default function ParticleNetwork() {
         const drawY = p.y + parallaxY
 
         if (p.isPixelBlock) {
-          // Pixelated rectangle blocks — drifting corrupted data
+          // Pixelated rectangle blocks - drifting corrupted data
           const flicker = Math.sin(time * 3 + p.z) > 0.7 ? 0.15 : p.opacity * 0.6
           ctx.fillStyle = `rgba(255, 255, 255, ${flicker})`
           ctx.fillRect(

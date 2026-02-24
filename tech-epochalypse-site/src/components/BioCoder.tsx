@@ -156,7 +156,7 @@ export default function BioCoder() {
         ? (time - glitchStartTime) / glitchDuration
         : 0
 
-      // ── Main text — 5x size, left-justified, bottom-to-top scroll ──
+      // ── Main text - 5x size, left-justified, bottom-to-top scroll ──
       const fontSize = Math.max(55, Math.min(70, canvas.width / 20))
       ctx.font = `bold ${fontSize}px 'Courier New', monospace`
       ctx.textAlign = 'left'
@@ -178,7 +178,7 @@ export default function BioCoder() {
         initGraphData()
       }
 
-      // Draw scrolling lines — left aligned, bottom to top
+      // Draw scrolling lines - left aligned, bottom to top
       for (let i = 0; i < TOTAL_LINES * 2; i++) {
         const phraseIndex = i % allPhrases.length
         const line = allPhrases[phraseIndex]
@@ -200,10 +200,10 @@ export default function BioCoder() {
           const splitAmount = (4 + Math.random() * 8) * Math.sin(glitchProgress * Math.PI)
           const hDisplace = (Math.random() - 0.5) * 20 * Math.sin(glitchProgress * Math.PI)
 
-          // Offset copy — lighter
+          // Offset copy - lighter
           ctx.fillStyle = `rgba(255, 255, 255, ${0.04 + Math.random() * 0.03})`
           ctx.fillText(line, drawX + hDisplace - splitAmount, drawY)
-          // Offset copy — darker
+          // Offset copy - darker
           ctx.fillStyle = `rgba(255, 255, 255, ${0.03 + Math.random() * 0.02})`
           ctx.fillText(line, drawX + hDisplace + splitAmount, drawY)
         }
@@ -212,7 +212,7 @@ export default function BioCoder() {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.19)'
         ctx.fillText(line, drawX, drawY)
 
-        // Opaque redaction bars — solid white, fully covers the word
+        // Opaque redaction bars - solid white, fully covers the word
         const redactWordIdx = redactionMap[i] ?? -1
         if (redactWordIdx >= 0) {
           const words = line.split(' ')
@@ -225,7 +225,7 @@ export default function BioCoder() {
             const wordWidth = ctx.measureText(redactedWord).width
             const startX = drawX + beforeWidth
 
-            // Solid opaque white bar — completely covers the word
+            // Solid opaque white bar - completely covers the word
             ctx.fillStyle = 'rgba(255, 255, 255, 0.35)'
             ctx.fillRect(
               startX - 3,
@@ -302,7 +302,7 @@ export default function BioCoder() {
         }
       }
 
-      // ── Vertical marquee redacted text — left justified, bottom to top ──
+      // ── Vertical marquee redacted text - left justified, bottom to top ──
       redactedScrollOffset -= REDACTED_SCROLL_SPEED
       const redactedSetHeight = REDACTED_LINE_HEIGHT * REDACTED_TOTAL_LINES
       if (redactedScrollOffset < -redactedSetHeight) {
@@ -341,7 +341,7 @@ export default function BioCoder() {
           ctx.fillStyle = 'rgba(255, 255, 255, 0.10)'
           ctx.fillText(phrase, col.x + drift, yPos)
 
-          // Opaque redaction bars — solid white, fully covers words
+          // Opaque redaction bars - solid white, fully covers words
           const wordIndices = redactedWordMap[i] ?? []
           if (wordIndices.length > 0) {
             let currentX = col.x + drift

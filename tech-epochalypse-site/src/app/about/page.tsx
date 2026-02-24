@@ -3,7 +3,7 @@ import ScrollReveal from '@/components/ScrollReveal'
 import ContactColdie from '@/components/ContactColdie'
 
 export const metadata: Metadata = {
-  title: 'Dossier — Tech Epochalypse',
+  title: 'Dossier - Tech Epochalypse',
   description:
     'Learn about Coldie, the artist behind Tech Epochalypse, and the vision driving this interactive digital art series.',
 }
@@ -37,7 +37,7 @@ export default function AboutPage() {
             <div className="aspect-[3/4] relative overflow-hidden bg-charcoal dossier-border">
               <img
                 src="/Coldie-artist-headshot.jpg"
-                alt="Coldie — Artist"
+                alt="Coldie - Artist"
                 className="w-full h-full object-cover"
                 style={{ filter: 'grayscale(1) contrast(1.2)' }}
               />
@@ -50,7 +50,7 @@ export default function AboutPage() {
           <ScrollReveal className="lg:col-span-3" delay={150}>
             <div>
               <div className="classified-header">
-                The Artist &mdash; Active File
+                The Artist - Active File
               </div>
               <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
                 Coldie
@@ -66,7 +66,7 @@ export default function AboutPage() {
                 <p>
                   With work collected by major institutions and featured in
                   publications worldwide, Coldie has established a distinctive
-                  visual language &mdash; one that merges glitch aesthetics, kinetic
+                  visual language - one that merges glitch aesthetics, kinetic
                   sculpture, and digital manipulation into portraits that feel
                   alive, unstable, and deeply human.
                 </p>
@@ -79,7 +79,7 @@ export default function AboutPage() {
               </div>
 
               <p className="text-white text-xs font-mono mt-4">
-                Clearance: <span className="redacted">FULL ACCESS</span> &mdash;
+                Clearance: <span className="redacted">FULL ACCESS</span> -
                 Status: <span className="text-white">ACTIVE</span>
               </p>
 
@@ -123,7 +123,7 @@ export default function AboutPage() {
           <ScrollReveal>
             <div>
               <div className="classified-header">
-                The Series &mdash; Overview
+                The Series - Overview
               </div>
               <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
                 What is Tech Epochalypse?
@@ -131,7 +131,7 @@ export default function AboutPage() {
               <div className="space-y-4 text-white text-sm font-mono leading-relaxed">
                 <p>
                   Tech Epochalypse is an interactive digital art series exploring
-                  the figures who defined &mdash; and disrupted &mdash; the technological
+                  the figures who defined - and disrupted - the technological
                   epoch. Five &ldquo;Tech Overlords,&rdquo; rendered as kinetic
                   3D portraits, each built as a standalone interactive
                   experience.
@@ -140,7 +140,7 @@ export default function AboutPage() {
                   Unlike traditional digital art, these pieces are not static
                   images. They are living, manipulable sculptures that exist in
                   your browser. Drag to rotate. Apply filters and effects.
-                  Export your unique iteration as a JPEG or MP4 &mdash; creating your
+                  Export your unique iteration as a JPEG or MP4 - creating your
                   own fragment of the epochalypse.
                 </p>
                 <p>
@@ -175,7 +175,7 @@ export default function AboutPage() {
           <ScrollReveal delay={150}>
             <div>
               <div className="classified-header">
-                The Process &mdash; <span className="redacted">Methods</span>
+                The Process - <span className="redacted">Methods</span>
               </div>
               <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
                 How They&rsquo;re Made
@@ -188,7 +188,7 @@ export default function AboutPage() {
                   entirely in WebGL using Three.js and custom GLSL shaders.
                 </p>
                 <p>
-                  The interactive layer is integral to the work &mdash; not an
+                  The interactive layer is integral to the work - not an
                   afterthought. Each portrait responds to viewer input: dragging
                   rotates the form, controls apply real-time effects, and the
                   export system captures your unique perspective as a new
@@ -228,7 +228,7 @@ export default function AboutPage() {
                 In Conversation With Coldie
               </h3>
               <p className="font-mono text-[10px] text-white leading-relaxed">
-                Written interview on the Tech Epochalypse drop &mdash; 250 1/1 stills critiquing tech power and the systems shaping modern life.
+                Written interview on the Tech Epochalypse drop - 250 1/1 stills critiquing tech power and the systems shaping modern life.
               </p>
             </a>
             <a

@@ -24,7 +24,7 @@ export default function PulseOverview({ overlords, hottest }: Props) {
   return (
     <div>
       <div className="classified-header">
-        Trending Leaderboard &mdash;{' '}
+        Trending Leaderboard -{' '}
         <span className="redacted-partial">Live</span>
       </div>
 

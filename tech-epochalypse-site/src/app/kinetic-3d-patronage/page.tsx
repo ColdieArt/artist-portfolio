@@ -3,9 +3,9 @@ import Link from 'next/link'
 import ScrollReveal from '@/components/ScrollReveal'
 
 export const metadata: Metadata = {
-  title: 'Kinetic 3D Patronage — Tech Epochalypse',
+  title: 'Kinetic 3D Patronage - Tech Epochalypse',
   description:
-    'What Kinetic 3D token holders receive as part of their patronage — interactive art stewardship, network effects, real-time evolution, and collaborative prints.',
+    'What Kinetic 3D token holders receive as part of their patronage - interactive art stewardship, network effects, real-time evolution, and collaborative prints.',
 }
 
 export default function Kinetic3DPatronagePage() {
@@ -24,7 +24,7 @@ export default function Kinetic3DPatronagePage() {
             <div className="flex items-center justify-center gap-3 mt-2">
               <div className="w-12 h-px bg-white/10" />
               <span className="font-mono text-[9px] text-white uppercase tracking-wider">
-                Stewardship &mdash; <span className="redacted">Active</span>
+                Stewardship - <span className="redacted">Active</span>
               </span>
               <div className="w-12 h-px bg-white/10" />
             </div>
@@ -41,7 +41,7 @@ export default function Kinetic3DPatronagePage() {
         <ScrollReveal>
           <div className="mb-16 md:mb-24">
             <div className="classified-header">
-              Benefit 001 &mdash;{' '}
+              Benefit 001 -{' '}
               <span className="redacted">Stewardship</span>
             </div>
             <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
@@ -63,7 +63,7 @@ export default function Kinetic3DPatronagePage() {
         <ScrollReveal>
           <div className="mb-16 md:mb-24">
             <div className="classified-header">
-              Benefit 002 &mdash;{' '}
+              Benefit 002 -{' '}
               <span className="redacted">Distribution</span>
             </div>
             <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
@@ -119,7 +119,7 @@ export default function Kinetic3DPatronagePage() {
         <ScrollReveal>
           <div className="mb-16 md:mb-24">
             <div className="classified-header">
-              Benefit 003 &mdash;{' '}
+              Benefit 003 -{' '}
               <span className="redacted">Evolution</span>
             </div>
             <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
@@ -172,7 +172,7 @@ export default function Kinetic3DPatronagePage() {
         <ScrollReveal>
           <div className="mb-16 md:mb-24">
             <div className="classified-header">
-              Benefit 004 &mdash;{' '}
+              Benefit 004 -{' '}
               <span className="redacted">Added-Value</span>
             </div>
             <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
@@ -193,29 +193,29 @@ export default function Kinetic3DPatronagePage() {
                 </h3>
                 <div className="space-y-3 text-white text-sm font-mono leading-relaxed">
                   <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">&mdash;</span>
+                    <span className="text-white/30 select-none">-</span>
                     <p>
                       Each token receives one gallery-quality print free of
                       charge.
                     </p>
                   </div>
                   <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">&mdash;</span>
+                    <span className="text-white/30 select-none">-</span>
                     <p>
                       Collector customizes their digital kinetic 3D layout to
                       their preferred composition.
                     </p>
                   </div>
                   <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">&mdash;</span>
+                    <span className="text-white/30 select-none">-</span>
                     <p>12&Prime; &times; 18&Prime;</p>
                   </div>
                   <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">&mdash;</span>
+                    <span className="text-white/30 select-none">-</span>
                     <p>Signed and numbered 1/1/10 per overlord.</p>
                   </div>
                   <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">&mdash;</span>
+                    <span className="text-white/30 select-none">-</span>
                     <p>
                       Collecting multiple overlords allows for mashup designs on
                       each print.
@@ -233,7 +233,7 @@ export default function Kinetic3DPatronagePage() {
         <ScrollReveal>
           <div className="mb-16 md:mb-24">
             <div className="classified-header">
-              Benefit 005 &mdash;{' '}
+              Benefit 005 -{' '}
               <span className="redacted">Physical</span>
             </div>
             <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
@@ -253,29 +253,29 @@ export default function Kinetic3DPatronagePage() {
                 </h3>
                 <div className="space-y-3 text-white text-sm font-mono leading-relaxed">
                   <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">&mdash;</span>
+                    <span className="text-white/30 select-none">-</span>
                     <p>
                       $6,000 discount applies toward the cost of the physical,
                       if you choose to collect.
                     </p>
                   </div>
                   <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">&mdash;</span>
+                    <span className="text-white/30 select-none">-</span>
                     <p>18&Prime; &times; 24&Prime;</p>
                   </div>
                   <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">&mdash;</span>
+                    <span className="text-white/30 select-none">-</span>
                     <p>Signed and numbered 1/10 per overlord.</p>
                   </div>
                   <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">&mdash;</span>
+                    <span className="text-white/30 select-none">-</span>
                     <p>
                       Owning multiple digital pieces allows for mashup of
                       elements on the physical work.
                     </p>
                   </div>
                   <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">&mdash;</span>
+                    <span className="text-white/30 select-none">-</span>
                     <p>
                       Release date TBD based on R&amp;D and production.
                     </p>

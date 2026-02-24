@@ -5,9 +5,9 @@ import UserExports from '@/components/UserExports'
 import overlords from '@/data/overlords.json'
 
 export const metadata: Metadata = {
-  title: 'The Overlords — Tech Epochalypse',
+  title: 'The Overlords - Tech Epochalypse',
   description:
-    'Explore all five Tech Overlords — interactive kinetic 3D portraits by Coldie.',
+    'Explore all five Tech Overlords - interactive kinetic 3D portraits by Coldie.',
 }
 
 export default function OverlordsPage() {
@@ -21,7 +21,7 @@ export default function OverlordsPage() {
     <section className="pt-28 md:pt-36 pb-24 lg:pb-8 section-padding bg-black grid-lines">
       <div className="page-container h-full">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-10 items-start h-full">
-          {/* Left column — headline & text */}
+          {/* Left column - headline & text */}
           <div className="w-full lg:w-5/12 flex items-start">
             <ScrollReveal>
               <p className="font-mono text-xs uppercase tracking-[0.4em] text-white mb-4">
@@ -35,21 +35,21 @@ export default function OverlordsPage() {
               </p>
               <p className="font-mono text-sm text-white/70 leading-relaxed mb-4 max-w-md">
                 Tech Epochalypse is an interactive digital art series by Coldie featuring
-                the faces behind the systems we live inside &mdash; Elon Musk, Mark Zuckerberg,
+                the faces behind the systems we live inside - Elon Musk, Mark Zuckerberg,
                 Sam Altman, Jeff Bezos, and Jensen Huang. These are not static images.
                 They are living, dimensional compositions built to be taken apart.
               </p>
               <p className="font-mono text-sm text-white/70 leading-relaxed mb-4 max-w-md">
                 Each portrait exists in 3D space. Move it. Stack the layers. Push elements
                 into depth. Pull them forward. Apply Control Layers that shift the image in
-                ways the subject never intended. The piece responds to you &mdash; every rotation,
+                ways the subject never intended. The piece responds to you - every rotation,
                 every arrangement, every decision creates something that didn&rsquo;t exist before
                 you touched it.
               </p>
               <p className="font-mono text-sm text-white/70 leading-relaxed mb-4 max-w-md">
                 When you find the version that speaks in your voice, export it. That artifact
                 is yours. Submit it to The Mainframe as a general entry for the community
-                gallery, or deploy it during an active Exploit &mdash; a bounty event where the
+                gallery, or deploy it during an active Exploit - a bounty event where the
                 most powerful breach earns a collaboration with the Tech Epochalypse project,
                 and extends to opportunities for special releases for token.
               </p>
@@ -63,7 +63,7 @@ export default function OverlordsPage() {
             </ScrollReveal>
           </div>
 
-          {/* Right column — overlord grid, 2 wide, fits viewport */}
+          {/* Right column - overlord grid, 2 wide, fits viewport */}
           <div className="w-full lg:w-7/12 lg:h-full">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:grid-rows-3 lg:h-full">
               {overlords.map((overlord, i) => (
@@ -83,7 +83,7 @@ export default function OverlordsPage() {
           <UserExports
             overlordNames={overlordNames}
             overlordSlugs={overlordSlugs}
-            headerText="Raw Signals — community exports from across the network. Unfiltered. Unranked. Create something. Touch the art. Submit the creation."
+            headerText="Raw Signals - community exports from across the network. Unfiltered. Unranked. Create something. Touch the art. Submit the creation."
           />
         </ScrollReveal>
       </div>
