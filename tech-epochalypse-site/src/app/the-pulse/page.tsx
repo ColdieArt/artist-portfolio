@@ -27,7 +27,7 @@ export default function ThePulsePage() {
         setUsingSample(true)
       }
     } catch {
-      // RSS fetch failed — fallback to sample data
+      // RSS fetch failed - fallback to sample data
       setData(getSamplePulseData())
       setUsingSample(true)
     }
@@ -47,7 +47,7 @@ export default function ThePulsePage() {
           <ScrollReveal>
             <div className="text-center">
               <div className="classified-header">
-                Intelligence Feed &mdash;{' '}
+                Intelligence Feed -{' '}
                 <span className="redacted">Live</span>
               </div>
               <h1 className="font-display text-4xl md:text-6xl text-white uppercase tracking-[0.05em] mt-4">
@@ -71,7 +71,7 @@ export default function ThePulsePage() {
               )}
               {usingSample && (
                 <p className="font-mono text-[10px] text-white mt-2 uppercase tracking-widest">
-                  Displaying sample data &mdash; live feed unavailable
+                  Displaying sample data - live feed unavailable
                 </p>
               )}
             </div>
@@ -120,7 +120,7 @@ export default function ThePulsePage() {
             <div className="page-container">
               <ScrollReveal>
                 <div className="classified-header">
-                  Dossiers &mdash;{' '}
+                  Dossiers -{' '}
                   <span className="redacted-partial">Individual</span>
                 </div>
                 <h2 className="font-display text-2xl md:text-3xl text-white mb-8 uppercase tracking-[0.03em]">
@@ -145,7 +145,7 @@ export default function ThePulsePage() {
             <div className="page-container">
               <ScrollReveal>
                 <div className="classified-header">
-                  Signal Analysis &mdash;{' '}
+                  Signal Analysis -{' '}
                   <span className="redacted">Classified</span>
                 </div>
                 <h2 className="font-display text-2xl md:text-3xl text-white mb-8 uppercase tracking-[0.03em]">

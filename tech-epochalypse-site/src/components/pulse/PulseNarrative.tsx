@@ -39,7 +39,7 @@ export default function PulseNarrative({
       : 0
     if (ratio < 60) {
       lines.push(
-        `${quietO.name} is running quiet at ${quietO.pulse_count} articles \u2014 ${ratio}% of the leader.`
+        `${quietO.name} is running quiet at ${quietO.pulse_count} articles - ${ratio}% of the leader.`
       )
     }
   }
@@ -61,7 +61,7 @@ export default function PulseNarrative({
   return (
     <div className="border border-white/5 bg-white/[0.01] p-6 md:p-8">
       <div className="classified-header">
-        Transmission &mdash; <span className="redacted-partial">IS</span>
+        Transmission - <span className="redacted-partial">IS</span>
       </div>
       <div className="space-y-4 mt-4">
         {lines.map((line, i) => (

@@ -21,7 +21,7 @@ export default function CollectInquiryButton({ overlordName }: CollectInquiryBut
       <InquiryForm
         open={open}
         onClose={() => setOpen(false)}
-        subject={`Individual Token — ${overlordName}`}
+        subject={`Individual Token - ${overlordName}`}
       />
     </>
   )

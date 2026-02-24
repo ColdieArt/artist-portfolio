@@ -1,6 +1,6 @@
 /**
  * Client-side Google News RSS fetcher for The Pulse.
- * Fetches real headlines via Google News RSS — no API key needed, no server route.
+ * Fetches real headlines via Google News RSS - no API key needed, no server route.
  * Works perfectly with static export (output: 'export').
  *
  * Google News RSS endpoint:
@@ -204,7 +204,7 @@ async function fetchViaProxy(rssUrl: string): Promise<RssArticle[]> {
  * then falls back to rss2json.com (capped at ~10 items).
  *
  * Uses when:7d to limit to the past week for recent trending data.
- * Counts each RSS item (story) as 1 in the pulse count — this gives
+ * Counts each RSS item (story) as 1 in the pulse count - this gives
  * clean, honest numbers that naturally vary between overlords based
  * on actual news volume.
  */
@@ -275,7 +275,7 @@ export async function fetchPulseData(): Promise<PulseData> {
         pulse_count: data.totalResults,
         sentiment_score: Math.round(sentimentScore * 100) / 100,
         sentiment_label: labelSentiment(sentimentScore),
-        trend_direction: 'stable', // placeholder — set relative to group below
+        trend_direction: 'stable', // placeholder - set relative to group below
         headlines,
       } as OverlordPulse
     } catch (err) {

@@ -19,7 +19,7 @@ interface Props {
 }
 
 /**
- * Cross-browser fullscreen helpers — handles webkit prefix for iOS Safari.
+ * Cross-browser fullscreen helpers - handles webkit prefix for iOS Safari.
  */
 function fsElement(): Element | null {
   if (typeof document === 'undefined') return null
@@ -107,7 +107,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
         setIsFullscreen(false)
       }
     } catch {
-      // Fullscreen not supported — ignore
+      // Fullscreen not supported - ignore
     }
   }, [])
 
@@ -137,7 +137,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
   }, [items])
 
   // Open/close the native <dialog> when lightbox state changes.
-  // showModal() renders in the browser's top-layer — above all z-indexes.
+  // showModal() renders in the browser's top-layer - above all z-indexes.
   useEffect(() => {
     const dialog = dialogRef.current
     if (!dialog) return
@@ -276,7 +276,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
         />
       )}
 
-      {/* ── Gallery Grid — 16:9 ── */}
+      {/* ── Gallery Grid - 16:9 ── */}
       {filtered.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {filtered.map((item, i) => (
@@ -330,7 +330,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
         </div>
       )}
 
-      {/* ── Lightbox — native <dialog> renders in browser top-layer ── */}
+      {/* ── Lightbox - native <dialog> renders in browser top-layer ── */}
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
       <dialog
         ref={dialogRef}
@@ -409,7 +409,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
               </div>
             </div>
 
-            {/* Image area — grid cell centers the image */}
+            {/* Image area - grid cell centers the image */}
             <div className="lightbox-image-area">
               {/* Previous button */}
               <button
@@ -474,7 +474,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
         )}
       </dialog>
 
-      {/* Lightbox styles — all in one place, no Tailwind dependencies for the modal */}
+      {/* Lightbox styles - all in one place, no Tailwind dependencies for the modal */}
       <style jsx>{`
         .lightbox-dialog {
           position: fixed;

@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import type { OverlordPulse } from '@/lib/pulse-client'
 
 /**
- * Simple SVG-based chart — no external charting library needed.
+ * Simple SVG-based chart - no external charting library needed.
  * Renders a horizontal bar chart of overlord pulse counts.
  * This avoids the recharts dependency to keep the bundle safe.
  */

@@ -43,7 +43,7 @@ export default function RootLayout({
           {`window.tlConfig = {
             mode: "dark",
             appName: "KnowYourOverlord.art",
-            appDescription: "Tech Epochalypse by Coldie — Kinetic 3D Portraits",
+            appDescription: "Tech Epochalypse by Coldie - Kinetic 3D Portraits",
             rpcUrls: { ethereum: "" }
           }`}
         </Script>

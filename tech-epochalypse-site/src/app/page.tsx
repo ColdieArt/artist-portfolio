@@ -6,7 +6,7 @@ import ScrollReveal from '@/components/ScrollReveal'
 export default function HomePage() {
   return (
     <>
-      {/* ── Hero — Noir Dossier ── */}
+      {/* ── Hero - Noir Dossier ── */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
         {/* Particle background with pixelated blocks */}
         <ParticleNetwork />
@@ -14,12 +14,12 @@ export default function HomePage() {
         {/* Bio-Coder surveillance data overlay */}
         <BioCoder />
 
-        {/* Dark vignette — softened so BioCoder/particles show through */}
+        {/* Dark vignette - softened so BioCoder/particles show through */}
         <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/30 to-black/70 pointer-events-none" />
 
-        {/* Floating pixelated blocks — parallax depth layers */}
+        {/* Floating pixelated blocks - parallax depth layers */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ perspective: '1200px' }}>
-          {/* Back layer — slow drift */}
+          {/* Back layer - slow drift */}
           <div className="absolute top-[15%] left-[8%] w-24 h-3 bg-white/[0.03] animate-pixel-drift-slow" style={{ transform: 'translateZ(-60px)' }} />
           <div className="absolute top-[45%] right-[12%] w-16 h-8 bg-white/[0.04] animate-pixel-drift-slow delay-500" style={{ transform: 'translateZ(-40px)' }} />
           <div className="absolute bottom-[30%] left-[20%] w-32 h-2 bg-white/[0.02] animate-pixel-drift-slow delay-300" style={{ transform: 'translateZ(-80px)' }} />
@@ -29,7 +29,7 @@ export default function HomePage() {
           <div className="absolute top-[60%] left-[15%] w-20 h-4 bg-white/[0.04] animate-pixel-drift delay-700" />
           <div className="absolute top-[70%] right-[8%] w-8 h-16 bg-white/[0.03] animate-pixel-drift delay-200" />
 
-          {/* Front layer — faster drift, closer */}
+          {/* Front layer - faster drift, closer */}
           <div className="absolute top-[35%] left-[40%] w-6 h-6 bg-white/[0.06] animate-pixel-drift-fast" style={{ transform: 'translateZ(40px)' }} />
           <div className="absolute bottom-[20%] right-[30%] w-14 h-3 bg-white/[0.05] animate-pixel-drift-fast delay-400" style={{ transform: 'translateZ(30px)' }} />
 
@@ -42,7 +42,7 @@ export default function HomePage() {
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
           <div className="animate-fade-in">
             <p className="font-mono text-xs uppercase tracking-[0.4em] text-white mb-8">
-              Classified &mdash; Kinetic 3D Interactive Art Series
+              Classified - Kinetic 3D Interactive Art Series
             </p>
           </div>
 
@@ -151,7 +151,7 @@ export default function HomePage() {
                 </div>
                 <p className="text-white text-base font-mono leading-relaxed mb-6">
                   You are looking at a living portrait. Not a photograph. Not a rendering.
-                  A kinetic 3D artifact built from the public face of power &mdash; fractured,
+                  A kinetic 3D artifact built from the public face of power - fractured,
                   reassembled, and set in motion. Move it. The face shifts. The layers
                   separate. What was hidden becomes visible.
                 </p>
@@ -210,7 +210,7 @@ export default function HomePage() {
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                 <div className="p-8 md:p-10 flex flex-col flex-1">
                   <div className="classified-header">
-                    Central Hub &mdash; <span className="redacted">All Systems</span>
+                    Central Hub - <span className="redacted">All Systems</span>
                   </div>
                   <h3 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em] mb-4">
                     The Mainframe
@@ -218,7 +218,7 @@ export default function HomePage() {
                   <p className="text-white text-sm font-mono leading-relaxed mb-6">
                     The nerve center of Tech Epochalypse. Active exploits with bounties,
                     community remix submissions, raw signal transmissions, and the live
-                    social wire &mdash; all in one feed.
+                    social wire - all in one feed.
                   </p>
                   <div className="space-y-2 mb-8">
                     <Link href="/mainframe#exploits" className="flex items-center gap-2 text-white font-mono text-xs uppercase tracking-wider hover:text-white/70 transition-colors">
@@ -231,10 +231,10 @@ export default function HomePage() {
                       <span className="text-white/40">&rsaquo;</span> Raw Signals Gallery
                     </Link>
                     <Link href="/mainframe" className="flex items-center gap-2 text-white font-mono text-xs uppercase tracking-wider hover:text-white/70 transition-colors">
-                      <span className="text-white/40">&rsaquo;</span> The Wire &mdash; Live Feed
+                      <span className="text-white/40">&rsaquo;</span> The Wire - Live Feed
                     </Link>
                     <Link href="/series" className="flex items-center gap-2 text-white font-mono text-xs uppercase tracking-wider hover:text-white/70 transition-colors">
-                      <span className="text-white/40">&rsaquo;</span> The Collection &mdash; OpenSea
+                      <span className="text-white/40">&rsaquo;</span> The Collection - OpenSea
                     </Link>
                   </div>
                   <div className="mt-auto">
@@ -256,14 +256,14 @@ export default function HomePage() {
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                 <div className="p-8 md:p-10 flex flex-col flex-1">
                   <div className="classified-header">
-                    Network Origins &mdash; <span className="redacted">First Contact</span>
+                    Network Origins - <span className="redacted">First Contact</span>
                   </div>
                   <h3 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em] mb-4">
                     Founding Signals
                   </h3>
                   <p className="text-white text-sm font-mono leading-relaxed mb-6">
                     Every network starts with its first connection. These patrons
-                    didn&rsquo;t just acquire art &mdash; they invested in a vision that
+                    didn&rsquo;t just acquire art - they invested in a vision that
                     digital art should be kinetic, interactive, and alive. They showed up
                     before the signal was strong and helped build it into something worth
                     broadcasting.
@@ -300,10 +300,10 @@ export default function HomePage() {
             </h2>
             <p className="text-white text-base font-mono max-w-xl mx-auto mb-4">
               Drag, rotate, distort, and export. Every interaction creates a
-              unique iteration &mdash; your own fragment of the network.
+              unique iteration - your own fragment of the network.
             </p>
             <p className="text-white text-sm font-mono max-w-md mx-auto mb-12">
-              Authorization: <span className="redacted">GRANTED</span> &mdash; Proceed with <span className="redacted">caution</span>
+              Authorization: <span className="redacted">GRANTED</span> - Proceed with <span className="redacted">caution</span>
             </p>
             <Link href="/overlords" className="btn-primary">
               <span>View All Overlords</span>
