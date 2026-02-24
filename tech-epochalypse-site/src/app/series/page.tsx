@@ -324,6 +324,13 @@ export default function SeriesPage() {
                 Moments collection captures 50 unique stills from each subject
                 &mdash; 250 fragments total.
               </p>
+              <p className="font-mono text-sm text-white/70 leading-relaxed mt-4 max-w-xl">
+                Moments works are access to each Overlord. You want to know your
+                Overlord and align with them. Exploits will feed into those who
+                collect Moments. For example, if there is an Elon Musk
+                Exploit/Bounty, the chosen piece will become a release that will
+                be available to Moments holders of Elon Musk.
+              </p>
             </div>
           </ScrollReveal>
 
