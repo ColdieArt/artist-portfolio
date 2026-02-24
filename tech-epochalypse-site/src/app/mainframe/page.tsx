@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import Script from 'next/script'
 import ScrollReveal from '@/components/ScrollReveal'
@@ -10,6 +11,40 @@ import collectors from '@/data/collectors.json'
 const overlordMap = Object.fromEntries(overlords.map((o) => [o.slug, o]))
 
 export default function MainframePage() {
+  const [formData, setFormData] = useState({
+    name: '',
+    ethAddress: '',
+    email: '',
+    xHandle: '',
+  })
+  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
+  const [formError, setFormError] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setFormStatus('submitting')
+    setFormError('')
+
+    try {
+      const res = await fetch('/api/exploit-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Submission failed')
+      }
+
+      setFormStatus('success')
+      setFormData({ name: '', ethAddress: '', email: '', xHandle: '' })
+    } catch (err) {
+      setFormStatus('error')
+      setFormError(err instanceof Error ? err.message : 'Something went wrong')
+    }
+  }
+
   const overlordNames = Object.fromEntries(
     overlords.map((o) => [o.slug, o.name])
   )
@@ -61,210 +96,129 @@ export default function MainframePage() {
 
           <ScrollReveal>
             <div className="bg-white p-8 md:p-12">
-              {/* Exploit header block */}
-              <div className="font-mono text-xs text-black uppercase tracking-[0.2em] mb-8">
-                <h3 className="font-display text-2xl md:text-3xl text-black uppercase tracking-[0.03em] mb-6">
-                  EXPLOIT #001 &mdash; &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;
+              <div className="font-mono text-xs text-black uppercase tracking-[0.2em] mb-6">
+                <h3 className="font-display text-2xl md:text-3xl text-black uppercase tracking-[0.03em] mb-4">
+                  EXPLOITS &mdash; INCOMING
                 </h3>
-                <div className="space-y-1 mb-8 border-b border-black/10 pb-6">
-                  <p>STATUS: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ACTIVE</p>
-                  <p>DEADLINE: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MARCH 06, 2026</p>
-                  <p>CLASSIFICATION: &nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; BOUNTY</p>
-                  <p>THREAT LEVEL: &nbsp;&nbsp;&nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
-                  <p>TARGET: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ALL OVERLORD &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
-                  <p>OPERATIVE CLEARANCE: &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
+                <div className="space-y-1 mb-6 border-b border-black/10 pb-6">
+                  <p>STATUS: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
+                  <p>NEXT EXPLOIT: &nbsp;&nbsp;&nbsp;&nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
+                  <p>CLASSIFICATION: &nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
                 </div>
               </div>
 
-              {/* Exploit body */}
               <div className="font-mono text-sm text-black leading-relaxed space-y-6">
+                <p>
+                  Future exploits are being &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. The network is not done with you. Register below to be the first to know when the next directive drops.
+                </p>
+
                 <p className="text-black/40 text-xs uppercase tracking-widest">
-                  // INTERCEPTED &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; &mdash; ORIGIN &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;
+                  // ENTER YOUR CREDENTIALS TO JOIN THE &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; LIST
                 </p>
 
-                <p>
-                  The &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; has been &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. The Overlords&rsquo; &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; files are exposed. For the &#9608;&#9608;&#9608;&#9608; time, their &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; are vulnerable to outside &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
-                </p>
-
-                <p>
-                  We are issuing an open &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; to all operatives &mdash; artists, &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;, creators, &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Your mission: &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; any Overlord node and &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; your own &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; into the system.
-                </p>
-
-                {/* Decrypted section */}
-                <div className="border-t border-b border-black/10 py-6 my-6">
-                  <p className="text-black/40 text-xs uppercase tracking-widest mb-4">
-                    [CONTROL LAYER PARTIALLY DECRYPTED &mdash; READABLE TEXT FOLLOWS]
-                  </p>
-
-                  <p>
-                    This is not a copy job. We don&rsquo;t need &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. We need your code inside their code. Your visual language fused with their architecture. Take an Overlord&rsquo;s portrait and make it unrecognizable as theirs alone. &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; it with your style. Merge your aesthetic &#9608;&#9608;&#9608; into the system until the two are inseparable.
-                  </p>
-
-                  <p className="mt-4">
-                    Glitch artists. Painters. 3D sculptors. Illustrators. &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Collagists. Pixel pushers. Whatever your method &mdash; that method is your &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
-                  </p>
-                </div>
-
-                {/* The brief */}
-                <p>
-                  <span className="font-bold">THE &#9608;&#9608;&#9608;&#9608;:</span> Choose any Overlord &mdash; Musk, Zuckerberg, Altman, Bezos, Huang. Access their node on the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Interact with the piece. Then take what you &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; and remix it through your own creative practice. The final &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; should be a collision between the Overlord&rsquo;s system and &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
-                </p>
-
-                {/* Examples */}
-                <div className="mt-6">
-                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">
-                    EXAMPLES OF &#9608;&#9608;&#9608;&#9608;&#9608; BREACHES:
-                  </p>
-                  <ul className="space-y-2 ml-1">
-                    <li className="flex gap-2">
-                      <span className="shrink-0">*</span>
-                      <span>Take a still export and &#9608;&#9608;&#9608;&#9608; over it &mdash; digital, physical, or both</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="shrink-0">*</span>
-                      <span>&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;, distort, or corrupt the output through your own tools and &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="shrink-0">*</span>
-                      <span>Collage elements of the Overlord into &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; compositions</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="shrink-0">*</span>
-                      <span>Use the export as a &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; layer and build an entirely new piece on top</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="shrink-0">*</span>
-                      <span>&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;, reanimate, or restructure the motion output into something &#9608;&#9608;&#9608;</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="shrink-0">*</span>
-                      <span>Print it, &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; it, photograph the remains, submit the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <p className="italic">There are no wrong methods. Only &#9608;&#9608;&#9608;&#9608; signals.</p>
-
-                {/* Payload specs */}
-                <div className="border-t border-black/10 pt-6 mt-6">
-                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">
-                    PAYLOAD &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;:
-                  </p>
-                  <ul className="space-y-2 ml-1">
-                    <li className="flex gap-2">
-                      <span className="shrink-0">*</span>
-                      <span>Final artifact: JPEG or GIF (2MB Max)</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="shrink-0">*</span>
-                      <span>Must contain &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; source material from at least one Overlord &#9608;&#9608;&#9608;&#9608;</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="shrink-0">*</span>
-                      <span>Must contain your own &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; creative intervention &mdash; this is a &#9608;&#9608;&#9608;&#9608;&#9608;, not a repost</span>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Broadcast protocol */}
-                <div className="border-t border-black/10 pt-6 mt-6">
-                  <p>
-                    &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; PROTOCOL: Your payload is only as &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; as its reach. After submission, broadcast your artifact on X with <span className="font-bold">#KnowYourOverlord</span>. Log your transmissions on The &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. The Overlord &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; both craft and &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; when selecting the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
-                  </p>
-                </div>
-
-                {/* Reward */}
-                <div className="border-t border-black/10 pt-6 mt-6">
-                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">
-                    &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;:
-                  </p>
-                  <p>
-                    &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;: One operative will be &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Not by &#9608;&#9608;&#9608;&#9608;. Not by &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; reviews every &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; personally.
-                  </p>
-                </div>
-
-                {/* How to submit */}
-                <div className="border-t border-black/10 pt-6 mt-6">
-                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">
-                    HOW TO &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;:
-                  </p>
-                  <ol className="space-y-2 ml-1 list-none">
-                    <li className="flex gap-2">
-                      <span className="shrink-0 font-bold">1.</span>
-                      <span>Access an Overlord node &rarr; &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.art</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="shrink-0 font-bold">2.</span>
-                      <span>Interact with the &#9608;&#9608;&#9608;&#9608;&#9608; &rarr; extract your source &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="shrink-0 font-bold">3.</span>
-                      <span>&#9608;&#9608;&#9608;&#9608;&#9608; through your own practice &rarr; create the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="shrink-0 font-bold">4.</span>
-                      <span>Submit your &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; &rarr; The Mainframe &gt; &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; &gt; SUBMIT PACKET</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="shrink-0 font-bold">5.</span>
-                      <span>&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; &rarr; post on X with #KnowYourOverlord &rarr; log your &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span>
-                    </li>
-                  </ol>
-                </div>
-
-                {/* Bounty details */}
-                <div className="border-t border-black/10 pt-6 mt-6">
-                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">
-                    &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; &mdash; WHAT THE &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; RECEIVES
-                  </p>
-                  <p className="text-black/40 text-xs uppercase tracking-widest mb-4">
-                    BOUNTY DETAILS: &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; DECRYPTING... &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;
-                  </p>
-                  <p className="text-black/40 text-xs uppercase tracking-widest mb-4">[DECRYPTED]</p>
-                  <p className="mb-6">
-                    The chosen &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; becomes the first entry in <span className="font-bold">The Usual Suspects</span> &mdash; a permanent gallery of the most &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; breaches in the network. You are not just winning a contest. You are &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; a record. A dossier. Every future Exploit winner joins after you, but you are Suspect #001. This builds &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; over time. This becomes something &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; that &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
-                  </p>
-
-                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">THE BOUNTY:</p>
-
-                  <div className="space-y-4 mb-6">
-                    <p>
-                      <span className="font-bold">ARTIST PROOF MINI PRINT</span> &mdash; Your winning artifact, produced as an official artist proof mini print, stamped as an official Tech Epochalypse collaboration, signed by Coldie. This is not a reproduction. This is a verified artifact &mdash; proof that your code infiltrated the system and was recognized by the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
+                {formStatus === 'success' ? (
+                  <div className="border border-black/10 p-8 text-center">
+                    <p className="font-display text-xl text-black uppercase tracking-[0.05em] mb-2">
+                      TRANSMISSION RECEIVED
                     </p>
-
-                    <p>
-                      <span className="font-bold">PRINT EDITION</span> &mdash; 60 mini prints of the winning piece will be produced. Purchase priority goes first to Moments holders of the depicted Overlord. Kinetic token holders of the selected overlord will each receive one print free of charge &mdash; no action required, the network rewards its own. Remaining prints will be available to the public.
+                    <p className="text-black/60 text-xs uppercase tracking-widest">
+                      You will be contacted when the next exploit is &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
                     </p>
-
-                    <p>
-                      <span className="font-bold">REVENUE SPLIT</span> &mdash; All proceeds from print sales are split between Coldie and the winning artist. You don&rsquo;t just get recognized. You get &#9608;&#9608;&#9608;&#9608;.
-                    </p>
+                    <button
+                      onClick={() => setFormStatus('idle')}
+                      className="mt-4 text-xs uppercase tracking-widest text-black/40 hover:text-black transition-colors"
+                    >
+                      Submit another
+                    </button>
                   </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    <div>
+                      <label htmlFor="exploit-name" className="block text-xs uppercase tracking-widest text-black/60 mb-2">
+                        Name / Alias *
+                      </label>
+                      <input
+                        id="exploit-name"
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="w-full bg-transparent border border-black/20 px-4 py-3 font-mono text-sm text-black placeholder:text-black/30 focus:outline-none focus:border-black transition-colors"
+                        placeholder="Your operative name"
+                      />
+                    </div>
 
-                  <p className="text-black/40 text-xs uppercase tracking-widest my-6">
-                    &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; THE USUAL SUSPECTS DOSSIER OPENS WITH YOU. THERE IS NO #002 WITHOUT #001. &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;
-                  </p>
+                    <div>
+                      <label htmlFor="exploit-eth" className="block text-xs uppercase tracking-widest text-black/60 mb-2">
+                        ETH Address
+                      </label>
+                      <input
+                        id="exploit-eth"
+                        type="text"
+                        value={formData.ethAddress}
+                        onChange={(e) => setFormData({ ...formData, ethAddress: e.target.value })}
+                        className="w-full bg-transparent border border-black/20 px-4 py-3 font-mono text-sm text-black placeholder:text-black/30 focus:outline-none focus:border-black transition-colors"
+                        placeholder="0x..."
+                      />
+                    </div>
 
-                  <p className="text-black/40 text-xs italic">
-                    // The Overlords built the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. You are the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
-                  </p>
-                  <p className="text-black/40 text-xs italic">
-                    // END &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;
-                  </p>
-                </div>
+                    <div>
+                      <label htmlFor="exploit-email" className="block text-xs uppercase tracking-widest text-black/60 mb-2">
+                        Email Address *
+                      </label>
+                      <input
+                        id="exploit-email"
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="w-full bg-transparent border border-black/20 px-4 py-3 font-mono text-sm text-black placeholder:text-black/30 focus:outline-none focus:border-black transition-colors"
+                        placeholder="operative@email.com"
+                      />
+                    </div>
 
-                {/* CTA */}
-                <div className="mt-10 text-center">
-                  <Link
-                    href="/overlords"
-                    className="inline-flex items-center gap-3 px-8 py-4 bg-black text-white font-mono text-sm uppercase tracking-[0.2em] hover:bg-black/80 transition-colors"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    EXPLOIT YOUR OVERLORD
-                  </Link>
-                </div>
+                    <div>
+                      <label htmlFor="exploit-x" className="block text-xs uppercase tracking-widest text-black/60 mb-2">
+                        X Handle
+                      </label>
+                      <input
+                        id="exploit-x"
+                        type="text"
+                        value={formData.xHandle}
+                        onChange={(e) => setFormData({ ...formData, xHandle: e.target.value })}
+                        className="w-full bg-transparent border border-black/20 px-4 py-3 font-mono text-sm text-black placeholder:text-black/30 focus:outline-none focus:border-black transition-colors"
+                        placeholder="@handle"
+                      />
+                    </div>
+
+                    {formStatus === 'error' && (
+                      <p className="text-red-600 text-xs uppercase tracking-widest">
+                        {formError || 'Transmission failed. Try again.'}
+                      </p>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={formStatus === 'submitting'}
+                      className="w-full flex items-center justify-center gap-3 px-8 py-4 bg-black text-white font-mono text-sm uppercase tracking-[0.2em] hover:bg-black/80 disabled:bg-black/40 transition-colors"
+                    >
+                      {formStatus === 'submitting' ? (
+                        'TRANSMITTING...'
+                      ) : (
+                        <>
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          JOIN THE LIST
+                        </>
+                      )}
+                    </button>
+                  </form>
+                )}
+
+                <p className="text-black/30 text-[10px] uppercase tracking-widest pt-4 border-t border-black/10">
+                  // Your data is stored securely. No spam. Only &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
+                </p>
               </div>
             </div>
           </ScrollReveal>

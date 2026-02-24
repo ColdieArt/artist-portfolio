@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import ScrollReveal from '@/components/ScrollReveal'
 import InquiryForm from '@/components/InquiryForm'
@@ -11,29 +11,6 @@ const OPENSEA_COLLECTION_URL = `https://opensea.io/collection/${OPENSEA_COLLECTI
 
 const KINETIC_3D_COLLECTION_SLUG = 'tech-epochalypse-by-coldie'
 const KINETIC_3D_COLLECTION_URL = `https://opensea.io/collection/${KINETIC_3D_COLLECTION_SLUG}`
-const OPENSEA_API_KEY = process.env.NEXT_PUBLIC_OPENSEA_API_KEY || ''
-
-const osHeaders: HeadersInit = {
-  accept: 'application/json',
-  ...(OPENSEA_API_KEY ? { 'x-api-key': OPENSEA_API_KEY } : {}),
-}
-
-interface CollectionStats {
-  total: {
-    volume: number
-    sales: number
-    average_price: number
-    num_owners: number
-    market_cap: number
-    floor_price: number
-    floor_price_symbol: string
-  }
-}
-
-interface CollectionInfo {
-  total_supply: number
-}
-
 // Per-overlord Trail collection listing URLs (to be filled in)
 const OVERLORD_COLLECT_URLS: Record<string, string> = {
   'elon-musk': 'https://opensea.io/collection/tech-epochalypse-moments-decentral-eyes?traits=[{%22traitType%22:%22Overlord%22,%22values%22:[%22Elon+Musk%22]}]',
@@ -44,36 +21,8 @@ const OVERLORD_COLLECT_URLS: Record<string, string> = {
 }
 
 export default function SeriesPage() {
-  const [stats, setStats] = useState<CollectionStats | null>(null)
-  const [collectionInfo, setCollectionInfo] = useState<CollectionInfo | null>(null)
-  const [statsLoading, setStatsLoading] = useState(true)
   const [inquiryOpen, setInquiryOpen] = useState(false)
   const [inquirySubject, setInquirySubject] = useState('Full Set')
-
-  useEffect(() => {
-    const base = `https://api.opensea.io/api/v2/collections/${OPENSEA_COLLECTION_SLUG}`
-
-    async function fetchAll() {
-      const [statsRes, infoRes] = await Promise.allSettled([
-        fetch(`${base}/stats`, { headers: osHeaders }),
-        fetch(base, { headers: osHeaders }),
-      ])
-
-      if (statsRes.status === 'fulfilled' && statsRes.value.ok) {
-        const data = await statsRes.value.json()
-        setStats(data)
-      }
-
-      if (infoRes.status === 'fulfilled' && infoRes.value.ok) {
-        const data = await infoRes.value.json()
-        setCollectionInfo(data)
-      }
-
-      setStatsLoading(false)
-    }
-
-    fetchAll()
-  }, [])
 
   return (
     <div className="min-h-screen bg-void">
@@ -164,15 +113,6 @@ export default function SeriesPage() {
                     </svg>
                     View Full Series on OpenSea
                   </a>
-                  <Link
-                    href="/overlords"
-                    className="btn-primary"
-                  >
-                    <span>Explore the Overlords</span>
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </Link>
                 </div>
               </div>
 
@@ -317,91 +257,11 @@ export default function SeriesPage() {
                     </svg>
                     View on OpenSea
                   </a>
-                  <Link
-                    href="/overlords"
-                    className="btn-primary"
-                  >
-                    <span>Interact with Overlords</span>
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </Link>
                 </div>
               </div>
 
-              {/* Right: Live Stats */}
+              {/* Right: Details */}
               <div className="lg:w-80 shrink-0">
-                <div className="bg-charcoal/30 border border-white/5 p-6">
-                  <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-6 border-b border-white/10 pb-3">
-                    Collection Stats
-                  </h3>
-                  {statsLoading ? (
-                    <div className="space-y-4">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="animate-pulse">
-                          <div className="h-2 bg-white/5 rounded w-20 mb-2" />
-                          <div className="h-5 bg-white/10 rounded w-28" />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-5">
-                      <div>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">
-                          Items
-                        </p>
-                        <p className="font-display text-2xl text-white">
-                          {collectionInfo?.total_supply != null
-                            ? collectionInfo.total_supply
-                            : '250'}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">
-                          Floor Price
-                        </p>
-                        <p className="font-display text-2xl text-white">
-                          {stats?.total?.floor_price != null
-                            ? `${Number(stats.total.floor_price).toFixed(3)} ${stats.total.floor_price_symbol || 'ETH'}`
-                            : '0.086 ETH'}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">
-                          Total Volume
-                        </p>
-                        <p className="font-display text-2xl text-white">
-                          {stats?.total?.volume != null
-                            ? `${Number(stats.total.volume).toFixed(2)} ETH`
-                            : '23.99 ETH'}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">
-                          Total Sales
-                        </p>
-                        <p className="font-display text-2xl text-white">
-                          {stats?.total?.sales ?? '—'}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">
-                          Unique Owners
-                        </p>
-                        <p className="font-display text-2xl text-white">
-                          {stats?.total?.num_owners ?? '—'}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  <div className="mt-6 pt-4 border-t border-white/10">
-                    <p className="font-mono text-[9px] uppercase tracking-wider text-white/30">
-                      {stats
-                        ? 'Live data via OpenSea'
-                        : 'Static snapshot — view OpenSea for live data'}
-                    </p>
-                  </div>
-                </div>
 
                 {/* Blockchain details */}
                 <div className="bg-charcoal/30 border border-white/5 p-6 mt-4">
