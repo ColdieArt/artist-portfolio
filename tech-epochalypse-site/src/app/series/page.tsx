@@ -242,6 +242,32 @@ export default function SeriesPage() {
                   </p>
                 </div>
 
+                {/* Moments Gallery */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-8">
+                  {[
+                    { src: '/images/overlords/elon-musk-coldie-kinetic-3d-digital.avif', alt: 'Elon Musk — Kinetic 3D Digital' },
+                    { src: '/images/overlords/elon-musk-typography-kinetic-collage.avif', alt: 'Elon Musk — Typography Kinetic Collage' },
+                    { src: '/images/overlords/jeff-bezos-coldie-kinetic-collage.avif', alt: 'Jeff Bezos — Kinetic Collage' },
+                    { src: '/images/overlords/jeff-bezos-kinetic-3d-collage.avif', alt: 'Jeff Bezos — Kinetic 3D Collage' },
+                    { src: '/images/overlords/jensen-huang-coldie-digital-3d-art.avif', alt: 'Jensen Huang — Digital 3D Art' },
+                    { src: '/images/overlords/jensen-huang-coldie-kinetic-art.avif', alt: 'Jensen Huang — Kinetic Art' },
+                    { src: '/images/overlords/jensen-huang-glitch-kinetic-art.avif', alt: 'Jensen Huang — Glitch Kinetic Art' },
+                    { src: '/images/overlords/Mark-Zuckerberg-coldie-kinetic-art.avif', alt: 'Mark Zuckerberg — Kinetic Art' },
+                    { src: '/images/overlords/mark-zuckerberg-3d-kinetic-art.avif', alt: 'Mark Zuckerberg — 3D Kinetic Art' },
+                    { src: '/images/overlords/sam-altman-coldie-kinetic-3d.avif', alt: 'Sam Altman — Kinetic 3D' },
+                    { src: '/images/overlords/sam-altman-overlord-3d-art-coldie.avif', alt: 'Sam Altman — Overlord 3D Art' },
+                  ].map((img) => (
+                    <div key={img.src} className="aspect-square relative overflow-hidden border border-white/5 hover:border-white/15 transition-all duration-500 group">
+                      <img
+                        src={img.src}
+                        alt={img.alt}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    </div>
+                  ))}
+                </div>
+
                 {/* CTA buttons */}
                 <div className="flex flex-wrap gap-4 mt-8">
                   <a
