@@ -25,7 +25,7 @@ export default function SeriesPage() {
   return (
     <div className="min-h-screen bg-void">
       {/* ── Header ── */}
-      <section className="pt-28 md:pt-36 pb-16 section-padding">
+      <section className="pt-28 md:pt-36 pb-10 section-padding">
         <div className="page-container">
           <ScrollReveal>
             <div className="text-center">
@@ -55,7 +55,7 @@ export default function SeriesPage() {
       <div className="line-accent" />
 
       {/* ── Overlord Breakdown ── */}
-      <section className="py-16 md:py-24 section-padding">
+      <section className="py-10 md:py-16 section-padding">
         <div className="page-container">
           <ScrollReveal>
             <div className="mb-12">
@@ -150,7 +150,7 @@ export default function SeriesPage() {
       <div className="line-accent" />
 
       {/* ── Main Series: Kinetic 3D Portraits ── */}
-      <section className="py-16 md:py-24 section-padding">
+      <section className="py-10 md:py-16 section-padding">
         <div className="page-container">
           <ScrollReveal>
             <div className="classified-header">
@@ -296,7 +296,7 @@ export default function SeriesPage() {
       <div className="line-accent" />
 
       {/* ── Collection: Moments — Decentral Eyes ── */}
-      <section className="py-16 md:py-24 section-padding">
+      <section className="py-10 md:py-16 section-padding">
         <div className="page-container">
           <ScrollReveal>
             <div className="classified-header">
@@ -429,7 +429,7 @@ export default function SeriesPage() {
       <div className="line-accent" />
 
       {/* ── Collect CTA ── */}
-      <section className="py-16 md:py-24 section-padding">
+      <section className="py-10 md:py-16 section-padding">
         <div className="page-container text-center">
           <ScrollReveal>
             <p className="font-mono text-xs uppercase tracking-[0.4em] text-white mb-6">
@@ -464,7 +464,7 @@ export default function SeriesPage() {
         </div>
       </section>
 
-      <div className="h-16" />
+      <div className="h-10" />
 
       <InquiryForm
         open={inquiryOpen}
