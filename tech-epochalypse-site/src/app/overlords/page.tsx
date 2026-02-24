@@ -117,7 +117,7 @@ function OverlordCard({ overlord }: { overlord: Overlord }) {
             alt={overlord.name}
             className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 opacity-100"
             loading="lazy"
-            style={{ filter: 'grayscale(1) contrast(1.2)' }}
+            style={{ filter: 'contrast(1.2)' }}
           />
         ) : (
           <div className="w-full h-full bg-charcoal flex items-center justify-center">
