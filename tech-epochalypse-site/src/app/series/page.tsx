@@ -113,6 +113,21 @@ export default function SeriesPage() {
                     </svg>
                     View Full Series on OpenSea
                   </a>
+                  <Link
+                    href="/kinetic-3d-patronage"
+                    className="inline-flex items-center gap-3 px-6 py-3 border border-white/20 text-white font-mono text-sm uppercase tracking-[0.15em] hover:bg-white/5 transition-colors"
+                  >
+                    Token Holder Benefits
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                      <path
+                        d="M3 8h10M9 4l4 4-4 4"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </Link>
                 </div>
               </div>
 
