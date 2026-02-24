@@ -28,7 +28,7 @@ export default function Navigation() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
+        scrolled || mobileOpen
           ? 'bg-black/95 backdrop-blur-sm border-b border-white/5'
           : 'bg-transparent'
       }`}
