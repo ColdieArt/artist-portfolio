@@ -16,6 +16,13 @@ export default function OverlordNewsFeed({ slug }: Props) {
 
   const config = OVERLORD_CONFIGS.find((c) => c.slug === slug)
 
+  // Auto-expand on desktop (md breakpoint = 768px)
+  useEffect(() => {
+    if (window.matchMedia('(min-width: 768px)').matches) {
+      setExpanded(true)
+    }
+  }, [])
+
   // Fetch on first expand
   useEffect(() => {
     if (!expanded || fetched) return
