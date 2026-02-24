@@ -352,7 +352,7 @@ export default function SeriesPage() {
                     { src: '/images/overlords/sam-altman-coldie-kinetic-3d.avif', alt: 'Sam Altman -Kinetic 3D' },
                     { src: '/images/overlords/sam-altman-overlord-3d-art-coldie.avif', alt: 'Sam Altman -Overlord 3D Art' },
                   ].map((img) => (
-                    <div key={img.src} className="aspect-square relative overflow-hidden border border-white/5 hover:border-white/15 transition-all duration-500 group">
+                    <div key={img.src} className="aspect-video relative overflow-hidden border border-white/5 hover:border-white/15 transition-all duration-500 group">
                       <img
                         src={img.src}
                         alt={img.alt}
