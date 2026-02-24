@@ -1,9 +1,5 @@
-'use client'
-
-import { useState } from 'react'
 import Link from 'next/link'
 import ScrollReveal from '@/components/ScrollReveal'
-import InquiryForm from '@/components/InquiryForm'
 import overlords from '@/data/overlords.json'
 
 const OPENSEA_COLLECTION_SLUG = 'tech-epochalypse-moments-decentral-eyes'
@@ -19,9 +15,6 @@ const OVERLORD_COLLECT_URLS: Record<string, string> = {
 }
 
 export default function SeriesPage() {
-  const [inquiryOpen, setInquiryOpen] = useState(false)
-  const [inquirySubject, setInquirySubject] = useState('Full Set')
-
   return (
     <div className="min-h-screen bg-void">
       {/* ── Header ── */}
@@ -245,12 +238,12 @@ export default function SeriesPage() {
                   <p className="font-mono text-[10px] text-white/40 mb-5">
                     Set of 5 Overlords
                   </p>
-                  <button
-                    onClick={() => { setInquirySubject('Full Set'); setInquiryOpen(true) }}
+                  <a
+                    href="mailto:coldieart@gmail.com?subject=Collect%20Inquiry%3A%20Full%20Set"
                     className="block w-full text-center font-mono text-xs uppercase tracking-[0.15em] text-black bg-white px-4 py-3 hover:bg-white/90 transition-colors"
                   >
                     Inquire to Collect Full Set
-                  </button>
+                  </a>
                 </div>
 
                 {/* Individual Tokens */}
@@ -466,11 +459,6 @@ export default function SeriesPage() {
 
       <div className="h-10" />
 
-      <InquiryForm
-        open={inquiryOpen}
-        onClose={() => setInquiryOpen(false)}
-        subject={inquirySubject}
-      />
     </div>
   )
 }
