@@ -150,7 +150,7 @@ export default function Kinetic3DPatronagePage() {
                   Advanced Viewing Methods
                 </h3>
                 <p className="text-white text-sm font-mono leading-relaxed">
-                  Including stereoscopic 3D screens.
+                  In-depth viewing experiences meant for public interaction and experimentation.
                 </p>
               </div>
 
