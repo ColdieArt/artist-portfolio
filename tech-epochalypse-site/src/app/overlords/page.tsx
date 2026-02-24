@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import ScrollReveal from '@/components/ScrollReveal'
+import UserExports from '@/components/UserExports'
 import overlords from '@/data/overlords.json'
 
 export const metadata: Metadata = {
@@ -10,7 +11,13 @@ export const metadata: Metadata = {
 }
 
 export default function OverlordsPage() {
+  const overlordNames = Object.fromEntries(
+    overlords.map((o) => [o.slug, o.name])
+  )
+  const overlordSlugs = overlords.map((o) => o.slug)
+
   return (
+    <>
     <section className="pt-28 md:pt-36 pb-24 lg:pb-8 section-padding bg-black grid-lines">
       <div className="page-container h-full">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-10 items-start h-full">
@@ -69,6 +76,19 @@ export default function OverlordsPage() {
         </div>
       </div>
     </section>
+
+    <section className="pb-24 section-padding bg-black grid-lines">
+      <div className="page-container">
+        <ScrollReveal>
+          <UserExports
+            overlordNames={overlordNames}
+            overlordSlugs={overlordSlugs}
+            headerText="Raw Signals — community exports from across the network. Unfiltered. Unranked. Create something. Touch the art. Submit the creation."
+          />
+        </ScrollReveal>
+      </div>
+    </section>
+    </>
   )
 }
 

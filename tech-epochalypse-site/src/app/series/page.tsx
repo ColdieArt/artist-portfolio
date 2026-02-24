@@ -69,10 +69,10 @@ export default function SeriesPage() {
               {/* Left: Series overview */}
               <div className="flex-1">
                 <h2 className="font-display text-3xl md:text-4xl text-white uppercase tracking-[0.03em] mb-2">
-                  Tech Epochalypse
+                  Tech Epochalypse - Kinetic 3D Interactive Art
                 </h2>
                 <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/50 mb-6">
-                  Kinetic 3D Portraits &bull; Interactive &bull; Ethereum
+                  Networked art creates deeper connection - Touch the art
                 </p>
 
                 <div className="space-y-4 text-white text-sm font-mono leading-relaxed max-w-xl">

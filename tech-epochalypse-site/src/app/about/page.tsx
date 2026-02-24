@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import ScrollReveal from '@/components/ScrollReveal'
+import ContactColdie from '@/components/ContactColdie'
 
 export const metadata: Metadata = {
   title: 'Dossier — Tech Epochalypse',
@@ -293,6 +294,7 @@ export default function AboutPage() {
               >
                 <span>Visit Coldie3d.com</span>
               </a>
+              <ContactColdie />
             </div>
           </div>
         </ScrollReveal>
