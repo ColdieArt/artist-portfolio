@@ -208,7 +208,7 @@ export default function SeriesPage() {
                     <span className="font-mono text-sm text-white">3 Available</span>
                   </div>
                   <p className="font-mono text-[10px] text-white/40 mb-5">
-                    All 10 editions of one Overlord
+                    Set of 5 Overlords
                   </p>
                   <button
                     onClick={() => { setInquirySubject('Full Set'); setInquiryOpen(true) }}
