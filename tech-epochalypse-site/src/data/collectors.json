@@ -11,12 +11,12 @@
     }
   },
   {
-    "name": "Christian",
+    "name": "Christian Thompson",
     "avatar": null,
     "pieces": ["elon-musk", "mark-zuckerberg", "sam-altman", "jeff-bezos", "jensen-huang"],
     "bio": null,
     "socials": {
-      "twitter": null,
+      "twitter": "https://x.com/web3crusadr",
       "instagram": null,
       "website": null
     }
