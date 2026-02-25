@@ -83,8 +83,13 @@ export default function AboutPage() {
                 Status: <span className="text-white">ACTIVE</span>
               </p>
 
+              {/* Email */}
+              <p className="font-mono text-sm text-white mt-8">
+                Email: coldieart@gmail.com
+              </p>
+
               {/* Social links */}
-              <div className="flex items-center gap-4 mt-8">
+              <div className="flex items-center gap-4 mt-4">
                 <a
                   href="https://twitter.com/Coldie"
                   target="_blank"
