@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation'
 import overlords from '@/data/overlords.json'
 import ArtworkViewer from '@/components/ArtworkViewer'
 import OverlordNewsFeed from '@/components/OverlordNewsFeed'
-import CollectInquiryButton from '@/components/CollectInquiryButton'
 
 interface PageProps {
   params: { slug: string }
@@ -147,16 +146,6 @@ export default function OverlordPage({ params }: PageProps) {
                   <li className="text-white text-sm font-mono uppercase tracking-wider">Shadow</li>
                   <li className="text-white text-sm font-mono uppercase tracking-wider">Redacted</li>
                 </ul>
-              </div>
-              <div>
-                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-2 border-b border-white/10 pb-1">
-                  Collect
-                </h3>
-                <p className="text-white text-sm font-mono mb-4">
-                  Interested in acquiring this piece? Submit an inquiry to discuss
-                  availability, pricing, and collection details.
-                </p>
-                <CollectInquiryButton overlordName={overlord.name} />
               </div>
             </div>
           </div>
