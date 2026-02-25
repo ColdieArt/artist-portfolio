@@ -22,12 +22,12 @@
     }
   },
   {
-    "name": "Benny",
+    "name": "Benny Red Beard",
     "avatar": null,
     "pieces": ["elon-musk"],
     "bio": null,
     "socials": {
-      "twitter": null,
+      "twitter": "https://x.com/redbeardnft",
       "instagram": null,
       "website": null
     }
@@ -38,7 +38,7 @@
     "pieces": ["elon-musk"],
     "bio": null,
     "socials": {
-      "twitter": null,
+      "twitter": "https://x.com/batsoupyum",
       "instagram": null,
       "website": null
     }

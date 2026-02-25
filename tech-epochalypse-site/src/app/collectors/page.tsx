@@ -1,20 +1,22 @@
-import type { Metadata } from 'next'
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
 import ScrollReveal from '@/components/ScrollReveal'
 import collectors from '@/data/collectors.json'
 import overlords from '@/data/overlords.json'
-
-export const metadata: Metadata = {
-  title: 'Founding Signals - Tech Epochalypse',
-  description:
-    'Every network starts with its first connection. Honoring the founding signals of Tech Epochalypse.',
-}
 
 const overlordMap = Object.fromEntries(
   overlords.map((o) => [o.slug, o])
 )
 
 export default function CollectorsPage() {
+  const [filter, setFilter] = useState<string | null>(null)
+
+  const filtered = filter
+    ? collectors.filter((c) => c.pieces.includes(filter))
+    : collectors
+
   return (
     <section className="pt-28 md:pt-36 pb-24 section-padding bg-black grid-lines">
       <div className="page-container">
@@ -34,9 +36,36 @@ export default function CollectorsPage() {
           </div>
         </ScrollReveal>
 
+        {/* Overlord filter */}
+        <div className="flex flex-wrap items-center gap-2 mb-10">
+          <button
+            onClick={() => setFilter(null)}
+            className={`font-mono text-[10px] uppercase tracking-[0.2em] px-4 py-2 border transition-colors ${
+              filter === null
+                ? 'bg-white text-black border-white'
+                : 'text-white border-white/10 hover:border-white/30'
+            }`}
+          >
+            All
+          </button>
+          {overlords.map((o) => (
+            <button
+              key={o.slug}
+              onClick={() => setFilter(filter === o.slug ? null : o.slug)}
+              className={`font-mono text-[10px] uppercase tracking-[0.2em] px-4 py-2 border transition-colors ${
+                filter === o.slug
+                  ? 'bg-white text-black border-white'
+                  : 'text-white border-white/10 hover:border-white/30'
+              }`}
+            >
+              {o.name}
+            </button>
+          ))}
+        </div>
+
         {/* Collectors grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {collectors.map((collector, i) => (
+          {filtered.map((collector, i) => (
             <ScrollReveal key={collector.name} delay={i * 150}>
               <div className="group relative bg-charcoal/30 border border-white/5 hover:border-white/10 overflow-hidden transition-all duration-500">
                 {/* Top accent line */}
