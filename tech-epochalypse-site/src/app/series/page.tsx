@@ -264,6 +264,14 @@ export default function SeriesPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Collectors */}
+                <Link
+                  href="/collectors"
+                  className="block w-full text-center font-mono text-xs uppercase tracking-[0.15em] text-black bg-white px-4 py-3 mt-4 hover:bg-white/90 transition-colors"
+                >
+                  View Collectors
+                </Link>
               </div>
             </div>
           </ScrollReveal>
