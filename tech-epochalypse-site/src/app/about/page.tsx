@@ -19,7 +19,7 @@ export default function AboutPage() {
               Behind the Network
             </p>
             <h1 className="font-display text-4xl md:text-6xl text-white mb-4 uppercase tracking-[0.05em]">
-              Dossier
+              Artist Dossier
             </h1>
             <div className="flex items-center justify-center gap-3 mt-2">
               <div className="w-12 h-px bg-white/10" />
