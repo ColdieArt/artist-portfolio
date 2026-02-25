@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import ScrollReveal from '@/components/ScrollReveal'
 import overlords from '@/data/overlords.json'
@@ -238,12 +240,12 @@ export default function SeriesPage() {
                   <p className="font-mono text-[10px] text-white/40 mb-5">
                     Set of 5 Overlords
                   </p>
-                  <a
-                    href="mailto:coldieart@gmail.com?subject=Collect%20Inquiry%3A%20Full%20Set"
-                    className="block w-full text-center font-mono text-xs uppercase tracking-[0.15em] text-black bg-white px-4 py-3 hover:bg-white/90 transition-colors"
+                  <button
+                    onClick={() => window.open('mailto:coldieart@gmail.com?subject=Collect%20Inquiry%3A%20Full%20Set', '_blank')}
+                    className="block w-full text-center font-mono text-xs uppercase tracking-[0.15em] text-black bg-white px-4 py-3 hover:bg-white/90 transition-colors cursor-pointer"
                   >
                     Inquire to Collect Full Set
-                  </a>
+                  </button>
                 </div>
 
                 {/* Individual Tokens */}
@@ -270,14 +272,12 @@ export default function SeriesPage() {
                     </div>
                   </div>
                   <div className="mt-5">
-                    <a
-                      href="https://gallery.transientlabs.xyz/shape-study"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block w-full text-center font-mono text-xs uppercase tracking-[0.15em] text-white border border-white/20 px-4 py-3 hover:bg-white/5 transition-colors"
+                    <button
+                      onClick={() => window.open('mailto:coldieart@gmail.com?subject=Collect%20Inquiry%3A%20Individual%20Token', '_blank')}
+                      className="block w-full text-center font-mono text-xs uppercase tracking-[0.15em] text-black bg-white px-4 py-3 hover:bg-white/90 transition-colors cursor-pointer"
                     >
-                      View Available Individual Tokens
-                    </a>
+                      Inquire to Collect Individual Token
+                    </button>
                   </div>
                 </div>
               </div>
