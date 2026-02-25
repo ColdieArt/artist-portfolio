@@ -85,7 +85,7 @@ export default function AboutPage() {
 
               {/* Email */}
               <p className="font-mono text-sm text-white mt-8">
-                Email: coldieart@gmail.com
+                Email: coldieart at gmail dot com
               </p>
 
               {/* Social links */}
