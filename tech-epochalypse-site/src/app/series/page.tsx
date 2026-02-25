@@ -241,7 +241,7 @@ export default function SeriesPage() {
                     Set of 5 Overlords
                   </p>
                   <button
-                    onClick={() => window.open('mailto:coldieart@gmail.com?subject=Collect%20Inquiry%3A%20Full%20Set', '_blank')}
+                    onClick={() => { window.location.href = 'mailto:coldieart@gmail.com?subject=Collect%20Inquiry%3A%20Full%20Set' }}
                     className="block w-full text-center font-mono text-xs uppercase tracking-[0.15em] text-black bg-white px-4 py-3 hover:bg-white/90 transition-colors cursor-pointer"
                   >
                     Inquire to Collect Full Set
@@ -273,7 +273,7 @@ export default function SeriesPage() {
                   </div>
                   <div className="mt-5">
                     <button
-                      onClick={() => window.open('mailto:coldieart@gmail.com?subject=Collect%20Inquiry%3A%20Individual%20Token', '_blank')}
+                      onClick={() => { window.location.href = 'mailto:coldieart@gmail.com?subject=Collect%20Inquiry%3A%20Individual%20Token' }}
                       className="block w-full text-center font-mono text-xs uppercase tracking-[0.15em] text-black bg-white px-4 py-3 hover:bg-white/90 transition-colors cursor-pointer"
                     >
                       Inquire to Collect Individual Token

@@ -9,7 +9,7 @@ export default function CollectInquiryButton({ overlordName }: CollectInquiryBut
 
   return (
     <button
-      onClick={() => window.open(`mailto:coldieart@gmail.com?subject=${subject}`, '_blank')}
+      onClick={() => { window.location.href = `mailto:coldieart@gmail.com?subject=${subject}` }}
       className="w-full text-center font-mono text-xs uppercase tracking-[0.15em] text-black bg-white px-4 py-3 hover:bg-white/90 transition-colors cursor-pointer"
     >
       Inquire to Collect
