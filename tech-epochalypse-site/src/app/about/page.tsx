@@ -19,7 +19,7 @@ export default function AboutPage() {
               Behind the Network
             </p>
             <h1 className="font-display text-4xl md:text-6xl text-white mb-4 uppercase tracking-[0.05em]">
-              Dossier
+              Artist Dossier
             </h1>
             <div className="flex items-center justify-center gap-3 mt-2">
               <div className="w-12 h-px bg-white/10" />
@@ -83,8 +83,13 @@ export default function AboutPage() {
                 Status: <span className="text-white">ACTIVE</span>
               </p>
 
+              {/* Email */}
+              <p className="font-mono text-sm text-white mt-8">
+                Email: coldieart at gmail dot com
+              </p>
+
               {/* Social links */}
-              <div className="flex items-center gap-4 mt-8">
+              <div className="flex items-center gap-4 mt-4">
                 <a
                   href="https://twitter.com/Coldie"
                   target="_blank"
