@@ -10,11 +10,13 @@ export const metadata: Metadata = {
     'Explore all five Tech Overlords - interactive kinetic 3D portraits by Coldie.',
 }
 
+const listedOverlords = overlords.filter((o) => o.status !== 'unlisted')
+
 export default function OverlordsPage() {
   const overlordNames = Object.fromEntries(
-    overlords.map((o) => [o.slug, o.name])
+    listedOverlords.map((o) => [o.slug, o.name])
   )
-  const overlordSlugs = overlords.map((o) => o.slug)
+  const overlordSlugs = listedOverlords.map((o) => o.slug)
 
   return (
     <>
@@ -66,7 +68,7 @@ export default function OverlordsPage() {
           {/* Right column - overlord grid, 2 wide, fits viewport */}
           <div className="w-full lg:w-7/12 lg:h-full">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:grid-rows-3 lg:h-full">
-              {overlords.map((overlord, i) => (
+              {listedOverlords.map((overlord, i) => (
                 <ScrollReveal key={overlord.slug} delay={i * 100} className="lg:min-h-0 lg:h-full">
                   <OverlordCard overlord={overlord} />
                 </ScrollReveal>

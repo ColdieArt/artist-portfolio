@@ -6,12 +6,13 @@ import overlords from '@/data/overlords.json'
 import collectors from '@/data/collectors.json'
 
 const overlordMap = Object.fromEntries(overlords.map((o) => [o.slug, o]))
+const listedOverlords = overlords.filter((o) => o.status !== 'unlisted')
 
 export default function MainframePage() {
   const overlordNames = Object.fromEntries(
-    overlords.map((o) => [o.slug, o.name])
+    listedOverlords.map((o) => [o.slug, o.name])
   )
-  const overlordSlugs = overlords.map((o) => o.slug)
+  const overlordSlugs = listedOverlords.map((o) => o.slug)
 
   return (
     <div className="min-h-screen bg-void">
