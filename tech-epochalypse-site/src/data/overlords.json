@@ -78,5 +78,21 @@
     "status": "live",
     "collector": null,
     "order": 5
+  },
+  {
+    "slug": "combined",
+    "number": "VI",
+    "name": "The Collective",
+    "title": "The Hybrid",
+    "tagline": "Five minds. One face. Whose eyes do you see?",
+    "description": "The network converges. A chimera forged from all five overlords - drag, rearrange, and right-click the eyes to cycle through each gaze. Every combination tells a different story.",
+    "lore": "When the five pillars of the tech epoch merge into one visage, the boundaries of identity dissolve. The Collective is not a person - it is a system. A composite intelligence wearing a human mask. Right-click the eyes and decide: whose vision drives the machine?",
+    "medium": "Interactive 3D WebGL - Three.js, custom shaders, eye-cycling system",
+    "year": 2026,
+    "artworkFile": "/artworks/combined.html",
+    "previewImage": null,
+    "status": "live",
+    "collector": null,
+    "order": 6
   }
 ]
