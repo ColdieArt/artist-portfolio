@@ -163,32 +163,59 @@
       color: #66CC66;
     }
 
-    /* ─── SCALE SLIDER CONTROLS ─── */
-    #scale-controls {
+    /* ─── ELEMENT CONTROLS PANEL (left side) ─── */
+    #element-controls {
       position: fixed;
-      bottom: 55px;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
       z-index: 200;
-      display: flex;
-      align-items: center;
-      gap: 8px;
       font-family: monospace;
       font-size: 10px;
       color: #888;
       letter-spacing: 1px;
       user-select: none;
       -webkit-user-select: none;
-      white-space: nowrap;
-      opacity: 0;
+      opacity: 0.4;
       transition: opacity 0.3s;
     }
-    #scale-controls.visible {
+    #element-controls.visible {
       opacity: 1;
     }
-    #scale-slider {
-      width: 140px;
-      height: 4px;
+    #element-controls .ctrl-label {
+      color: #fff;
+      font-size: 11px;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      border-bottom: 1px solid #333;
+      padding-bottom: 6px;
+    }
+    #element-controls .ctrl-section {
+      margin-bottom: 14px;
+    }
+    #element-controls .ctrl-section-title {
+      color: #555;
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    #element-controls .ctrl-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    #element-controls .ctrl-row label {
+      width: 10px;
+      color: #666;
+      font-size: 9px;
+      text-align: right;
+    }
+    #element-controls input[type="range"] {
+      width: 100px;
+      height: 3px;
       -webkit-appearance: none;
       appearance: none;
       background: #333;
@@ -196,22 +223,28 @@
       outline: none;
       cursor: pointer;
     }
-    #scale-slider::-webkit-slider-thumb {
+    #element-controls input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 14px;
-      height: 14px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       background: #4CAF50;
       cursor: pointer;
       border: none;
     }
-    #scale-slider::-moz-range-thumb {
-      width: 14px;
-      height: 14px;
+    #element-controls input[type="range"]::-moz-range-thumb {
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       background: #4CAF50;
       cursor: pointer;
       border: none;
+    }
+    #element-controls .ctrl-value {
+      color: #555;
+      font-size: 9px;
+      min-width: 32px;
+      text-align: left;
     }
 
     /* ─── SUBMIT TO THE OVERLORD BUTTON ─── */
@@ -654,10 +687,8 @@ const BRANDED_OPTIONS = [
 const BRANDED_LABELS = ['SPACEX', 'TESLA', 'DRONE', 'BLUE ORIGIN', 'BLUE BILL', 'META HEADSET', 'NVIDIA CARD'];
 // Add branded elements to OVERLORD_ASSETS so cycleElement can handle them
 OVERLORD_ASSETS['spacex'] = BRANDED_OPTIONS;
-OVERLORD_ASSETS['dogecoin'] = BRANDED_OPTIONS;
 OVERLORD_ASSETS['blueBill'] = BRANDED_OPTIONS;
 OVERLORD_ASSETS['rocket'] = BRANDED_OPTIONS;
-OVERLORD_ASSETS['fiatWorthless'] = BRANDED_OPTIONS;
 
 // Track which overlord index each element is currently showing
 const elementOverlordIndex = {
@@ -671,14 +702,12 @@ const elementOverlordIndex = {
     background: 0,     // Musk default
     mouthOverlay: 4,   // Tracks mouth; default is Huang (no overlay)
     spacex: 0,         // SpaceX (branded index 0)
-    dogecoin: 5,       // Meta Headset (branded index 5)
     blueBill: 4,       // Blue Bill/OpenAI (branded index 4)
-    rocket: 3,         // Blue Origin (branded index 3)
-    fiatWorthless: 6   // Nvidia card (branded index 6)
+    rocket: 3          // Blue Origin (branded index 3)
 };
 
 // Cyclable element IDs (matches userData.id on meshes)
-const CYCLABLE_ELEMENTS = ['rightEye', 'leftEye', 'nose', 'mouth', 'forehead', 'hair', 'ear', 'background', 'spacex', 'dogecoin', 'blueBill', 'rocket', 'fiatWorthless'];
+const CYCLABLE_ELEMENTS = ['rightEye', 'leftEye', 'nose', 'mouth', 'forehead', 'hair', 'ear', 'background', 'spacex', 'blueBill', 'rocket'];
 
 // Preloaded textures: { elementId: [texture0, texture1, ...texture4] }
 let preloadedElementTextures = {};
@@ -1668,71 +1697,7 @@ function resetPiecesToOriginalPositions() {
             return; // Wait for all textures
         }
         
-        // --- 3.1. Load and Position Dogecoin/Tesla (Using FIXED initialPosition) ---
-        const dogecoinConfig = initialAssetConfigs.find(c => c.id === 'dogecoin');
-        if (dogecoinConfig && !dogecoinConfig.removed) {
-            // Re-create the Tesla Greyscale Contrast Material
-            teslaGreyscaleContrastMaterial = new THREE.ShaderMaterial({
-                uniforms: {
-                    tDiffuse: { value: teslaTexture },
-                    contrast: { value: GreyscaleContrastShader.uniforms.contrast.value }
-                },
-                vertexShader: GreyscaleContrastShader.vertexShader,
-                fragmentShader: GreyscaleContrastShader.fragmentShader,
-                transparent: true,
-                alphaTest: 0.5
-            });
-
-            // Re-create Dogecoin/Tesla mesh
-            const material = teslaGreyscaleContrastMaterial;
-            const dogecoinScaleFactor = 0.7;
-            const planeWidth = teslaTexture.image.width * baseScale * dogecoinScaleFactor;
-            const planeHeight = teslaTexture.image.height * baseScale * dogecoinScaleFactor;
-            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-            const dogecoin = new THREE.Mesh(geometry, material);
-            
-            // Set the position using the FIXED initialPosition stored in the config
-            dogecoin.position.copy(dogecoinConfig.initialPosition);
-
-            dogecoin.userData.currentLayer = dogecoinConfig.initialLayer;
-            dogecoin.userData.initialPosition = dogecoinConfig.initialPosition.clone();
-            dogecoin.userData.initialLayer = dogecoinConfig.initialLayer;
-            dogecoin.userData.originalTexture = dogecoinOriginalTexture;
-            dogecoin.userData.teslaTexture = teslaTexture;
-            dogecoin.userData.id = 'dogecoin';
-            dogecoin.userData.initialScale = { width: planeWidth, height: planeHeight };
-            scene.add(dogecoin);
-            draggableObjects.push(dogecoin);
-            cameraAnimationTargets.push(dogecoin);
-            dogecoinRef = dogecoin;
-        }
-
-        // --- 3.2. Load and Position Fiat Worthless (Using FIXED initialPosition) ---
-        const fiatWorthlessConfig = initialAssetConfigs.find(c => c.id === 'fiatWorthless');
-        if (fiatWorthlessConfig && !fiatWorthlessConfig.removed) {
-            loadTexture(fiatWorthlessConfig.url, (texture) => {
-                const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-                const aspectRatio = texture.image.width / texture.image.height;
-                const fiatWorthlessHeight = 0.3; // Fixed height
-                const fiatWorthlessWidth = fiatWorthlessHeight * aspectRatio;
-                const geometry = new THREE.PlaneGeometry(fiatWorthlessWidth, fiatWorthlessHeight);
-                const fiatWorthless = new THREE.Mesh(geometry, material);
-
-                // Set position using the FIXED initialPosition stored in the config
-                fiatWorthless.position.copy(fiatWorthlessConfig.initialPosition);
-
-                fiatWorthless.userData.currentLayer = fiatWorthlessConfig.initialLayer;
-                fiatWorthless.userData.initialPosition = fiatWorthlessConfig.initialPosition.clone();
-                fiatWorthless.userData.initialLayer = fiatWorthlessConfig.initialLayer;
-                fiatWorthless.userData.id = 'fiatWorthless';
-                fiatWorthless.userData.initialScale = { width: fiatWorthlessWidth, height: fiatWorthlessHeight };
-                scene.add(fiatWorthless);
-                draggableObjects.push(fiatWorthless);
-                cameraAnimationTargets.push(fiatWorthless);
-            });
-        }
-        
-        // --- 3.3. Load and Position Signature (Using FIXED initialPosition) ---
+        // --- 3.1. Load and Position Signature (Using FIXED initialPosition) ---
         const signatureConfig = initialAssetConfigs.find(c => c.id === 'signature');
         if (signatureConfig && !signatureConfig.removed) {
             loadTexture(signatureConfig.url, (texture) => {
@@ -2224,13 +2189,13 @@ function init() {
         url: URL_BACKGROUND,
         initialPosition: new THREE.Vector3(0, 0, -4 * depthStep),
         initialLayer: -4,
-        scaleFactor: 1.10,
+        scaleFactor: 1.0,
         removed: false // Add removed flag
     });
     loadTexture(URL_BACKGROUND, (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
         const aspectRatio = texture.image.width / texture.image.height;
-        const scaleFactor = 1.10;
+        const scaleFactor = 1.0;
         const planeHeight = 10 * scaleFactor;
         const planeWidth = planeHeight * aspectRatio;
         const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight); // Fixed: Declare geometry here
@@ -2251,12 +2216,12 @@ function init() {
         initialPosition: new THREE.Vector3(0, (0.5 + 2.666) * 1.10, (2 - 1) * depthStep),
         initialLayer: 2,
         baseScale: baseScale,
-        scaleFactor: 1.15,
+        scaleFactor: 1.0,
         removed: false // Add removed flag
     });
     loadTexture(URL_FOREHEAD, (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const scaleFactor = 1.15;
+        const scaleFactor = 1.0;
         const planeWidth = texture.image.width * baseScale * scaleFactor;
         const planeHeight = texture.image.height * baseScale * scaleFactor;
         const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
@@ -2482,12 +2447,12 @@ function init() {
         initialPosition: new THREE.Vector3(0, 0.8, (11 - 1) * depthStep),
         initialLayer: 11,
         baseScale: baseScale,
-        scaleFactor: 0.93,
+        scaleFactor: 1.0,
         removed: false // Add removed flag
     });
     loadTexture(URL_NOSE, (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const scaleFactor = 0.93;
+        const scaleFactor = 1.0;
         const planeWidth = texture.image.width * baseScale * scaleFactor;
         const planeHeight = texture.image.height * baseScale * scaleFactor;
         const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
@@ -2511,12 +2476,12 @@ function init() {
         initialPosition: new THREE.Vector3(0, 3.5 * 1.10, (4 - 1) * depthStep),
         initialLayer: 4,
         baseScale: baseScale,
-        scaleFactor: 1.15,
+        scaleFactor: 1.0,
         removed: false // Add removed flag
     });
     loadTexture(URL_HAIR, (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const scaleFactor = 1.15;
+        const scaleFactor = 1.0;
         const planeWidth = texture.image.width * baseScale * scaleFactor;
         const planeHeight = texture.image.height * baseScale * scaleFactor;
         const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
@@ -2571,13 +2536,13 @@ function init() {
         initialPosition: new THREE.Vector3(ROCKET_INITIAL_X, rocketInitialY, rocketZ),
         initialLayer: rocketLayer,
         baseScale: baseScale,
-        scaleFactor: 1.04,
+        scaleFactor: 1.0,
         removed: false // Add removed flag
     });
     let rocketRef = null; // Local reference to the rocket mesh
     loadTexture(URL_ROCKET, (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const rocketScaleFactor = 1.04;
+        const rocketScaleFactor = 1.0;
         const planeWidth = texture.image.width * baseScale * rocketScaleFactor;
         const planeHeight = texture.image.height * baseScale * rocketScaleFactor;
         const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
@@ -2599,181 +2564,42 @@ function init() {
         loadDogecoinAndFiat();
     });
 
-    // Function to handle the interdependent loading and positioning of Dogecoin, Fiat, and Signature
+    // Function to load signature after rocket is ready
     function loadDogecoinAndFiat() {
-        const dogecoinLayer = 3;
-        const dogecoinZ = (dogecoinLayer - 1) * depthStep;
-        
-        // Initial position placeholder for config (will be updated by the calculation below)
-        let dogecoinInitialPos = new THREE.Vector3(0, 0, dogecoinZ);
-        let fiatWorthlessInitialPos = new THREE.Vector3();
-        let signatureInitialPos = new THREE.Vector3();
-        
-        // Define fiatWorthlessNewLayer here for scope consistency
-        const fiatWorthlessNewLayer = dogecoinLayer + 2; 
+        loadTexture(URL_SIGNATURE, (signatureTex) => {
+            const signatureHeight = 1.0;
+            const signatureAspectRatio = signatureTex.image.width / signatureTex.image.height;
+            const signatureWidth = signatureHeight * signatureAspectRatio;
+            const signatureNewLayer = 0;
+            const signatureNewZ = (signatureNewLayer - 1) * depthStep;
+            const signatureNewX = -2.0;
+            const signatureNewY = -4.7;
+            const signatureInitialPos = new THREE.Vector3(signatureNewX, signatureNewY, signatureNewZ);
 
-        // Load necessary textures first
-        loadTexture(URL_DOGECOIN_ORIGINAL, (dogeTex) => {
-            dogecoinOriginalTexture = dogeTex;
-
-            loadTexture(URL_TESLA_SWAP, (teslaTex) => {
-                teslaTexture = teslaTex;
-                
-                // Load Fiat Worthless texture to determine its size for config
-                loadTexture(URL_FIAT_WORTHLESS, (fiatTex) => {
-                    const fiatWorthlessHeight = 0.3;
-                    const fiatWorthlessAspectRatio = fiatTex.image.width / fiatTex.image.height;
-                    const fiatWorthlessWidth = fiatWorthlessHeight * fiatWorthlessAspectRatio;
-
-                    // --- CALCULATE FIXED POSITIONS NOW (moved from onWindowResize) ---
-                    
-                    // 1. Calculate Dogecoin/Tesla Position
-                    // We must ensure backgroundMesh is ready before calculating positions relative to it
-                    if (!backgroundMesh) {
-                        console.error("Background mesh not loaded yet, deferring position calculation.");
-                        // Fallback position if background isn't ready
-                        dogecoinInitialPos.set(ROCKET_INITIAL_X, -3, dogecoinZ);
-                        fiatWorthlessInitialPos.set(ROCKET_INITIAL_X + 2, -3.5, dogecoinZ + depthStep * 2);
-                    } else {
-                        const bgBounds = getBackgroundBounds(backgroundMesh.position.z);
-                        const dogecoinScaleFactor = 0.7;
-                        const tempDogeWidth = teslaTexture.image.width * baseScale * dogecoinScaleFactor; 
-                        const tempDogeHeight = teslaTexture.image.height * baseScale * dogecoinScaleFactor;
-                        const targetX = ROCKET_INITIAL_X; // Same as ROCKET_INITIAL_X
-                        const paddingY = 0.5;
-                        const targetY = bgBounds.minY + tempDogeHeight / 2 + paddingY;
-                        dogecoinInitialPos.set(targetX, targetY, dogecoinZ);
-
-                        // 2. Calculate Fiat Worthless Position
-                        const fiatWorthlessNewZ = (fiatWorthlessNewLayer - 1) * depthStep;
-                        const fiatWorthlessInitialWorldX = dogecoinInitialPos.x + tempDogeWidth * 1.1 + .25; 
-                        const fiatWorthlessInitialWorldY = dogecoinInitialPos.y - tempDogeHeight * .11 - 0;
-                        fiatWorthlessInitialPos.set(fiatWorthlessInitialWorldX, fiatWorthlessInitialWorldY, fiatWorthlessNewZ);
-                    }
-
-                    // 3. Calculate Signature Position
-                    loadTexture(URL_SIGNATURE, (signatureTex) => {
-                        const signatureHeight = 1.0;
-                        const signatureAspectRatio = signatureTex.image.width / signatureTex.image.height;
-                        const signatureWidth = signatureHeight * signatureAspectRatio;
-                        const signatureNewLayer = 0; // (2 - 2)
-                        const signatureNewZ = (signatureNewLayer - 1) * depthStep;
-                        const signatureNewX = -2.0;
-                        const signatureNewY = -4.7;
-                        signatureInitialPos.set(signatureNewX, signatureNewY, signatureNewZ);
-
-                        // --- Store CONFIGS (if not already present) ---
-                        if (!initialAssetConfigs.find(c => c.id === 'dogecoin')) {
-                            initialAssetConfigs.push({
-                                id: 'dogecoin',
-                                type: 'image',
-                                url: URL_TESLA_SWAP,
-                                originalTextureUrl: URL_DOGECOIN_ORIGINAL,
-                                swapTextureUrl: URL_TESLA_SWAP,
-                                initialPosition: dogecoinInitialPos.clone(),
-                                initialLayer: dogecoinLayer,
-                                baseScale: baseScale,
-                                scaleFactor: 0.7,
-                                removed: false
-                            });
-                        } else {
-                             // Update existing config with the calculated fixed position
-                            initialAssetConfigs.find(c => c.id === 'dogecoin').initialPosition.copy(dogecoinInitialPos);
-                        }
-                        
-                        if (!initialAssetConfigs.find(c => c.id === 'fiatWorthless')) {
-                            initialAssetConfigs.push({
-                                id: 'fiatWorthless',
-                                type: 'image',
-                                url: URL_FIAT_WORTHLESS,
-                                initialPosition: fiatWorthlessInitialPos.clone(),
-                                initialLayer: fiatWorthlessNewLayer,
-                                baseScale: baseScale,
-                                scaleFactor: 0.3, // Used to derive the fixed height/width above
-                                removed: false
-                            });
-                        } else {
-                            // Update existing config with the calculated fixed position
-                            initialAssetConfigs.find(c => c.id === 'fiatWorthless').initialPosition.copy(fiatWorthlessInitialPos);
-                        }
-                        
-                        if (!initialAssetConfigs.find(c => c.id === 'signature')) {
-                            initialAssetConfigs.push({
-                                id: 'signature',
-                                type: 'image',
-                                url: URL_SIGNATURE,
-                                initialPosition: signatureInitialPos.clone(),
-                                initialLayer: signatureNewLayer,
-                                baseScale: baseScale,
-                                scaleFactor: 1.0,
-                                removed: false
-                            });
-                        } else {
-                            // Update existing config with the calculated fixed position
-                            initialAssetConfigs.find(c => c.id === 'signature').initialPosition.copy(signatureInitialPos);
-                        }
-
-                        // --- CREATE MESHES ---
-                        
-                        // 1. Dogecoin/Tesla
-                        teslaGreyscaleContrastMaterial = new THREE.ShaderMaterial({
-                            uniforms: {
-                                tDiffuse: { value: teslaTexture },
-                                contrast: { value: GreyscaleContrastShader.uniforms.contrast.value }
-                            },
-                            vertexShader: GreyscaleContrastShader.vertexShader,
-                            fragmentShader: GreyscaleContrastShader.fragmentShader,
-                            transparent: true,
-                            alphaTest: 0.5
-                        });
-                        const dogecoinScaleFactor = 0.7;
-                        const dogePlaneWidth = teslaTexture.image.width * baseScale * dogecoinScaleFactor;
-                        const dogePlaneHeight = teslaTexture.image.height * baseScale * dogecoinScaleFactor;
-                        const dogecoin = new THREE.Mesh(new THREE.PlaneGeometry(dogePlaneWidth, dogePlaneHeight), teslaGreyscaleContrastMaterial);
-                        dogecoin.userData.currentLayer = dogecoinLayer;
-                        dogecoin.userData.initialPosition = dogecoinInitialPos.clone();
-                        dogecoin.userData.initialLayer = dogecoinLayer;
-                        dogecoin.userData.originalTexture = dogecoinOriginalTexture;
-                        dogecoin.userData.teslaTexture = teslaTexture;
-                        dogecoin.userData.id = 'dogecoin';
-                        dogecoin.userData.initialScale = { width: dogePlaneWidth, height: dogePlaneHeight };
-                        dogecoinRef = dogecoin;
-                        scene.add(dogecoin);
-                        draggableObjects.push(dogecoin);
-                        cameraAnimationTargets.push(dogecoin);
-                        
-                        // Set position immediately after creation using the calculated fixed position
-                        dogecoin.position.copy(dogecoinInitialPos);
-
-                        // 2. Fiat Worthless
-                        const fiatWorthlessMaterial = new THREE.MeshBasicMaterial({ map: fiatTex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-                        const fiatWorthless = new THREE.Mesh(new THREE.PlaneGeometry(fiatWorthlessWidth, fiatWorthlessHeight), fiatWorthlessMaterial);
-                        fiatWorthless.position.copy(fiatWorthlessInitialPos);
-                        fiatWorthless.userData.currentLayer = fiatWorthlessNewLayer;
-                        fiatWorthless.userData.initialPosition = fiatWorthlessInitialPos.clone();
-                        fiatWorthless.userData.initialLayer = fiatWorthlessNewLayer;
-                        fiatWorthless.userData.id = 'fiatWorthless';
-                        fiatWorthless.userData.initialScale = { width: fiatWorthlessWidth, height: fiatWorthlessHeight };
-                        scene.add(fiatWorthless);
-                        draggableObjects.push(fiatWorthless);
-                        cameraAnimationTargets.push(fiatWorthless);
-
-                        // 3. Signature
-                        const signatureMaterial = new THREE.MeshBasicMaterial({ map: signatureTex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-                        const signature = new THREE.Mesh(new THREE.PlaneGeometry(signatureWidth, signatureHeight), signatureMaterial);
-                        signature.position.copy(signatureInitialPos);
-                        signature.userData.currentLayer = signatureNewLayer;
-                        signature.userData.id = 'signature';
-                        signature.userData.initialScale = { width: signatureWidth, height: signatureHeight };
-                        signature.userData.initialPosition = signatureInitialPos.clone();
-                        signature.userData.initialLayer = signatureNewLayer;
-                        scene.add(signature);
-                        
-                        // Call onWindowResize only to handle ear and text positions, not dogecoin/fiat/signature
-                        onWindowResize();
-                    });
+            if (!initialAssetConfigs.find(c => c.id === 'signature')) {
+                initialAssetConfigs.push({
+                    id: 'signature',
+                    type: 'image',
+                    url: URL_SIGNATURE,
+                    initialPosition: signatureInitialPos.clone(),
+                    initialLayer: signatureNewLayer,
+                    baseScale: baseScale,
+                    scaleFactor: 1.0,
+                    removed: false
                 });
-            });
+            }
+
+            const signatureMaterial = new THREE.MeshBasicMaterial({ map: signatureTex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+            const signature = new THREE.Mesh(new THREE.PlaneGeometry(signatureWidth, signatureHeight), signatureMaterial);
+            signature.position.copy(signatureInitialPos);
+            signature.userData.currentLayer = signatureNewLayer;
+            signature.userData.id = 'signature';
+            signature.userData.initialScale = { width: signatureWidth, height: signatureHeight };
+            signature.userData.initialPosition = signatureInitialPos.clone();
+            signature.userData.initialLayer = signatureNewLayer;
+            scene.add(signature);
+
+            onWindowResize();
         });
     }
 
@@ -2898,9 +2724,9 @@ function init() {
     // ── Create swap mode indicator UI ──
     createEyeIndicator();
 
-    // ── Wire swap mode toggle button and scale slider ──
+    // ── Wire swap mode toggle button and element controls panel ──
     initSwapModeButton();
-    initScaleControls();
+    initElementControls();
 
     // Helper function to add a toggle button for an effect
     const addButtonToggle = (parentContainer, label, property, pass) => {
@@ -3917,16 +3743,64 @@ function preloadEyeTextures() {
 
     // Preload textures for every element (including mouthOverlay companion)
     const elementsToPreload = [...CYCLABLE_ELEMENTS, 'mouthOverlay'];
+    const preloadPromises = [];
     for (const elementId of elementsToPreload) {
         const urls = OVERLORD_ASSETS[elementId];
         if (!urls) continue;
         preloadedElementTextures[elementId] = new Array(urls.length).fill(null);
         urls.forEach((url, index) => {
-            loadTex(url).then((tex) => {
+            const p = loadTex(url).then((tex) => {
                 preloadedElementTextures[elementId][index] = tex;
             });
+            preloadPromises.push(p);
         });
     }
+
+    // After all textures are preloaded, randomize face elements
+    Promise.all(preloadPromises).then(() => {
+        randomizeFaceElements();
+    });
+}
+
+function randomizeFaceElements() {
+    // Randomize all cyclable elements (face + branded)
+    const allElements = CYCLABLE_ELEMENTS;
+
+    for (const elementId of allElements) {
+        const urls = OVERLORD_ASSETS[elementId];
+        if (!urls) continue;
+
+        // Pick a random index that has an asset
+        const validIndices = [];
+        for (let i = 0; i < urls.length; i++) {
+            if (urls[i]) validIndices.push(i);
+        }
+        if (validIndices.length === 0) continue;
+
+        const randomIdx = validIndices[Math.floor(Math.random() * validIndices.length)];
+
+        // Skip if already showing this index
+        if (elementOverlordIndex[elementId] === randomIdx) continue;
+
+        elementOverlordIndex[elementId] = randomIdx;
+
+        // Apply the texture swap
+        if (elementId === 'rightEye') {
+            cycleRightEyeMesh(randomIdx);
+        } else if (elementId === 'leftEye') {
+            cycleLeftEyeMesh(randomIdx);
+        } else if (elementId === 'mouth') {
+            cycleGenericElement(elementId, randomIdx);
+            cycleMouthOverlay(randomIdx);
+        } else {
+            cycleGenericElement(elementId, randomIdx);
+        }
+    }
+
+    const isBranded = (id) => ['spacex', 'blueBill', 'rocket'].includes(id);
+    console.log('Elements randomized:', Object.fromEntries(
+        allElements.map(id => [id, isBranded(id) ? (BRANDED_LABELS[elementOverlordIndex[id]] || elementOverlordIndex[id]) : (OVERLORD_NAMES[elementOverlordIndex[id]] || elementOverlordIndex[id])])
+    ));
 }
 
 function createEyeIndicator() {
@@ -3978,52 +3852,84 @@ function initSwapModeButton() {
     };
 }
 
-function initScaleControls() {
-    const slider = document.getElementById('scale-slider');
-    const valueLabel = document.getElementById('scale-value');
-    const nameLabel = document.getElementById('scale-label');
-    const controls = document.getElementById('scale-controls');
-    if (!slider || !controls) return;
+function initElementControls() {
+    const panel = document.getElementById('element-controls');
+    const scaleSlider = document.getElementById('scale-slider');
+    const rotateX = document.getElementById('rotate-x');
+    const rotateY = document.getElementById('rotate-y');
+    const rotateZ = document.getElementById('rotate-z');
+    if (!panel) return;
 
-    slider.addEventListener('input', (e) => {
-        e.stopPropagation();
+    // Scale slider
+    scaleSlider.addEventListener('input', () => {
         if (!selectedScaleElement) return;
-        const pct = parseInt(slider.value);
+        const pct = parseInt(scaleSlider.value);
         const scale = pct / 100;
         selectedScaleElement.userData.userScale = scale;
-
         const baseW = selectedScaleElement.userData.initialScale.width;
         const baseH = selectedScaleElement.userData.initialScale.height;
         selectedScaleElement.geometry.dispose();
         selectedScaleElement.geometry = new THREE.PlaneGeometry(baseW * scale, baseH * scale);
-
-        if (valueLabel) valueLabel.textContent = pct + '%';
+        document.getElementById('scale-value').textContent = pct + '%';
     });
 
-    // Prevent clicks on slider from propagating to the scene
-    slider.addEventListener('mousedown', (e) => e.stopPropagation());
-    slider.addEventListener('touchstart', (e) => e.stopPropagation());
-    controls.addEventListener('mousedown', (e) => e.stopPropagation());
-    controls.addEventListener('touchstart', (e) => e.stopPropagation());
+    // Rotation sliders
+    const applyRotation = () => {
+        if (!selectedScaleElement) return;
+        const rx = parseInt(rotateX.value);
+        const ry = parseInt(rotateY.value);
+        const rz = parseInt(rotateZ.value);
+        selectedScaleElement.rotation.set(
+            THREE.MathUtils.degToRad(rx),
+            THREE.MathUtils.degToRad(ry),
+            THREE.MathUtils.degToRad(rz)
+        );
+        document.getElementById('rotate-x-value').textContent = rx + '°';
+        document.getElementById('rotate-y-value').textContent = ry + '°';
+        document.getElementById('rotate-z-value').textContent = rz + '°';
+    };
+    rotateX.addEventListener('input', applyRotation);
+    rotateY.addEventListener('input', applyRotation);
+    rotateZ.addEventListener('input', applyRotation);
+
+    // Prevent interaction from propagating to scene
+    panel.addEventListener('mousedown', (e) => e.stopPropagation());
+    panel.addEventListener('touchstart', (e) => e.stopPropagation());
+    panel.addEventListener('click', (e) => e.stopPropagation());
 }
 
-function selectElementForScale(mesh) {
+function selectElementForControls(mesh) {
     if (!mesh || !mesh.userData.id) return;
     selectedScaleElement = mesh;
 
-    const controls = document.getElementById('scale-controls');
-    const slider = document.getElementById('scale-slider');
-    const valueLabel = document.getElementById('scale-value');
-    const nameLabel = document.getElementById('scale-label');
+    const panel = document.getElementById('element-controls');
+    const scaleSlider = document.getElementById('scale-slider');
+    const rotateX = document.getElementById('rotate-x');
+    const rotateY = document.getElementById('rotate-y');
+    const rotateZ = document.getElementById('rotate-z');
 
-    if (controls && slider && valueLabel && nameLabel) {
-        controls.classList.add('visible');
-        const currentScale = Math.round((mesh.userData.userScale || 1.0) * 100);
-        slider.value = currentScale;
-        valueLabel.textContent = currentScale + '%';
-        const displayName = mesh.userData.id.replace(/([A-Z])/g, ' $1').toUpperCase().trim();
-        nameLabel.textContent = displayName;
-    }
+    if (!panel) return;
+    panel.classList.add('visible');
+
+    // Update element name
+    const displayName = mesh.userData.id.replace(/([A-Z])/g, ' $1').toUpperCase().trim();
+    document.getElementById('ctrl-element-name').textContent = displayName;
+
+    // Update scale slider
+    const currentScale = Math.round((mesh.userData.userScale || 1.0) * 100);
+    scaleSlider.value = currentScale;
+    document.getElementById('scale-value').textContent = currentScale + '%';
+
+    // Update rotation sliders
+    const rx = Math.round(THREE.MathUtils.radToDeg(mesh.rotation.x));
+    const ry = Math.round(THREE.MathUtils.radToDeg(mesh.rotation.y));
+    const rz = Math.round(THREE.MathUtils.radToDeg(mesh.rotation.z));
+    rotateX.value = rx;
+    rotateY.value = ry;
+    rotateZ.value = rz;
+    document.getElementById('rotate-x-value').textContent = rx + '°';
+    document.getElementById('rotate-y-value').textContent = ry + '°';
+    document.getElementById('rotate-z-value').textContent = rz + '°';
 }
 
 function updateElementIndicator(elementId) {
@@ -4031,7 +3937,7 @@ function updateElementIndicator(elementId) {
     if (indicator) {
         const idx = elementOverlordIndex[elementId];
         const label = elementId.replace(/([A-Z])/g, ' $1').toUpperCase().trim();
-        const isBranded = ['spacex', 'dogecoin', 'blueBill', 'rocket', 'fiatWorthless'].includes(elementId);
+        const isBranded = ['spacex', 'blueBill', 'rocket'].includes(elementId);
 
         if (isBranded) {
             indicator.innerHTML = `<span style="color:#fff;font-size:12px;">${BRANDED_LABELS[idx] || label}</span>`;
@@ -4082,7 +3988,7 @@ function cycleElement(elementId) {
     updateElementIndicator(elementId);
 
     // Log label: use branded labels or overlord names depending on element type
-    const isBranded = ['spacex', 'dogecoin', 'blueBill', 'rocket', 'fiatWorthless'].includes(elementId);
+    const isBranded = ['spacex', 'blueBill', 'rocket'].includes(elementId);
     const logLabel = isBranded ? (BRANDED_LABELS[nextIdx] || nextIdx) : `${OVERLORD_NAMES[nextIdx]} (${OVERLORD_NUMERALS[nextIdx]})`;
     console.log(`${elementId} cycled to: ${logLabel}`);
 }
@@ -4449,7 +4355,7 @@ function onClick(event) {
 
     if (clickedObject) {
         // ── Select element for scale slider ──
-        selectElementForScale(clickedObject);
+        selectElementForControls(clickedObject);
 
         // ── SWAP MODE: cycle overlord element instead of Z-depth ──
         if (swapMode) {
@@ -4747,11 +4653,34 @@ setTimeout(function () {
   <!-- ─── SWAP MODE TOGGLE ─── -->
   <button id="swap-mode-btn">SWAP MODE</button>
 
-  <!-- ─── SCALE CONTROLS ─── -->
-  <div id="scale-controls">
-    <span id="scale-label">SCALE</span>
-    <input type="range" id="scale-slider" min="10" max="300" value="100" />
-    <span id="scale-value">100%</span>
+  <!-- ─── ELEMENT CONTROLS PANEL ─── -->
+  <div id="element-controls">
+    <div class="ctrl-label" id="ctrl-element-name">SELECT ELEMENT</div>
+    <div class="ctrl-section">
+      <div class="ctrl-section-title">Scale</div>
+      <div class="ctrl-row">
+        <input type="range" id="scale-slider" min="10" max="300" value="100" />
+        <span class="ctrl-value" id="scale-value">100%</span>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-section-title">Rotate</div>
+      <div class="ctrl-row">
+        <label>X</label>
+        <input type="range" id="rotate-x" min="-180" max="180" value="0" />
+        <span class="ctrl-value" id="rotate-x-value">0°</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Y</label>
+        <input type="range" id="rotate-y" min="-180" max="180" value="0" />
+        <span class="ctrl-value" id="rotate-y-value">0°</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Z</label>
+        <input type="range" id="rotate-z" min="-180" max="180" value="0" />
+        <span class="ctrl-value" id="rotate-z-value">0°</span>
+      </div>
+    </div>
   </div>
 
   <!-- ─── EXPORT PANEL HTML ─── -->
@@ -4846,8 +4775,8 @@ setTimeout(function () {
       if (eyeIndicator) eyeIndicator.style.display = 'none';
       const swapModeBtn = document.getElementById('swap-mode-btn');
       if (swapModeBtn) swapModeBtn.style.display = 'none';
-      const scaleControls = document.getElementById('scale-controls');
-      if (scaleControls) scaleControls.style.display = 'none';
+      const elementControls = document.getElementById('element-controls');
+      if (elementControls) elementControls.style.display = 'none';
       return;
     }
     
