@@ -129,6 +129,40 @@
     #export-panel .status-line.active { color: #4c4; }
     #export-panel .status-line.error   { color: #e66; }
 
+    /* ─── SWAP MODE TOGGLE BUTTON ─── */
+    #swap-mode-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      background: #000;
+      color: #fff;
+      border: 2px solid #555;
+      padding: 10px 28px;
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.3s, color 0.3s, box-shadow 0.3s;
+      text-transform: uppercase;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #swap-mode-btn:hover {
+      border-color: #999;
+    }
+    #swap-mode-btn.active {
+      border-color: #4CAF50;
+      color: #4CAF50;
+      box-shadow: 0 0 12px rgba(76, 175, 80, 0.3);
+    }
+    #swap-mode-btn.active:hover {
+      border-color: #66CC66;
+      color: #66CC66;
+    }
+
     /* ─── SUBMIT TO THE OVERLORD BUTTON ─── */
     #submit-overlord-btn {
       position: fixed;
@@ -484,48 +518,90 @@ const URL_ROCKET = URL_BRANDED_4;
 const URL_BLUE_BILL = URL_BRANDED_3;
 const URL_FIAT_WORTHLESS = URL_BRANDED_5;
 
-// ── EYE CYCLING SYSTEM ──
-// All 5 overlord eye sets for right-click cycling
-const EYE_SETS = [
-    {
-        name: 'Elon Musk',
-        numeral: 'I',
-        rightEye: 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0007_Eye-R.png',
-        leftEye: 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0009_Eye-L.png',
-        combined: false
-    },
-    {
-        name: 'Mark Zuckerberg',
-        numeral: 'II',
-        rightEye: 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Eye-R.gif',
-        leftEye: 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Eye-L.gif',
-        combined: false
-    },
-    {
-        name: 'Sam Altman',
-        numeral: 'III',
-        rightEye: 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_Eye-R.gif',
-        leftEye: 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_Eye-L.gif',
-        combined: false
-    },
-    {
-        name: 'Jeff Bezos',
-        numeral: 'IV',
-        rightEye: 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-Eye-R.gif',
-        leftEye: 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-Eye-L.gif',
-        combined: false
-    },
-    {
-        name: 'Jensen Huang',
-        numeral: 'V',
-        rightEye: 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-eyes.gif',
-        leftEye: '',
-        combined: true
-    }
-];
-let currentEyeSetIndex = 0;
-let preloadedEyeTextures = []; // Array of { rightEye: texture, leftEye: texture|null }
+// ── ELEMENT CYCLING SYSTEM ──
+// Right-click any face element to cycle through all 5 overlords' versions
+const OVERLORD_NAMES = ['Elon Musk', 'Mark Zuckerberg', 'Sam Altman', 'Jeff Bezos', 'Jensen Huang'];
+const OVERLORD_NUMERALS = ['I', 'II', 'III', 'IV', 'V'];
+
+// Asset URLs per element per overlord (index 0=Musk, 1=Zuckerberg, 2=Altman, 3=Bezos, 4=Huang)
+const OVERLORD_ASSETS = {
+    rightEye: [
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0007_Eye-R.png',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Eye-R.gif',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_Eye-R.gif',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-Eye-R.gif',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-eyes.gif'
+    ],
+    leftEye: [
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0009_Eye-L.png',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Eye-L.gif',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_Eye-L.gif',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-Eye-L.gif',
+        ''
+    ],
+    nose: [
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0003_nose-2.png',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-nose.gif',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_nose.gif',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-nose.gif',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-nose.gif'
+    ],
+    mouth: [
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0008_mouth.png',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Mouth.gif',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_mouth-color.gif',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-mouth.gif',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-mouth.gif'
+    ],
+    forehead: [
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0010_forehead.png',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Forehead.gif',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_forehead-2.gif',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-Forehead.gif',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/fhead01.gif'
+    ],
+    hair: [
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0001_hair.png',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Hair.gif',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_hair.gif',
+        '',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-hair.gif'
+    ],
+    ear: [
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0002_ear.png',
+        '',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_ear.gif',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-ear.gif',
+        ''
+    ],
+    background: [
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/K-Dallas-Region-BG.jpg',
+        '',
+        '',
+        '',
+        ''
+    ]
+};
+
+// Track which overlord index each element is currently showing
+const elementOverlordIndex = {
+    rightEye: 0,   // Musk default
+    leftEye: 0,    // Musk default
+    nose: 3,       // Bezos default
+    mouth: 4,      // Huang default
+    forehead: 1,   // Zuckerberg default
+    hair: 2,       // Altman default
+    ear: 2,        // Altman default
+    background: 0  // Musk default
+};
+
+// Cyclable element IDs (matches userData.id on meshes)
+const CYCLABLE_ELEMENTS = ['rightEye', 'leftEye', 'nose', 'mouth', 'forehead', 'hair', 'ear', 'background'];
+
+// Preloaded textures: { elementId: [texture0, texture1, ...texture4] }
+let preloadedElementTextures = {};
 let combinedEyesMesh = null; // For Jensen Huang's combined eyes image
+let swapMode = false; // When true, clicks cycle overlord elements instead of Z-depth
 
 // Define the initial X position for the rocket (was missing)
 const ROCKET_INITIAL_X = -2.0;
@@ -2733,15 +2809,14 @@ function init() {
     renderer.domElement.addEventListener('pointerup', onPointerUp);
     renderer.domElement.addEventListener('click', onClick);
 
-    // ── Prevent context menu and add right-click eye cycling ──
-    renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
-    renderer.domElement.addEventListener('pointerdown', onRightClickEyeCycle);
-
-    // ── Preload all eye textures ──
+    // ── Preload all element textures for swap mode ──
     preloadEyeTextures();
 
-    // ── Create eye indicator UI ──
+    // ── Create swap mode indicator UI ──
     createEyeIndicator();
+
+    // ── Wire swap mode toggle button ──
+    initSwapModeButton();
 
     // Helper function to add a toggle button for an effect
     const addButtonToggle = (parentContainer, label, property, pass) => {
@@ -3585,8 +3660,6 @@ function init() {
     renderer.domElement.addEventListener('pointermove', onPointerMove);
     renderer.domElement.addEventListener('pointerup', onPointerUp);
     renderer.domElement.addEventListener('click', onClick);
-    renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
-    renderer.domElement.addEventListener('pointerdown', onRightClickEyeCycle);
 
     // Call onWindowResize once after init to ensure initial positions are calculated correctly
     // NOTE: This is called after the main assets are loaded in loadDogecoinAndFiat to ensure
@@ -3735,11 +3808,12 @@ function onWindowResize() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// ── EYE CYCLING SYSTEM ──
-// Right-click on eye elements cycles through all 5 overlords' eyes
+// ── ELEMENT CYCLING SYSTEM ──
+// Right-click any face element to cycle through all 5 overlords' versions
 // ══════════════════════════════════════════════════════════════
 
 function preloadEyeTextures() {
+    // Actually preloads ALL element textures (name kept for backward compat with init calls)
     const textureLoader = new THREE.TextureLoader();
     textureLoader.setCrossOrigin('');
 
@@ -3757,11 +3831,17 @@ function preloadEyeTextures() {
         });
     };
 
-    EYE_SETS.forEach((set, index) => {
-        Promise.all([loadTex(set.rightEye), loadTex(set.leftEye)]).then(([rTex, lTex]) => {
-            preloadedEyeTextures[index] = { rightEye: rTex, leftEye: lTex };
+    // Preload textures for every element across all 5 overlords
+    for (const elementId of CYCLABLE_ELEMENTS) {
+        const urls = OVERLORD_ASSETS[elementId];
+        if (!urls) continue;
+        preloadedElementTextures[elementId] = new Array(5).fill(null);
+        urls.forEach((url, index) => {
+            loadTex(url).then((tex) => {
+                preloadedElementTextures[elementId][index] = tex;
+            });
         });
-    });
+    }
 }
 
 function createEyeIndicator() {
@@ -3769,26 +3849,56 @@ function createEyeIndicator() {
     indicator.id = 'eye-indicator';
     indicator.style.cssText = `
         position: fixed;
-        bottom: 70px;
-        right: 20px;
-        z-index: 200;
+        bottom: 60px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 199;
         font-family: monospace;
         font-size: 10px;
         color: #888;
         letter-spacing: 1px;
-        text-align: right;
+        text-align: center;
         pointer-events: none;
         transition: opacity 0.3s;
+        opacity: 0;
     `;
-    indicator.innerHTML = `<span style="color:#fff;font-size:12px;">EYES: ${EYE_SETS[0].numeral}</span><br><span style="font-size:9px;color:#555;">RIGHT-CLICK EYES TO CYCLE</span>`;
+    indicator.innerHTML = '';
     document.body.appendChild(indicator);
 }
 
-function updateEyeIndicator() {
+function initSwapModeButton() {
+    const btn = document.getElementById('swap-mode-btn');
+    if (!btn) return;
+
+    btn.onclick = (e) => {
+        e.stopPropagation();
+        swapMode = !swapMode;
+        btn.classList.toggle('active', swapMode);
+        btn.textContent = swapMode ? 'SWAP MODE ON' : 'SWAP MODE';
+
+        const indicator = document.getElementById('eye-indicator');
+        if (indicator) {
+            if (swapMode) {
+                indicator.style.opacity = '0.8';
+                indicator.innerHTML = `<span style="color:#4CAF50;font-size:10px;">TAP ANY FACE ELEMENT TO CYCLE</span>`;
+            } else {
+                indicator.style.opacity = '0';
+            }
+        }
+
+        // Change cursor to signal swap mode
+        if (renderer && renderer.domElement) {
+            renderer.domElement.style.cursor = swapMode ? 'crosshair' : 'grab';
+        }
+    };
+}
+
+function updateElementIndicator(elementId) {
     const indicator = document.getElementById('eye-indicator');
     if (indicator) {
-        const set = EYE_SETS[currentEyeSetIndex];
-        indicator.innerHTML = `<span style="color:#fff;font-size:12px;">EYES: ${set.numeral}</span><br><span style="font-size:9px;color:#555;">${set.name.toUpperCase()}</span>`;
+        const overlordIdx = elementOverlordIndex[elementId];
+        const label = elementId.replace(/([A-Z])/g, ' $1').toUpperCase().trim();
+        indicator.innerHTML = `<span style="color:#fff;font-size:12px;">${label}: ${OVERLORD_NUMERALS[overlordIdx]}</span><br><span style="font-size:9px;color:#555;">${OVERLORD_NAMES[overlordIdx].toUpperCase()}</span>`;
 
         // Flash the indicator briefly
         indicator.style.opacity = '1';
@@ -3796,84 +3906,55 @@ function updateEyeIndicator() {
     }
 }
 
-function onRightClickEyeCycle(event) {
-    // Only handle right-click (button === 2)
-    if (event.button !== 2) return;
+// Swap mode is handled inside onClick — no separate handler needed
+function onRightClickEyeCycle() { /* deprecated — swap mode uses onClick */ }
 
-    event.preventDefault();
-    event.stopPropagation();
+function cycleElement(elementId) {
+    const urls = OVERLORD_ASSETS[elementId];
+    if (!urls) return;
 
-    // Check if the click is on a UI element
-    if (event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) {
-        return;
+    // Find next overlord that has an asset for this element
+    let nextIdx = elementOverlordIndex[elementId];
+    let attempts = 0;
+    do {
+        nextIdx = (nextIdx + 1) % 5;
+        attempts++;
+    } while (!urls[nextIdx] && attempts < 5);
+
+    if (attempts >= 5) return; // No assets available
+
+    elementOverlordIndex[elementId] = nextIdx;
+
+    // Special handling for eyes (rightEye and leftEye cycle together, combined eyes for Huang)
+    if (elementId === 'rightEye') {
+        elementOverlordIndex['leftEye'] = nextIdx;
+        cycleEyeMeshes(nextIdx);
+    } else {
+        // Generic element cycling
+        cycleGenericElement(elementId, nextIdx);
     }
 
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-
-    const intersects = raycaster.intersectObjects(draggableObjects, true);
-
-    let clickedEye = false;
-    for (const intersect of intersects) {
-        const object = intersect.object;
-        const id = object.userData.id;
-        if (id === 'rightEye' || id === 'leftEye') {
-            // Check alpha for transparent parts
-            const material = object.material;
-            if (material && material.map && material.transparent) {
-                const alpha = getAlphaAtUV(material.map, intersect.uv);
-                if (alpha > 0.1) {
-                    clickedEye = true;
-                    break;
-                }
-            } else {
-                clickedEye = true;
-                break;
-            }
-        }
-        // Also check if click is on the combined eyes mesh
-        if (object === combinedEyesMesh) {
-            clickedEye = true;
-            break;
-        }
-    }
-
-    if (clickedEye) {
-        cycleEyes();
-    }
+    updateElementIndicator(elementId);
+    console.log(`${elementId} cycled to: ${OVERLORD_NAMES[nextIdx]} (${OVERLORD_NUMERALS[nextIdx]})`);
 }
 
-function cycleEyes() {
-    // Advance to next eye set
-    currentEyeSetIndex = (currentEyeSetIndex + 1) % EYE_SETS.length;
-    const textures = preloadedEyeTextures[currentEyeSetIndex];
-    const eyeSet = EYE_SETS[currentEyeSetIndex];
+function cycleEyeMeshes(overlordIdx) {
+    const rightTex = preloadedElementTextures['rightEye'] ? preloadedElementTextures['rightEye'][overlordIdx] : null;
+    const leftTex = preloadedElementTextures['leftEye'] ? preloadedElementTextures['leftEye'][overlordIdx] : null;
+    const isCombined = !OVERLORD_ASSETS['leftEye'][overlordIdx]; // Huang has no separate left eye
 
-    if (!textures) {
-        console.warn('Eye textures not yet loaded for index:', currentEyeSetIndex);
-        return;
-    }
+    if (isCombined) {
+        // Jensen Huang - combined eyes: hide separate, show combined
+        if (rightEyeMesh) fadeOutMesh(rightEyeMesh);
+        if (leftEyeMesh) fadeOutMesh(leftEyeMesh);
 
-    if (eyeSet.combined) {
-        // Jensen Huang - combined eyes: hide separate eye meshes, show combined
-        if (rightEyeMesh) {
-            fadeOutMesh(rightEyeMesh);
-        }
-        if (leftEyeMesh) {
-            fadeOutMesh(leftEyeMesh);
-        }
-
-        if (!combinedEyesMesh && textures.rightEye) {
-            // Create the combined eyes mesh on first use
+        if (!combinedEyesMesh && rightTex) {
             const baseScale = 0.005;
-            const material = new THREE.MeshBasicMaterial({ map: textures.rightEye, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-            const planeWidth = textures.rightEye.image.width * baseScale;
-            const planeHeight = textures.rightEye.image.height * baseScale;
+            const material = new THREE.MeshBasicMaterial({ map: rightTex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+            const planeWidth = rightTex.image.width * baseScale;
+            const planeHeight = rightTex.image.height * baseScale;
             const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
             combinedEyesMesh = new THREE.Mesh(geometry, material);
-            // Position at center of where both eyes would be
             const eyeY = rightEyeMesh ? rightEyeMesh.position.y : 1.81;
             const eyeZ = rightEyeMesh ? rightEyeMesh.position.z : 1.2;
             combinedEyesMesh.position.set(0, eyeY, eyeZ);
@@ -3884,48 +3965,75 @@ function cycleEyes() {
             combinedEyesMesh.userData.initialScale = { width: planeWidth, height: planeHeight };
             scene.add(combinedEyesMesh);
             draggableObjects.push(combinedEyesMesh);
-        } else if (combinedEyesMesh && textures.rightEye) {
-            combinedEyesMesh.material.map = textures.rightEye;
+        } else if (combinedEyesMesh && rightTex) {
+            combinedEyesMesh.material.map = rightTex;
             combinedEyesMesh.material.needsUpdate = true;
             fadeInMesh(combinedEyesMesh);
         }
     } else {
-        // Separate L/R eyes: hide combined mesh, show separate
-        if (combinedEyesMesh) {
-            fadeOutMesh(combinedEyesMesh);
-        }
+        // Separate L/R eyes
+        if (combinedEyesMesh) fadeOutMesh(combinedEyesMesh);
 
-        if (rightEyeMesh && textures.rightEye) {
-            fadeInMesh(rightEyeMesh);
-            // Crossfade: quick opacity dip
-            rightEyeMesh.material.opacity = 0;
-            rightEyeMesh.material.map = textures.rightEye;
-            rightEyeMesh.material.needsUpdate = true;
-            // Rebuild geometry to match new texture dimensions
-            const baseScale = 0.005;
-            const newWidth = textures.rightEye.image.width * baseScale;
-            const newHeight = textures.rightEye.image.height * baseScale;
-            rightEyeMesh.geometry.dispose();
-            rightEyeMesh.geometry = new THREE.PlaneGeometry(newWidth, newHeight);
-            // Animate opacity back in
-            animateOpacity(rightEyeMesh, 0, 1, 200);
+        if (rightEyeMesh && rightTex) {
+            swapMeshTexture(rightEyeMesh, rightTex);
         }
-        if (leftEyeMesh && textures.leftEye) {
-            fadeInMesh(leftEyeMesh);
-            leftEyeMesh.material.opacity = 0;
-            leftEyeMesh.material.map = textures.leftEye;
-            leftEyeMesh.material.needsUpdate = true;
-            const baseScale = 0.005;
-            const newWidth = textures.leftEye.image.width * baseScale;
-            const newHeight = textures.leftEye.image.height * baseScale;
-            leftEyeMesh.geometry.dispose();
-            leftEyeMesh.geometry = new THREE.PlaneGeometry(newWidth, newHeight);
-            animateOpacity(leftEyeMesh, 0, 1, 200);
+        if (leftEyeMesh && leftTex) {
+            swapMeshTexture(leftEyeMesh, leftTex);
         }
     }
+}
 
-    updateEyeIndicator();
-    console.log(`Eyes cycled to: ${eyeSet.name} (${eyeSet.numeral})`);
+function cycleGenericElement(elementId, overlordIdx) {
+    const textures = preloadedElementTextures[elementId];
+    if (!textures) return;
+    const newTex = textures[overlordIdx];
+
+    // Find the mesh with this userData.id
+    let mesh = null;
+    if (elementId === 'background') {
+        mesh = backgroundMesh;
+    } else {
+        mesh = draggableObjects.find(obj => obj.userData.id === elementId);
+    }
+
+    if (!mesh) return;
+
+    if (!newTex) {
+        // No asset for this overlord - hide the element
+        fadeOutMesh(mesh);
+        return;
+    }
+
+    // Element was previously hidden - show it
+    if (!mesh.visible) {
+        mesh.visible = true;
+    }
+
+    swapMeshTexture(mesh, newTex);
+}
+
+function swapMeshTexture(mesh, newTexture) {
+    if (!mesh || !newTexture) return;
+    const baseScale = 0.005;
+
+    // Fade out, swap, fade in
+    mesh.material.transparent = true;
+    mesh.material.opacity = 0;
+    mesh.material.map = newTexture;
+    mesh.material.needsUpdate = true;
+
+    // Rebuild geometry to match new texture dimensions
+    const newWidth = newTexture.image.width * baseScale;
+    const newHeight = newTexture.image.height * baseScale;
+
+    // Apply scale factor if stored
+    const scaleFactor = mesh.userData.swapScaleFactor || 1.0;
+
+    mesh.geometry.dispose();
+    mesh.geometry = new THREE.PlaneGeometry(newWidth * scaleFactor, newHeight * scaleFactor);
+
+    // Animate opacity back in
+    animateOpacity(mesh, 0, 1, 200);
 }
 
 function fadeOutMesh(mesh) {
@@ -4181,6 +4289,20 @@ function onClick(event) {
     }
 
     if (clickedObject) {
+        // ── SWAP MODE: cycle overlord element instead of Z-depth ──
+        if (swapMode) {
+            const id = clickedObject.userData.id;
+            if (CYCLABLE_ELEMENTS.includes(id) || id === 'combinedEyes') {
+                if (id === 'combinedEyes' || id === 'leftEye') {
+                    cycleElement('rightEye');
+                } else {
+                    cycleElement(id);
+                }
+                return; // Don't fall through to Z-depth cycling
+            }
+            // If not a cyclable element, fall through to normal Z-depth behavior
+        }
+
         // Skip depth cycling for non-draggable elements or those with special handling
         if (clickedObject === backgroundMesh || clickedObject === rightEyeRedactionRect || clickedObject === leftEyeRedactionRect || clickedObject === marqueeTextMesh || clickedObject === biometricMarqueeTextMesh || clickedObject === bloodTextMesh || clickedObject === redactedGlitchTextMesh) { // Added redactedGlitchTextMesh
             return;
@@ -4464,6 +4586,9 @@ setTimeout(function () {
     }, 1000)
   </script>
 
+  <!-- ─── SWAP MODE TOGGLE ─── -->
+  <button id="swap-mode-btn">SWAP MODE</button>
+
   <!-- ─── EXPORT PANEL HTML ─── -->
   <button id="submit-overlord-btn">SUBMIT</button>
 
@@ -4554,6 +4679,8 @@ setTimeout(function () {
       if (submitOverlordBtn) submitOverlordBtn.style.display = 'none';
       const eyeIndicator = document.getElementById('eye-indicator');
       if (eyeIndicator) eyeIndicator.style.display = 'none';
+      const swapModeBtn = document.getElementById('swap-mode-btn');
+      if (swapModeBtn) swapModeBtn.style.display = 'none';
       return;
     }
     
