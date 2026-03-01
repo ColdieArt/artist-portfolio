@@ -48,7 +48,7 @@ export default function CollectorsPage() {
           >
             All
           </button>
-          {overlords.map((o) => (
+          {overlords.filter((o) => o.status !== 'unlisted').map((o) => (
             <button
               key={o.slug}
               onClick={() => setFilter(filter === o.slug ? null : o.slug)}

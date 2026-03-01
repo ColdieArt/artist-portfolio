@@ -75,7 +75,7 @@ export default function SeriesPage() {
           </ScrollReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            {overlords.map((overlord, i) => (
+            {overlords.filter((o) => o.status !== 'unlisted').map((overlord, i) => (
               <ScrollReveal key={overlord.slug} delay={i * 100}>
                 <div className="group relative bg-charcoal/30 border border-white/5 hover:border-white/10 overflow-hidden transition-all duration-500">
                   <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />

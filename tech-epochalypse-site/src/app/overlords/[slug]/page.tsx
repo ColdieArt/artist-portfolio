@@ -11,7 +11,7 @@ interface PageProps {
 
 export function generateStaticParams() {
   return overlords
-    .filter((o) => o.status === 'live')
+    .filter((o) => o.status === 'live' || o.status === 'unlisted')
     .map((o) => ({ slug: o.slug }))
 }
 
@@ -27,7 +27,7 @@ export function generateMetadata({ params }: PageProps): Metadata {
 
 export default function OverlordPage({ params }: PageProps) {
   const overlord = overlords.find((o) => o.slug === params.slug)
-  if (!overlord || overlord.status !== 'live') notFound()
+  if (!overlord || (overlord.status !== 'live' && overlord.status !== 'unlisted')) notFound()
 
   const liveOverlords = overlords.filter((o) => o.status === 'live')
   const currentLiveIndex = liveOverlords.findIndex(

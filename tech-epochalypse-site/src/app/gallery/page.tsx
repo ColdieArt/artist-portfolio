@@ -9,11 +9,13 @@ export const metadata: Metadata = {
     'A living gallery of visitor-created remixes and exported iterations from the Tech Epochalypse series.',
 }
 
+const listedOverlords = overlords.filter((o) => o.status !== 'unlisted')
+
 export default function GalleryPage() {
   const overlordNames = Object.fromEntries(
-    overlords.map((o) => [o.slug, o.name])
+    listedOverlords.map((o) => [o.slug, o.name])
   )
-  const overlordSlugs = overlords.map((o) => o.slug)
+  const overlordSlugs = listedOverlords.map((o) => o.slug)
 
   return (
     <section className="pt-28 md:pt-36 pb-24 section-padding bg-black grid-lines">
