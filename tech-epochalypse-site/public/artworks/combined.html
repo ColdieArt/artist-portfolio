@@ -3763,14 +3763,14 @@ function preloadEyeTextures() {
 }
 
 function randomizeFaceElements() {
-    // Face elements to randomize (not branded elements)
-    const faceElements = ['rightEye', 'leftEye', 'nose', 'mouth', 'forehead', 'hair', 'ear'];
+    // Randomize all cyclable elements (face + branded)
+    const allElements = CYCLABLE_ELEMENTS;
 
-    for (const elementId of faceElements) {
+    for (const elementId of allElements) {
         const urls = OVERLORD_ASSETS[elementId];
         if (!urls) continue;
 
-        // Pick a random overlord that has an asset for this element
+        // Pick a random index that has an asset
         const validIndices = [];
         for (let i = 0; i < urls.length; i++) {
             if (urls[i]) validIndices.push(i);
@@ -3779,7 +3779,7 @@ function randomizeFaceElements() {
 
         const randomIdx = validIndices[Math.floor(Math.random() * validIndices.length)];
 
-        // Skip if already showing this overlord
+        // Skip if already showing this index
         if (elementOverlordIndex[elementId] === randomIdx) continue;
 
         elementOverlordIndex[elementId] = randomIdx;
@@ -3797,8 +3797,9 @@ function randomizeFaceElements() {
         }
     }
 
-    console.log('Face elements randomized:', Object.fromEntries(
-        faceElements.map(id => [id, OVERLORD_NAMES[elementOverlordIndex[id]] || elementOverlordIndex[id]])
+    const isBranded = (id) => ['spacex', 'blueBill', 'rocket'].includes(id);
+    console.log('Elements randomized:', Object.fromEntries(
+        allElements.map(id => [id, isBranded(id) ? (BRANDED_LABELS[elementOverlordIndex[id]] || elementOverlordIndex[id]) : (OVERLORD_NAMES[elementOverlordIndex[id]] || elementOverlordIndex[id])])
     ));
 }
 
