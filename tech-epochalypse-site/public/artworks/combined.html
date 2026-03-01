@@ -138,12 +138,12 @@
       z-index: 200;
       background: #000;
       color: #fff;
-      border: 2px solid #555;
-      padding: 10px 28px;
+      border: 1px solid #555;
+      padding: 5px 14px;
       font-family: monospace;
-      font-size: 11px;
+      font-size: 6px;
       font-weight: bold;
-      letter-spacing: 2px;
+      letter-spacing: 1px;
       cursor: pointer;
       transition: background 0.2s, border-color 0.3s, color 0.3s, box-shadow 0.3s;
       text-transform: uppercase;
@@ -156,94 +156,107 @@
     #swap-mode-btn.active {
       border-color: #4CAF50;
       color: #4CAF50;
-      box-shadow: 0 0 12px rgba(76, 175, 80, 0.3);
+      box-shadow: 0 0 6px rgba(76, 175, 80, 0.3);
     }
     #swap-mode-btn.active:hover {
       border-color: #66CC66;
       color: #66CC66;
     }
 
-    /* ─── ELEMENT CONTROLS PANEL (left side) ─── */
+    /* ─── ELEMENT CONTROLS PANEL (top bar) ─── */
     #element-controls {
       position: fixed;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #000;
+      border: 1px solid #555;
+      padding: 5px 14px;
       font-family: monospace;
-      font-size: 10px;
-      color: #888;
+      font-size: 6px;
+      font-weight: bold;
+      color: #fff;
       letter-spacing: 1px;
+      text-transform: uppercase;
       user-select: none;
       -webkit-user-select: none;
       opacity: 0.4;
-      transition: opacity 0.3s;
+      transition: opacity 0.3s, border-color 0.3s;
     }
     #element-controls.visible {
       opacity: 1;
     }
     #element-controls .ctrl-label {
       color: #fff;
-      font-size: 11px;
-      letter-spacing: 2px;
-      margin-bottom: 12px;
+      font-size: 6px;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      border-bottom: 1px solid #333;
-      padding-bottom: 6px;
+      white-space: nowrap;
+      border-right: 1px solid #333;
+      padding-right: 10px;
+      margin-right: 0;
     }
     #element-controls .ctrl-section {
-      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 0;
     }
     #element-controls .ctrl-section-title {
-      color: #555;
-      font-size: 9px;
-      letter-spacing: 2px;
+      color: #888;
+      font-size: 5px;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      margin-bottom: 6px;
+      margin-bottom: 0;
+      white-space: nowrap;
     }
     #element-controls .ctrl-row {
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 4px;
+      gap: 3px;
+      margin-bottom: 0;
     }
     #element-controls .ctrl-row label {
-      width: 10px;
+      width: auto;
       color: #666;
-      font-size: 9px;
+      font-size: 5px;
       text-align: right;
     }
     #element-controls input[type="range"] {
-      width: 100px;
-      height: 3px;
+      width: 50px;
+      height: 2px;
       -webkit-appearance: none;
       appearance: none;
       background: #333;
-      border-radius: 2px;
+      border-radius: 1px;
       outline: none;
       cursor: pointer;
     }
     #element-controls input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 10px;
-      height: 10px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #4CAF50;
       cursor: pointer;
       border: none;
     }
     #element-controls input[type="range"]::-moz-range-thumb {
-      width: 10px;
-      height: 10px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #4CAF50;
       cursor: pointer;
       border: none;
     }
     #element-controls .ctrl-value {
-      color: #555;
-      font-size: 9px;
-      min-width: 32px;
+      color: #888;
+      font-size: 5px;
+      min-width: 20px;
       text-align: left;
     }
 
@@ -255,12 +268,12 @@
       z-index: 200;
       background: #000;
       color: #fff;
-      border: 2px solid #fff;
-      padding: 14px 24px;
+      border: 1px solid #fff;
+      padding: 7px 12px;
       font-family: monospace;
-      font-size: 13px;
+      font-size: 7px;
       font-weight: bold;
-      letter-spacing: 1.5px;
+      letter-spacing: 1px;
       cursor: pointer;
       transition: background 0.2s, border-color 0.2s;
     }
@@ -4664,7 +4677,7 @@ setTimeout(function () {
       </div>
     </div>
     <div class="ctrl-section">
-      <div class="ctrl-section-title">Rotate</div>
+      <div class="ctrl-section-title">Rot</div>
       <div class="ctrl-row">
         <label>X</label>
         <input type="range" id="rotate-x" min="-180" max="180" value="0" />
