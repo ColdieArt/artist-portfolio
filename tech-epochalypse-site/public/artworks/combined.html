@@ -129,6 +129,40 @@
     #export-panel .status-line.active { color: #4c4; }
     #export-panel .status-line.error   { color: #e66; }
 
+    /* ─── SWAP MODE TOGGLE BUTTON ─── */
+    #swap-mode-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      background: #000;
+      color: #fff;
+      border: 2px solid #555;
+      padding: 10px 28px;
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.3s, color 0.3s, box-shadow 0.3s;
+      text-transform: uppercase;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #swap-mode-btn:hover {
+      border-color: #999;
+    }
+    #swap-mode-btn.active {
+      border-color: #4CAF50;
+      color: #4CAF50;
+      box-shadow: 0 0 12px rgba(76, 175, 80, 0.3);
+    }
+    #swap-mode-btn.active:hover {
+      border-color: #66CC66;
+      color: #66CC66;
+    }
+
     /* ─── SUBMIT TO THE OVERLORD BUTTON ─── */
     #submit-overlord-btn {
       position: fixed;
@@ -567,6 +601,7 @@ const CYCLABLE_ELEMENTS = ['rightEye', 'leftEye', 'nose', 'mouth', 'forehead', '
 // Preloaded textures: { elementId: [texture0, texture1, ...texture4] }
 let preloadedElementTextures = {};
 let combinedEyesMesh = null; // For Jensen Huang's combined eyes image
+let swapMode = false; // When true, clicks cycle overlord elements instead of Z-depth
 
 // Define the initial X position for the rocket (was missing)
 const ROCKET_INITIAL_X = -2.0;
@@ -2774,15 +2809,14 @@ function init() {
     renderer.domElement.addEventListener('pointerup', onPointerUp);
     renderer.domElement.addEventListener('click', onClick);
 
-    // ── Prevent context menu and add right-click eye cycling ──
-    renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
-    renderer.domElement.addEventListener('pointerdown', onRightClickEyeCycle);
-
-    // ── Preload all eye textures ──
+    // ── Preload all element textures for swap mode ──
     preloadEyeTextures();
 
-    // ── Create eye indicator UI ──
+    // ── Create swap mode indicator UI ──
     createEyeIndicator();
+
+    // ── Wire swap mode toggle button ──
+    initSwapModeButton();
 
     // Helper function to add a toggle button for an effect
     const addButtonToggle = (parentContainer, label, property, pass) => {
@@ -3626,8 +3660,6 @@ function init() {
     renderer.domElement.addEventListener('pointermove', onPointerMove);
     renderer.domElement.addEventListener('pointerup', onPointerUp);
     renderer.domElement.addEventListener('click', onClick);
-    renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
-    renderer.domElement.addEventListener('pointerdown', onRightClickEyeCycle);
 
     // Call onWindowResize once after init to ensure initial positions are calculated correctly
     // NOTE: This is called after the main assets are loaded in loadDogecoinAndFiat to ensure
@@ -3817,19 +3849,48 @@ function createEyeIndicator() {
     indicator.id = 'eye-indicator';
     indicator.style.cssText = `
         position: fixed;
-        bottom: 70px;
-        right: 20px;
-        z-index: 200;
+        bottom: 60px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 199;
         font-family: monospace;
         font-size: 10px;
         color: #888;
         letter-spacing: 1px;
-        text-align: right;
+        text-align: center;
         pointer-events: none;
         transition: opacity 0.3s;
+        opacity: 0;
     `;
-    indicator.innerHTML = `<span style="color:#fff;font-size:12px;">RIGHT-CLICK TO SWAP</span><br><span style="font-size:9px;color:#555;">CYCLE OVERLORD FACES</span>`;
+    indicator.innerHTML = '';
     document.body.appendChild(indicator);
+}
+
+function initSwapModeButton() {
+    const btn = document.getElementById('swap-mode-btn');
+    if (!btn) return;
+
+    btn.onclick = (e) => {
+        e.stopPropagation();
+        swapMode = !swapMode;
+        btn.classList.toggle('active', swapMode);
+        btn.textContent = swapMode ? 'SWAP MODE ON' : 'SWAP MODE';
+
+        const indicator = document.getElementById('eye-indicator');
+        if (indicator) {
+            if (swapMode) {
+                indicator.style.opacity = '0.8';
+                indicator.innerHTML = `<span style="color:#4CAF50;font-size:10px;">TAP ANY FACE ELEMENT TO CYCLE</span>`;
+            } else {
+                indicator.style.opacity = '0';
+            }
+        }
+
+        // Change cursor to signal swap mode
+        if (renderer && renderer.domElement) {
+            renderer.domElement.style.cursor = swapMode ? 'crosshair' : 'grab';
+        }
+    };
 }
 
 function updateElementIndicator(elementId) {
@@ -3845,52 +3906,8 @@ function updateElementIndicator(elementId) {
     }
 }
 
-function onRightClickEyeCycle(event) {
-    // Only handle right-click (button === 2)
-    if (event.button !== 2) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    // Check if the click is on a UI element
-    if (event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) {
-        return;
-    }
-
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-
-    const intersects = raycaster.intersectObjects(draggableObjects, true);
-
-    for (const intersect of intersects) {
-        const object = intersect.object;
-        const id = object.userData.id;
-
-        // Check if this is a cyclable element
-        if (CYCLABLE_ELEMENTS.includes(id) || id === 'combinedEyes') {
-            // Alpha check for transparent materials
-            const material = object.material;
-            if (material && material.map && material.transparent) {
-                const alpha = getAlphaAtUV(material.map, intersect.uv);
-                if (alpha <= 0.1) continue; // Skip transparent pixels
-            }
-
-            // Determine which element to cycle
-            if (id === 'combinedEyes') {
-                // Combined eyes mesh → cycle rightEye (which controls both eyes)
-                cycleElement('rightEye');
-            } else if (id === 'leftEye') {
-                // Left eye cycles together with right eye
-                cycleElement('rightEye');
-            } else {
-                cycleElement(id);
-            }
-            return; // Only cycle the first (topmost) hit
-        }
-    }
-}
+// Swap mode is handled inside onClick — no separate handler needed
+function onRightClickEyeCycle() { /* deprecated — swap mode uses onClick */ }
 
 function cycleElement(elementId) {
     const urls = OVERLORD_ASSETS[elementId];
@@ -4272,6 +4289,20 @@ function onClick(event) {
     }
 
     if (clickedObject) {
+        // ── SWAP MODE: cycle overlord element instead of Z-depth ──
+        if (swapMode) {
+            const id = clickedObject.userData.id;
+            if (CYCLABLE_ELEMENTS.includes(id) || id === 'combinedEyes') {
+                if (id === 'combinedEyes' || id === 'leftEye') {
+                    cycleElement('rightEye');
+                } else {
+                    cycleElement(id);
+                }
+                return; // Don't fall through to Z-depth cycling
+            }
+            // If not a cyclable element, fall through to normal Z-depth behavior
+        }
+
         // Skip depth cycling for non-draggable elements or those with special handling
         if (clickedObject === backgroundMesh || clickedObject === rightEyeRedactionRect || clickedObject === leftEyeRedactionRect || clickedObject === marqueeTextMesh || clickedObject === biometricMarqueeTextMesh || clickedObject === bloodTextMesh || clickedObject === redactedGlitchTextMesh) { // Added redactedGlitchTextMesh
             return;
@@ -4555,6 +4586,9 @@ setTimeout(function () {
     }, 1000)
   </script>
 
+  <!-- ─── SWAP MODE TOGGLE ─── -->
+  <button id="swap-mode-btn">SWAP MODE</button>
+
   <!-- ─── EXPORT PANEL HTML ─── -->
   <button id="submit-overlord-btn">SUBMIT</button>
 
@@ -4645,6 +4679,8 @@ setTimeout(function () {
       if (submitOverlordBtn) submitOverlordBtn.style.display = 'none';
       const eyeIndicator = document.getElementById('eye-indicator');
       if (eyeIndicator) eyeIndicator.style.display = 'none';
+      const swapModeBtn = document.getElementById('swap-mode-btn');
+      if (swapModeBtn) swapModeBtn.style.display = 'none';
       return;
     }
     
