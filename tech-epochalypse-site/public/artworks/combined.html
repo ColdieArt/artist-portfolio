@@ -163,6 +163,57 @@
       color: #66CC66;
     }
 
+    /* ─── SCALE SLIDER CONTROLS ─── */
+    #scale-controls {
+      position: fixed;
+      bottom: 55px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: monospace;
+      font-size: 10px;
+      color: #888;
+      letter-spacing: 1px;
+      user-select: none;
+      -webkit-user-select: none;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    #scale-controls.visible {
+      opacity: 1;
+    }
+    #scale-slider {
+      width: 140px;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #333;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    #scale-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #4CAF50;
+      cursor: pointer;
+      border: none;
+    }
+    #scale-slider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #4CAF50;
+      cursor: pointer;
+      border: none;
+    }
+
     /* ─── SUBMIT TO THE OVERLORD BUTTON ─── */
     #submit-overlord-btn {
       position: fixed;
@@ -590,6 +641,24 @@ const OVERLORD_ASSETS = {
     ]
 };
 
+// Branded element cycle options (SpaceX, Tesla, Drone, Blue Origin, Blue Bill)
+const BRANDED_OPTIONS = [
+    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0000_SpaceX.png',
+    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/tesla.png',
+    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/drone-color.gif',
+    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/blue-origin.gif',
+    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_OpenAI.gif',
+    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-meta-headset-2.gif',
+    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/card-01.gif'
+];
+const BRANDED_LABELS = ['SPACEX', 'TESLA', 'DRONE', 'BLUE ORIGIN', 'BLUE BILL', 'META HEADSET', 'NVIDIA CARD'];
+// Add branded elements to OVERLORD_ASSETS so cycleElement can handle them
+OVERLORD_ASSETS['spacex'] = BRANDED_OPTIONS;
+OVERLORD_ASSETS['dogecoin'] = BRANDED_OPTIONS;
+OVERLORD_ASSETS['blueBill'] = BRANDED_OPTIONS;
+OVERLORD_ASSETS['rocket'] = BRANDED_OPTIONS;
+OVERLORD_ASSETS['fiatWorthless'] = BRANDED_OPTIONS;
+
 // Track which overlord index each element is currently showing
 const elementOverlordIndex = {
     rightEye: 0,   // Musk default
@@ -598,18 +667,24 @@ const elementOverlordIndex = {
     mouth: 4,      // Huang default
     forehead: 1,   // Zuckerberg default
     hair: 2,       // Altman default
-    ear: 2,          // Altman default
-    background: 0,   // Musk default
-    mouthOverlay: 4  // Tracks mouth; default is Huang (no overlay)
+    ear: 2,            // Altman default
+    background: 0,     // Musk default
+    mouthOverlay: 4,   // Tracks mouth; default is Huang (no overlay)
+    spacex: 0,         // SpaceX (branded index 0)
+    dogecoin: 5,       // Meta Headset (branded index 5)
+    blueBill: 4,       // Blue Bill/OpenAI (branded index 4)
+    rocket: 3,         // Blue Origin (branded index 3)
+    fiatWorthless: 6   // Nvidia card (branded index 6)
 };
 
 // Cyclable element IDs (matches userData.id on meshes)
-const CYCLABLE_ELEMENTS = ['rightEye', 'leftEye', 'nose', 'mouth', 'forehead', 'hair', 'ear', 'background'];
+const CYCLABLE_ELEMENTS = ['rightEye', 'leftEye', 'nose', 'mouth', 'forehead', 'hair', 'ear', 'background', 'spacex', 'dogecoin', 'blueBill', 'rocket', 'fiatWorthless'];
 
 // Preloaded textures: { elementId: [texture0, texture1, ...texture4] }
 let preloadedElementTextures = {};
 let combinedEyesMesh = null; // For Jensen Huang's combined eyes image
 let swapMode = false; // When true, clicks cycle overlord elements instead of Z-depth
+let selectedScaleElement = null; // Currently selected element for scale slider
 
 // Define the initial X position for the rocket (was missing)
 const ROCKET_INITIAL_X = -2.0;
@@ -2823,8 +2898,9 @@ function init() {
     // ── Create swap mode indicator UI ──
     createEyeIndicator();
 
-    // ── Wire swap mode toggle button ──
+    // ── Wire swap mode toggle button and scale slider ──
     initSwapModeButton();
+    initScaleControls();
 
     // Helper function to add a toggle button for an effect
     const addButtonToggle = (parentContainer, label, property, pass) => {
@@ -3839,12 +3915,12 @@ function preloadEyeTextures() {
         });
     };
 
-    // Preload textures for every element across all 5 overlords (including mouthOverlay companion)
+    // Preload textures for every element (including mouthOverlay companion)
     const elementsToPreload = [...CYCLABLE_ELEMENTS, 'mouthOverlay'];
     for (const elementId of elementsToPreload) {
         const urls = OVERLORD_ASSETS[elementId];
         if (!urls) continue;
-        preloadedElementTextures[elementId] = new Array(5).fill(null);
+        preloadedElementTextures[elementId] = new Array(urls.length).fill(null);
         urls.forEach((url, index) => {
             loadTex(url).then((tex) => {
                 preloadedElementTextures[elementId][index] = tex;
@@ -3902,12 +3978,66 @@ function initSwapModeButton() {
     };
 }
 
+function initScaleControls() {
+    const slider = document.getElementById('scale-slider');
+    const valueLabel = document.getElementById('scale-value');
+    const nameLabel = document.getElementById('scale-label');
+    const controls = document.getElementById('scale-controls');
+    if (!slider || !controls) return;
+
+    slider.addEventListener('input', (e) => {
+        e.stopPropagation();
+        if (!selectedScaleElement) return;
+        const pct = parseInt(slider.value);
+        const scale = pct / 100;
+        selectedScaleElement.userData.userScale = scale;
+
+        const baseW = selectedScaleElement.userData.initialScale.width;
+        const baseH = selectedScaleElement.userData.initialScale.height;
+        selectedScaleElement.geometry.dispose();
+        selectedScaleElement.geometry = new THREE.PlaneGeometry(baseW * scale, baseH * scale);
+
+        if (valueLabel) valueLabel.textContent = pct + '%';
+    });
+
+    // Prevent clicks on slider from propagating to the scene
+    slider.addEventListener('mousedown', (e) => e.stopPropagation());
+    slider.addEventListener('touchstart', (e) => e.stopPropagation());
+    controls.addEventListener('mousedown', (e) => e.stopPropagation());
+    controls.addEventListener('touchstart', (e) => e.stopPropagation());
+}
+
+function selectElementForScale(mesh) {
+    if (!mesh || !mesh.userData.id) return;
+    selectedScaleElement = mesh;
+
+    const controls = document.getElementById('scale-controls');
+    const slider = document.getElementById('scale-slider');
+    const valueLabel = document.getElementById('scale-value');
+    const nameLabel = document.getElementById('scale-label');
+
+    if (controls && slider && valueLabel && nameLabel) {
+        controls.classList.add('visible');
+        const currentScale = Math.round((mesh.userData.userScale || 1.0) * 100);
+        slider.value = currentScale;
+        valueLabel.textContent = currentScale + '%';
+        const displayName = mesh.userData.id.replace(/([A-Z])/g, ' $1').toUpperCase().trim();
+        nameLabel.textContent = displayName;
+    }
+}
+
 function updateElementIndicator(elementId) {
     const indicator = document.getElementById('eye-indicator');
     if (indicator) {
-        const overlordIdx = elementOverlordIndex[elementId];
+        const idx = elementOverlordIndex[elementId];
         const label = elementId.replace(/([A-Z])/g, ' $1').toUpperCase().trim();
-        indicator.innerHTML = `<span style="color:#fff;font-size:12px;">${label}: ${OVERLORD_NUMERALS[overlordIdx]}</span><br><span style="font-size:9px;color:#555;">${OVERLORD_NAMES[overlordIdx].toUpperCase()}</span>`;
+        const isBranded = ['spacex', 'dogecoin', 'blueBill', 'rocket', 'fiatWorthless'].includes(elementId);
+
+        if (isBranded) {
+            indicator.innerHTML = `<span style="color:#fff;font-size:12px;">${BRANDED_LABELS[idx] || label}</span>`;
+        } else {
+            indicator.innerHTML = `<span style="color:#fff;font-size:12px;">${label}: ${OVERLORD_NUMERALS[idx]}</span><br><span style="font-size:9px;color:#555;">${OVERLORD_NAMES[idx].toUpperCase()}</span>`;
+        }
 
         // Flash the indicator briefly
         indicator.style.opacity = '1';
@@ -3922,15 +4052,17 @@ function cycleElement(elementId) {
     const urls = OVERLORD_ASSETS[elementId];
     if (!urls) return;
 
-    // Find next overlord that has an asset for this element
+    const totalOptions = urls.length;
+
+    // Find next option that has an asset for this element
     let nextIdx = elementOverlordIndex[elementId];
     let attempts = 0;
     do {
-        nextIdx = (nextIdx + 1) % 5;
+        nextIdx = (nextIdx + 1) % totalOptions;
         attempts++;
-    } while (!urls[nextIdx] && attempts < 5);
+    } while (!urls[nextIdx] && attempts < totalOptions);
 
-    if (attempts >= 5) return; // No assets available
+    if (attempts >= totalOptions) return; // No assets available
 
     elementOverlordIndex[elementId] = nextIdx;
 
@@ -3948,7 +4080,11 @@ function cycleElement(elementId) {
     }
 
     updateElementIndicator(elementId);
-    console.log(`${elementId} cycled to: ${OVERLORD_NAMES[nextIdx]} (${OVERLORD_NUMERALS[nextIdx]})`);
+
+    // Log label: use branded labels or overlord names depending on element type
+    const isBranded = ['spacex', 'dogecoin', 'blueBill', 'rocket', 'fiatWorthless'].includes(elementId);
+    const logLabel = isBranded ? (BRANDED_LABELS[nextIdx] || nextIdx) : `${OVERLORD_NAMES[nextIdx]} (${OVERLORD_NUMERALS[nextIdx]})`;
+    console.log(`${elementId} cycled to: ${logLabel}`);
 }
 
 function cycleRightEyeMesh(overlordIdx) {
@@ -4049,8 +4185,8 @@ function swapMeshTexture(mesh, newTexture) {
     const newWidth = newTexture.image.width * baseScale;
     const newHeight = newTexture.image.height * baseScale;
 
-    // Apply scale factor if stored
-    const scaleFactor = mesh.userData.swapScaleFactor || 1.0;
+    // Apply scale factor if stored, plus user scale from slider
+    const scaleFactor = (mesh.userData.swapScaleFactor || 1.0) * (mesh.userData.userScale || 1.0);
 
     mesh.geometry.dispose();
     mesh.geometry = new THREE.PlaneGeometry(newWidth * scaleFactor, newHeight * scaleFactor);
@@ -4312,6 +4448,9 @@ function onClick(event) {
     }
 
     if (clickedObject) {
+        // ── Select element for scale slider ──
+        selectElementForScale(clickedObject);
+
         // ── SWAP MODE: cycle overlord element instead of Z-depth ──
         if (swapMode) {
             const id = clickedObject.userData.id;
@@ -4608,6 +4747,13 @@ setTimeout(function () {
   <!-- ─── SWAP MODE TOGGLE ─── -->
   <button id="swap-mode-btn">SWAP MODE</button>
 
+  <!-- ─── SCALE CONTROLS ─── -->
+  <div id="scale-controls">
+    <span id="scale-label">SCALE</span>
+    <input type="range" id="scale-slider" min="10" max="300" value="100" />
+    <span id="scale-value">100%</span>
+  </div>
+
   <!-- ─── EXPORT PANEL HTML ─── -->
   <button id="submit-overlord-btn">SUBMIT</button>
 
@@ -4700,6 +4846,8 @@ setTimeout(function () {
       if (eyeIndicator) eyeIndicator.style.display = 'none';
       const swapModeBtn = document.getElementById('swap-mode-btn');
       if (swapModeBtn) swapModeBtn.style.display = 'none';
+      const scaleControls = document.getElementById('scale-controls');
+      if (scaleControls) scaleControls.style.display = 'none';
       return;
     }
     
