@@ -580,6 +580,13 @@ const OVERLORD_ASSETS = {
         '',
         '',
         ''
+    ],
+    mouthOverlay: [
+        '',
+        '',
+        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_mouth.gif',
+        '',
+        ''
     ]
 };
 
@@ -591,8 +598,9 @@ const elementOverlordIndex = {
     mouth: 4,      // Huang default
     forehead: 1,   // Zuckerberg default
     hair: 2,       // Altman default
-    ear: 2,        // Altman default
-    background: 0  // Musk default
+    ear: 2,          // Altman default
+    background: 0,   // Musk default
+    mouthOverlay: 4  // Tracks mouth; default is Huang (no overlay)
 };
 
 // Cyclable element IDs (matches userData.id on meshes)
@@ -3831,8 +3839,9 @@ function preloadEyeTextures() {
         });
     };
 
-    // Preload textures for every element across all 5 overlords
-    for (const elementId of CYCLABLE_ELEMENTS) {
+    // Preload textures for every element across all 5 overlords (including mouthOverlay companion)
+    const elementsToPreload = [...CYCLABLE_ELEMENTS, 'mouthOverlay'];
+    for (const elementId of elementsToPreload) {
         const urls = OVERLORD_ASSETS[elementId];
         if (!urls) continue;
         preloadedElementTextures[elementId] = new Array(5).fill(null);
@@ -3925,10 +3934,14 @@ function cycleElement(elementId) {
 
     elementOverlordIndex[elementId] = nextIdx;
 
-    // Special handling for eyes (rightEye and leftEye cycle together, combined eyes for Huang)
+    // Eyes cycle independently; mouth has overlay companion for Altman
     if (elementId === 'rightEye') {
-        elementOverlordIndex['leftEye'] = nextIdx;
-        cycleEyeMeshes(nextIdx);
+        cycleRightEyeMesh(nextIdx);
+    } else if (elementId === 'leftEye') {
+        cycleLeftEyeMesh(nextIdx);
+    } else if (elementId === 'mouth') {
+        cycleGenericElement(elementId, nextIdx);
+        cycleMouthOverlay(nextIdx);
     } else {
         // Generic element cycling
         cycleGenericElement(elementId, nextIdx);
@@ -3938,48 +3951,55 @@ function cycleElement(elementId) {
     console.log(`${elementId} cycled to: ${OVERLORD_NAMES[nextIdx]} (${OVERLORD_NUMERALS[nextIdx]})`);
 }
 
-function cycleEyeMeshes(overlordIdx) {
+function cycleRightEyeMesh(overlordIdx) {
     const rightTex = preloadedElementTextures['rightEye'] ? preloadedElementTextures['rightEye'][overlordIdx] : null;
+    if (rightEyeMesh && rightTex) {
+        swapMeshTexture(rightEyeMesh, rightTex);
+    }
+}
+
+function cycleLeftEyeMesh(overlordIdx) {
     const leftTex = preloadedElementTextures['leftEye'] ? preloadedElementTextures['leftEye'][overlordIdx] : null;
-    const isCombined = !OVERLORD_ASSETS['leftEye'][overlordIdx]; // Huang has no separate left eye
+    if (leftEyeMesh && leftTex) {
+        swapMeshTexture(leftEyeMesh, leftTex);
+    }
+}
 
-    if (isCombined) {
-        // Jensen Huang - combined eyes: hide separate, show combined
-        if (rightEyeMesh) fadeOutMesh(rightEyeMesh);
-        if (leftEyeMesh) fadeOutMesh(leftEyeMesh);
+let mouthOverlayMesh = null; // Altman's second mouth piece overlay
 
-        if (!combinedEyesMesh && rightTex) {
+function cycleMouthOverlay(overlordIdx) {
+    const ALTMAN_IDX = 2;
+    if (overlordIdx === ALTMAN_IDX) {
+        // Show Altman's overlay mouth
+        const overlayTex = preloadedElementTextures['mouthOverlay'] ? preloadedElementTextures['mouthOverlay'][ALTMAN_IDX] : null;
+        if (!mouthOverlayMesh && overlayTex) {
             const baseScale = 0.005;
-            const material = new THREE.MeshBasicMaterial({ map: rightTex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-            const planeWidth = rightTex.image.width * baseScale;
-            const planeHeight = rightTex.image.height * baseScale;
+            const material = new THREE.MeshBasicMaterial({
+                map: overlayTex, transparent: true, side: THREE.DoubleSide,
+                alphaTest: 0.5, blending: THREE.MultiplyBlending
+            });
+            const planeWidth = overlayTex.image.width * baseScale;
+            const planeHeight = overlayTex.image.height * baseScale;
             const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-            combinedEyesMesh = new THREE.Mesh(geometry, material);
-            const eyeY = rightEyeMesh ? rightEyeMesh.position.y : 1.81;
-            const eyeZ = rightEyeMesh ? rightEyeMesh.position.z : 1.2;
-            combinedEyesMesh.position.set(0, eyeY, eyeZ);
-            combinedEyesMesh.userData.id = 'combinedEyes';
-            combinedEyesMesh.userData.currentLayer = rightEyeMesh ? rightEyeMesh.userData.currentLayer : 7;
-            combinedEyesMesh.userData.initialPosition = combinedEyesMesh.position.clone();
-            combinedEyesMesh.userData.initialLayer = combinedEyesMesh.userData.currentLayer;
-            combinedEyesMesh.userData.initialScale = { width: planeWidth, height: planeHeight };
-            scene.add(combinedEyesMesh);
-            draggableObjects.push(combinedEyesMesh);
-        } else if (combinedEyesMesh && rightTex) {
-            combinedEyesMesh.material.map = rightTex;
-            combinedEyesMesh.material.needsUpdate = true;
-            fadeInMesh(combinedEyesMesh);
+            mouthOverlayMesh = new THREE.Mesh(geometry, material);
+            // Position at same place as mouth, slightly in front
+            const mouthMesh = draggableObjects.find(obj => obj.userData.id === 'mouth');
+            const mY = mouthMesh ? mouthMesh.position.y : -1.5;
+            const mZ = mouthMesh ? mouthMesh.position.z + 0.01 : (10 - 1) * 0.2;
+            mouthOverlayMesh.position.set(0, mY, mZ);
+            mouthOverlayMesh.userData.id = 'mouthOverlay';
+            mouthOverlayMesh.userData.currentLayer = mouthMesh ? mouthMesh.userData.currentLayer + 1 : 10;
+            mouthOverlayMesh.userData.initialPosition = mouthOverlayMesh.position.clone();
+            mouthOverlayMesh.userData.initialLayer = mouthOverlayMesh.userData.currentLayer;
+            mouthOverlayMesh.userData.initialScale = { width: planeWidth, height: planeHeight };
+            scene.add(mouthOverlayMesh);
+            draggableObjects.push(mouthOverlayMesh);
+        } else if (mouthOverlayMesh) {
+            fadeInMesh(mouthOverlayMesh);
         }
     } else {
-        // Separate L/R eyes
-        if (combinedEyesMesh) fadeOutMesh(combinedEyesMesh);
-
-        if (rightEyeMesh && rightTex) {
-            swapMeshTexture(rightEyeMesh, rightTex);
-        }
-        if (leftEyeMesh && leftTex) {
-            swapMeshTexture(leftEyeMesh, leftTex);
-        }
+        // Hide overlay for non-Altman overlords
+        if (mouthOverlayMesh) fadeOutMesh(mouthOverlayMesh);
     }
 }
 
@@ -4015,6 +4035,9 @@ function cycleGenericElement(elementId, overlordIdx) {
 function swapMeshTexture(mesh, newTexture) {
     if (!mesh || !newTexture) return;
     const baseScale = 0.005;
+
+    // Ensure mesh is visible (may have been hidden by fadeOutMesh)
+    mesh.visible = true;
 
     // Fade out, swap, fade in
     mesh.material.transparent = true;
@@ -4292,12 +4315,8 @@ function onClick(event) {
         // ── SWAP MODE: cycle overlord element instead of Z-depth ──
         if (swapMode) {
             const id = clickedObject.userData.id;
-            if (CYCLABLE_ELEMENTS.includes(id) || id === 'combinedEyes') {
-                if (id === 'combinedEyes' || id === 'leftEye') {
-                    cycleElement('rightEye');
-                } else {
-                    cycleElement(id);
-                }
+            if (CYCLABLE_ELEMENTS.includes(id)) {
+                cycleElement(id);
                 return; // Don't fall through to Z-depth cycling
             }
             // If not a cyclable element, fall through to normal Z-depth behavior
