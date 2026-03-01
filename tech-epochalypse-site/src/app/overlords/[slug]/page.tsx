@@ -130,6 +130,9 @@ export default function OverlordPage({ params }: PageProps) {
                 </h3>
                 <p className="text-white text-sm font-mono">
                   Drag to rotate. Use the built-in controls to apply control layer effects. Submit your unique iteration to the overlords for total judgement.
+                  {overlord.slug === 'combined' && (
+                    <span className="block mt-2 text-white/70">Right-click the eyes to cycle through all five overlords&rsquo; gazes.</span>
+                  )}
                 </p>
               </div>
               <div>

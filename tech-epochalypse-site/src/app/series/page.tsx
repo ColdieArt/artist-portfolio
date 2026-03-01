@@ -80,6 +80,7 @@ export default function SeriesPage() {
                 <div className="group relative bg-charcoal/30 border border-white/5 hover:border-white/10 overflow-hidden transition-all duration-500">
                   <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                   <div className="aspect-square relative overflow-hidden">
+                    {overlord.previewImage ? (
                     <img
                       src={overlord.previewImage}
                       alt={overlord.name}
@@ -87,6 +88,11 @@ export default function SeriesPage() {
                       style={{ filter: 'contrast(1.1)' }}
                       loading="lazy"
                     />
+                    ) : (
+                    <div className="w-full h-full bg-charcoal flex items-center justify-center">
+                      <span className="font-display text-6xl text-white">{overlord.number}</span>
+                    </div>
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                       <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/60 mb-1">
