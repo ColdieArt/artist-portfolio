@@ -4,6 +4,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Gallery API — update this URL after deploying the Cloudflare Worker -->
   <script>window.GALLERY_API_URL = 'https://te-gallery-api.YOUR_SUBDOMAIN.workers.dev';</script>
+  <!-- Airtable API — set your Personal Access Token and table name -->
+  <script>
+    window.AIRTABLE_PAT = '';
+    window.AIRTABLE_BASE_ID = 'app28BSDaZwDpDw4m';
+    window.AIRTABLE_TABLE_NAME = 'Submissions';
+  </script>
   <script type="importmap">
     {
       "imports": {
@@ -4109,7 +4115,16 @@ setTimeout(function () {
         width: 100%;
       ">SUBMIT TO JUDGMENT PROTOCOL</button>
 
-      <p style="margin: 15px 0 0 0; font-size: 10px; color: #888; line-height: 1.4;">
+      <div id="judgment-status" style="
+        margin: 12px 0 0 0;
+        font-family: monospace;
+        font-size: 11px;
+        text-align: center;
+        min-height: 16px;
+        letter-spacing: 0.5px;
+      "></div>
+
+      <p style="margin: 10px 0 0 0; font-size: 10px; color: #888; line-height: 1.4;">
         Submit your capture for collector review.<br>
         Top submissions will be minted as official subseries.
       </p>
@@ -4161,17 +4176,98 @@ setTimeout(function () {
       modal.classList.remove('open');
     };
 
-    // Wire judgment protocol button to open Airtable form
+    // Wire judgment protocol button to submit via Airtable API
     const judgmentBtn = document.getElementById('judgment-btn');
-    judgmentBtn.onclick = () => {
-      const xAccount = document.getElementById('x-account-input').value.trim();
-      let url = 'https://airtable.com/app28BSDaZwDpDw4m/pagUJlx4mF1vkSgO4/form';
-      if (xAccount) {
-        url += '?prefill_X+Account=' + encodeURIComponent(xAccount);
+    const judgmentStatus = document.getElementById('judgment-status');
+    const OVERLORD_NAME = 'sam-altman';
+
+    judgmentBtn.onclick = async () => {
+      const pat = window.AIRTABLE_PAT;
+      const baseId = window.AIRTABLE_BASE_ID;
+      const tableName = window.AIRTABLE_TABLE_NAME;
+
+      if (!pat) {
+        judgmentStatus.style.color = '#e66';
+        judgmentStatus.textContent = 'AIRTABLE API TOKEN NOT CONFIGURED';
+        return;
       }
-      window.open(url, '_blank');
-      // Close modal
-      modal.classList.remove('open');
+
+      const xAccount = document.getElementById('x-account-input').value.trim();
+      judgmentBtn.disabled = true;
+      judgmentBtn.style.opacity = '0.5';
+      judgmentStatus.style.color = '#aaa';
+      judgmentStatus.textContent = 'SUBMITTING...';
+
+      try {
+        // Capture canvas as base64 for the image URL field
+        let imageUrl = '';
+        const r = await getRenderer();
+        if (window.composer) { window.composer.render(); }
+        else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
+        const dataUrl = r.domElement.toDataURL('image/png');
+
+        // If gallery API is configured, upload and get a real URL
+        if (window.GALLERY_API_URL && !window.GALLERY_API_URL.includes('YOUR_SUBDOMAIN')) {
+          try {
+            const blob = await (await fetch(dataUrl)).blob();
+            const form = new FormData();
+            form.append('image', blob, 'export.png');
+            form.append('overlord', OVERLORD_NAME);
+            const uploadRes = await fetch(window.GALLERY_API_URL + '/upload', { method: 'POST', body: form });
+            if (uploadRes.ok) {
+              const uploadData = await uploadRes.json();
+              if (uploadData.url) imageUrl = uploadData.url;
+            }
+          } catch (e) {
+            console.warn('Gallery upload for Airtable failed, submitting without image URL:', e);
+          }
+        }
+
+        // Build Airtable record fields
+        const fields = {
+          'X Account': xAccount || '',
+          'Overlord': OVERLORD_NAME,
+          'Submitted At': new Date().toISOString()
+        };
+        if (imageUrl) {
+          fields['Image'] = [{ url: imageUrl }];
+        }
+
+        const res = await fetch(
+          `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${pat}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ fields, typecast: true })
+          }
+        );
+
+        if (res.ok) {
+          judgmentStatus.style.color = '#4c4';
+          judgmentStatus.textContent = 'SUBMITTED SUCCESSFULLY';
+          setTimeout(() => {
+            modal.classList.remove('open');
+            judgmentStatus.textContent = '';
+            judgmentBtn.disabled = false;
+            judgmentBtn.style.opacity = '1';
+          }, 2000);
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          const errMsg = errData.error?.message || `HTTP ${res.status}`;
+          judgmentStatus.style.color = '#e66';
+          judgmentStatus.textContent = 'SUBMISSION FAILED: ' + errMsg;
+          judgmentBtn.disabled = false;
+          judgmentBtn.style.opacity = '1';
+        }
+      } catch (e) {
+        judgmentStatus.style.color = '#e66';
+        judgmentStatus.textContent = 'NETWORK ERROR — TRY AGAIN';
+        judgmentBtn.disabled = false;
+        judgmentBtn.style.opacity = '1';
+      }
     };
 
     // Close modal on background click
