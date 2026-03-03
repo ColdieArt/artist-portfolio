@@ -129,46 +129,18 @@
     #export-panel .status-line.active { color: #4c4; }
     #export-panel .status-line.error   { color: #e66; }
 
-    /* ─── SWAP MODE TOGGLE BUTTON ─── */
+    /* ─── SWAP MODE TOGGLE BUTTON (now in left drop menu) ─── */
     #swap-mode-btn {
-      position: fixed;
-      top: 12px;
-      right: 12px;
-      z-index: 201;
-      background: #000;
-      color: #fff;
-      border: 1px solid #555;
-      padding: 8px 21px;
-      font-family: monospace;
-      font-size: 9px;
-      font-weight: bold;
-      letter-spacing: 1.5px;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.3s, color 0.3s, box-shadow 0.3s;
-      text-transform: uppercase;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    #swap-mode-btn:hover {
-      border-color: #999;
-    }
-    #swap-mode-btn.active {
-      border-color: #4CAF50;
-      color: #4CAF50;
-      box-shadow: 0 0 6px rgba(76, 175, 80, 0.3);
-    }
-    #swap-mode-btn.active:hover {
-      border-color: #66CC66;
-      color: #66CC66;
+      display: none;
     }
 
-    /* ─── ELEMENT CONTROLS PANEL (top-right vertical stack) ─── */
+    /* ─── ELEMENT CONTROLS PANEL (pops out to the right of left menu) ─── */
     #element-controls {
-      position: fixed;
-      top: 46px;
-      right: 12px;
+      position: absolute;
+      top: 10px;
+      left: 90px;
       z-index: 200;
-      display: flex;
+      display: none;
       flex-direction: column;
       align-items: stretch;
       gap: 6px;
@@ -183,10 +155,11 @@
       text-transform: uppercase;
       user-select: none;
       -webkit-user-select: none;
-      opacity: 0.4;
+      opacity: 1;
       transition: opacity 0.3s, border-color 0.3s;
     }
     #element-controls.visible {
+      display: flex;
       opacity: 1;
     }
     #element-controls .ctrl-label {
@@ -242,16 +215,16 @@
       -webkit-appearance: none;
       width: 14px;
       height: 14px;
-      border-radius: 50%;
-      background: #4CAF50;
+      border-radius: 0;
+      background: #808080;
       cursor: pointer;
       border: none;
     }
     #element-controls input[type="range"]::-moz-range-thumb {
       width: 14px;
       height: 14px;
-      border-radius: 50%;
-      background: #4CAF50;
+      border-radius: 0;
+      background: #808080;
       cursor: pointer;
       border: none;
     }
@@ -3460,6 +3433,63 @@ function init() {
         }
     });
 
+    // Add SWAP MODE button to the left UI container
+    const swapBtn = document.createElement('button');
+    swapBtn.id = 'swap-mode-btn-left';
+    swapBtn.textContent = 'SWAP MODE';
+    swapBtn.style.cssText = `
+        background-color: black;
+        color: white;
+        padding: 4px;
+        margin: 0;
+        border: 0.5px solid white;
+        border-radius: 0;
+        cursor: pointer;
+        font-family: monospace;
+        font-size: 7px;
+        outline: none;
+        box-sizing: border-box;
+    `;
+    swapBtn.onmouseover = () => {
+        swapBtn.style.borderColor = swapMode ? '#999' : '#777';
+    };
+    swapBtn.onmouseout = () => {
+        swapBtn.style.borderColor = swapMode ? '#808080' : 'white';
+    };
+    swapBtn.onclick = (event) => {
+        event.stopPropagation();
+        swapMode = !swapMode;
+        swapBtn.textContent = swapMode ? 'SWAP MODE ON' : 'SWAP MODE';
+        swapBtn.style.borderColor = swapMode ? '#808080' : 'white';
+        swapBtn.style.color = swapMode ? '#808080' : 'white';
+
+        // Show/hide rotation options panel to the right
+        const panel = document.getElementById('element-controls');
+        if (panel) {
+            if (swapMode) {
+                panel.classList.add('visible');
+            } else {
+                panel.classList.remove('visible');
+            }
+        }
+
+        const indicator = document.getElementById('eye-indicator');
+        if (indicator) {
+            if (swapMode) {
+                indicator.style.opacity = '0.8';
+                indicator.innerHTML = '<span style="color:#808080;font-size:10px;">TAP ANY FACE ELEMENT TO CYCLE</span>';
+            } else {
+                indicator.style.opacity = '0';
+            }
+        }
+
+        // Change cursor to signal swap mode
+        if (renderer && renderer.domElement) {
+            renderer.domElement.style.cursor = swapMode ? 'crosshair' : 'grab';
+        }
+    };
+    leftUiContainer.appendChild(swapBtn);
+
     // Add the RESET button to both UI containers
     const createResetButton = () => {
         const button = document.createElement('button');
@@ -3841,30 +3871,8 @@ function createEyeIndicator() {
 }
 
 function initSwapModeButton() {
-    const btn = document.getElementById('swap-mode-btn');
-    if (!btn) return;
-
-    btn.onclick = (e) => {
-        e.stopPropagation();
-        swapMode = !swapMode;
-        btn.classList.toggle('active', swapMode);
-        btn.textContent = swapMode ? 'SWAP MODE ON' : 'SWAP MODE';
-
-        const indicator = document.getElementById('eye-indicator');
-        if (indicator) {
-            if (swapMode) {
-                indicator.style.opacity = '0.8';
-                indicator.innerHTML = `<span style="color:#4CAF50;font-size:10px;">TAP ANY FACE ELEMENT TO CYCLE</span>`;
-            } else {
-                indicator.style.opacity = '0';
-            }
-        }
-
-        // Change cursor to signal swap mode
-        if (renderer && renderer.domElement) {
-            renderer.domElement.style.cursor = swapMode ? 'crosshair' : 'grab';
-        }
-    };
+    // Swap mode is now handled by the button in the left drop menu (#swap-mode-btn-left)
+    // The original fixed button is hidden via CSS
 }
 
 function initElementControls() {
@@ -4155,7 +4163,7 @@ function onPointerDown(event) {
     pointerDownPosition.set(event.clientX, event.clientY);
 
     // Check if the click is on a UI element
-    if (event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) {
+    if (event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#element-controls')) {
         selectedObject = null;
         controls.enabled = true;
         return;
@@ -4329,7 +4337,7 @@ function onPointerUp(event) {
 function onClick(event) {
     
     // Only process click if no dragging occurred and not clicking on UI
-    if (isDragging || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) {
+    if (isDragging || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#element-controls')) {
         return;
     }
 
@@ -4790,6 +4798,8 @@ setTimeout(function () {
       if (eyeIndicator) eyeIndicator.style.display = 'none';
       const swapModeBtn = document.getElementById('swap-mode-btn');
       if (swapModeBtn) swapModeBtn.style.display = 'none';
+      const swapModeBtnLeft = document.getElementById('swap-mode-btn-left');
+      if (swapModeBtnLeft) swapModeBtnLeft.style.display = 'none';
       const elementControls = document.getElementById('element-controls');
       if (elementControls) elementControls.style.display = 'none';
       return;
