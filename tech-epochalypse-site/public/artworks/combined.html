@@ -4114,11 +4114,19 @@ function swapMeshTexture(mesh, newTexture) {
     const newWidth = newTexture.image.width * baseScale;
     const newHeight = newTexture.image.height * baseScale;
 
-    // Apply scale factor if stored, plus user scale from slider
-    const scaleFactor = (mesh.userData.swapScaleFactor || 1.0) * (mesh.userData.userScale || 1.0);
+    // Base dimensions (before user scale) for the new texture
+    const swapFactor = mesh.userData.swapScaleFactor || 1.0;
+    const baseW = newWidth * swapFactor;
+    const baseH = newHeight * swapFactor;
+
+    // Update initialScale so scale slider maintains correct 1:1 ratio
+    mesh.userData.initialScale = { width: baseW, height: baseH };
+
+    // Apply user scale from slider on top of base dimensions
+    const userScale = mesh.userData.userScale || 1.0;
 
     mesh.geometry.dispose();
-    mesh.geometry = new THREE.PlaneGeometry(newWidth * scaleFactor, newHeight * scaleFactor);
+    mesh.geometry = new THREE.PlaneGeometry(baseW * userScale, baseH * userScale);
 
     // Animate opacity back in
     animateOpacity(mesh, 0, 1, 200);
