@@ -4,12 +4,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Gallery API — update this URL after deploying the Cloudflare Worker -->
   <script>window.GALLERY_API_URL = 'https://te-gallery-api.YOUR_SUBDOMAIN.workers.dev';</script>
-  <!-- Airtable API — set your Personal Access Token and table name -->
-  <script>
-    window.AIRTABLE_PAT = '';
-    window.AIRTABLE_BASE_ID = 'app28BSDaZwDpDw4m';
-    window.AIRTABLE_TABLE_NAME = 'Submissions';
-  </script>
   <script type="importmap">
     {
       "imports": {
@@ -4238,16 +4232,6 @@ setTimeout(function () {
     const OVERLORD_NAME = 'mark-zuckerberg';
 
     judgmentBtn.onclick = async () => {
-      const pat = window.AIRTABLE_PAT;
-      const baseId = window.AIRTABLE_BASE_ID;
-      const tableName = window.AIRTABLE_TABLE_NAME;
-
-      if (!pat) {
-        judgmentStatus.style.color = '#e66';
-        judgmentStatus.textContent = 'AIRTABLE API TOKEN NOT CONFIGURED';
-        return;
-      }
-
       const xAccount = document.getElementById('x-account-input').value.trim();
       judgmentBtn.disabled = true;
       judgmentBtn.style.opacity = '0.5';
@@ -4289,17 +4273,11 @@ setTimeout(function () {
           fields['Image'] = [{ url: imageUrl }];
         }
 
-        const res = await fetch(
-          `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${pat}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ fields, typecast: true })
-          }
-        );
+        const res = await fetch('/api/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fields, typecast: true })
+        });
 
         if (res.ok) {
           judgmentStatus.style.color = '#4c4';
