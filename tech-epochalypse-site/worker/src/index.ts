@@ -78,7 +78,9 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
       },
     });
 
-    return json({ ok: true, id, key });
+    const workerUrl = new URL(request.url);
+    const imageUrl = `${workerUrl.origin}/image/${key}`;
+    return json({ ok: true, id, key, url: imageUrl });
   } catch (e) {
     return json({ error: 'Upload failed' }, 500);
   }
