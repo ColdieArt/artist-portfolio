@@ -7,7 +7,9 @@
     "prebuild": "node scripts/inject-config.js",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "worker:dev": "cd worker && npx wrangler dev",
+    "worker:deploy": "cd worker && npx wrangler deploy"
   },
   "dependencies": {
     "@types/three": "^0.183.0",
