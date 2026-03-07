@@ -39,7 +39,7 @@ export default {
 
     // GET /gallery — list all submissions
     if (request.method === 'GET' && path === '/gallery') {
-      return handleList(env);
+      return handleList(request, env);
     }
 
     // GET /image/:key — serve an image from R2
@@ -141,7 +141,7 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
 
     const today = new Date().toISOString().split('T')[0];
 
-    // Build Airtable record with fields matching the Gallery table schema
+    // Build Airtable record WITHOUT image first — attach image separately
     // Fields: Title, Image, Overlord, Date, Contributor, Category, Approved
     const fields: Record<string, unknown> = {
       'Title': `${overlord} — ${today}`,
@@ -150,11 +150,6 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
       'Contributor': xAccount || 'Anonymous',
       'Category': 'general submission',
     };
-
-    // Attach image via URL in the same create request — Airtable fetches & stores it
-    if (imageUrl) {
-      fields['Image'] = [{ url: imageUrl }];
-    }
 
     const airtableRes = await fetch(
       `https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}`,
@@ -176,42 +171,64 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
 
     const record = (await airtableRes.json()) as { id: string };
 
-    // If URL-based attachment didn't work (e.g. Airtable couldn't reach the URL),
-    // try direct upload via the Upload Attachment API as a fallback
-    if (fileBytes && record.id && imageUrl) {
+    // Attach image to the Airtable record
+    if (fileBytes && record.id) {
+      let imageAttached = false;
+
+      // Approach 1: Direct upload via content.airtable.com (most reliable)
       try {
-        // Verify the record has an image attached
-        const checkRes = await fetch(
-          `https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}/${record.id}`,
+        const ext = fileContentType === 'image/png' ? 'png' : 'jpg';
+        const blob = new Blob([fileBytes], { type: fileContentType });
+        const uploadForm = new FormData();
+        uploadForm.append('file', blob, `submission.${ext}`);
+
+        const uploadRes = await fetch(
+          `https://content.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}/${record.id}/Image/uploadAttachment`,
           {
+            method: 'POST',
             headers: { 'Authorization': `Bearer ${env.AIRTABLE_PAT}` },
+            body: uploadForm,
           }
         );
-        if (checkRes.ok) {
-          const checkData = (await checkRes.json()) as { fields: { Image?: unknown[] } };
-          if (!checkData.fields.Image || checkData.fields.Image.length === 0) {
-            // URL attachment didn't take — try direct upload
-            const ext = fileContentType === 'image/png' ? 'png' : 'jpg';
-            const blob = new Blob([fileBytes], { type: fileContentType });
-            const uploadForm = new FormData();
-            uploadForm.append('file', blob, `submission.${ext}`);
-
-            const uploadRes = await fetch(
-              `https://content.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}/${record.id}/Image/uploadAttachment`,
-              {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${env.AIRTABLE_PAT}` },
-                body: uploadForm,
-              }
-            );
-            if (!uploadRes.ok) {
-              const errBody = await uploadRes.text();
-              console.error('Airtable direct upload fallback failed:', uploadRes.status, errBody);
-            }
-          }
+        if (uploadRes.ok) {
+          imageAttached = true;
+        } else {
+          const errBody = await uploadRes.text();
+          console.error('Airtable direct upload failed:', uploadRes.status, errBody);
         }
       } catch (e) {
-        console.error('Airtable attachment verification/fallback error:', e);
+        console.error('Airtable direct upload exception:', e);
+      }
+
+      // Approach 2: Fallback — PATCH the record with the R2 image URL
+      if (!imageAttached && imageUrl) {
+        try {
+          const patchRes = await fetch(
+            `https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}/${record.id}`,
+            {
+              method: 'PATCH',
+              headers: {
+                'Authorization': `Bearer ${env.AIRTABLE_PAT}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                fields: { 'Image': [{ url: imageUrl }] },
+              }),
+            }
+          );
+          if (patchRes.ok) {
+            imageAttached = true;
+          } else {
+            const errBody = await patchRes.text();
+            console.error('Airtable URL fallback failed:', patchRes.status, errBody);
+          }
+        } catch (e) {
+          console.error('Airtable URL fallback exception:', e);
+        }
+      }
+
+      if (!imageAttached) {
+        console.error('Both image attachment approaches failed for record:', record.id);
       }
     }
 
@@ -222,16 +239,17 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
   }
 }
 
-async function handleList(env: Env): Promise<Response> {
+async function handleList(request: Request, env: Env): Promise<Response> {
   const listed = await env.GALLERY_BUCKET.list({ prefix: 'exports/', limit: 100 });
+  const origin = new URL(request.url).origin;
 
   const items = await Promise.all(
     listed.objects.map(async (obj) => {
       const head = await env.GALLERY_BUCKET.head(obj.key);
       return {
-        id: obj.key.replace('exports/', '').replace('.jpg', ''),
+        id: obj.key.replace('exports/', '').replace(/\.(jpg|png)$/, ''),
         key: obj.key,
-        imageUrl: `/image/${obj.key}`,
+        imageUrl: `${origin}/image/${obj.key}`,
         overlord: head?.customMetadata?.overlord || 'unknown',
         date: head?.customMetadata?.date || '',
         size: obj.size,
@@ -336,12 +354,13 @@ async function handleContact(request: Request, env: Env): Promise<Response> {
 }
 
 async function handleImage(key: string, env: Env): Promise<Response> {
-  const object = await env.GALLERY_BUCKET.get(key);
+  const decodedKey = decodeURIComponent(key);
+  const object = await env.GALLERY_BUCKET.get(decodedKey);
   if (!object) {
-    return json({ error: 'Image not found' }, 404);
+    return json({ error: 'Image not found', key: decodedKey }, 404);
   }
 
-  const filename = key.split('/').pop() || 'image.png';
+  const filename = decodedKey.split('/').pop() || 'image.png';
   return new Response(object.body, {
     headers: {
       'Content-Type': object.httpMetadata?.contentType || 'image/png',

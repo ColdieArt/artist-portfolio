@@ -3794,7 +3794,7 @@ setTimeout(function () {
 
       try {
         // Capture canvas as PNG
-        const r = window.renderer;
+        const r = await getRenderer();
         if (window.composer) { window.composer.render(); }
         else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
         const dataUrl = r.domElement.toDataURL('image/png');
