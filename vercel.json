@@ -3,6 +3,11 @@
   "outputDirectory": ".",
   "cleanUrls": true,
   "trailingSlash": false,
+  "functions": {
+    "api/**/*.js": {
+      "memory": 128
+    }
+  },
   "headers": [
     {
       "source": "/tech-epochalypse/artworks/(.*)",
