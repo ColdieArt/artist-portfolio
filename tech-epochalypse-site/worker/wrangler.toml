@@ -5,3 +5,12 @@ compatibility_date = "2024-12-01"
 [[r2_buckets]]
 binding = "GALLERY_BUCKET"
 bucket_name = "te-gallery"
+
+# Airtable integration — set these secrets via:
+#   npx wrangler secret put AIRTABLE_PAT
+#   npx wrangler secret put AIRTABLE_BASE_ID
+#   npx wrangler secret put AIRTABLE_TABLE_NAME
+# Optional secrets for contact form:
+#   npx wrangler secret put TURNSTILE_SECRET
+#   npx wrangler secret put RESEND_API_KEY
+#   npx wrangler secret put CONTACT_EMAIL

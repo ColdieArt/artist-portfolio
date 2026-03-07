@@ -24,6 +24,8 @@ function json(data: unknown, status = 200) {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    // Normalize pathname: strip trailing slash (except root)
+    const path = url.pathname.length > 1 ? url.pathname.replace(/\/+$/, '') : url.pathname;
 
     // CORS preflight
     if (request.method === 'OPTIONS') {
@@ -31,31 +33,31 @@ export default {
     }
 
     // POST /upload — accept JPEG blob + metadata
-    if (request.method === 'POST' && url.pathname === '/upload') {
+    if (request.method === 'POST' && path === '/upload') {
       return handleUpload(request, env);
     }
 
     // GET /gallery — list all submissions
-    if (request.method === 'GET' && url.pathname === '/gallery') {
+    if (request.method === 'GET' && path === '/gallery') {
       return handleList(env);
     }
 
     // GET /image/:key — serve an image from R2
-    if (request.method === 'GET' && url.pathname.startsWith('/image/')) {
-      return handleImage(url.pathname.slice(7), env);
+    if (request.method === 'GET' && path.startsWith('/image/')) {
+      return handleImage(path.slice(7), env);
     }
 
     // POST /submit — upload image + create Airtable record in one step
-    if (request.method === 'POST' && url.pathname === '/submit') {
+    if (request.method === 'POST' && path === '/submit') {
       return handleSubmit(request, env);
     }
 
     // POST /api/contact — inquiry form with Turnstile CAPTCHA
-    if (request.method === 'POST' && url.pathname === '/api/contact') {
+    if (request.method === 'POST' && path === '/api/contact') {
       return handleContact(request, env);
     }
 
-    return json({ error: 'Not found' }, 404);
+    return json({ error: 'Not found', path, method: request.method }, 404);
   },
 };
 
