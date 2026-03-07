@@ -137,12 +137,22 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
       imageUrl = `${workerUrl.origin}/image/${key}`;
     }
 
-    // Build Airtable record (create WITHOUT image — we upload it directly after)
+    const today = new Date().toISOString().split('T')[0];
+
+    // Build Airtable record with fields matching the Gallery table schema
+    // Fields: Title, Image, Overlord, Date, Contributor, Category, Approved
     const fields: Record<string, unknown> = {
-      'X Account': xAccount,
+      'Title': `${overlord} — ${today}`,
       'Overlord': overlord,
-      'Submitted At': new Date().toISOString(),
+      'Date': today,
+      'Contributor': xAccount || 'Anonymous',
+      'Category': 'general submission',
     };
+
+    // Attach image via URL in the same create request — Airtable fetches & stores it
+    if (imageUrl) {
+      fields['Image'] = [{ url: imageUrl }];
+    }
 
     const airtableRes = await fetch(
       `https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}`,
@@ -164,75 +174,42 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
 
     const record = (await airtableRes.json()) as { id: string };
 
-    // Upload image to Airtable attachment field
-    if (fileBytes && record.id) {
-      let attachmentOk = false;
-
-      // Approach 1: Direct upload via content.airtable.com Upload Attachment API
-      // Endpoint: POST /v0/{baseId}/{tableIdOrName}/{recordId}/{fieldIdOrName}/uploadAttachment
-      // Body: multipart/form-data with the file
+    // If URL-based attachment didn't work (e.g. Airtable couldn't reach the URL),
+    // try direct upload via the Upload Attachment API as a fallback
+    if (fileBytes && record.id && imageUrl) {
       try {
-        const ext = fileContentType === 'image/png' ? 'png' : 'jpg';
-        const blob = new Blob([fileBytes], { type: fileContentType });
-        const uploadForm = new FormData();
-        uploadForm.append('file', blob, `submission.${ext}`);
-
-        const uploadRes = await fetch(
-          `https://content.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}/${record.id}/Image/uploadAttachment`,
+        // Verify the record has an image attached
+        const checkRes = await fetch(
+          `https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}/${record.id}`,
           {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${env.AIRTABLE_PAT}`,
-            },
-            body: uploadForm,
+            headers: { 'Authorization': `Bearer ${env.AIRTABLE_PAT}` },
           }
         );
+        if (checkRes.ok) {
+          const checkData = (await checkRes.json()) as { fields: { Image?: unknown[] } };
+          if (!checkData.fields.Image || checkData.fields.Image.length === 0) {
+            // URL attachment didn't take — try direct upload
+            const ext = fileContentType === 'image/png' ? 'png' : 'jpg';
+            const blob = new Blob([fileBytes], { type: fileContentType });
+            const uploadForm = new FormData();
+            uploadForm.append('file', blob, `submission.${ext}`);
 
-        if (uploadRes.ok) {
-          attachmentOk = true;
-          console.log('Airtable direct upload succeeded for record:', record.id);
-        } else {
-          const errBody = await uploadRes.text();
-          console.error('Airtable direct upload failed:', uploadRes.status, errBody);
+            const uploadRes = await fetch(
+              `https://content.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}/${record.id}/Image/uploadAttachment`,
+              {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${env.AIRTABLE_PAT}` },
+                body: uploadForm,
+              }
+            );
+            if (!uploadRes.ok) {
+              const errBody = await uploadRes.text();
+              console.error('Airtable direct upload fallback failed:', uploadRes.status, errBody);
+            }
+          }
         }
       } catch (e) {
-        console.error('Airtable direct upload exception:', e);
-      }
-
-      // Approach 2: Fallback — PATCH the record with the public R2 image URL
-      // Airtable will fetch and store the image from the URL
-      if (!attachmentOk && imageUrl) {
-        try {
-          const patchRes = await fetch(
-            `https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}/${record.id}`,
-            {
-              method: 'PATCH',
-              headers: {
-                'Authorization': `Bearer ${env.AIRTABLE_PAT}`,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                fields: {
-                  'Image': [{ url: imageUrl }],
-                },
-              }),
-            }
-          );
-
-          if (patchRes.ok) {
-            attachmentOk = true;
-            console.log('Airtable URL fallback succeeded for record:', record.id);
-          } else {
-            const errBody = await patchRes.text();
-            console.error('Airtable URL fallback failed:', patchRes.status, errBody);
-          }
-        } catch (e) {
-          console.error('Airtable URL fallback exception:', e);
-        }
-      }
-
-      if (!attachmentOk) {
-        console.error('Both Airtable attachment approaches failed for record:', record.id);
+        console.error('Airtable attachment verification/fallback error:', e);
       }
     }
 
