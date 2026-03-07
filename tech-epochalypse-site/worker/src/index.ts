@@ -106,19 +106,26 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
       return json({ error: 'Airtable not configured on server' }, 500);
     }
 
-    // Upload image to R2 if provided
-    let imageUrl = '';
+    // Read file bytes upfront so we can use them for both R2 and Airtable
+    let fileBytes: ArrayBuffer | null = null;
+    let fileContentType = 'image/png';
     if (file && file.size > 0) {
       if (file.size > 5 * 1024 * 1024) {
         return json({ error: 'File too large (max 5MB)' }, 400);
       }
+      fileBytes = await file.arrayBuffer();
+      fileContentType = file.type || 'image/png';
+    }
 
+    // Upload image to R2 if provided
+    let imageUrl = '';
+    if (fileBytes) {
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      const ext = file.type === 'image/png' ? 'png' : 'jpg';
+      const ext = fileContentType === 'image/png' ? 'png' : 'jpg';
       const key = `exports/${id}.${ext}`;
 
-      await env.GALLERY_BUCKET.put(key, file.stream(), {
-        httpMetadata: { contentType: file.type || 'image/png' },
+      await env.GALLERY_BUCKET.put(key, fileBytes, {
+        httpMetadata: { contentType: fileContentType },
         customMetadata: {
           overlord,
           date: new Date().toISOString().split('T')[0],
@@ -130,15 +137,12 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
       imageUrl = `${workerUrl.origin}/image/${key}`;
     }
 
-    // Build Airtable record
+    // Build Airtable record (create WITHOUT image — we upload it directly after)
     const fields: Record<string, unknown> = {
       'X Account': xAccount,
       'Overlord': overlord,
       'Submitted At': new Date().toISOString(),
     };
-    if (imageUrl) {
-      fields['Image'] = [{ url: imageUrl, filename: `${overlord}-export.png` }];
-    }
 
     const airtableRes = await fetch(
       `https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}`,
@@ -154,16 +158,54 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
 
     if (!airtableRes.ok) {
       const errBody = await airtableRes.text();
-      console.error('Airtable error:', airtableRes.status, errBody);
+      console.error('Airtable create error:', airtableRes.status, errBody);
       return json({ error: 'Airtable submission failed', details: errBody }, airtableRes.status);
     }
 
-    const record = await airtableRes.json();
+    const record = (await airtableRes.json()) as { id: string };
+
+    // Upload image directly to Airtable using their Upload Attachment API
+    // This sends the binary as base64 JSON instead of asking Airtable to fetch a URL
+    if (fileBytes && record.id) {
+      const base64Content = arrayBufferToBase64(fileBytes);
+      const ext = fileContentType === 'image/png' ? 'png' : 'jpg';
+      const uploadRes = await fetch(
+        `https://content.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${record.id}/Image/uploadAttachment`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${env.AIRTABLE_PAT}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contentType: fileContentType,
+            filename: `${overlord}-export.${ext}`,
+            file: base64Content,
+          }),
+        }
+      );
+
+      if (!uploadRes.ok) {
+        const errBody = await uploadRes.text();
+        console.error('Airtable attachment upload error:', uploadRes.status, errBody);
+        // Record was created, just the attachment failed — don't fail the whole request
+      }
+    }
+
     return json({ ok: true, record, imageUrl });
   } catch (e) {
     console.error('Submit error:', e);
     return json({ error: 'Submission failed' }, 500);
   }
+}
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
 }
 
 async function handleList(env: Env): Promise<Response> {
