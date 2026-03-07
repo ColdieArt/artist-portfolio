@@ -3780,12 +3780,6 @@ setTimeout(function () {
     const OVERLORD_NAME = 'jensen-huang';
 
     judgmentBtn.onclick = async () => {
-      if (!window.GALLERY_API_URL || window.GALLERY_API_URL.includes('YOUR_SUBDOMAIN')) {
-        judgmentStatus.style.color = '#e66';
-        judgmentStatus.textContent = 'SUBMISSION SERVICE UNAVAILABLE';
-        return;
-      }
-
       const xAccount = document.getElementById('x-account-input').value.trim();
       judgmentBtn.disabled = true;
       judgmentBtn.style.opacity = '0.5';
@@ -3806,7 +3800,7 @@ setTimeout(function () {
         form.append('overlord', OVERLORD_NAME);
         form.append('xAccount', xAccount);
 
-        const res = await fetch(window.GALLERY_API_URL + '/submit', { method: 'POST', body: form });
+        const res = await fetch((window.GALLERY_API_URL || '') + '/submit', { method: 'POST', body: form });
         const data = await res.json();
 
         if (res.ok && data.ok) {
