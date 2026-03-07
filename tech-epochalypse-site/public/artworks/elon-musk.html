@@ -4,8 +4,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Gallery API — update this URL after deploying the Cloudflare Worker -->
   <script>window.GALLERY_API_URL = 'https://te-gallery-api.coldieart.workers.dev';</script>
-  <!-- Airtable config — generated at build time from env vars -->
-  <script src="/artworks/airtable-config.js"></script>
+  <!-- Airtable submission handled server-side by the worker -->
   <script type="importmap">
     {
       "imports": {
@@ -4343,11 +4342,7 @@ setTimeout(function () {
     const OVERLORD_NAME = 'elon-musk';
 
     judgmentBtn.onclick = async () => {
-      const pat = window.AIRTABLE_PAT;
-      const baseId = window.AIRTABLE_BASE_ID;
-      const tableName = window.AIRTABLE_TABLE_NAME;
-
-      if (!pat) {
+      if (!window.GALLERY_API_URL || window.GALLERY_API_URL.includes('YOUR_SUBDOMAIN')) {
         judgmentStatus.style.color = '#e66';
         judgmentStatus.textContent = 'SUBMISSION SERVICE UNAVAILABLE';
         return;
@@ -4360,55 +4355,23 @@ setTimeout(function () {
       judgmentStatus.textContent = 'SUBMITTING...';
 
       try {
-        // Capture canvas as base64 for the image URL field
-        let imageUrl = '';
+        // Capture canvas as PNG
         const r = await getRenderer();
         if (window.composer) { window.composer.render(); }
         else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
         const dataUrl = r.domElement.toDataURL('image/png');
+        const blob = await (await fetch(dataUrl)).blob();
 
-        // If gallery API is configured, upload and get a real URL
-        if (window.GALLERY_API_URL && !window.GALLERY_API_URL.includes('YOUR_SUBDOMAIN')) {
-          try {
-            const blob = await (await fetch(dataUrl)).blob();
-            const form = new FormData();
-            form.append('image', blob, 'export.png');
-            form.append('overlord', OVERLORD_NAME);
-            const uploadRes = await fetch(window.GALLERY_API_URL + '/upload', { method: 'POST', body: form });
-            if (uploadRes.ok) {
-              const uploadData = await uploadRes.json();
-              if (uploadData.url) imageUrl = uploadData.url;
-            } else {
-              console.error('Gallery upload failed:', uploadRes.status, await uploadRes.text());
-            }
-          } catch (e) {
-            console.error('Gallery upload for Airtable failed, submitting without image URL:', e);
-          }
-        }
+        // Send everything to the worker — it handles R2 upload + Airtable
+        const form = new FormData();
+        form.append('image', blob, 'export.png');
+        form.append('overlord', OVERLORD_NAME);
+        form.append('xAccount', xAccount);
 
-        // Build Airtable record fields
-        const fields = {
-          'X Account': xAccount || '',
-          'Overlord': OVERLORD_NAME,
-          'Submitted At': new Date().toISOString()
-        };
-        if (imageUrl) {
-          fields['Image'] = [{ url: imageUrl, filename: 'export.png' }];
-        }
+        const res = await fetch(window.GALLERY_API_URL + '/submit', { method: 'POST', body: form });
+        const data = await res.json();
 
-        const res = await fetch(
-          `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${pat}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ fields, typecast: true })
-          }
-        );
-
-        if (res.ok) {
+        if (res.ok && data.ok) {
           judgmentStatus.style.color = '#4c4';
           judgmentStatus.textContent = 'SUBMITTED SUCCESSFULLY';
           setTimeout(() => {
@@ -4418,8 +4381,7 @@ setTimeout(function () {
             judgmentBtn.style.opacity = '1';
           }, 2000);
         } else {
-          const errData = await res.json().catch(() => ({}));
-          const errMsg = errData.error?.message || `HTTP ${res.status}`;
+          const errMsg = data.details || data.error || `HTTP ${res.status}`;
           judgmentStatus.style.color = '#e66';
           judgmentStatus.textContent = 'SUBMISSION FAILED: ' + errMsg;
           judgmentBtn.disabled = false;
