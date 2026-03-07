@@ -168,18 +168,27 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
     if (fileBytes && record.id) {
       let attachmentOk = false;
 
-      // Approach 1: Direct binary upload via content.airtable.com
-      // The Upload Attachment API expects raw file bytes, NOT JSON
+      // Approach 1: Direct upload via content.airtable.com
+      // The Upload Attachment API expects JSON with base64-encoded file content
       try {
+        const base64File = btoa(
+          new Uint8Array(fileBytes).reduce((data, byte) => data + String.fromCharCode(byte), '')
+        );
+        const ext = fileContentType === 'image/png' ? 'png' : 'jpg';
+
         const uploadRes = await fetch(
-          `https://content.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}/${record.id}/Image/uploadAttachment`,
+          `https://content.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${record.id}/Image/uploadAttachment`,
           {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${env.AIRTABLE_PAT}`,
-              'Content-Type': fileContentType,
+              'Content-Type': 'application/json',
             },
-            body: fileBytes,
+            body: JSON.stringify({
+              contentType: fileContentType,
+              filename: `submission.${ext}`,
+              file: base64File,
+            }),
           }
         );
 
