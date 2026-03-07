@@ -67,10 +67,11 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
     }
 
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const key = `exports/${id}.jpg`;
+    const ext = file.type === 'image/png' ? 'png' : 'jpg';
+    const key = `exports/${id}.${ext}`;
 
     await env.GALLERY_BUCKET.put(key, file.stream(), {
-      httpMetadata: { contentType: 'image/jpeg' },
+      httpMetadata: { contentType: file.type || 'image/png' },
       customMetadata: {
         overlord,
         date: new Date().toISOString().split('T')[0],
@@ -207,7 +208,8 @@ async function handleImage(key: string, env: Env): Promise<Response> {
 
   return new Response(object.body, {
     headers: {
-      'Content-Type': object.httpMetadata?.contentType || 'image/jpeg',
+      'Content-Type': object.httpMetadata?.contentType || 'image/png',
+      'Content-Length': String(object.size),
       'Cache-Control': 'public, max-age=31536000, immutable',
       ...CORS_HEADERS,
     },

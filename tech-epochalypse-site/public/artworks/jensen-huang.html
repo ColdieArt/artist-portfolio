@@ -2761,9 +2761,11 @@ setTimeout(() => {
             if (uploadRes.ok) {
               const uploadData = await uploadRes.json();
               if (uploadData.url) imageUrl = uploadData.url;
+            } else {
+              console.error('Gallery upload failed:', uploadRes.status, await uploadRes.text());
             }
           } catch (e) {
-            console.warn('Gallery upload for Airtable failed, submitting without image URL:', e);
+            console.error('Gallery upload for Airtable failed, submitting without image URL:', e);
           }
         }
 
@@ -2774,7 +2776,7 @@ setTimeout(() => {
           'Submitted At': new Date().toISOString()
         };
         if (imageUrl) {
-          fields['Image'] = [{ url: imageUrl }];
+          fields['Image'] = [{ url: imageUrl, filename: 'export.png' }];
         }
 
         const res = await fetch(
