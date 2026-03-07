@@ -4224,11 +4224,26 @@ setTimeout(function () {
       <h2>Share your overlord</h2>
       <p style="margin: 0 0 20px 0; font-size: 12px; color: #aaa;">Attach your downloaded file before posting</p>
       <button id="post-modal-btn">POST TO X</button>
-      
+
       <div style="margin: 20px 0; color: #666; font-size: 11px; text-align: center;">
         ── OR ──
       </div>
-      
+
+      <div style="margin: 0 0 12px 0;">
+        <label style="font-size: 10px; color: #888; display: block; margin-bottom: 4px;">X / Twitter handle (optional)</label>
+        <input id="x-account-input" type="text" placeholder="@yourhandle" style="
+          width: 100%;
+          box-sizing: border-box;
+          background: #111;
+          color: #fff;
+          border: 1px solid #444;
+          padding: 8px 12px;
+          font-family: monospace;
+          font-size: 13px;
+          outline: none;
+        " />
+      </div>
+
       <button id="judgment-btn" style="
         background: #000;
         color: #fff;
@@ -4242,8 +4257,17 @@ setTimeout(function () {
         transition: background 0.2s;
         width: 100%;
       ">SUBMIT TO JUDGMENT PROTOCOL</button>
-      
-      <p style="margin: 15px 0 0 0; font-size: 10px; color: #888; line-height: 1.4;">
+
+      <div id="judgment-status" style="
+        margin: 12px 0 0 0;
+        font-family: monospace;
+        font-size: 11px;
+        text-align: center;
+        min-height: 16px;
+        letter-spacing: 0.5px;
+      "></div>
+
+      <p style="margin: 10px 0 0 0; font-size: 10px; color: #888; line-height: 1.4;">
         Submit your capture for collector review.<br>
         Top submissions will be minted as official subseries.
       </p>
@@ -4293,12 +4317,57 @@ setTimeout(function () {
       modal.classList.remove('open');
     };
 
-    // Wire judgment protocol button to open Airtable form
+    // Wire judgment protocol button to submit via Airtable API
     const judgmentBtn = document.getElementById('judgment-btn');
-    judgmentBtn.onclick = () => {
-      window.open('https://airtable.com/app28BSDaZwDpDw4m/pagUJlx4mF1vkSgO4/form', '_blank');
-      // Close modal
-      modal.classList.remove('open');
+    const judgmentStatus = document.getElementById('judgment-status');
+    const OVERLORD_NAME = 'elon-musk';
+
+    judgmentBtn.onclick = async () => {
+      const xAccount = document.getElementById('x-account-input').value.trim();
+      judgmentBtn.disabled = true;
+      judgmentBtn.style.opacity = '0.5';
+      judgmentStatus.style.color = '#aaa';
+      judgmentStatus.textContent = 'SUBMITTING...';
+
+      try {
+        // Capture canvas as PNG
+        const r = await getRenderer();
+        if (window.composer) { window.composer.render(); }
+        else { r.render(window.scene, window.camera); }
+        const dataUrl = r.domElement.toDataURL('image/png');
+        const resp = await fetch(dataUrl);
+        const blob = await resp.blob();
+
+        const form = new FormData();
+        form.append('image', blob, 'export.png');
+        form.append('overlord', OVERLORD_NAME);
+        form.append('xAccount', xAccount);
+
+        const res = await fetch((window.GALLERY_API_URL || '') + '/submit', { method: 'POST', body: form });
+        const data = await res.json();
+
+        if (res.ok && data.ok) {
+          judgmentStatus.style.color = '#4c4';
+          judgmentStatus.textContent = 'SUBMITTED SUCCESSFULLY';
+          setTimeout(() => {
+            modal.classList.remove('open');
+            judgmentStatus.textContent = '';
+            judgmentBtn.disabled = false;
+            judgmentBtn.style.opacity = '1';
+          }, 2000);
+        } else {
+          const errMsg = data.details || data.error || `HTTP ${res.status}`;
+          judgmentStatus.style.color = '#e66';
+          judgmentStatus.textContent = 'SUBMISSION FAILED: ' + errMsg;
+          judgmentBtn.disabled = false;
+          judgmentBtn.style.opacity = '1';
+        }
+      } catch (e) {
+        judgmentStatus.style.color = '#e66';
+        judgmentStatus.textContent = 'NETWORK ERROR — TRY AGAIN';
+        judgmentBtn.disabled = false;
+        judgmentBtn.style.opacity = '1';
+      }
     };
 
     // Close modal on background click
