@@ -164,31 +164,68 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
 
     const record = (await airtableRes.json()) as { id: string };
 
-    // Upload image directly to Airtable using their Upload Attachment API
-    // This sends the binary as base64 JSON instead of asking Airtable to fetch a URL
+    // Upload image to Airtable attachment field
     if (fileBytes && record.id) {
-      const base64Content = arrayBufferToBase64(fileBytes);
-      const ext = fileContentType === 'image/png' ? 'png' : 'jpg';
-      const uploadRes = await fetch(
-        `https://content.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${record.id}/Image/uploadAttachment`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${env.AIRTABLE_PAT}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contentType: fileContentType,
-            filename: `${overlord}-export.${ext}`,
-            file: base64Content,
-          }),
-        }
-      );
+      let attachmentOk = false;
 
-      if (!uploadRes.ok) {
-        const errBody = await uploadRes.text();
-        console.error('Airtable attachment upload error:', uploadRes.status, errBody);
-        // Record was created, just the attachment failed — don't fail the whole request
+      // Approach 1: Direct binary upload via content.airtable.com
+      // The Upload Attachment API expects raw file bytes, NOT JSON
+      try {
+        const uploadRes = await fetch(
+          `https://content.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${record.id}/Image/uploadAttachment`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${env.AIRTABLE_PAT}`,
+              'Content-Type': fileContentType,
+            },
+            body: fileBytes,
+          }
+        );
+
+        if (uploadRes.ok) {
+          attachmentOk = true;
+        } else {
+          const errBody = await uploadRes.text();
+          console.error('Airtable direct upload failed:', uploadRes.status, errBody);
+        }
+      } catch (e) {
+        console.error('Airtable direct upload exception:', e);
+      }
+
+      // Approach 2: Fallback — PATCH the record with the public R2 image URL
+      // Airtable will fetch the image from the URL and store it
+      if (!attachmentOk && imageUrl) {
+        try {
+          const patchRes = await fetch(
+            `https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}/${record.id}`,
+            {
+              method: 'PATCH',
+              headers: {
+                'Authorization': `Bearer ${env.AIRTABLE_PAT}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                fields: {
+                  'Image': [{ url: imageUrl }],
+                },
+              }),
+            }
+          );
+
+          if (patchRes.ok) {
+            attachmentOk = true;
+          } else {
+            const errBody = await patchRes.text();
+            console.error('Airtable URL fallback failed:', patchRes.status, errBody);
+          }
+        } catch (e) {
+          console.error('Airtable URL fallback exception:', e);
+        }
+      }
+
+      if (!attachmentOk) {
+        console.error('Both Airtable attachment approaches failed for record:', record.id);
       }
     }
 
@@ -197,15 +234,6 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
     console.error('Submit error:', e);
     return json({ error: 'Submission failed' }, 500);
   }
-}
-
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = '';
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binary);
 }
 
 async function handleList(env: Env): Promise<Response> {
