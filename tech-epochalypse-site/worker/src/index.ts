@@ -172,7 +172,7 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
       // The Upload Attachment API expects raw file bytes, NOT JSON
       try {
         const uploadRes = await fetch(
-          `https://content.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${record.id}/Image/uploadAttachment`,
+          `https://content.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}/${record.id}/Image/uploadAttachment`,
           {
             method: 'POST',
             headers: {
