@@ -206,10 +206,12 @@ async function handleImage(key: string, env: Env): Promise<Response> {
     return json({ error: 'Image not found' }, 404);
   }
 
+  const filename = key.split('/').pop() || 'image.png';
   return new Response(object.body, {
     headers: {
       'Content-Type': object.httpMetadata?.contentType || 'image/png',
       'Content-Length': String(object.size),
+      'Content-Disposition': `inline; filename="${filename}"`,
       'Cache-Control': 'public, max-age=31536000, immutable',
       ...CORS_HEADERS,
     },
