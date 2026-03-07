@@ -4343,7 +4343,7 @@ setTimeout(function () {
         form.append('overlord', OVERLORD_NAME);
         form.append('xAccount', xAccount);
 
-        const res = await fetch((window.GALLERY_API_URL || '') + '/submit', { method: 'POST', body: form });
+        const res = await fetch('/api/submit', { method: 'POST', body: form });
         const data = await res.json();
 
         if (res.ok && data.ok) {
