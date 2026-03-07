@@ -3,7 +3,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Gallery API — update this URL after deploying the Cloudflare Worker -->
-  <script>window.GALLERY_API_URL = 'https://te-gallery-api.YOUR_SUBDOMAIN.workers.dev';</script>
+  <script>window.GALLERY_API_URL = 'https://te-gallery-api.coldieart.workers.dev';</script>
   <!-- Airtable config — generated at build time from env vars -->
   <script src="/artworks/airtable-config.js"></script>
   <script type="importmap">
@@ -4889,9 +4889,11 @@ setTimeout(function () {
             if (uploadRes.ok) {
               const uploadData = await uploadRes.json();
               if (uploadData.url) imageUrl = uploadData.url;
+            } else {
+              console.error('Gallery upload failed:', uploadRes.status, await uploadRes.text());
             }
           } catch (e) {
-            console.warn('Gallery upload for Airtable failed, submitting without image URL:', e);
+            console.error('Gallery upload for Airtable failed, submitting without image URL:', e);
           }
         }
 
@@ -4902,7 +4904,7 @@ setTimeout(function () {
           'Submitted At': new Date().toISOString()
         };
         if (imageUrl) {
-          fields['Image'] = [{ url: imageUrl }];
+          fields['Image'] = [{ url: imageUrl, filename: 'export.png' }];
         }
 
         const res = await fetch(

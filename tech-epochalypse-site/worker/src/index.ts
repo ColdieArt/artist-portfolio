@@ -67,10 +67,11 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
     }
 
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const key = `exports/${id}.jpg`;
+    const ext = file.type === 'image/png' ? 'png' : 'jpg';
+    const key = `exports/${id}.${ext}`;
 
     await env.GALLERY_BUCKET.put(key, file.stream(), {
-      httpMetadata: { contentType: 'image/jpeg' },
+      httpMetadata: { contentType: file.type || 'image/png' },
       customMetadata: {
         overlord,
         date: new Date().toISOString().split('T')[0],
@@ -78,7 +79,9 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
       },
     });
 
-    return json({ ok: true, id, key });
+    const workerUrl = new URL(request.url);
+    const imageUrl = `${workerUrl.origin}/image/${key}`;
+    return json({ ok: true, id, key, url: imageUrl });
   } catch (e) {
     return json({ error: 'Upload failed' }, 500);
   }
@@ -203,9 +206,12 @@ async function handleImage(key: string, env: Env): Promise<Response> {
     return json({ error: 'Image not found' }, 404);
   }
 
+  const filename = key.split('/').pop() || 'image.png';
   return new Response(object.body, {
     headers: {
-      'Content-Type': object.httpMetadata?.contentType || 'image/jpeg',
+      'Content-Type': object.httpMetadata?.contentType || 'image/png',
+      'Content-Length': String(object.size),
+      'Content-Disposition': `inline; filename="${filename}"`,
       'Cache-Control': 'public, max-age=31536000, immutable',
       ...CORS_HEADERS,
     },
