@@ -3,6 +3,9 @@ interface Env {
   TURNSTILE_SECRET: string;
   RESEND_API_KEY: string;
   CONTACT_EMAIL: string;
+  AIRTABLE_PAT: string;
+  AIRTABLE_BASE_ID: string;
+  AIRTABLE_TABLE_NAME: string;
 }
 
 const CORS_HEADERS = {
@@ -40,6 +43,11 @@ export default {
     // GET /image/:key — serve an image from R2
     if (request.method === 'GET' && url.pathname.startsWith('/image/')) {
       return handleImage(url.pathname.slice(7), env);
+    }
+
+    // POST /submit — upload image + create Airtable record in one step
+    if (request.method === 'POST' && url.pathname === '/submit') {
+      return handleSubmit(request, env);
     }
 
     // POST /api/contact — inquiry form with Turnstile CAPTCHA
@@ -84,6 +92,77 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
     return json({ ok: true, id, key, url: imageUrl });
   } catch (e) {
     return json({ error: 'Upload failed' }, 500);
+  }
+}
+
+async function handleSubmit(request: Request, env: Env): Promise<Response> {
+  try {
+    const formData = await request.formData();
+    const file = formData.get('image') as File | null;
+    const overlord = (formData.get('overlord') as string) || 'unknown';
+    const xAccount = (formData.get('xAccount') as string) || '';
+
+    if (!env.AIRTABLE_PAT || !env.AIRTABLE_BASE_ID || !env.AIRTABLE_TABLE_NAME) {
+      return json({ error: 'Airtable not configured on server' }, 500);
+    }
+
+    // Upload image to R2 if provided
+    let imageUrl = '';
+    if (file && file.size > 0) {
+      if (file.size > 5 * 1024 * 1024) {
+        return json({ error: 'File too large (max 5MB)' }, 400);
+      }
+
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const ext = file.type === 'image/png' ? 'png' : 'jpg';
+      const key = `exports/${id}.${ext}`;
+
+      await env.GALLERY_BUCKET.put(key, file.stream(), {
+        httpMetadata: { contentType: file.type || 'image/png' },
+        customMetadata: {
+          overlord,
+          date: new Date().toISOString().split('T')[0],
+          uploadedAt: new Date().toISOString(),
+        },
+      });
+
+      const workerUrl = new URL(request.url);
+      imageUrl = `${workerUrl.origin}/image/${key}`;
+    }
+
+    // Build Airtable record
+    const fields: Record<string, unknown> = {
+      'X Account': xAccount,
+      'Overlord': overlord,
+      'Submitted At': new Date().toISOString(),
+    };
+    if (imageUrl) {
+      fields['Image'] = [{ url: imageUrl, filename: `${overlord}-export.png` }];
+    }
+
+    const airtableRes = await fetch(
+      `https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${env.AIRTABLE_PAT}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fields, typecast: true }),
+      }
+    );
+
+    if (!airtableRes.ok) {
+      const errBody = await airtableRes.text();
+      console.error('Airtable error:', airtableRes.status, errBody);
+      return json({ error: 'Airtable submission failed', details: errBody }, airtableRes.status);
+    }
+
+    const record = await airtableRes.json();
+    return json({ ok: true, record, imageUrl });
+  } catch (e) {
+    console.error('Submit error:', e);
+    return json({ error: 'Submission failed' }, 500);
   }
 }
 
