@@ -24,6 +24,8 @@ function json(data: unknown, status = 200) {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    // Normalize pathname: strip trailing slash (except root)
+    const path = url.pathname.length > 1 ? url.pathname.replace(/\/+$/, '') : url.pathname;
 
     // CORS preflight
     if (request.method === 'OPTIONS') {
@@ -31,31 +33,31 @@ export default {
     }
 
     // POST /upload — accept JPEG blob + metadata
-    if (request.method === 'POST' && url.pathname === '/upload') {
+    if (request.method === 'POST' && path === '/upload') {
       return handleUpload(request, env);
     }
 
     // GET /gallery — list all submissions
-    if (request.method === 'GET' && url.pathname === '/gallery') {
-      return handleList(env);
+    if (request.method === 'GET' && path === '/gallery') {
+      return handleList(request, env);
     }
 
     // GET /image/:key — serve an image from R2
-    if (request.method === 'GET' && url.pathname.startsWith('/image/')) {
-      return handleImage(url.pathname.slice(7), env);
+    if (request.method === 'GET' && path.startsWith('/image/')) {
+      return handleImage(path.slice(7), env);
     }
 
     // POST /submit — upload image + create Airtable record in one step
-    if (request.method === 'POST' && url.pathname === '/submit') {
+    if (request.method === 'POST' && path === '/submit') {
       return handleSubmit(request, env);
     }
 
     // POST /api/contact — inquiry form with Turnstile CAPTCHA
-    if (request.method === 'POST' && url.pathname === '/api/contact') {
+    if (request.method === 'POST' && path === '/api/contact') {
       return handleContact(request, env);
     }
 
-    return json({ error: 'Not found' }, 404);
+    return json({ error: 'Not found', path, method: request.method }, 404);
   },
 };
 
@@ -137,11 +139,16 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
       imageUrl = `${workerUrl.origin}/image/${key}`;
     }
 
-    // Build Airtable record (create WITHOUT image — we upload it directly after)
+    const today = new Date().toISOString().split('T')[0];
+
+    // Build Airtable record WITHOUT image first — attach image separately
+    // Fields: Title, Image, Overlord, Date, Contributor, Category, Approved
     const fields: Record<string, unknown> = {
-      'X Account': xAccount,
+      'Title': `${overlord} — ${today}`,
       'Overlord': overlord,
-      'Submitted At': new Date().toISOString(),
+      'Date': today,
+      'Contributor': xAccount || 'Anonymous',
+      'Category': 'general submission',
     };
 
     const airtableRes = await fetch(
@@ -164,13 +171,11 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
 
     const record = (await airtableRes.json()) as { id: string };
 
-    // Upload image to Airtable attachment field
+    // Attach image to the Airtable record
     if (fileBytes && record.id) {
-      let attachmentOk = false;
+      let imageAttached = false;
 
-      // Approach 1: Direct upload via content.airtable.com Upload Attachment API
-      // Endpoint: POST /v0/{baseId}/{tableIdOrName}/{recordId}/{fieldIdOrName}/uploadAttachment
-      // Body: multipart/form-data with the file
+      // Approach 1: Direct upload via content.airtable.com (most reliable)
       try {
         const ext = fileContentType === 'image/png' ? 'png' : 'jpg';
         const blob = new Blob([fileBytes], { type: fileContentType });
@@ -181,16 +186,12 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
           `https://content.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}/${record.id}/Image/uploadAttachment`,
           {
             method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${env.AIRTABLE_PAT}`,
-            },
+            headers: { 'Authorization': `Bearer ${env.AIRTABLE_PAT}` },
             body: uploadForm,
           }
         );
-
         if (uploadRes.ok) {
-          attachmentOk = true;
-          console.log('Airtable direct upload succeeded for record:', record.id);
+          imageAttached = true;
         } else {
           const errBody = await uploadRes.text();
           console.error('Airtable direct upload failed:', uploadRes.status, errBody);
@@ -199,9 +200,8 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
         console.error('Airtable direct upload exception:', e);
       }
 
-      // Approach 2: Fallback — PATCH the record with the public R2 image URL
-      // Airtable will fetch and store the image from the URL
-      if (!attachmentOk && imageUrl) {
+      // Approach 2: Fallback — PATCH the record with the R2 image URL
+      if (!imageAttached && imageUrl) {
         try {
           const patchRes = await fetch(
             `https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}/${record.id}`,
@@ -212,16 +212,12 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                fields: {
-                  'Image': [{ url: imageUrl }],
-                },
+                fields: { 'Image': [{ url: imageUrl }] },
               }),
             }
           );
-
           if (patchRes.ok) {
-            attachmentOk = true;
-            console.log('Airtable URL fallback succeeded for record:', record.id);
+            imageAttached = true;
           } else {
             const errBody = await patchRes.text();
             console.error('Airtable URL fallback failed:', patchRes.status, errBody);
@@ -231,8 +227,8 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
         }
       }
 
-      if (!attachmentOk) {
-        console.error('Both Airtable attachment approaches failed for record:', record.id);
+      if (!imageAttached) {
+        console.error('Both image attachment approaches failed for record:', record.id);
       }
     }
 
@@ -243,16 +239,17 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
   }
 }
 
-async function handleList(env: Env): Promise<Response> {
+async function handleList(request: Request, env: Env): Promise<Response> {
   const listed = await env.GALLERY_BUCKET.list({ prefix: 'exports/', limit: 100 });
+  const origin = new URL(request.url).origin;
 
   const items = await Promise.all(
     listed.objects.map(async (obj) => {
       const head = await env.GALLERY_BUCKET.head(obj.key);
       return {
-        id: obj.key.replace('exports/', '').replace('.jpg', ''),
+        id: obj.key.replace('exports/', '').replace(/\.(jpg|png)$/, ''),
         key: obj.key,
-        imageUrl: `/image/${obj.key}`,
+        imageUrl: `${origin}/image/${obj.key}`,
         overlord: head?.customMetadata?.overlord || 'unknown',
         date: head?.customMetadata?.date || '',
         size: obj.size,
@@ -357,12 +354,13 @@ async function handleContact(request: Request, env: Env): Promise<Response> {
 }
 
 async function handleImage(key: string, env: Env): Promise<Response> {
-  const object = await env.GALLERY_BUCKET.get(key);
+  const decodedKey = decodeURIComponent(key);
+  const object = await env.GALLERY_BUCKET.get(decodedKey);
   if (!object) {
-    return json({ error: 'Image not found' }, 404);
+    return json({ error: 'Image not found', key: decodedKey }, 404);
   }
 
-  const filename = key.split('/').pop() || 'image.png';
+  const filename = decodedKey.split('/').pop() || 'image.png';
   return new Response(object.body, {
     headers: {
       'Content-Type': object.httpMetadata?.contentType || 'image/png',
