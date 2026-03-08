@@ -3958,7 +3958,7 @@ setTimeout(function () {
         form.append('xAccount', xAccount);
         form.append('title', title);
 
-        const res = await fetch('/submit', { method: 'POST', body: form });
+        const res = await fetch((window.GALLERY_API_URL || '') + '/submit', { method: 'POST', body: form });
         const data = await res.json();
 
         if (res.ok && data.ok) {
