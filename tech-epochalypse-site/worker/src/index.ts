@@ -103,6 +103,7 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
     const file = formData.get('image') as File | null;
     const overlord = (formData.get('overlord') as string) || 'unknown';
     const xAccount = (formData.get('xAccount') as string) || '';
+    const title = (formData.get('title') as string) || '';
 
     if (!env.AIRTABLE_PAT || !env.AIRTABLE_BASE_ID || !env.AIRTABLE_TABLE_NAME) {
       return json({ error: 'Airtable not configured on server' }, 500);
@@ -145,6 +146,7 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
     // Fields: Title, Image, Overlord, Date, Contributor, Category, Approved
     const fields: Record<string, unknown> = {
       'Name': `${overlord} — ${today}`,
+      'Title': title || `${overlord} — ${today}`,
       'Overlord': overlord,
       'Date': today,
       'Contributor': xAccount || 'Anonymous',
@@ -183,7 +185,7 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
         uploadForm.append('file', blob, `submission.${ext}`);
 
         const uploadRes = await fetch(
-          `https://content.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}/${record.id}/Image/uploadAttachment`,
+          `https://content.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${record.id}/Image/uploadAttachment`,
           {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${env.AIRTABLE_PAT}` },

@@ -44,13 +44,14 @@ module.exports = async (req, res) => {
     const parts = parseMultipart(body, boundary);
     const overlord = getFieldValue(parts, 'overlord') || 'unknown';
     const xAccount = getFieldValue(parts, 'xAccount') || '';
+    const title = getFieldValue(parts, 'title') || '';
     const imagePart = parts.find(p => p.name === 'image');
 
     const today = new Date().toISOString().split('T')[0];
 
     // Create Airtable record
     const fields = {
-      'Title': `${overlord} — ${today}`,
+      'Title': title || `${overlord} — ${today}`,
       'Overlord': overlord,
       'Submission Date': today,
       'X Account': xAccount || 'Anonymous',
@@ -97,7 +98,7 @@ module.exports = async (req, res) => {
         const uploadBody = Buffer.concat([preamble, imagePart.data, epilogue]);
 
         const uploadRes = await fetch(
-          `https://content.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}/${record.id}/Image/uploadAttachment`,
+          `https://content.airtable.com/v0/${AIRTABLE_BASE_ID}/${record.id}/Image/uploadAttachment`,
           {
             method: 'POST',
             headers: {
