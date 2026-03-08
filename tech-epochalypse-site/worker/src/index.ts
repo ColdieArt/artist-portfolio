@@ -144,7 +144,7 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
     // Build Airtable record WITHOUT image first — attach image separately
     // Fields: Title, Image, Overlord, Date, Contributor, Category, Approved
     const fields: Record<string, unknown> = {
-      'Title': `${overlord} — ${today}`,
+      'Name': `${overlord} — ${today}`,
       'Overlord': overlord,
       'Date': today,
       'Contributor': xAccount || 'Anonymous',
