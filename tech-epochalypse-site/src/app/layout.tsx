@@ -32,6 +32,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.transientlabs.xyz" />
         <link
           rel="stylesheet"
           crossOrigin="anonymous"
@@ -39,7 +42,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-black text-bone">
-        <Script id="tl-config" strategy="beforeInteractive">
+        <Script id="tl-config" strategy="afterInteractive">
           {`window.tlConfig = {
             mode: "dark",
             appName: "KnowYourOverlord.art",
@@ -50,7 +53,7 @@ export default function RootLayout({
         <Script
           id="tl-embeds"
           src="https://cdn.transientlabs.xyz/embeds/v1.7.0/index.js"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
         <div className="grain-overlay" />
         <div className="scanline" />
