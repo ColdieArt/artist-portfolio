@@ -50,7 +50,7 @@ module.exports = async (req, res) => {
 
     // Create Airtable record
     const fields = {
-      'Title': `${overlord} — ${today}`,
+      'Name': `${overlord} — ${today}`,
       'Overlord': overlord,
       'Date': today,
       'Contributor': xAccount || 'Anonymous',
