@@ -10,7 +10,9 @@
     }
   },
   "rewrites": [
-    { "source": "/submit", "destination": "/api/submit" }
+    { "source": "/submit", "destination": "/api/submit" },
+    { "source": "/gallery", "destination": "/api/gallery" },
+    { "source": "/upload", "destination": "/api/upload" }
   ],
   "headers": [
     {

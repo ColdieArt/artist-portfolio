@@ -3,7 +3,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Gallery API — update this URL after deploying the Cloudflare Worker -->
-  <script>window.GALLERY_API_URL = 'https://te-gallery-api.coldieart.workers.dev';</script>
+  <script>window.GALLERY_API_URL = '';</script>
   <!-- Airtable submission handled server-side by the worker -->
   <script type="importmap">
     {
@@ -4208,7 +4208,7 @@ setTimeout(function () {
         const blob = await (await fetch(dataUrl)).blob();
 
         // Upload image + create Airtable record in one request via Cloudflare Worker
-        const WORKER_URL = window.GALLERY_API_URL || 'https://te-gallery-api.coldieart.workers.dev';
+        const WORKER_URL = window.GALLERY_API_URL || window.location.origin;
         const form = new FormData();
         form.append('image', blob, 'export.png');
         form.append('overlord', OVERLORD_NAME);
