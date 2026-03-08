@@ -48,7 +48,6 @@ module.exports = async (req, res) => {
     if (imagePart && !imageUrl) {
       const WORKER_URL = process.env.GALLERY_WORKER_URL || 'https://te-gallery-api.coldieart.workers.dev';
       try {
-        const FormData = (await import('node-fetch')).default ? null : null;
         // Build a new multipart body to forward to the worker
         const workerBoundary = '----VercelForward' + Date.now();
         const imageCt = imagePart.contentType || 'image/png';

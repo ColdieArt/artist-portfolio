@@ -41,16 +41,49 @@ module.exports = async (req, res) => {
     const overlord = getFieldValue(parts, 'overlord') || 'unknown';
     const xAccount = getFieldValue(parts, 'xAccount') || '';
     const title = getFieldValue(parts, 'title') || '';
-    const imageUrl = getFieldValue(parts, 'imageUrl') || '';
+    let imageUrl = getFieldValue(parts, 'imageUrl') || '';
+
+    // If client sent an image file, upload it to R2 via the Cloudflare Worker
+    const imagePart = parts.find(p => p.name === 'image' && p.filename);
+    if (imagePart && !imageUrl) {
+      const WORKER_URL = process.env.GALLERY_WORKER_URL || 'https://te-gallery-api.coldieart.workers.dev';
+      try {
+        // Build a new multipart body to forward to the worker
+        const workerBoundary = '----VercelForward' + Date.now();
+        const imageCt = imagePart.contentType || 'image/png';
+        const workerBody = Buffer.concat([
+          Buffer.from(`--${workerBoundary}\r\nContent-Disposition: form-data; name="image"; filename="${imagePart.filename}"\r\nContent-Type: ${imageCt}\r\n\r\n`),
+          imagePart.data,
+          Buffer.from(`\r\n--${workerBoundary}\r\nContent-Disposition: form-data; name="overlord"\r\n\r\n${overlord}`),
+          Buffer.from(`\r\n--${workerBoundary}--\r\n`),
+        ]);
+
+        const uploadRes = await fetch(WORKER_URL + '/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': `multipart/form-data; boundary=${workerBoundary}` },
+          body: workerBody,
+        });
+
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json();
+          imageUrl = uploadData.url || '';
+        } else {
+          console.warn('Worker upload returned', uploadRes.status, '— continuing without image');
+        }
+      } catch (uploadErr) {
+        console.warn('Worker upload failed — continuing without image:', uploadErr.message);
+      }
+    }
 
     const today = new Date().toISOString().split('T')[0];
 
-    // Create Airtable record — image was already uploaded to R2 by the client
     const fields = {
+      'Name': `${overlord} — ${today}`,
       'Title': title || `${overlord} — ${today}`,
       'Overlord': overlord,
-      'Submission Date': today,
-      'X Account': xAccount || 'Anonymous',
+      'Date': today,
+      'Contributor': xAccount || 'Anonymous',
+      'Category': 'general submission',
     };
 
     if (imageUrl) {
@@ -91,7 +124,6 @@ module.exports = async (req, res) => {
 function parseMultipart(body, boundary) {
   const parts = [];
   const boundaryBuf = Buffer.from(`--${boundary}`);
-  const endBuf = Buffer.from(`--${boundary}--`);
 
   let start = indexOf(body, boundaryBuf, 0);
   if (start === -1) return parts;
