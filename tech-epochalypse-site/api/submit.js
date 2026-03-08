@@ -50,33 +50,16 @@ module.exports = async (req, res) => {
     const today = new Date().toISOString().split('T')[0];
 
     // Upload image to R2 via the Cloudflare Worker
+    // Forward the raw multipart body as-is — the Worker parses formData natively
     let imageUrl = '';
     if (imagePart && imagePart.data.length > 0) {
       try {
-        const ext = (imagePart.contentType || 'image/png').includes('png') ? 'png' : 'jpg';
-        const filename = `export.${ext}`;
-        const uploadBoundary = '----R2Upload' + Date.now();
-
-        const preamble = Buffer.from(
-          `--${uploadBoundary}\r\n` +
-          `Content-Disposition: form-data; name="image"; filename="${filename}"\r\n` +
-          `Content-Type: ${imagePart.contentType || 'image/png'}\r\n\r\n`
-        );
-        const overlordField = Buffer.from(
-          `\r\n--${uploadBoundary}\r\n` +
-          `Content-Disposition: form-data; name="overlord"\r\n\r\n` +
-          overlord
-        );
-        const epilogue = Buffer.from(`\r\n--${uploadBoundary}--\r\n`);
-        const uploadBody = Buffer.concat([preamble, imagePart.data, overlordField, epilogue]);
-
         const r2Res = await fetch(`${WORKER_URL}/upload`, {
           method: 'POST',
           headers: {
-            'Content-Type': `multipart/form-data; boundary=${uploadBoundary}`,
-            'Content-Length': String(uploadBody.length),
+            'Content-Type': contentType,
           },
-          body: new Uint8Array(uploadBody),
+          body: body,
         });
 
         if (r2Res.ok) {
