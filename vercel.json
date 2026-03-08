@@ -12,7 +12,8 @@
   "rewrites": [
     { "source": "/submit", "destination": "/api/submit" },
     { "source": "/gallery", "destination": "/api/gallery" },
-    { "source": "/upload", "destination": "/api/upload" }
+    { "source": "/upload", "destination": "/api/upload" },
+    { "source": "/image/:path*", "destination": "/api/image?key=exports/:path*" }
   ],
   "headers": [
     {

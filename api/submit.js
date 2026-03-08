@@ -1,16 +1,26 @@
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+
+const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || '8cd572b8af641d3f03353b7cd96a1a78';
+const R2_BUCKET = process.env.R2_BUCKET_NAME || 'te-gallery';
+
+function getS3Client() {
+  return new S3Client({
+    region: 'auto',
+    endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: process.env.R2_ACCESS_KEY_ID,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+    },
+  });
+}
+
 module.exports = async (req, res) => {
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method === 'OPTIONS') return res.status(204).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const AIRTABLE_PAT = process.env.AIRTABLE_PAT || process.env.AIRTABLE_TOKEN;
   const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
@@ -18,6 +28,10 @@ module.exports = async (req, res) => {
 
   if (!AIRTABLE_PAT || !AIRTABLE_BASE_ID) {
     return res.status(500).json({ error: 'Airtable not configured on server' });
+  }
+
+  if (!process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY) {
+    return res.status(500).json({ error: 'R2 credentials not configured on server' });
   }
 
   try {
@@ -41,38 +55,37 @@ module.exports = async (req, res) => {
     const overlord = getFieldValue(parts, 'overlord') || 'unknown';
     const xAccount = getFieldValue(parts, 'xAccount') || '';
     const title = getFieldValue(parts, 'title') || '';
-    let imageUrl = getFieldValue(parts, 'imageUrl') || '';
 
-    // If client sent an image file, upload it to R2 via the Cloudflare Worker
+    // Upload image directly to R2 via S3 API
+    let imageUrl = '';
     const imagePart = parts.find(p => p.name === 'image' && p.filename);
-    if (imagePart && !imageUrl) {
-      const WORKER_URL = process.env.GALLERY_WORKER_URL || 'https://te-gallery-api.coldieart.workers.dev';
-      try {
-        // Build a new multipart body to forward to the worker
-        const workerBoundary = '----VercelForward' + Date.now();
-        const imageCt = imagePart.contentType || 'image/png';
-        const workerBody = Buffer.concat([
-          Buffer.from(`--${workerBoundary}\r\nContent-Disposition: form-data; name="image"; filename="${imagePart.filename}"\r\nContent-Type: ${imageCt}\r\n\r\n`),
-          imagePart.data,
-          Buffer.from(`\r\n--${workerBoundary}\r\nContent-Disposition: form-data; name="overlord"\r\n\r\n${overlord}`),
-          Buffer.from(`\r\n--${workerBoundary}--\r\n`),
-        ]);
-
-        const uploadRes = await fetch(WORKER_URL + '/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': `multipart/form-data; boundary=${workerBoundary}` },
-          body: workerBody,
-        });
-
-        if (uploadRes.ok) {
-          const uploadData = await uploadRes.json();
-          imageUrl = uploadData.url || '';
-        } else {
-          console.warn('Worker upload returned', uploadRes.status, '— continuing without image');
-        }
-      } catch (uploadErr) {
-        console.warn('Worker upload failed — continuing without image:', uploadErr.message);
+    if (imagePart && imagePart.data.length > 0) {
+      if (imagePart.data.length > 5 * 1024 * 1024) {
+        return res.status(400).json({ error: 'File too large (max 5MB)' });
       }
+
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const ext = (imagePart.contentType || '').includes('png') ? 'png' : 'jpg';
+      const key = `exports/${id}.${ext}`;
+      const imgContentType = imagePart.contentType || 'image/png';
+
+      const s3 = getS3Client();
+      await s3.send(new PutObjectCommand({
+        Bucket: R2_BUCKET,
+        Key: key,
+        Body: imagePart.data,
+        ContentType: imgContentType,
+        Metadata: {
+          overlord,
+          date: new Date().toISOString().split('T')[0],
+          uploadedat: new Date().toISOString(),
+        },
+      }));
+
+      // Build a public image URL served through our own API
+      const host = req.headers['x-forwarded-host'] || req.headers.host || 'knowyouroverlord.art';
+      const proto = req.headers['x-forwarded-proto'] || 'https';
+      imageUrl = `${proto}://${host}/api/image?key=${encodeURIComponent(key)}`;
     }
 
     const today = new Date().toISOString().split('T')[0];
@@ -112,11 +125,10 @@ module.exports = async (req, res) => {
     }
 
     const record = await airtableRes.json();
-
     return res.status(200).json({ ok: true, record: { id: record.id }, imageUrl });
   } catch (e) {
     console.error('Submit error:', e);
-    return res.status(500).json({ error: 'Submission failed' });
+    return res.status(500).json({ error: 'Submission failed', details: e.message });
   }
 };
 
@@ -124,32 +136,26 @@ module.exports = async (req, res) => {
 function parseMultipart(body, boundary) {
   const parts = [];
   const boundaryBuf = Buffer.from(`--${boundary}`);
-  const endBuf = Buffer.from(`--${boundary}--`);
 
   let start = indexOf(body, boundaryBuf, 0);
   if (start === -1) return parts;
 
   while (true) {
-    // Move past boundary + CRLF
     start += boundaryBuf.length;
-    if (body.slice(start, start + 2).toString() === '--') break; // end boundary
-    start += 2; // skip CRLF
+    if (body.slice(start, start + 2).toString() === '--') break;
+    start += 2;
 
-    // Find end of headers (double CRLF)
     const headerEnd = indexOf(body, Buffer.from('\r\n\r\n'), start);
     if (headerEnd === -1) break;
 
     const headerStr = body.slice(start, headerEnd).toString();
     const dataStart = headerEnd + 4;
 
-    // Find next boundary
     const nextBoundary = indexOf(body, boundaryBuf, dataStart);
     if (nextBoundary === -1) break;
 
-    // Data ends 2 bytes before next boundary (CRLF)
     const data = body.slice(dataStart, nextBoundary - 2);
 
-    // Parse headers
     const nameMatch = headerStr.match(/name="([^"]+)"/);
     const filenameMatch = headerStr.match(/filename="([^"]+)"/);
     const ctMatch = headerStr.match(/Content-Type:\s*(.+)/i);
@@ -176,10 +182,7 @@ function indexOf(buf, search, fromIndex) {
   for (let i = fromIndex; i <= buf.length - search.length; i++) {
     let found = true;
     for (let j = 0; j < search.length; j++) {
-      if (buf[i + j] !== search[j]) {
-        found = false;
-        break;
-      }
+      if (buf[i + j] !== search[j]) { found = false; break; }
     }
     if (found) return i;
   }
