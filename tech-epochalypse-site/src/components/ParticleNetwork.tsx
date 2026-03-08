@@ -28,9 +28,13 @@ export default function ParticleNetwork() {
     let animationId: number
     let particles: Particle[] = []
     const PARTICLE_COUNT = 45
-    const CONNECTION_DISTANCE = 120
+    const CONNECTION_DISTANCE_SQ = 120 * 120 // Squared to avoid sqrt
+    const MOUSE_DISTANCE_SQ = 180 * 180
     const MOUSE = { x: -1000, y: -1000 }
     let time = 0
+    let lastFrameTime = 0
+    const FRAME_INTERVAL = 1000 / 20 // Cap at 20fps for background effect
+    let isVisible = true
 
     const resize = () => {
       canvas.width = window.innerWidth
@@ -60,17 +64,17 @@ export default function ParticleNetwork() {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       time += 0.005
 
-      // Draw connections - thin white lines
+      // Draw connections - use squared distance to avoid sqrt
+      ctx.lineWidth = 0.5
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x
           const dy = particles[i].y - particles[j].y
-          const dist = Math.sqrt(dx * dx + dy * dy)
+          const distSq = dx * dx + dy * dy
 
-          if (dist < CONNECTION_DISTANCE) {
-            const alpha = (1 - dist / CONNECTION_DISTANCE) * 0.06
+          if (distSq < CONNECTION_DISTANCE_SQ) {
+            const alpha = (1 - Math.sqrt(distSq) / 120) * 0.06
             ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`
-            ctx.lineWidth = 0.5
             ctx.beginPath()
             ctx.moveTo(particles[i].x, particles[i].y)
             ctx.lineTo(particles[j].x, particles[j].y)
@@ -81,11 +85,10 @@ export default function ParticleNetwork() {
         // Mouse connections
         const mdx = particles[i].x - MOUSE.x
         const mdy = particles[i].y - MOUSE.y
-        const mDist = Math.sqrt(mdx * mdx + mdy * mdy)
-        if (mDist < 180) {
-          const alpha = (1 - mDist / 180) * 0.15
+        const mDistSq = mdx * mdx + mdy * mdy
+        if (mDistSq < MOUSE_DISTANCE_SQ) {
+          const alpha = (1 - Math.sqrt(mDistSq) / 180) * 0.15
           ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`
-          ctx.lineWidth = 0.5
           ctx.beginPath()
           ctx.moveTo(particles[i].x, particles[i].y)
           ctx.lineTo(MOUSE.x, MOUSE.y)
@@ -93,16 +96,14 @@ export default function ParticleNetwork() {
         }
       }
 
-      // Draw particles - either dots or pixelated blocks
+      // Draw particles
       for (const p of particles) {
-        // Parallax z-depth offset
         const parallaxX = Math.sin(time + p.z * 0.02) * (p.z * 0.15)
         const parallaxY = Math.cos(time * 0.7 + p.z * 0.03) * (p.z * 0.1)
         const drawX = p.x + parallaxX
         const drawY = p.y + parallaxY
 
         if (p.isPixelBlock) {
-          // Pixelated rectangle blocks - drifting corrupted data
           const flicker = Math.sin(time * 3 + p.z) > 0.7 ? 0.15 : p.opacity * 0.6
           ctx.fillStyle = `rgba(255, 255, 255, ${flicker})`
           ctx.fillRect(
@@ -112,7 +113,6 @@ export default function ParticleNetwork() {
             p.blockH
           )
         } else {
-          // Small dots
           ctx.beginPath()
           ctx.arc(drawX, drawY, p.size, 0, Math.PI * 2)
           ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`
@@ -139,10 +139,16 @@ export default function ParticleNetwork() {
       }
     }
 
-    const loop = () => {
+    const loop = (timestamp: number) => {
+      if (!isVisible) return
+      animationId = requestAnimationFrame(loop)
+
+      // Throttle to 20fps
+      if (timestamp - lastFrameTime < FRAME_INTERVAL) return
+      lastFrameTime = timestamp
+
       update()
       draw()
-      animationId = requestAnimationFrame(loop)
     }
 
     const handleMouse = (e: MouseEvent) => {
@@ -150,20 +156,32 @@ export default function ParticleNetwork() {
       MOUSE.y = e.clientY
     }
 
-    resize()
-    createParticles()
-    loop()
+    const handleVisibility = () => {
+      isVisible = !document.hidden
+      if (isVisible) {
+        lastFrameTime = 0
+        animationId = requestAnimationFrame(loop)
+      }
+    }
 
-    window.addEventListener('resize', () => {
+    const handleResize = () => {
       resize()
       createParticles()
-    })
+    }
+
+    resize()
+    createParticles()
+    animationId = requestAnimationFrame(loop)
+
+    window.addEventListener('resize', handleResize)
     window.addEventListener('mousemove', handleMouse)
+    document.addEventListener('visibilitychange', handleVisibility)
 
     return () => {
       cancelAnimationFrame(animationId)
-      window.removeEventListener('resize', resize)
+      window.removeEventListener('resize', handleResize)
       window.removeEventListener('mousemove', handleMouse)
+      document.removeEventListener('visibilitychange', handleVisibility)
     }
   }, [])
 

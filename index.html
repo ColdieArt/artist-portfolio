@@ -12,6 +12,10 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:creator" content="@Coldie">
     <link rel="canonical" href="https://artist-portfolio-two-eta.vercel.app/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.youtube.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Schema.org JSON-LD Structured Data for AI Optimization -->
@@ -1228,8 +1232,11 @@
                 <h2>Filthy Fiat</h2>
             </div>
             <div class="featured-layout">
-                <div class="featured-video">
-                    <iframe src="https://www.youtube.com/embed/Eti8Lp3nVGQ" title="Filthy Fiat -- Currency Art by Coldie" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+                <div class="featured-video" id="yt-facade" style="cursor:pointer;position:relative;">
+                    <img src="https://i.ytimg.com/vi/Eti8Lp3nVGQ/hqdefault.jpg" alt="Filthy Fiat -- Currency Art by Coldie" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+                    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:68px;height:48px;background:rgba(0,0,0,0.7);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><polygon points="6,3 20,12 6,21"/></svg>
+                    </div>
                 </div>
                 <div class="featured-text">
                     <h3>The Tale of Hyperinflation</h3>
@@ -1922,6 +1929,12 @@
             });
         });
 
+        // ==================== YOUTUBE FACADE (click to load) ====================
+        document.getElementById('yt-facade').addEventListener('click', function() {
+            this.innerHTML = '<iframe src="https://www.youtube.com/embed/Eti8Lp3nVGQ?autoplay=1" title="Filthy Fiat -- Currency Art by Coldie" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+            this.style.cursor = 'default';
+        });
+
         // ==================== INTERSECTION OBSERVER ====================
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -1940,20 +1953,60 @@
             let mouseX = 0.5, mouseY = 0.5;
             let targetX = 0.5, targetY = 0.5;
             let animFrame;
+            let lastDrawTime = 0;
+            const FPS_CAP = 20; // 20fps is plenty for a subtle background effect
+            const FRAME_INTERVAL = 1000 / FPS_CAP;
+            let isPageVisible = true;
+            let needsRedraw = true;
+            let lastScrollY = 0;
 
             function resize() {
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
+                needsRedraw = true;
             }
             resize();
             window.addEventListener('resize', resize);
 
+            // Pause animation when tab is hidden
+            document.addEventListener('visibilitychange', () => {
+                isPageVisible = !document.hidden;
+                if (isPageVisible) {
+                    needsRedraw = true;
+                    lastDrawTime = 0;
+                    animFrame = requestAnimationFrame(draw);
+                }
+            });
+
             document.addEventListener('mousemove', (e) => {
                 targetX = e.clientX / window.innerWidth;
                 targetY = e.clientY / window.innerHeight;
+                needsRedraw = true;
             });
 
-            function draw() {
+            window.addEventListener('scroll', () => {
+                needsRedraw = true;
+            }, { passive: true });
+
+            function draw(timestamp) {
+                if (!isPageVisible) return;
+
+                animFrame = requestAnimationFrame(draw);
+
+                // Throttle to FPS_CAP
+                if (timestamp - lastDrawTime < FRAME_INTERVAL) return;
+
+                // Skip if nothing changed
+                const scrollY = window.scrollY || 0;
+                const dx = Math.abs(targetX - mouseX);
+                const dy = Math.abs(targetY - mouseY);
+                const scrollDelta = Math.abs(scrollY - lastScrollY);
+                if (!needsRedraw && dx < 0.001 && dy < 0.001 && scrollDelta < 1) return;
+
+                lastDrawTime = timestamp;
+                lastScrollY = scrollY;
+                needsRedraw = false;
+
                 mouseX += (targetX - mouseX) * 0.06;
                 mouseY += (targetY - mouseY) * 0.06;
 
@@ -1966,14 +2019,16 @@
 
                 const maxRadius = Math.sqrt(w * w + h * h) * 0.75;
                 const rings = 28;
-                const scrollOffset = (window.scrollY || 0) * 0.0008;
+                const scrollOffset = scrollY * 0.0008;
+
+                // Batch draws by color to reduce state changes
+                const batches = {};
 
                 for (let r = 0; r < rings; r++) {
                     const ringProgress = (r + 1) / rings;
                     const radius = maxRadius * ringProgress;
                     const dotCount = Math.floor(10 + r * 6);
 
-                    // Varied dot sizes: alternate between small, medium, large
                     const sizeVariant = r % 3;
                     let dotSize;
                     if (sizeVariant === 0) dotSize = 1 + ringProgress * 2.5;
@@ -1981,32 +2036,26 @@
                     else dotSize = 3 + ringProgress * 7;
 
                     const alpha = 0.12 + ringProgress * 0.35;
-
-                    // Alternate between 50% grey and 80% grey
                     const grey = r % 2 === 0 ? 128 : 204;
                     const color = `rgba(${grey}, ${grey}, ${grey}, ${alpha})`;
 
                     const dir = r % 2 === 0 ? 1 : -1;
-                    const rotationOffset = dir * (mouseX - 0.5) * 0.5
-                        + scrollOffset * dir;
+                    const rotationOffset = dir * (mouseX - 0.5) * 0.5 + scrollOffset * dir;
+
+                    if (!batches[color]) batches[color] = [];
 
                     for (let d = 0; d < dotCount; d++) {
-                        const angle = (d / dotCount) * Math.PI * 2
-                            + ringProgress * 0.8
-                            + rotationOffset;
+                        const angle = (d / dotCount) * Math.PI * 2 + ringProgress * 0.8 + rotationOffset;
                         const x = cx + Math.cos(angle) * radius;
                         const y = cy + Math.sin(angle) * radius;
 
                         if (x < -10 || x > w + 10 || y < -10 || y > h + 10) continue;
 
-                        ctx.beginPath();
-                        ctx.arc(x, y, dotSize, 0, Math.PI * 2);
-                        ctx.fillStyle = color;
-                        ctx.fill();
+                        batches[color].push(x, y, dotSize);
                     }
                 }
 
-                // Extra scattered halftone dots of various sizes
+                // Extra scattered halftone dots
                 const seed = Math.floor(scrollOffset * 100);
                 for (let i = 0; i < 80; i++) {
                     const px = ((i * 7919 + seed) % 1000) / 1000;
@@ -2016,32 +2065,53 @@
                     const size = ((i * 3571) % 5) + 1.5;
                     const grey = (i % 2 === 0) ? 128 : 204;
                     const a = 0.08 + ((i * 2347) % 100) / 500;
-
-                    ctx.beginPath();
-                    ctx.arc(x, y, size, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(${grey}, ${grey}, ${grey}, ${a})`;
-                    ctx.fill();
+                    const color = `rgba(${grey}, ${grey}, ${grey}, ${a})`;
+                    if (!batches[color]) batches[color] = [];
+                    batches[color].push(x, y, size);
                 }
 
-                animFrame = requestAnimationFrame(draw);
+                // Draw all dots batched by color (fewer fillStyle changes)
+                for (const color in batches) {
+                    ctx.fillStyle = color;
+                    const dots = batches[color];
+                    for (let i = 0; i < dots.length; i += 3) {
+                        ctx.beginPath();
+                        ctx.arc(dots[i], dots[i+1], dots[i+2], 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
             }
 
-            draw();
+            animFrame = requestAnimationFrame(draw);
         })();
     </script>
     <script>
         (function() {
             var bgs = [
                 'background/bg-assange.png',
-                'background/bg-buffett.png',
                 'background/bg-buterin.png',
-                'background/bg-snowden.png'
+                'background/bg-snowden.png',
+                'background/bg-buffett.png'
             ];
             var pick = bgs[Math.floor(Math.random() * bgs.length)];
-            document.body.style.setProperty('--random-bg', 'url(' + pick + ')');
-            var style = document.createElement('style');
-            style.textContent = 'body::after { background-image: url(' + pick + '); }';
-            document.head.appendChild(style);
+            // Defer background image load so it doesn't block page render
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(function() {
+                    var img = new Image();
+                    img.onload = function() {
+                        var style = document.createElement('style');
+                        style.textContent = 'body::after { background-image: url(' + pick + '); }';
+                        document.head.appendChild(style);
+                    };
+                    img.src = pick;
+                });
+            } else {
+                setTimeout(function() {
+                    var style = document.createElement('style');
+                    style.textContent = 'body::after { background-image: url(' + pick + '); }';
+                    document.head.appendChild(style);
+                }, 100);
+            }
         })();
     </script>
 </body>
