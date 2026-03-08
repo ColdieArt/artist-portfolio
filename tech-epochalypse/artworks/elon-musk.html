@@ -4339,7 +4339,7 @@ setTimeout(function () {
         const blob = await resp.blob();
 
         // Step 1: Upload image directly to R2 via Cloudflare Worker
-        const WORKER_URL = window.GALLERY_API_URL || 'https://te-gallery-api.coldieart.workers.dev';
+        const WORKER_URL = window.GALLERY_API_URL || window.location.origin;
         const imgForm = new FormData();
         imgForm.append('image', blob, 'export.png');
         imgForm.append('overlord', OVERLORD_NAME);
