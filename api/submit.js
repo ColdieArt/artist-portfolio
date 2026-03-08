@@ -64,7 +64,7 @@ module.exports = async (req, res) => {
 
         if (r2Res.ok) {
           const r2Data = await r2Res.json();
-          imageUrl = r2Data.url || '';
+          imageUrl = r2Data.url || (r2Data.key ? `${WORKER_URL}/image/${r2Data.key}` : '');
           console.log('R2 upload success, imageUrl:', imageUrl);
         } else {
           const errText = await r2Res.text();
