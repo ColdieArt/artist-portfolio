@@ -4269,8 +4269,13 @@ setTimeout(function () {
         imgForm.append('image', blob, 'export.png');
         imgForm.append('overlord', OVERLORD_NAME);
         const r2Res = await fetch(WORKER_URL + '/upload', { method: 'POST', body: imgForm });
+        if (!r2Res.ok) {
+          const r2Err = await r2Res.json().catch(() => ({}));
+          throw new Error(r2Err.error || 'Image upload to R2 failed');
+        }
         const r2Data = await r2Res.json();
         const imageUrl = r2Data.url || '';
+        if (!imageUrl) throw new Error('R2 upload returned no image URL');
 
         // Step 2: Submit metadata + R2 URL to Airtable via Vercel API
         const form = new FormData();
@@ -4300,7 +4305,7 @@ setTimeout(function () {
         }
       } catch (e) {
         judgmentStatus.style.color = '#e66';
-        judgmentStatus.textContent = 'NETWORK ERROR — TRY AGAIN';
+        judgmentStatus.textContent = e.message || 'NETWORK ERROR — TRY AGAIN';
         judgmentBtn.disabled = false;
         judgmentBtn.style.opacity = '1';
       }
