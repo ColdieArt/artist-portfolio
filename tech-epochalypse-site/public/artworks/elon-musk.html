@@ -4379,7 +4379,7 @@ setTimeout(function () {
         form.append('xAccount', xAccount);
         form.append('title', title);
 
-        const res = await fetch('/submit', { method: 'POST', body: form });
+        const res = await fetch('/api/submit', { method: 'POST', body: form });
         const data = await res.json();
 
         if (res.ok && data.ok) {
