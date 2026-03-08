@@ -1,5 +1,3 @@
-const { Readable } = require('stream');
-
 module.exports = async (req, res) => {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,6 +19,8 @@ module.exports = async (req, res) => {
   if (!AIRTABLE_PAT || !AIRTABLE_BASE_ID) {
     return res.status(500).json({ error: 'Airtable not configured on server' });
   }
+
+  const WORKER_URL = process.env.GALLERY_WORKER_URL || 'https://te-gallery-api.coldieart.workers.dev';
 
   try {
     // Parse multipart form data manually using the busboy-free approach
@@ -49,13 +49,57 @@ module.exports = async (req, res) => {
 
     const today = new Date().toISOString().split('T')[0];
 
-    // Create Airtable record
+    // Upload image to R2 via the Cloudflare Worker
+    let imageUrl = '';
+    if (imagePart && imagePart.data.length > 0) {
+      try {
+        const ext = (imagePart.contentType || 'image/png').includes('png') ? 'png' : 'jpg';
+        const filename = `export.${ext}`;
+        const uploadBoundary = '----R2Upload' + Date.now();
+
+        const preamble = Buffer.from(
+          `--${uploadBoundary}\r\n` +
+          `Content-Disposition: form-data; name="image"; filename="${filename}"\r\n` +
+          `Content-Type: ${imagePart.contentType || 'image/png'}\r\n\r\n`
+        );
+        const overlordPart = Buffer.from(
+          `\r\n--${uploadBoundary}\r\n` +
+          `Content-Disposition: form-data; name="overlord"\r\n\r\n` +
+          overlord
+        );
+        const epilogue = Buffer.from(`\r\n--${uploadBoundary}--\r\n`);
+        const uploadBody = Buffer.concat([preamble, imagePart.data, overlordPart, epilogue]);
+
+        const r2Res = await fetch(`${WORKER_URL}/upload`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': `multipart/form-data; boundary=${uploadBoundary}`,
+          },
+          body: uploadBody,
+        });
+
+        if (r2Res.ok) {
+          const r2Data = await r2Res.json();
+          imageUrl = r2Data.url || '';
+        } else {
+          console.error('R2 upload failed:', r2Res.status, await r2Res.text());
+        }
+      } catch (e) {
+        console.error('R2 upload exception:', e);
+      }
+    }
+
+    // Create Airtable record with R2 image URL
     const fields = {
       'Title': title || `${overlord} — ${today}`,
       'Overlord': overlord,
       'Submission Date': today,
       'X Account': xAccount || 'Anonymous',
     };
+
+    if (imageUrl) {
+      fields['Image URL'] = imageUrl;
+    }
 
     const airtableRes = await fetch(
       `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}`,
@@ -80,47 +124,7 @@ module.exports = async (req, res) => {
 
     const record = await airtableRes.json();
 
-    // Attach image to Airtable record if provided
-    let imageAttached = false;
-    if (imagePart && imagePart.data.length > 0 && record.id) {
-      try {
-        const ext = (imagePart.contentType || 'image/png').includes('png') ? 'png' : 'jpg';
-        const uploadBoundary = '----AirtableUpload' + Date.now();
-        const filename = `submission.${ext}`;
-
-        // Build multipart body for Airtable upload
-        const preamble = Buffer.from(
-          `--${uploadBoundary}\r\n` +
-          `Content-Disposition: form-data; name="file"; filename="${filename}"\r\n` +
-          `Content-Type: ${imagePart.contentType || 'image/png'}\r\n\r\n`
-        );
-        const epilogue = Buffer.from(`\r\n--${uploadBoundary}--\r\n`);
-        const uploadBody = Buffer.concat([preamble, imagePart.data, epilogue]);
-
-        const uploadRes = await fetch(
-          `https://content.airtable.com/v0/${AIRTABLE_BASE_ID}/${record.id}/Image/uploadAttachment`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${AIRTABLE_PAT}`,
-              'Content-Type': `multipart/form-data; boundary=${uploadBoundary}`,
-            },
-            body: uploadBody,
-          }
-        );
-
-        if (uploadRes.ok) {
-          imageAttached = true;
-        } else {
-          const errBody = await uploadRes.text();
-          console.error('Airtable image upload failed:', uploadRes.status, errBody);
-        }
-      } catch (e) {
-        console.error('Image upload exception:', e);
-      }
-    }
-
-    return res.status(200).json({ ok: true, record: { id: record.id }, imageAttached });
+    return res.status(200).json({ ok: true, record: { id: record.id }, imageUrl });
   } catch (e) {
     console.error('Submit error:', e);
     return res.status(500).json({ error: 'Submission failed' });
