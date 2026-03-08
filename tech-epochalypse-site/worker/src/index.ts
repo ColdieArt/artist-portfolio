@@ -80,7 +80,9 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
     const ext = file.type === 'image/png' ? 'png' : 'jpg';
     const key = `exports/${id}.${ext}`;
 
-    await env.GALLERY_BUCKET.put(key, file.stream(), {
+    const fileBytes = await file.arrayBuffer();
+
+    await env.GALLERY_BUCKET.put(key, fileBytes, {
       httpMetadata: { contentType: file.type || 'image/png' },
       customMetadata: {
         overlord,
@@ -93,6 +95,7 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
     const imageUrl = `${workerUrl.origin}/image/${key}`;
     return json({ ok: true, id, key, url: imageUrl });
   } catch (e) {
+    console.error('Upload error:', e);
     return json({ error: 'Upload failed' }, 500);
   }
 }

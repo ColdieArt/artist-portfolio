@@ -20,10 +20,8 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: 'Airtable not configured on server' });
   }
 
-  const WORKER_URL = process.env.GALLERY_WORKER_URL || 'https://te-gallery-api.coldieart.workers.dev';
-
   try {
-    // Parse multipart form data manually using the busboy-free approach
+    // Parse multipart form data
     const chunks = [];
     await new Promise((resolve, reject) => {
       req.on('data', (chunk) => chunks.push(chunk));
@@ -32,7 +30,6 @@ module.exports = async (req, res) => {
     });
     const body = Buffer.concat(chunks);
 
-    // Extract boundary from content-type header
     const contentType = req.headers['content-type'] || '';
     const boundaryMatch = contentType.match(/boundary=(?:"([^"]+)"|([^\s;]+))/);
     if (!boundaryMatch) {
@@ -40,42 +37,15 @@ module.exports = async (req, res) => {
     }
     const boundary = boundaryMatch[1] || boundaryMatch[2];
 
-    // Parse multipart fields
     const parts = parseMultipart(body, boundary);
     const overlord = getFieldValue(parts, 'overlord') || 'unknown';
     const xAccount = getFieldValue(parts, 'xAccount') || '';
     const title = getFieldValue(parts, 'title') || '';
-    const imagePart = parts.find(p => p.name === 'image');
+    const imageUrl = getFieldValue(parts, 'imageUrl') || '';
 
     const today = new Date().toISOString().split('T')[0];
 
-    // Upload image to R2 via the Cloudflare Worker
-    // Forward the raw multipart body as-is — the Worker parses formData natively
-    let imageUrl = '';
-    if (imagePart && imagePart.data.length > 0) {
-      try {
-        const r2Res = await fetch(`${WORKER_URL}/upload`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': contentType,
-          },
-          body: body,
-        });
-
-        if (r2Res.ok) {
-          const r2Data = await r2Res.json();
-          imageUrl = r2Data.url || (r2Data.key ? `${WORKER_URL}/image/${r2Data.key}` : '');
-          console.log('R2 upload success, imageUrl:', imageUrl);
-        } else {
-          const errText = await r2Res.text();
-          console.error('R2 upload failed:', r2Res.status, errText);
-        }
-      } catch (e) {
-        console.error('R2 upload exception:', e.message || e);
-      }
-    }
-
-    // Create Airtable record with R2 image URL
+    // Create Airtable record — image was already uploaded to R2 by the client
     const fields = {
       'Title': title || `${overlord} — ${today}`,
       'Overlord': overlord,

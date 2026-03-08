@@ -2755,15 +2755,28 @@ setTimeout(() => {
         const dataUrl = r.domElement.toDataURL('image/png');
         const blob = await (await fetch(dataUrl)).blob();
 
-        // Send everything to the worker — it handles R2 upload + Airtable
+        // Step 1: Upload image directly to R2 via Cloudflare Worker
+        const WORKER_URL = window.GALLERY_API_URL || 'https://te-gallery-api.coldieart.workers.dev';
+        const imgForm = new FormData();
+        imgForm.append('image', blob, 'export.png');
+        imgForm.append('overlord', OVERLORD_NAME);
+        const r2Res = await fetch(WORKER_URL + '/upload', { method: 'POST', body: imgForm });
+        if (!r2Res.ok) {
+          const r2Err = await r2Res.json().catch(() => ({}));
+          throw new Error(r2Err.error || 'Image upload to R2 failed');
+        }
+        const r2Data = await r2Res.json();
+        const imageUrl = r2Data.url || '';
+        if (!imageUrl) throw new Error('R2 upload returned no image URL');
+
+        // Step 2: Submit metadata + R2 URL to Airtable via Vercel API
         const form = new FormData();
-        form.append('image', blob, 'export.png');
         form.append('overlord', OVERLORD_NAME);
         form.append('xAccount', xAccount);
         form.append('title', title);
+        if (imageUrl) form.append('imageUrl', imageUrl);
 
-        const SUBMIT_URL = (window.GALLERY_API_URL || 'https://te-gallery-api.coldieart.workers.dev') + '/submit';
-        const res = await fetch(SUBMIT_URL, { method: 'POST', body: form });
+        const res = await fetch('/api/submit', { method: 'POST', body: form });
         const data = await res.json();
 
         if (res.ok && data.ok) {
@@ -2784,7 +2797,7 @@ setTimeout(() => {
         }
       } catch (e) {
         judgmentStatus.style.color = '#e66';
-        judgmentStatus.textContent = 'NETWORK ERROR — TRY AGAIN';
+        judgmentStatus.textContent = e.message || 'NETWORK ERROR — TRY AGAIN';
         judgmentBtn.disabled = false;
         judgmentBtn.style.opacity = '1';
       }
