@@ -91,16 +91,14 @@ module.exports = async (req, res) => {
     const today = new Date().toISOString().split('T')[0];
 
     const fields = {
-      'Name': `${overlord} — ${today}`,
       'Title': title || `${overlord} — ${today}`,
       'Overlord': overlord,
-      'Date': today,
-      'Contributor': xAccount || 'Anonymous',
-      'Category': 'general submission',
+      'Submission Date': today,
+      'X Account': xAccount || 'Anonymous',
     };
 
     if (imageUrl) {
-      fields['Image'] = [{ url: imageUrl }];
+      fields['Image URL'] = imageUrl;
     }
 
     const airtableRes = await fetch(
