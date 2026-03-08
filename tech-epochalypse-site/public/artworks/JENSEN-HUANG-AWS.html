@@ -3817,7 +3817,8 @@ setTimeout(function () {
         form.append('xAccount', xAccount);
         form.append('title', title);
 
-        const res = await fetch('/api/submit', { method: 'POST', body: form });
+        const SUBMIT_URL = (window.GALLERY_API_URL || 'https://te-gallery-api.coldieart.workers.dev') + '/submit';
+        const res = await fetch(SUBMIT_URL, { method: 'POST', body: form });
         const data = await res.json();
 
         if (res.ok && data.ok) {
