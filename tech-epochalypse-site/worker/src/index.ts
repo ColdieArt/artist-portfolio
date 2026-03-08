@@ -156,9 +156,9 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
       'Category': 'general submission',
     };
 
-    // Store the R2 URL directly — no flaky attachment uploads
+    // Send as Airtable attachment so the Image field (attachment type) is populated
     if (imageUrl) {
-      fields['Image URL'] = imageUrl;
+      fields['Image'] = [{ url: imageUrl }];
     }
 
     const airtableRes = await fetch(
