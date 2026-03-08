@@ -4207,12 +4207,21 @@ setTimeout(function () {
         const dataUrl = r.domElement.toDataURL('image/png');
         const blob = await (await fetch(dataUrl)).blob();
 
-        // Send everything to the worker — it handles R2 upload + Airtable
+        // Step 1: Upload image directly to R2 via Cloudflare Worker
+        const WORKER_URL = window.GALLERY_API_URL || 'https://te-gallery-api.coldieart.workers.dev';
+        const imgForm = new FormData();
+        imgForm.append('image', blob, 'export.png');
+        imgForm.append('overlord', OVERLORD_NAME);
+        const r2Res = await fetch(WORKER_URL + '/upload', { method: 'POST', body: imgForm });
+        const r2Data = await r2Res.json();
+        const imageUrl = r2Data.url || '';
+
+        // Step 2: Submit metadata + R2 URL to Airtable via Vercel API
         const form = new FormData();
-        form.append('image', blob, 'export.png');
         form.append('overlord', OVERLORD_NAME);
         form.append('xAccount', xAccount);
         form.append('title', title);
+        if (imageUrl) form.append('imageUrl', imageUrl);
 
         const res = await fetch('/api/submit', { method: 'POST', body: form });
         const data = await res.json();
