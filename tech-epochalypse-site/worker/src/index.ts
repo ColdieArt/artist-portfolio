@@ -148,17 +148,14 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
     // Build Airtable record with R2 image URL in a text field
     // Fields: Title, Image URL, Overlord, Date, Contributor, Category
     const fields: Record<string, unknown> = {
-      'Name': `${overlord} — ${today}`,
       'Title': title || `${overlord} — ${today}`,
       'Overlord': overlord,
-      'Date': today,
-      'Contributor': xAccount || 'Anonymous',
-      'Category': 'general submission',
+      'Submission Date': today,
+      'X Account': xAccount || 'Anonymous',
     };
 
-    // Send as Airtable attachment so the Image field (attachment type) is populated
     if (imageUrl) {
-      fields['Image'] = [{ url: imageUrl }];
+      fields['Image URL'] = imageUrl;
     }
 
     const airtableRes = await fetch(
