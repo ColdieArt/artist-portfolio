@@ -62,30 +62,33 @@ module.exports = async (req, res) => {
           `Content-Disposition: form-data; name="image"; filename="${filename}"\r\n` +
           `Content-Type: ${imagePart.contentType || 'image/png'}\r\n\r\n`
         );
-        const overlordPart = Buffer.from(
+        const overlordField = Buffer.from(
           `\r\n--${uploadBoundary}\r\n` +
           `Content-Disposition: form-data; name="overlord"\r\n\r\n` +
           overlord
         );
         const epilogue = Buffer.from(`\r\n--${uploadBoundary}--\r\n`);
-        const uploadBody = Buffer.concat([preamble, imagePart.data, overlordPart, epilogue]);
+        const uploadBody = Buffer.concat([preamble, imagePart.data, overlordField, epilogue]);
 
         const r2Res = await fetch(`${WORKER_URL}/upload`, {
           method: 'POST',
           headers: {
             'Content-Type': `multipart/form-data; boundary=${uploadBoundary}`,
+            'Content-Length': String(uploadBody.length),
           },
-          body: uploadBody,
+          body: new Uint8Array(uploadBody),
         });
 
         if (r2Res.ok) {
           const r2Data = await r2Res.json();
           imageUrl = r2Data.url || '';
+          console.log('R2 upload success, imageUrl:', imageUrl);
         } else {
-          console.error('R2 upload failed:', r2Res.status, await r2Res.text());
+          const errText = await r2Res.text();
+          console.error('R2 upload failed:', r2Res.status, errText);
         }
       } catch (e) {
-        console.error('R2 upload exception:', e);
+        console.error('R2 upload exception:', e.message || e);
       }
     }
 
