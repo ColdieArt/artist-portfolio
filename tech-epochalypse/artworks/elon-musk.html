@@ -875,6 +875,8 @@ let greyscalePass, thresholdPass, darkPass, pixelationPass, glitchPass, matrixPa
 
 let trashButtonElement = null; // Global reference for the trash button UI element
 let exportButtonElement = null; // Global reference for the export button UI element
+let uploadButtonElement = null; // Global reference for the upload button UI element
+let uploadedImageCounter = 0; // Counter for unique IDs on uploaded images
 let leftUiContainer = null; // Global reference for the left UI container
 let arrowContainer = null; // Global reference for the arrow container
 
@@ -3448,6 +3450,98 @@ function init() {
     exportButtonElement = createExportButton();
     leftUiContainer.appendChild(exportButtonElement);
 
+    // Create hidden file input for image uploads
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/jpeg, image/png';
+    fileInput.style.display = 'none';
+    fileInput.id = 'image-upload-input';
+    document.body.appendChild(fileInput);
+
+    // Create and append the UPLOAD button below EXPORT
+    const createUploadButton = () => {
+        const button = document.createElement('button');
+        button.id = 'upload-button';
+        button.innerHTML = 'UPLOAD';
+        button.style.cssText = `
+            background-color: white;
+            color: black;
+            padding: 4px;
+            margin-top: 2px;
+            border: 0.5px solid white;
+            border-radius: 0;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 7px;
+            outline: none;
+            white-space: nowrap;
+            box-sizing: border-box;
+        `;
+        button.onclick = (event) => {
+            event.stopPropagation();
+            fileInput.click();
+        };
+        return button;
+    };
+    uploadButtonElement = createUploadButton();
+    leftUiContainer.appendChild(uploadButtonElement);
+
+    // Handle file selection: load image as texture and add as draggable piece
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        // Validate file type
+        if (!file.type.match(/^image\/(jpeg|png)$/)) {
+            console.warn('Only JPEG and PNG images are supported.');
+            fileInput.value = '';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                // Create Three.js texture from uploaded image
+                const texture = new THREE.Texture(img);
+                texture.colorSpace = THREE.SRGBColorSpace;
+                texture.minFilter = THREE.LinearFilter;
+                texture.magFilter = THREE.LinearFilter;
+                texture.generateMipmaps = false;
+                texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                texture.needsUpdate = true;
+
+                const baseScale = 0.005;
+                const planeWidth = img.width * baseScale;
+                const planeHeight = img.height * baseScale;
+                const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+                const material = new THREE.MeshBasicMaterial({
+                    map: texture,
+                    transparent: true,
+                    side: THREE.DoubleSide,
+                    alphaTest: 0.5
+                });
+                const mesh = new THREE.Mesh(geometry, material);
+
+                // Place in front center at a mid-depth layer
+                const layer = 6;
+                mesh.position.set(0, 0, (layer - 1) * depthStep);
+                mesh.userData.currentLayer = layer;
+                mesh.userData.initialPosition = mesh.position.clone();
+                mesh.userData.initialLayer = layer;
+                mesh.userData.id = 'uploaded_' + (++uploadedImageCounter);
+                mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
+                mesh.userData.isUploaded = true;
+
+                scene.add(mesh);
+                draggableObjects.push(mesh);
+                cameraAnimationTargets.push(mesh);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        // Reset file input so the same file can be re-uploaded
+        fileInput.value = '';
+    });
+
     // Add the thin black rectangle with a down-facing arrow below the TRASH button
     arrowContainer = document.createElement('div'); // Assign to global variable
     arrowContainer.id = 'arrow-container'; // Add ID for better targeting
@@ -3484,6 +3578,7 @@ function init() {
             leftUiContainer.style.top = '-190px'; // Hide it, revealing only the arrow
             trashButtonElement.style.display = 'none'; // Hide TRASH button
             exportButtonElement.style.display = 'none'; // Hide EXPORT button
+            uploadButtonElement.style.display = 'none'; // Hide UPLOAD button
             const panel = document.getElementById('export-panel');
             if (panel) panel.classList.remove('open'); // Close export panel
             arrowContainer.style.top = '0px'; // Keep arrow at the top
@@ -3492,15 +3587,17 @@ function init() {
             leftUiContainer.style.top = '10px'; // Show it
             trashButtonElement.style.display = 'block'; // Show TRASH button
             exportButtonElement.style.display = 'block'; // Show EXPORT button
+            uploadButtonElement.style.display = 'block'; // Show UPLOAD button
             arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; // Move arrow below the UI
             arrowSpan.innerHTML = '&#x25B2'; // Change to up arrow
         }
     };
 
-    // Initial state setup for TRASH/EXPORT buttons and arrowContainer
+    // Initial state setup for TRASH/EXPORT/UPLOAD buttons and arrowContainer
     // When the page loads, the left UI is hidden, so these buttons should be hidden.
     trashButtonElement.style.display = 'none';
     exportButtonElement.style.display = 'none';
+    uploadButtonElement.style.display = 'none';
 
     window.addEventListener('resize', onWindowResize);
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
