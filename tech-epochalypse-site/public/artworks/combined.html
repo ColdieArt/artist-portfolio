@@ -4825,7 +4825,7 @@ setTimeout(function () {
     <!-- Video duration row (hidden — PNG only) -->
     <div class="export-row" id="duration-row" style="display:none;">
       <label>Duration (sec)</label>
-      <input type="number" id="export-duration" value="5" min="1" max="60" step="1">
+      <input type="number" id="export-duration" value="11" min="1" max="60" step="1">
     </div>
 
     <button class="export-btn" id="export-start-btn">EXPORT</button>
@@ -4843,7 +4843,7 @@ setTimeout(function () {
         ── OR ──
       </div>
 
-      <!-- Submission type toggle: Image or 10s Video -->
+      <!-- Submission type toggle: Image or 11s Video -->
       <div style="margin: 0 0 15px 0;">
         <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 8px; letter-spacing: 1px;">SUBMISSION TYPE</label>
         <div id="submit-type-toggle" style="display: flex; gap: 0; border: 1px solid #333;">
@@ -4873,10 +4873,10 @@ setTimeout(function () {
             letter-spacing: 1px;
             cursor: pointer;
             transition: background 0.2s, color 0.2s;
-          ">10s VIDEO</button>
+          ">11s VIDEO</button>
         </div>
         <div id="video-hint" style="display: none; margin-top: 6px; font-family: monospace; font-size: 10px; color: #666; line-height: 1.4;">
-          Records a 10-second MP4 of your live artwork
+          Records an 11-second MP4 of your live artwork
         </div>
       </div>
 
@@ -5017,13 +5017,13 @@ setTimeout(function () {
         submitTypeImage.style.background = '#111';
         submitTypeImage.style.color = '#666';
         videoHint.style.display = 'block';
-        judgmentBtn.textContent = 'RECORD & SUBMIT 10s VIDEO';
+        judgmentBtn.textContent = 'RECORD & SUBMIT 11s VIDEO';
       }
     }
     submitTypeImage.onclick = () => setSubmitType('image');
     submitTypeVideo.onclick = () => setSubmitType('video');
 
-    // ── Record 10-second MP4 from canvas ──
+    // ── Record 11-second MP4 from canvas ──
     function recordVideoBlob() {
       return new Promise(async (resolve, reject) => {
         const r = await getRenderer();
@@ -5067,7 +5067,7 @@ setTimeout(function () {
               const payload = new Uint8Array(totalLen);
               let off = 0;
               for (const a of arrays) { payload.set(a, off); off += a.length; }
-              const mp4 = buildMP4(payload, 5000, canvas.width, canvas.height);
+              const mp4 = buildMP4(payload, 11000, canvas.width, canvas.height);
               resolve(new Blob([mp4], { type: 'video/mp4' }));
             }
           } catch (err) {
@@ -5079,7 +5079,7 @@ setTimeout(function () {
         mr.onerror = () => reject(new Error('Recording failed'));
 
         mr.start(100);
-        setTimeout(() => { mr.stop(); }, 5000);
+        setTimeout(() => { mr.stop(); }, 11000);
       });
     }
 
@@ -5096,7 +5096,7 @@ setTimeout(function () {
         const form = new FormData();
 
         if (submitType === 'video') {
-          judgmentStatus.textContent = 'RECORDING 10s…';
+          judgmentStatus.textContent = 'RECORDING 11s…';
           blob = await recordVideoBlob();
           form.append('video', blob, 'export.mp4');
         } else {
