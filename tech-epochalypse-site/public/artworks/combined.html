@@ -3546,85 +3546,6 @@ function init() {
     trashButtonElement = createTrashButton(); // Store reference to the button element
     leftUiContainer.appendChild(trashButtonElement);
 
-    // Create hidden file input and UPLOAD button for importing user images
-    let uploadCounter = 0;
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/jpeg, image/png';
-    fileInput.style.display = 'none';
-    document.body.appendChild(fileInput);
-
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas2d = document.createElement('canvas');
-                canvas2d.width = img.width;
-                canvas2d.height = img.height;
-                const ctx = canvas2d.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-                const texture = new THREE.CanvasTexture(canvas2d);
-                texture.colorSpace = THREE.SRGBColorSpace;
-                texture.minFilter = THREE.LinearFilter;
-                texture.magFilter = THREE.LinearFilter;
-                texture.generateMipmaps = false;
-                texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-
-                const uploadBaseScale = 0.005;
-                const planeWidth = img.width * uploadBaseScale;
-                const planeHeight = img.height * uploadBaseScale;
-                const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-                const material = new THREE.MeshBasicMaterial({
-                    map: texture,
-                    transparent: true,
-                    side: THREE.DoubleSide,
-                    alphaTest: 0.01
-                });
-                const mesh = new THREE.Mesh(geometry, material);
-                const layer = 12;
-                mesh.position.set(0, 0, (layer - 1) * depthStep);
-                mesh.userData.currentLayer = layer;
-                mesh.userData.initialPosition = mesh.position.clone();
-                mesh.userData.initialLayer = layer;
-                mesh.userData.id = 'userUpload_' + (uploadCounter++);
-                mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
-                mesh.userData.isUserUpload = true;
-                scene.add(mesh);
-                draggableObjects.push(mesh);
-                cameraAnimationTargets.push(mesh);
-            };
-            img.src = evt.target.result;
-        };
-        reader.readAsDataURL(file);
-        // Reset so the same file can be re-uploaded
-        fileInput.value = '';
-    });
-
-    const uploadBtn = document.createElement('button');
-    uploadBtn.id = 'upload-button';
-    uploadBtn.textContent = 'UPLOAD';
-    uploadBtn.style.cssText = `
-        background-color: black;
-        color: white;
-        padding: 4px;
-        margin-top: 10px;
-        border: 0.5px solid white;
-        border-radius: 0;
-        cursor: pointer;
-        font-family: monospace;
-        font-size: 7px;
-        outline: none;
-        white-space: nowrap;
-        box-sizing: border-box;
-    `;
-    uploadBtn.onmouseover = () => { uploadBtn.style.borderColor = '#777'; };
-    uploadBtn.onmouseout = () => { uploadBtn.style.borderColor = 'white'; };
-    uploadBtn.onclick = (event) => { event.stopPropagation(); fileInput.click(); };
-    leftUiContainer.appendChild(uploadBtn);
-
     // Create and append the EXPORT button below TRASH
     const createExportButton = () => {
         const button = document.createElement('button');
@@ -3653,11 +3574,11 @@ function init() {
         button.id = 'upload-button';
         button.innerHTML = 'UPLOAD';
         button.style.cssText = `
-            background-color: white;
-            color: black;
+            background-color: black;
+            color: white;
             padding: 4px;
-            margin-top: 2px;
-            border: 0.5px solid white;
+            margin-top: 10px;
+            border: none;
             border-radius: 0;
             cursor: pointer;
             font-family: monospace;
