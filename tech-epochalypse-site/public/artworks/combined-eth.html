@@ -5089,7 +5089,7 @@ animate();
     <!-- Video duration row (hidden — PNG only) -->
     <div class="export-row" id="duration-row" style="display:none;">
       <label>Duration (sec)</label>
-      <input type="number" id="export-duration" value="5" min="1" max="60" step="1">
+      <input type="number" id="export-duration" value="10" min="1" max="60" step="1">
     </div>
 
     <button class="export-btn" id="export-start-btn">EXPORT</button>
@@ -5333,7 +5333,7 @@ animate();
               const payload = new Uint8Array(totalLen);
               let off = 0;
               for (const a of arrays) { payload.set(a, off); off += a.length; }
-              const mp4 = buildMP4(payload, 5000, canvas.width, canvas.height);
+              const mp4 = buildMP4(payload, 10000, canvas.width, canvas.height);
               resolve(new Blob([mp4], { type: 'video/mp4' }));
             }
           } catch (err) {
@@ -5345,7 +5345,7 @@ animate();
         mr.onerror = () => reject(new Error('Recording failed'));
 
         mr.start(100);
-        setTimeout(() => { mr.stop(); }, 5000);
+        setTimeout(() => { mr.stop(); }, 10000);
       });
     }
 
@@ -5422,6 +5422,8 @@ animate();
     // ── Toggle panel ──
     toggle.onclick = (e) => {
       e.stopPropagation();
+      // Don't close panel while recording
+      if (startBtn.classList.contains('recording')) return;
       if (panel.classList.contains('open')) {
         panel.classList.remove('open');
       } else {
@@ -5433,6 +5435,8 @@ animate();
       }
     };
     document.addEventListener('click', (e) => {
+      // Don't close panel while recording — let user interact with artwork
+      if (startBtn.classList.contains('recording')) return;
       if (!panel.contains(e.target) && e.target !== toggle) panel.classList.remove('open');
     });
 
@@ -5457,16 +5461,6 @@ animate();
       startBtn.disabled = on;
       fmtSel.disabled   = on;
       durInput.disabled  = on;
-    }
-    function triggerDownload(blob, filename) {
-      const url = URL.createObjectURL(blob);
-      const a   = document.createElement('a');
-      a.href    = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
     // Wait for window.renderer to be available (exposed after 1 s by the app)
     function getRenderer() {
@@ -5525,17 +5519,10 @@ animate();
       } else if (window.scene && window.camera) {
         r.render(window.scene, window.camera);
       }
-      r.domElement.toBlob((blob) => {
-        if (blob) {
-          triggerDownload(blob, 'combined-coldie.png');
-          saveToGallery(r.domElement);
-          setStatus('PNG saved ✓ — added to gallery', 'active');
-          showPostModal();
-        } else {
-          setStatus('Capture failed', 'error');
-        }
-        lockUI(false);
-      }, 'image/png');
+      saveToGallery(r.domElement);
+      setStatus('PNG saved ✓ — added to gallery', 'active');
+      showPostModal();
+      lockUI(false);
     }
     // ── Video (MP4) export ──────────────────────────────────────────
     // Strategy: try native H.264 MP4 first (Safari, newer Chrome).
@@ -5577,9 +5564,8 @@ animate();
       mr.onstop = async () => {
         try {
           if (nativeMp4) {
-            // Browser produced a native MP4 – download directly
+            // Browser produced a native MP4 – upload to R2 only
             const blob = new Blob(chunks, { type: 'video/mp4' });
-            triggerDownload(blob, 'combined-coldie.mp4');
             setStatus(`MP4 saved ✓  (${(blob.size/1024/1024).toFixed(2)} MB)`, 'active');
             showPostModal();
           } else {
@@ -5600,17 +5586,12 @@ animate();
             // Build a minimal but valid fragmented MP4 shell
             const mp4 = buildMP4(payload, duration, canvas.width, canvas.height);
             const blob = new Blob([mp4], { type: 'video/mp4' });
-            triggerDownload(blob, 'combined-coldie.mp4');
             setStatus(`MP4 saved ✓  (${(blob.size/1024/1024).toFixed(2)} MB)`, 'active');
             showPostModal();
           }
         } catch (err) {
-          // Ultimate fallback: save raw recording as-is
           console.error('MP4 mux error', err);
-          const ext  = nativeMp4 ? 'mp4' : 'webm';
-          const blob = new Blob(chunks, { type: usedMime });
-          triggerDownload(blob, `combined-coldie.${ext}`);
-          setStatus(`Saved as .${ext} (mux failed)`, 'active');
+          setStatus('Video export failed', 'error');
         }
         lockUI(false);
         startBtn.classList.remove('recording');
