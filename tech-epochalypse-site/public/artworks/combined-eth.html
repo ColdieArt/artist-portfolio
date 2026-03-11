@@ -261,25 +261,22 @@
     /* ─── POST TO X MODAL ─── */
     #post-modal {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.85);
+      bottom: 10px;
+      left: 10px;
       display: none;
-      justify-content: center;
-      align-items: center;
       z-index: 300;
     }
-    #post-modal.open { display: flex; }
+    #post-modal.open { display: block; }
 
     #post-modal-content {
-      background: #000;
-      border: 2px solid #fff;
-      padding: 30px 40px;
+      background: rgba(0,0,0,0.92);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 4px;
+      padding: 20px 24px;
       text-align: center;
       font-family: monospace;
       color: #fff;
+      max-width: 320px;
     }
 
     #post-modal h2 {
@@ -5107,7 +5104,7 @@ animate();
         ── OR ──
       </div>
 
-      <!-- Submission type toggle: Image or 5s Video -->
+      <!-- Submission type toggle: Image or 10s Video -->
       <div style="margin: 0 0 15px 0;">
         <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 8px; letter-spacing: 1px;">SUBMISSION TYPE</label>
         <div id="submit-type-toggle" style="display: flex; gap: 0; border: 1px solid #333;">
@@ -5137,10 +5134,10 @@ animate();
             letter-spacing: 1px;
             cursor: pointer;
             transition: background 0.2s, color 0.2s;
-          ">5s VIDEO</button>
+          ">10s VIDEO</button>
         </div>
         <div id="video-hint" style="display: none; margin-top: 6px; font-family: monospace; font-size: 10px; color: #666; line-height: 1.4;">
-          Records a 5-second MP4 of your live artwork
+          Records a 10-second MP4 of your live artwork
         </div>
       </div>
 
@@ -5245,8 +5242,6 @@ animate();
     // ── Show POST TO X modal ──
     function showPostModal() {
       modal.classList.add('open');
-      // Close export panel
-      panel.classList.remove('open');
     }
 
     // Wire modal button to open Twitter compose page with pre-filled text
@@ -5283,13 +5278,13 @@ animate();
         submitTypeImage.style.background = '#111';
         submitTypeImage.style.color = '#666';
         videoHint.style.display = 'block';
-        judgmentBtn.textContent = 'RECORD & SUBMIT 5s VIDEO';
+        judgmentBtn.textContent = 'RECORD & SUBMIT 10s VIDEO';
       }
     }
     submitTypeImage.onclick = () => setSubmitType('image');
     submitTypeVideo.onclick = () => setSubmitType('video');
 
-    // ── Record 5-second MP4 from canvas ──
+    // ── Record 10-second MP4 from canvas ──
     function recordVideoBlob() {
       return new Promise(async (resolve, reject) => {
         const r = await getRenderer();
@@ -5362,7 +5357,7 @@ animate();
         const form = new FormData();
 
         if (submitType === 'video') {
-          judgmentStatus.textContent = 'RECORDING 5s…';
+          judgmentStatus.textContent = 'RECORDING 10s…';
           blob = await recordVideoBlob();
           form.append('video', blob, 'export.mp4');
         } else {
