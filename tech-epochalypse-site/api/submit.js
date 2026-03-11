@@ -102,11 +102,6 @@ module.exports = async (req, res) => {
       fields['Image URL'] = imageUrl;
     }
 
-    const isVideo = imageUrl.endsWith('.mp4');
-    if (isVideo) {
-      fields['Media Type'] = 'video';
-    }
-
     const airtableRes = await fetch(
       `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}`,
       {

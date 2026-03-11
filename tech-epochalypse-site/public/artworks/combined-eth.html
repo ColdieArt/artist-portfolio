@@ -348,6 +348,46 @@
       display: inline-block;
       background: #222;
     }
+    .eth-wallet-form {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(100,200,255,0.15);
+    }
+    .eth-wallet-form input[type="text"] {
+      background: #111;
+      color: #ddd;
+      border: 1px solid rgba(100,200,255,0.25);
+      border-radius: 3px;
+      padding: 6px 8px;
+      font-family: monospace;
+      font-size: 10px;
+      outline: none;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .eth-wallet-form input[type="text"]:focus {
+      border-color: rgba(100,200,255,0.6);
+    }
+    .eth-wallet-form input[type="text"]::placeholder {
+      color: #667;
+    }
+    #eth-load-btn {
+      background: rgba(100,200,255,0.15);
+      color: #8cf;
+      border: 1px solid rgba(100,200,255,0.3);
+      border-radius: 3px;
+      padding: 6px 10px;
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #eth-load-btn:hover { background: rgba(100,200,255,0.25); }
+    #eth-load-btn:disabled { opacity: 0.5; cursor: wait; }
   </style>
 </head>
 <body>
@@ -4806,36 +4846,54 @@ init();
 animate();
 
 // ═══════════════════════════════════════════════════════════════════
-// ETH ERC-721 TOKEN INTEGRATION (TEST MODE — hardcoded wallet, no wallet connect)
+// ETH ERC-721 TOKEN INTEGRATION
 // ═══════════════════════════════════════════════════════════════════
-(async function loadEthTokens() {
-    // ── Config ──
-    const ETH_CONTRACT = '0xb4683204f6d349faf1b4a6a480e253a7c6a6af5d';
-    const ETH_WALLET   = '0xd0c877b474cd51959931a7f70d7a6c60f50cdae7';
-    const RPC_URL      = 'https://eth.llamarpc.com';  // Public RPC, no key needed
+(function setupEthLoader() {
+    const RPC_URL = 'https://eth.llamarpc.com';
 
-    // Minimal ERC-721 ABI — only the read functions we need
+    // Full ABI covering both enumerable and non-enumerable ERC-721
     const ERC721_ABI = [
         'function balanceOf(address owner) view returns (uint256)',
         'function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)',
         'function tokenURI(uint256 tokenId) view returns (string)',
         'function name() view returns (string)',
-        'function symbol() view returns (string)'
+        'function ownerOf(uint256 tokenId) view returns (address)'
     ];
 
     // ── Status Panel ──
     const panel = document.createElement('div');
     panel.id = 'eth-status-panel';
-    panel.innerHTML = '<div class="panel-title">ETH TOKEN LOADER</div>';
+    panel.innerHTML = `
+        <div class="panel-title">ETH TOKEN LOADER</div>
+        <div class="eth-wallet-form">
+            <input type="text" id="eth-wallet-input" placeholder="Paste wallet address (0x...)" spellcheck="false" />
+            <input type="text" id="eth-contract-input" placeholder="Contract address (0x...)" spellcheck="false" />
+            <button id="eth-load-btn">LOAD TOKENS</button>
+        </div>
+        <div id="eth-log-area"></div>
+    `;
     document.body.appendChild(panel);
+
+    const logArea = document.getElementById('eth-log-area');
+    const walletInput = document.getElementById('eth-wallet-input');
+    const contractInput = document.getElementById('eth-contract-input');
+    const loadBtn = document.getElementById('eth-load-btn');
+
+    // Pre-fill with defaults
+    walletInput.value = '0xd0c877b474cd51959931a7f70d7a6c60f50cdae7';
+    contractInput.value = '0xb4683204f6d349faf1b4a6a480e253a7c6a6af5d';
 
     function ethLog(msg, cls = '') {
         const d = document.createElement('div');
         d.className = 'eth-log' + (cls ? ' ' + cls : '');
         d.textContent = msg;
-        panel.appendChild(d);
-        panel.scrollTop = panel.scrollHeight;
+        logArea.appendChild(d);
+        logArea.scrollTop = logArea.scrollHeight;
         console.log('[ETH]', msg);
+    }
+
+    function clearLog() {
+        logArea.innerHTML = '';
     }
 
     // ── Resolve IPFS / Arweave URLs to HTTP gateway URLs ──
@@ -4846,219 +4904,253 @@ animate();
         if (uri.startsWith('ar://'))
             return 'https://arweave.net/' + uri.slice(5);
         if (uri.startsWith('data:'))
-            return uri; // data URI, use as-is
-        return uri; // already HTTP(S)
+            return uri;
+        return uri;
     }
 
-    try {
-        ethLog('Connecting to Ethereum...');
-        const provider = new ethers.JsonRpcProvider(RPC_URL);
-        const contract = new ethers.Contract(ETH_CONTRACT, ERC721_ABI, provider);
-
-        // Get token name
-        let tokenName = 'Unknown';
-        try {
-            tokenName = await contract.name();
-            ethLog('Contract: ' + tokenName, 'success');
-        } catch (e) {
-            ethLog('Could not read token name: ' + e.message, 'error');
+    // ── Remove previously loaded ETH tokens from scene ──
+    function clearEthTokensFromScene() {
+        const toRemove = [];
+        scene.traverse((obj) => {
+            if (obj.userData && obj.userData.ethToken) toRemove.push(obj);
+        });
+        toRemove.forEach((mesh) => {
+            scene.remove(mesh);
+            const dIdx = draggableObjects.indexOf(mesh);
+            if (dIdx !== -1) draggableObjects.splice(dIdx, 1);
+            const cIdx = cameraAnimationTargets.indexOf(mesh);
+            if (cIdx !== -1) cameraAnimationTargets.splice(cIdx, 1);
+            if (mesh.geometry) mesh.geometry.dispose();
+            if (mesh.material) {
+                if (mesh.material.map) mesh.material.map.dispose();
+                mesh.material.dispose();
+            }
+        });
+        // Remove ETH entries from initialAssetConfigs
+        for (let i = initialAssetConfigs.length - 1; i >= 0; i--) {
+            if (initialAssetConfigs[i].ethToken) initialAssetConfigs.splice(i, 1);
         }
+    }
 
-        // Get balance
-        const balance = await contract.balanceOf(ETH_WALLET);
-        const count = Number(balance);
-        ethLog('Wallet holds ' + count + ' token(s)', count > 0 ? 'success' : 'error');
+    async function loadEthTokens(walletAddr, contractAddr) {
+        clearLog();
+        clearEthTokensFromScene();
 
-        if (count === 0) {
-            ethLog('No tokens found. Nothing to load.');
+        // Validate inputs
+        if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddr)) {
+            ethLog('Invalid wallet address. Must be 0x + 40 hex chars.', 'error');
+            return;
+        }
+        if (!/^0x[a-fA-F0-9]{40}$/.test(contractAddr)) {
+            ethLog('Invalid contract address. Must be 0x + 40 hex chars.', 'error');
             return;
         }
 
-        // Cap at 20 tokens for performance
-        const maxTokens = Math.min(count, 20);
-        ethLog('Loading first ' + maxTokens + ' token(s)...');
+        try {
+            ethLog('Connecting to Ethereum...');
+            const provider = new ethers.JsonRpcProvider(RPC_URL);
+            const contract = new ethers.Contract(contractAddr, ERC721_ABI, provider);
 
-        // ── Fetch token IDs ──
-        const tokenIds = [];
-        for (let i = 0; i < maxTokens; i++) {
+            // Get token name (optional — many contracts don't support this)
+            let tokenName = '';
             try {
-                const tokenId = await contract.tokenOfOwnerByIndex(ETH_WALLET, i);
-                tokenIds.push(tokenId);
-                ethLog('  Token ID: ' + tokenId.toString());
-            } catch (e) {
-                // tokenOfOwnerByIndex may not be supported (ERC721Enumerable)
-                ethLog('  tokenOfOwnerByIndex failed at index ' + i + ': ' + e.message, 'error');
-                ethLog('Trying alternative: will attempt tokenURI for IDs 0-999...', 'error');
-                break;
+                tokenName = await contract.name();
+                ethLog('Contract: ' + tokenName, 'success');
+            } catch (_) {
+                ethLog('Connected (contract name not available)');
             }
-        }
 
-        // ── Fallback: if enumerable not supported, try brute-force scan ──
-        if (tokenIds.length === 0) {
-            ethLog('Attempting brute-force token scan (0-999)...');
-            // Try calling ownerOf for a range of token IDs
-            const ownerOfABI = ['function ownerOf(uint256 tokenId) view returns (address)'];
-            const scanContract = new ethers.Contract(ETH_CONTRACT, [...ERC721_ABI, ...ownerOfABI], provider);
-            const walletLower = ETH_WALLET.toLowerCase();
+            // Get balance
+            const balance = await contract.balanceOf(walletAddr);
+            const count = Number(balance);
+            ethLog('Wallet holds ' + count + ' token(s)', count > 0 ? 'success' : 'error');
 
-            // Scan in batches
-            for (let id = 0; id < 1000 && tokenIds.length < maxTokens; id++) {
-                try {
-                    const owner = await scanContract.ownerOf(id);
-                    if (owner.toLowerCase() === walletLower) {
-                        tokenIds.push(BigInt(id));
-                        ethLog('  Found token ID: ' + id + ' (owned by wallet)');
-                    }
-                } catch (_) {
-                    // token doesn't exist, skip
-                }
-            }
-            if (tokenIds.length === 0) {
-                ethLog('No tokens found via scan.', 'error');
+            if (count === 0) {
+                ethLog('No tokens found for this wallet.');
                 return;
             }
-        }
 
-        // ── Fetch metadata + images ──
-        const tokenImages = [];
-        const thumbContainer = document.createElement('div');
-        thumbContainer.style.marginTop = '8px';
-        panel.appendChild(thumbContainer);
+            const maxTokens = Math.min(count, 20);
+            ethLog('Loading ' + maxTokens + ' token(s)...');
 
-        for (const tokenId of tokenIds) {
+            // ── Try ERC721Enumerable first, then fall back to ownerOf scan ──
+            const tokenIds = [];
+            let enumerable = true;
             try {
-                let uri = await contract.tokenURI(tokenId);
-                uri = resolveUrl(uri);
-                ethLog('  Fetching metadata for #' + tokenId.toString() + '...');
-
-                const resp = await fetch(uri);
-                const metadata = await resp.json();
-                const imageUrl = resolveUrl(metadata.image || metadata.image_url);
-
-                if (imageUrl) {
-                    tokenImages.push({
-                        id: 'eth-token-' + tokenId.toString(),
-                        tokenId: tokenId.toString(),
-                        name: metadata.name || ('#' + tokenId.toString()),
-                        imageUrl: imageUrl
-                    });
-
-                    // Show thumbnail
-                    const thumb = document.createElement('img');
-                    thumb.className = 'eth-token-thumb';
-                    thumb.src = imageUrl;
-                    thumb.title = metadata.name || ('#' + tokenId.toString());
-                    thumb.onerror = () => { thumb.style.display = 'none'; };
-                    thumbContainer.appendChild(thumb);
-
-                    ethLog('  Got image: ' + (metadata.name || '#' + tokenId.toString()), 'success');
-                } else {
-                    ethLog('  No image in metadata for #' + tokenId.toString(), 'error');
+                const firstId = await contract.tokenOfOwnerByIndex(walletAddr, 0);
+                tokenIds.push(firstId);
+                // First call worked — contract is enumerable
+                for (let i = 1; i < maxTokens; i++) {
+                    const tokenId = await contract.tokenOfOwnerByIndex(walletAddr, i);
+                    tokenIds.push(tokenId);
                 }
-            } catch (e) {
-                ethLog('  Error fetching token #' + tokenId.toString() + ': ' + e.message, 'error');
+            } catch (_) {
+                enumerable = false;
             }
-        }
 
-        ethLog('─────────────────────────');
-        ethLog('Loaded ' + tokenImages.length + ' token image(s). Adding to scene...', 'success');
+            if (!enumerable) {
+                // Non-enumerable contract — scan ownerOf
+                ethLog('Scanning for owned tokens...');
+                tokenIds.length = 0;
+                const walletLower = walletAddr.toLowerCase();
+                for (let id = 0; id < 1000 && tokenIds.length < maxTokens; id++) {
+                    try {
+                        const owner = await contract.ownerOf(id);
+                        if (owner.toLowerCase() === walletLower) {
+                            tokenIds.push(BigInt(id));
+                            ethLog('  Found token #' + id, 'success');
+                        }
+                    } catch (_) {
+                        // token doesn't exist, skip
+                    }
+                }
+            }
 
-        // ── Add token images to Three.js scene ──
-        const textureLoader = new THREE.TextureLoader();
-        textureLoader.setCrossOrigin('');
-        const baseScale = 0.005;
+            if (tokenIds.length === 0) {
+                ethLog('Could not locate token IDs for this wallet.', 'error');
+                return;
+            }
 
-        // Arrange tokens in a row to the right of existing content
-        const startX = 5.0;  // Start position to the right of the main composition
-        const spacing = 3.0; // Horizontal spacing between tokens
-        const tokenLayer = 8; // Depth layer for tokens
+            ethLog('Found ' + tokenIds.length + ' token(s). Fetching metadata...');
 
-        tokenImages.forEach((token, index) => {
-            const loadTex = (url, cb) => {
-                textureLoader.load(url, (texture) => {
+            // ── Fetch metadata + images ──
+            const tokenImages = [];
+            const thumbContainer = document.createElement('div');
+            thumbContainer.style.marginTop = '8px';
+            logArea.appendChild(thumbContainer);
+
+            for (const tokenId of tokenIds) {
+                try {
+                    let uri = await contract.tokenURI(tokenId);
+                    uri = resolveUrl(uri);
+
+                    const resp = await fetch(uri);
+                    const metadata = await resp.json();
+                    const imageUrl = resolveUrl(metadata.image || metadata.image_url);
+
+                    if (imageUrl) {
+                        const name = metadata.name || ('#' + tokenId.toString());
+                        tokenImages.push({
+                            id: 'eth-token-' + tokenId.toString(),
+                            tokenId: tokenId.toString(),
+                            name: name,
+                            imageUrl: imageUrl
+                        });
+
+                        const thumb = document.createElement('img');
+                        thumb.className = 'eth-token-thumb';
+                        thumb.src = imageUrl;
+                        thumb.title = name;
+                        thumb.onerror = () => { thumb.style.display = 'none'; };
+                        thumbContainer.appendChild(thumb);
+
+                        ethLog('  ' + name, 'success');
+                    } else {
+                        ethLog('  No image in metadata for #' + tokenId.toString(), 'error');
+                    }
+                } catch (e) {
+                    ethLog('  Error fetching #' + tokenId.toString() + ': ' + e.message, 'error');
+                }
+            }
+
+            ethLog('─────────────────────────');
+            ethLog('Adding ' + tokenImages.length + ' image(s) to scene...', 'success');
+
+            // ── Add token images to Three.js scene ──
+            const textureLoader = new THREE.TextureLoader();
+            textureLoader.setCrossOrigin('');
+            const baseScale = 0.005;
+
+            const startX = 5.0;
+            const spacing = 3.0;
+            const tokenLayer = 8;
+
+            tokenImages.forEach((token, index) => {
+                textureLoader.load(token.imageUrl, (texture) => {
                     texture.colorSpace = THREE.SRGBColorSpace;
                     texture.minFilter = THREE.LinearFilter;
                     texture.magFilter = THREE.LinearFilter;
                     texture.generateMipmaps = false;
                     texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-                    cb(texture);
+
+                    const aspectRatio = texture.image.width / texture.image.height;
+                    const planeHeight = 2.5;
+                    const planeWidth = planeHeight * aspectRatio;
+                    const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+                    const material = new THREE.MeshBasicMaterial({
+                        map: texture,
+                        transparent: true,
+                        side: THREE.DoubleSide,
+                        alphaTest: 0.1
+                    });
+                    const mesh = new THREE.Mesh(geometry, material);
+
+                    const col = index % 4;
+                    const row = Math.floor(index / 4);
+                    const x = startX + col * spacing;
+                    const y = 1.0 - row * spacing;
+                    const z = (tokenLayer - 1) * depthStep;
+
+                    mesh.position.set(x, y, z);
+                    mesh.userData.currentLayer = tokenLayer;
+                    mesh.userData.initialPosition = mesh.position.clone();
+                    mesh.userData.initialLayer = tokenLayer;
+                    mesh.userData.id = token.id;
+                    mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
+                    mesh.userData.ethToken = true;
+                    mesh.userData.tokenName = token.name;
+
+                    scene.add(mesh);
+                    draggableObjects.push(mesh);
+                    cameraAnimationTargets.push(mesh);
+
+                    initialAssetConfigs.push({
+                        id: token.id,
+                        type: 'image',
+                        url: token.imageUrl,
+                        initialPosition: mesh.position.clone(),
+                        initialLayer: tokenLayer,
+                        baseScale: baseScale,
+                        scaleFactor: 1.0,
+                        removed: false,
+                        ethToken: true
+                    });
+
+                    ethLog('  Added: ' + token.name, 'success');
                 }, undefined, (err) => {
-                    ethLog('  Texture load failed for ' + token.name + ': ' + err.message, 'error');
+                    ethLog('  Texture load failed for ' + token.name, 'error');
                 });
-            };
-
-            loadTex(token.imageUrl, (texture) => {
-                const aspectRatio = texture.image.width / texture.image.height;
-                const planeHeight = 2.5; // Fixed height for uniformity
-                const planeWidth = planeHeight * aspectRatio;
-                const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-                const material = new THREE.MeshBasicMaterial({
-                    map: texture,
-                    transparent: true,
-                    side: THREE.DoubleSide,
-                    alphaTest: 0.1
-                });
-                const mesh = new THREE.Mesh(geometry, material);
-
-                // Position in a grid: 4 per row
-                const col = index % 4;
-                const row = Math.floor(index / 4);
-                const x = startX + col * spacing;
-                const y = 1.0 - row * spacing;
-                const z = (tokenLayer - 1) * depthStep;
-
-                mesh.position.set(x, y, z);
-                mesh.userData.currentLayer = tokenLayer;
-                mesh.userData.initialPosition = mesh.position.clone();
-                mesh.userData.initialLayer = tokenLayer;
-                mesh.userData.id = token.id;
-                mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
-                mesh.userData.ethToken = true; // Flag as ETH-loaded asset
-                mesh.userData.tokenName = token.name;
-
-                scene.add(mesh);
-                draggableObjects.push(mesh);
-                cameraAnimationTargets.push(mesh);
-
-                // Also store in initialAssetConfigs for reset support
-                initialAssetConfigs.push({
-                    id: token.id,
-                    type: 'image',
-                    url: token.imageUrl,
-                    initialPosition: mesh.position.clone(),
-                    initialLayer: tokenLayer,
-                    baseScale: baseScale,
-                    scaleFactor: 1.0,
-                    removed: false,
-                    ethToken: true
-                });
-
-                ethLog('  Added to scene: ' + token.name, 'success');
             });
-        });
 
-    } catch (e) {
-        ethLog('ETH ERROR: ' + e.message, 'error');
-        console.error('[ETH]', e);
+        } catch (e) {
+            ethLog('Error: ' + e.message, 'error');
+            console.error('[ETH]', e);
+        }
     }
+
+    // ── Wire up the Load button ──
+    loadBtn.addEventListener('click', () => {
+        const wallet = walletInput.value.trim();
+        const contract = contractInput.value.trim();
+        loadBtn.disabled = true;
+        loadBtn.textContent = 'LOADING...';
+        loadEthTokens(wallet, contract).finally(() => {
+            loadBtn.disabled = false;
+            loadBtn.textContent = 'LOAD TOKENS';
+        });
+    });
+
+    // Auto-load on page open with the default values
+    loadEthTokens(walletInput.value.trim(), contractInput.value.trim());
 })();
 
 // Expose for dae hooks
-setTimeout(function () {
-    window.animate = typeof animate == "function" ? animate : () => { };
-    window.camera = typeof camera != "undefined" ? camera : undefined;
-    window.renderer = typeof renderer != "undefined" ? renderer : undefined;
-    window.scene = typeof scene != "undefined" ? scene : undefined;
-    window.composer = typeof composer != "undefined" ? composer : undefined;
-}, 1000)
-    
-    // Expose for dae hooks
     setTimeout(function() {
       window.animate = typeof animate == "function" ? animate : () => {};
       window.camera = typeof camera != "undefined" ? camera : undefined;
       window.renderer = typeof renderer != "undefined" ? renderer : undefined;
       window.scene = typeof scene != "undefined" ? scene : undefined;
-      window.composer = typeof composer != "undefined" ? composer : undefined; 
+      window.composer = typeof composer != "undefined" ? composer : undefined;
     }, 1000)
   </script>
 
