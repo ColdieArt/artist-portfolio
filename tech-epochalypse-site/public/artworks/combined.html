@@ -39,13 +39,19 @@
     }
 
     /* ─── EXPORT PANEL ─── */
-    #export-panel {
+    #export-wrapper {
       position: fixed;
-      bottom: 0;
-      left: 10px;
-      z-index: 201;
+      bottom: 10px;
+      right: 10px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    #export-panel {
       background: rgba(0,0,0,0.92);
       border: 0.5px solid white;
+      border-bottom: none;
       padding: 6px;
       font-family: monospace;
       color: #ccc;
@@ -53,8 +59,6 @@
       display: none;
       flex-direction: column;
       gap: 5px;
-      transform: translateY(-100%);
-      margin-bottom: 4px;
     }
     #export-panel.open { display: flex; }
 
@@ -245,11 +249,9 @@
       font-weight: bold;
       letter-spacing: 1px;
       cursor: pointer;
-      margin-top: 10px;
       white-space: nowrap;
       box-sizing: border-box;
       outline: none;
-      display: none;
     }
     #submit-overlord-btn:hover {
       background: #1a1a1a;
@@ -3590,12 +3592,6 @@ function init() {
     uploadButtonElement = createUploadButton();
     leftUiContainer.appendChild(uploadButtonElement);
 
-    // Create and append the SUBMIT button below UPLOAD
-    const submitBtn = document.createElement('button');
-    submitBtn.id = 'submit-overlord-btn';
-    submitBtn.textContent = 'SUBMIT';
-    leftUiContainer.appendChild(submitBtn);
-
     // Handle file selection: load image as texture and add as draggable piece
     fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
@@ -3689,7 +3685,6 @@ function init() {
             trashButtonElement.style.display = 'none'; // Hide TRASH button
             exportButtonElement.style.display = 'none'; // Hide EXPORT button
             uploadButtonElement.style.display = 'none'; // Hide UPLOAD button
-            submitBtn.style.display = 'none'; // Hide SUBMIT button
             const panel = document.getElementById('export-panel');
             if (panel) panel.classList.remove('open'); // Close export panel
             arrowContainer.style.top = '0px'; // Keep arrow at the top
@@ -3698,7 +3693,6 @@ function init() {
             leftUiContainer.style.top = '10px'; // Show it
             trashButtonElement.style.display = 'block'; // Show TRASH button
             uploadButtonElement.style.display = 'block'; // Show UPLOAD button
-            submitBtn.style.display = 'block'; // Show SUBMIT button
             arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; // Move arrow below the UI
             arrowSpan.innerHTML = '&#x25B2'; // Change to up arrow
         }
@@ -3709,7 +3703,6 @@ function init() {
     trashButtonElement.style.display = 'none';
     exportButtonElement.style.display = 'none';
     uploadButtonElement.style.display = 'none';
-    submitBtn.style.display = 'none';
 
     window.addEventListener('resize', onWindowResize);
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
@@ -4816,24 +4809,27 @@ setTimeout(function () {
   </div>
 
   <!-- ─── EXPORT PANEL HTML ─── -->
-  <div id="export-panel">
-    <div class="panel-title">EXPORT</div>
+  <div id="export-wrapper">
+    <div id="export-panel">
+      <div class="panel-title">EXPORT</div>
 
-    <div class="export-row" style="display:none;">
-      <label>Format</label>
-      <select id="export-format">
-        <option value="png">PNG</option>
-      </select>
+      <div class="export-row" style="display:none;">
+        <label>Format</label>
+        <select id="export-format">
+          <option value="png">PNG</option>
+        </select>
+      </div>
+
+      <!-- Video duration row (hidden — PNG only) -->
+      <div class="export-row" id="duration-row" style="display:none;">
+        <label>Duration (sec)</label>
+        <input type="number" id="export-duration" value="11" min="1" max="60" step="1">
+      </div>
+
+      <button class="export-btn" id="export-start-btn">EXPORT</button>
+      <div class="status-line" id="export-status"></div>
     </div>
-
-    <!-- Video duration row (hidden — PNG only) -->
-    <div class="export-row" id="duration-row" style="display:none;">
-      <label>Duration (sec)</label>
-      <input type="number" id="export-duration" value="11" min="1" max="60" step="1">
-    </div>
-
-    <button class="export-btn" id="export-start-btn">EXPORT</button>
-    <div class="status-line" id="export-status"></div>
+    <button id="submit-overlord-btn">SUBMIT</button>
   </div>
 
   <!-- ─── POST TO X MODAL ─── -->
@@ -4960,8 +4956,8 @@ setTimeout(function () {
       toggle.style.display = 'none';
       const modal = document.getElementById('post-modal');
       if (modal) modal.style.display = 'none';
-      const submitOverlordBtn = document.getElementById('submit-overlord-btn');
-      if (submitOverlordBtn) submitOverlordBtn.style.display = 'none';
+      const exportWrapper = document.getElementById('export-wrapper');
+      if (exportWrapper) exportWrapper.style.display = 'none';
       const eyeIndicator = document.getElementById('eye-indicator');
       if (eyeIndicator) eyeIndicator.style.display = 'none';
       const swapModeBtn = document.getElementById('swap-mode-btn');
@@ -5159,25 +5155,15 @@ setTimeout(function () {
 
     // ── Toggle panel from SUBMIT button ──
     const submitOverlordBtn = document.getElementById('submit-overlord-btn');
+    const exportWrapper = document.getElementById('export-wrapper');
     submitOverlordBtn.onclick = (e) => {
       e.stopPropagation();
-      // Don't close panel while recording
       if (startBtn.classList.contains('recording')) return;
-      if (panel.classList.contains('open')) {
-        panel.classList.remove('open');
-      } else {
-        // Position panel to expand upward from SUBMIT button
-        const rect = submitOverlordBtn.getBoundingClientRect();
-        panel.style.bottom = (window.innerHeight - rect.top + 4) + 'px';
-        panel.style.left = rect.left + 'px';
-        panel.style.width = rect.width + 'px';
-        panel.classList.add('open');
-      }
+      panel.classList.toggle('open');
     };
     document.addEventListener('click', (e) => {
-      // Don't close panel while recording — let user interact with artwork
       if (startBtn.classList.contains('recording')) return;
-      if (!panel.contains(e.target) && e.target !== submitOverlordBtn) panel.classList.remove('open');
+      if (!exportWrapper.contains(e.target)) panel.classList.remove('open');
     });
 
     // ── Format is PNG-only, duration row stays hidden ──
