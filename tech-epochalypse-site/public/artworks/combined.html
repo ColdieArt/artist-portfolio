@@ -4846,6 +4846,43 @@ setTimeout(function () {
         ── OR ──
       </div>
 
+      <!-- Submission type toggle: Image or 5s Video -->
+      <div style="margin: 0 0 15px 0;">
+        <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 8px; letter-spacing: 1px;">SUBMISSION TYPE</label>
+        <div id="submit-type-toggle" style="display: flex; gap: 0; border: 1px solid #333;">
+          <button id="submit-type-image" class="submit-type-btn active" style="
+            flex: 1;
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 8px 0;
+            font-family: monospace;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+          ">IMAGE</button>
+          <button id="submit-type-video" class="submit-type-btn" style="
+            flex: 1;
+            background: #111;
+            color: #666;
+            border: none;
+            border-left: 1px solid #333;
+            padding: 8px 0;
+            font-family: monospace;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+          ">5s VIDEO</button>
+        </div>
+        <div id="video-hint" style="display: none; margin-top: 6px; font-family: monospace; font-size: 10px; color: #666; line-height: 1.4;">
+          Records a 5-second MP4 of your live artwork
+        </div>
+      </div>
+
       <div style="margin: 0 0 15px 0;">
         <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 6px; letter-spacing: 1px;">NAME / X ACCOUNT</label>
         <input id="x-account-input" type="text" placeholder="@yourhandle" style="
@@ -4964,26 +5001,123 @@ setTimeout(function () {
     const judgmentStatus = document.getElementById('judgment-status');
     const OVERLORD_NAME = 'combined';
 
+    // ── Submission type toggle ──
+    let submitType = 'image'; // 'image' or 'video'
+    const submitTypeImage = document.getElementById('submit-type-image');
+    const submitTypeVideo = document.getElementById('submit-type-video');
+    const videoHint = document.getElementById('video-hint');
+
+    function setSubmitType(type) {
+      submitType = type;
+      if (type === 'image') {
+        submitTypeImage.style.background = '#fff';
+        submitTypeImage.style.color = '#000';
+        submitTypeVideo.style.background = '#111';
+        submitTypeVideo.style.color = '#666';
+        videoHint.style.display = 'none';
+        judgmentBtn.textContent = 'SUBMIT TO JUDGMENT PROTOCOL';
+      } else {
+        submitTypeVideo.style.background = '#fff';
+        submitTypeVideo.style.color = '#000';
+        submitTypeImage.style.background = '#111';
+        submitTypeImage.style.color = '#666';
+        videoHint.style.display = 'block';
+        judgmentBtn.textContent = 'RECORD & SUBMIT 5s VIDEO';
+      }
+    }
+    submitTypeImage.onclick = () => setSubmitType('image');
+    submitTypeVideo.onclick = () => setSubmitType('video');
+
+    // ── Record 5-second MP4 from canvas ──
+    function recordVideoBlob() {
+      return new Promise(async (resolve, reject) => {
+        const r = await getRenderer();
+        const canvas = r.domElement;
+        const stream = canvas.captureStream(30);
+
+        const candidates = [
+          'video/mp4;codecs=avc1.42E01E',
+          'video/mp4;codecs=avc1.640028',
+          'video/mp4',
+          'video/webm;codecs=vp9',
+          'video/webm;codecs=vp8',
+          'video/webm'
+        ];
+        let usedMime = '';
+        for (const m of candidates) {
+          if (MediaRecorder.isTypeSupported(m)) { usedMime = m; break; }
+        }
+        if (!usedMime) { reject(new Error('No supported video codec')); return; }
+
+        const nativeMp4 = usedMime.startsWith('video/mp4');
+        const chunks = [];
+        const mr = new MediaRecorder(stream, { mimeType: usedMime, videoBitsPerSecond: 2500000 });
+
+        mr.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+
+        mr.onstop = async () => {
+          try {
+            stream.getTracks().forEach(t => t.stop());
+            if (nativeMp4) {
+              resolve(new Blob(chunks, { type: 'video/mp4' }));
+            } else {
+              // Re-mux WebM into MP4 container
+              const arrays = [];
+              for (const c of chunks) {
+                const buf = await c.arrayBuffer();
+                arrays.push(new Uint8Array(buf));
+              }
+              let totalLen = 0;
+              for (const a of arrays) totalLen += a.length;
+              const payload = new Uint8Array(totalLen);
+              let off = 0;
+              for (const a of arrays) { payload.set(a, off); off += a.length; }
+              const mp4 = buildMP4(payload, 5000, canvas.width, canvas.height);
+              resolve(new Blob([mp4], { type: 'video/mp4' }));
+            }
+          } catch (err) {
+            // Fallback: return raw recording
+            resolve(new Blob(chunks, { type: usedMime }));
+          }
+        };
+
+        mr.onerror = () => reject(new Error('Recording failed'));
+
+        mr.start(100);
+        setTimeout(() => { mr.stop(); }, 5000);
+      });
+    }
+
     judgmentBtn.onclick = async () => {
       const xAccount = document.getElementById('x-account-input').value.trim();
       const title = document.getElementById('title-input').value.trim();
       judgmentBtn.disabled = true;
       judgmentBtn.style.opacity = '0.5';
       judgmentStatus.style.color = '#aaa';
-      judgmentStatus.textContent = 'SUBMITTING...';
 
       try {
-        // Capture canvas as PNG
-        const r = await getRenderer();
-        if (window.composer) { window.composer.render(); }
-        else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
-        const dataUrl = r.domElement.toDataURL('image/png');
-        const blob = await (await fetch(dataUrl)).blob();
-
-        // Upload image + create Airtable record in one request via Cloudflare Worker
+        let blob;
         const WORKER_URL = window.GALLERY_API_URL || window.location.origin;
         const form = new FormData();
-        form.append('image', blob, 'export.png');
+
+        if (submitType === 'video') {
+          judgmentStatus.textContent = 'RECORDING 5s…';
+          blob = await recordVideoBlob();
+          form.append('video', blob, 'export.mp4');
+        } else {
+          judgmentStatus.textContent = 'SUBMITTING...';
+          // Capture canvas as PNG
+          const r = await getRenderer();
+          if (window.composer) { window.composer.render(); }
+          else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
+          const dataUrl = r.domElement.toDataURL('image/png');
+          blob = await (await fetch(dataUrl)).blob();
+          form.append('image', blob, 'export.png');
+        }
+
+        judgmentStatus.textContent = 'UPLOADING…';
+
+        // Upload + create Airtable record in one request
         form.append('overlord', OVERLORD_NAME);
         form.append('xAccount', xAccount);
         form.append('title', title);
@@ -5002,6 +5136,7 @@ setTimeout(function () {
             judgmentStatus.textContent = '';
             judgmentBtn.disabled = false;
             judgmentBtn.style.opacity = '1';
+            setSubmitType('image'); // reset toggle
           }, 2000);
         } else {
           const errMsg = data.details || data.error || `HTTP ${res.status}`;
