@@ -45,19 +45,20 @@ module.exports = async (req, res) => {
     const parts = parseMultipart(body, boundary);
     const overlord = getFieldValue(parts, 'overlord') || 'unknown';
 
-    const imagePart = parts.find(p => p.name === 'image' && p.filename);
+    const imagePart = parts.find(p => p.name === 'image' && p.filename) || parts.find(p => p.name === 'video' && p.filename);
     if (!imagePart || imagePart.data.length === 0) {
-      return res.status(400).json({ error: 'No image provided' });
+      return res.status(400).json({ error: 'No file provided' });
     }
 
-    if (imagePart.data.length > 5 * 1024 * 1024) {
-      return res.status(400).json({ error: 'File too large (max 5MB)' });
+    if (imagePart.data.length > 10 * 1024 * 1024) {
+      return res.status(400).json({ error: 'File too large (max 10MB)' });
     }
 
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const ext = (imagePart.contentType || '').includes('png') ? 'png' : 'jpg';
+    const isVideo = (imagePart.contentType || '').includes('video/') || (imagePart.filename || '').endsWith('.mp4');
+    const ext = isVideo ? 'mp4' : (imagePart.contentType || '').includes('png') ? 'png' : 'jpg';
     const key = `exports/${id}.${ext}`;
-    const imgContentType = imagePart.contentType || 'image/png';
+    const imgContentType = isVideo ? 'video/mp4' : (imagePart.contentType || 'image/png');
 
     const s3 = getS3Client();
     await s3.send(new PutObjectCommand({
