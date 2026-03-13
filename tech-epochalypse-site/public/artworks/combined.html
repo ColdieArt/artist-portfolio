@@ -3526,6 +3526,69 @@ function init() {
     leftUiContainer.appendChild(createResetButton());
     rightUiContainer.appendChild(createResetButton());
 
+    // Create and append the DUPLICATE button below RESET
+    const duplicateBtn = document.createElement('button');
+    duplicateBtn.id = 'duplicate-btn';
+    duplicateBtn.textContent = 'DUPLICATE';
+    duplicateBtn.style.cssText = `
+        background-color: black;
+        color: white;
+        padding: 4px;
+        margin-top: 10px;
+        border: 0.5px solid #888;
+        border-radius: 0;
+        cursor: pointer;
+        font-family: monospace;
+        font-size: 7px;
+        outline: none;
+        white-space: nowrap;
+        box-sizing: border-box;
+    `;
+    duplicateBtn.onclick = (event) => {
+        event.stopPropagation();
+        const src = selectedScaleElement || selectedObject;
+        if (!src || !src.userData || !src.userData.id) {
+            duplicateBtn.textContent = 'SELECT PIECE';
+            duplicateBtn.style.borderColor = '#e33';
+            setTimeout(() => { duplicateBtn.textContent = 'DUPLICATE'; duplicateBtn.style.borderColor = '#888'; }, 1200);
+            return;
+        }
+        // Clone geometry and material
+        const newGeometry = src.geometry.clone();
+        const newMaterial = src.material.clone();
+        if (src.material.map) {
+            newMaterial.map = src.material.map; // Share texture reference
+        }
+        const clone = new THREE.Mesh(newGeometry, newMaterial);
+
+        // Offset: 10% right on X, 2 layers forward on Z
+        const xOffset = (src.userData.initialScale ? src.userData.initialScale.width : 1) * 0.1;
+        const zOffset = 2 * depthStep;
+        clone.position.set(src.position.x + xOffset, src.position.y, src.position.z + zOffset);
+        clone.rotation.copy(src.rotation);
+        clone.visible = src.visible;
+
+        // Set up userData
+        clone.userData.id = 'dup_' + src.userData.id + '_' + Date.now();
+        clone.userData.currentLayer = (src.userData.currentLayer || 0) + 2;
+        clone.userData.initialPosition = clone.position.clone();
+        clone.userData.initialLayer = clone.userData.currentLayer;
+        clone.userData.initialScale = src.userData.initialScale
+            ? { width: src.userData.initialScale.width, height: src.userData.initialScale.height }
+            : undefined;
+        clone.userData.userScale = src.userData.userScale || 1.0;
+        if (src.userData.isUploaded) clone.userData.isUploaded = true;
+
+        scene.add(clone);
+        draggableObjects.push(clone);
+        cameraAnimationTargets.push(clone);
+
+        duplicateBtn.textContent = 'DUPLICATED';
+        duplicateBtn.style.borderColor = '#4CAF50';
+        setTimeout(() => { duplicateBtn.textContent = 'DUPLICATE'; duplicateBtn.style.borderColor = '#888'; }, 1200);
+    };
+    leftUiContainer.appendChild(duplicateBtn);
+
     // Create and append the TRASH button to the left UI container
     const createTrashButton = () => {
         const button = document.createElement('button');
@@ -3871,6 +3934,7 @@ function init() {
             trashButtonElement.style.display = 'none'; // Hide TRASH button
             exportButtonElement.style.display = 'none'; // Hide EXPORT button
             uploadButtonElement.style.display = 'none'; // Hide UPLOAD button
+            duplicateBtn.style.display = 'none'; // Hide DUPLICATE button
             maskBtn.style.display = 'none'; // Hide MASK button
             saveBtn.style.display = 'none'; // Hide SAVE button
             loadBtn.style.display = 'none'; // Hide LOAD button
@@ -3884,6 +3948,7 @@ function init() {
             leftUiContainer.style.top = '10px'; // Show it
             trashButtonElement.style.display = 'block'; // Show TRASH button
             uploadButtonElement.style.display = 'block'; // Show UPLOAD button
+            duplicateBtn.style.display = 'block'; // Show DUPLICATE button
             maskBtn.style.display = 'block'; // Show MASK button
             saveBtn.style.display = 'block'; // Show SAVE button
             loadBtn.style.display = 'block'; // Show LOAD button
@@ -3898,6 +3963,7 @@ function init() {
     trashButtonElement.style.display = 'none';
     exportButtonElement.style.display = 'none';
     uploadButtonElement.style.display = 'none';
+    duplicateBtn.style.display = 'none';
     maskBtn.style.display = 'none';
     saveBtn.style.display = 'none';
     loadBtn.style.display = 'none';
