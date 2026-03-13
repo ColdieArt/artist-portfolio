@@ -39,55 +39,58 @@
     }
 
     /* ─── EXPORT PANEL ─── */
-    #export-panel {
+    #export-wrapper {
       position: fixed;
-      left: 10px;
-      z-index: 201;
-      background: rgba(0,0,0,0.88);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 4px;
-      padding: 12px 14px;
+      bottom: 10px;
+      right: 10px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    #export-panel {
+      background: rgba(0,0,0,0.92);
+      border: 0.5px solid white;
+      border-bottom: none;
+      padding: 6px;
       font-family: monospace;
       color: #ccc;
-      font-size: 10px;
-      width: 200px;
+      font-size: 7px;
       display: none;
       flex-direction: column;
-      gap: 8px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+      gap: 5px;
     }
     #export-panel.open { display: flex; }
 
     #export-panel .panel-title {
       color: #fff;
-      font-size: 11px;
-      letter-spacing: 1.5px;
-      border-bottom: 1px solid rgba(255,255,255,0.15);
-      padding-bottom: 6px;
-      margin-bottom: 2px;
+      font-size: 7px;
+      letter-spacing: 1px;
+      border-bottom: 0.5px solid rgba(255,255,255,0.3);
+      padding-bottom: 4px;
+      margin-bottom: 0;
     }
 
     #export-panel .export-row {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 4px;
     }
     #export-panel .export-row label {
       flex: 1;
       color: #aaa;
-      font-size: 10px;
+      font-size: 7px;
       letter-spacing: 0.5px;
     }
     #export-panel .export-row select,
     #export-panel .export-row input[type="number"] {
       background: #111;
       color: #ddd;
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 2px;
-      padding: 3px 5px;
+      border: 0.5px solid rgba(255,255,255,0.3);
+      padding: 2px 4px;
       font-family: monospace;
-      font-size: 10px;
-      width: 58px;
+      font-size: 7px;
+      width: 40px;
       outline: none;
     }
     #export-panel .export-row select:focus,
@@ -98,11 +101,10 @@
     #export-panel .export-btn {
       background: #000;
       color: #fff;
-      border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 2px;
-      padding: 5px 0;
+      border: 0.5px solid white;
+      padding: 4px 0;
       font-family: monospace;
-      font-size: 10px;
+      font-size: 7px;
       letter-spacing: 1px;
       cursor: pointer;
       text-align: center;
@@ -122,9 +124,9 @@
 
     #export-panel .status-line {
       color: #666;
-      font-size: 9px;
+      font-size: 7px;
       text-align: center;
-      min-height: 11px;
+      min-height: 9px;
       letter-spacing: 0.5px;
     }
     #export-panel .status-line.active { color: #4c4; }
@@ -238,24 +240,21 @@
 
     /* ─── SUBMIT TO THE OVERLORD BUTTON ─── */
     #submit-overlord-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 200;
       background: #000;
       color: #fff;
-      border: 1px solid #fff;
-      padding: 11px 18px;
+      border: 0.5px solid white;
+      padding: 4px;
       font-family: monospace;
-      font-size: 11px;
+      font-size: 7px;
       font-weight: bold;
-      letter-spacing: 1.5px;
+      letter-spacing: 1px;
       cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
+      white-space: nowrap;
+      box-sizing: border-box;
+      outline: none;
     }
     #submit-overlord-btn:hover {
       background: #1a1a1a;
-      border-color: #ccc;
     }
 
     /* ─── POST TO X MODAL ─── */
@@ -5071,26 +5070,27 @@ animate();
   </div>
 
   <!-- ─── EXPORT PANEL HTML ─── -->
-  <button id="submit-overlord-btn">SUBMIT</button>
+  <div id="export-wrapper">
+    <div id="export-panel">
+      <div class="panel-title">EXPORT</div>
 
-  <div id="export-panel">
-    <div class="panel-title">EXPORT</div>
+      <div class="export-row" style="display:none;">
+        <label>Format</label>
+        <select id="export-format">
+          <option value="png">PNG</option>
+        </select>
+      </div>
 
-    <div class="export-row" style="display:none;">
-      <label>Format</label>
-      <select id="export-format">
-        <option value="png">PNG</option>
-      </select>
+      <!-- Video duration row (hidden — PNG only) -->
+      <div class="export-row" id="duration-row" style="display:none;">
+        <label>Duration (sec)</label>
+        <input type="number" id="export-duration" value="11" min="1" max="60" step="1">
+      </div>
+
+      <button class="export-btn" id="export-start-btn">EXPORT</button>
+      <div class="status-line" id="export-status"></div>
     </div>
-
-    <!-- Video duration row (hidden — PNG only) -->
-    <div class="export-row" id="duration-row" style="display:none;">
-      <label>Duration (sec)</label>
-      <input type="number" id="export-duration" value="10" min="1" max="60" step="1">
-    </div>
-
-    <button class="export-btn" id="export-start-btn">EXPORT</button>
-    <div class="status-line" id="export-status"></div>
+    <button id="submit-overlord-btn">SUBMIT</button>
   </div>
 
   <!-- ─── POST TO X MODAL ─── -->
@@ -5104,7 +5104,7 @@ animate();
         ── OR ──
       </div>
 
-      <!-- Submission type toggle: Image or 10s Video -->
+      <!-- Submission type toggle: Image or 11s Video -->
       <div style="margin: 0 0 15px 0;">
         <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 8px; letter-spacing: 1px;">SUBMISSION TYPE</label>
         <div id="submit-type-toggle" style="display: flex; gap: 0; border: 1px solid #333;">
@@ -5134,10 +5134,10 @@ animate();
             letter-spacing: 1px;
             cursor: pointer;
             transition: background 0.2s, color 0.2s;
-          ">10s VIDEO</button>
+          ">11s VIDEO</button>
         </div>
         <div id="video-hint" style="display: none; margin-top: 6px; font-family: monospace; font-size: 10px; color: #666; line-height: 1.4;">
-          Records a 10-second MP4 of your live artwork
+          Records an 11-second MP4 of your live artwork
         </div>
       </div>
 
@@ -5217,8 +5217,8 @@ animate();
       toggle.style.display = 'none';
       const modal = document.getElementById('post-modal');
       if (modal) modal.style.display = 'none';
-      const submitOverlordBtn = document.getElementById('submit-overlord-btn');
-      if (submitOverlordBtn) submitOverlordBtn.style.display = 'none';
+      const exportWrapper = document.getElementById('export-wrapper');
+      if (exportWrapper) exportWrapper.style.display = 'none';
       const eyeIndicator = document.getElementById('eye-indicator');
       if (eyeIndicator) eyeIndicator.style.display = 'none';
       const swapModeBtn = document.getElementById('swap-mode-btn');
@@ -5278,13 +5278,13 @@ animate();
         submitTypeImage.style.background = '#111';
         submitTypeImage.style.color = '#666';
         videoHint.style.display = 'block';
-        judgmentBtn.textContent = 'RECORD & SUBMIT 10s VIDEO';
+        judgmentBtn.textContent = 'RECORD & SUBMIT 11s VIDEO';
       }
     }
     submitTypeImage.onclick = () => setSubmitType('image');
     submitTypeVideo.onclick = () => setSubmitType('video');
 
-    // ── Record 10-second MP4 from canvas ──
+    // ── Record 11-second MP4 from canvas ──
     function recordVideoBlob() {
       return new Promise(async (resolve, reject) => {
         const r = await getRenderer();
@@ -5328,7 +5328,7 @@ animate();
               const payload = new Uint8Array(totalLen);
               let off = 0;
               for (const a of arrays) { payload.set(a, off); off += a.length; }
-              const mp4 = buildMP4(payload, 10000, canvas.width, canvas.height);
+              const mp4 = buildMP4(payload, 11000, canvas.width, canvas.height);
               resolve(new Blob([mp4], { type: 'video/mp4' }));
             }
           } catch (err) {
@@ -5340,7 +5340,7 @@ animate();
         mr.onerror = () => reject(new Error('Recording failed'));
 
         mr.start(100);
-        setTimeout(() => { mr.stop(); }, 10000);
+        setTimeout(() => { mr.stop(); }, 11000);
       });
     }
 
@@ -5357,7 +5357,7 @@ animate();
         const form = new FormData();
 
         if (submitType === 'video') {
-          judgmentStatus.textContent = 'RECORDING 10s…';
+          judgmentStatus.textContent = 'RECORDING 11s…';
           blob = await recordVideoBlob();
           form.append('video', blob, 'export.mp4');
         } else {
@@ -5414,33 +5414,18 @@ animate();
       if (e.target === modal) modal.classList.remove('open');
     };
 
-    // ── Toggle panel ──
-    toggle.onclick = (e) => {
-      e.stopPropagation();
-      // Don't close panel while recording
-      if (startBtn.classList.contains('recording')) return;
-      if (panel.classList.contains('open')) {
-        panel.classList.remove('open');
-      } else {
-        // Position panel directly below the EXPORT button
-        const rect = toggle.getBoundingClientRect();
-        panel.style.top = (rect.bottom + 4) + 'px';
-        panel.style.left = rect.left + 'px';
-        panel.classList.add('open');
-      }
-    };
-    document.addEventListener('click', (e) => {
-      // Don't close panel while recording — let user interact with artwork
-      if (startBtn.classList.contains('recording')) return;
-      if (!panel.contains(e.target) && e.target !== toggle) panel.classList.remove('open');
-    });
-
-    // ── SUBMIT YOURSELF button — capture PNG then show post modal ──
+    // ── Toggle panel from SUBMIT button ──
     const submitOverlordBtn = document.getElementById('submit-overlord-btn');
+    const exportWrapper = document.getElementById('export-wrapper');
     submitOverlordBtn.onclick = (e) => {
       e.stopPropagation();
-      exportPNG();
+      if (startBtn.classList.contains('recording')) return;
+      panel.classList.toggle('open');
     };
+    document.addEventListener('click', (e) => {
+      if (startBtn.classList.contains('recording')) return;
+      if (!exportWrapper.contains(e.target)) panel.classList.remove('open');
+    });
 
     // ── Format is PNG-only, duration row stays hidden ──
     fmtSel.onchange = () => {
