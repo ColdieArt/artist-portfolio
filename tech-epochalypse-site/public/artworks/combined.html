@@ -139,7 +139,7 @@
 
     /* ─── ELEMENT CONTROLS PANEL (pops out to the right of left menu) ─── */
     #element-controls {
-      position: absolute;
+      position: fixed;
       top: 10px;
       left: 90px;
       z-index: 200;
@@ -3381,7 +3381,7 @@ function init() {
     // Create and append the left UI container
     leftUiContainer = document.createElement('div'); // Assign to global variable
     leftUiContainer.id = 'left-ui-container';
-    leftUiContainer.style.position = 'absolute';
+    leftUiContainer.style.position = 'fixed';
     leftUiContainer.style.top = '-190px'; // Start mostly hidden, revealing only the arrow
     leftUiContainer.style.left = '10px';
     leftUiContainer.style.backgroundColor = 'rgba(0, 0, 0, 0)';
@@ -3787,7 +3787,7 @@ function init() {
     arrowContainer = document.createElement('div'); // Assign to global variable
     arrowContainer.id = 'arrow-container'; // Add ID for better targeting
     arrowContainer.style.cssText = `
-        position: absolute; /* Position relative to the viewport */
+        position: fixed; /* Position relative to the viewport */
         top: 0px; /* Initially at the top, peeking out */
         left: 20px;
         background-color: black;
