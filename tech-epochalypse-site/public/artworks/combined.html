@@ -3714,9 +3714,14 @@ function init() {
             exitMaskMode();
             return;
         }
-        // Need a selected uploaded image
+        // Need a selected uploaded image — flash red border if none
         if (!selectedScaleElement || !selectedScaleElement.userData.isUploaded) {
-            console.warn('Select an uploaded image first.');
+            maskBtn.style.borderColor = '#e33';
+            maskBtn.textContent = 'SELECT IMG';
+            setTimeout(() => {
+                maskBtn.style.borderColor = 'white';
+                maskBtn.textContent = 'MASK';
+            }, 1200);
             return;
         }
         enterMaskMode(selectedScaleElement);

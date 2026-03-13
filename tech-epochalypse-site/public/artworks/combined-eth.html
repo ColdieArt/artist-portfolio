@@ -1177,6 +1177,17 @@ let uploadedImageCounter = 0; // Counter for unique IDs on uploaded images
 let leftUiContainer = null; // Global reference for the left UI container
 let arrowContainer = null; // Global reference for the arrow container
 
+// ── Mask mode state ──
+let maskMode = false;
+let maskTargetMesh = null;
+let maskShape = 'circle';
+let maskScale = 1.0;
+let maskOffsetX = 0;
+let maskOffsetY = 0;
+let maskOverlayMesh = null;
+let maskDragging = false;
+let maskDragStart = null;
+
 // Array to store initial configurations of assets for reloading
 const initialAssetConfigs = [];
 
@@ -3637,6 +3648,123 @@ function init() {
     uploadButtonElement = createUploadButton();
     leftUiContainer.appendChild(uploadButtonElement);
 
+    // ── MASK UI ──
+    const maskBtn = document.createElement('button');
+    maskBtn.id = 'mask-btn';
+    maskBtn.textContent = 'MASK';
+    maskBtn.style.cssText = `
+        background-color: black; color: white; padding: 4px; margin-top: 10px;
+        border: 0.5px solid white; border-radius: 0; cursor: pointer;
+        font-family: monospace; font-size: 7px; outline: none;
+        white-space: nowrap; box-sizing: border-box;
+    `;
+    leftUiContainer.appendChild(maskBtn);
+
+    const maskPanel = document.createElement('div');
+    maskPanel.id = 'mask-panel';
+    maskPanel.style.cssText = `
+        display: none; flex-direction: column; gap: 4px; padding: 4px 0 0 0;
+    `;
+
+    const shapeRow = document.createElement('div');
+    shapeRow.style.cssText = 'display: flex; gap: 3px; flex-wrap: wrap;';
+    const shapes = ['square', 'circle', 'triangle', 'star'];
+    const shapeLabels = { square: '■', circle: '●', triangle: '▲', star: '★' };
+    const shapeBtns = {};
+    shapes.forEach(s => {
+        const b = document.createElement('button');
+        b.textContent = shapeLabels[s];
+        b.title = s;
+        b.style.cssText = `
+            flex: 1; background: black; color: white; border: 0.5px solid ${s === maskShape ? '#4CAF50' : 'white'};
+            padding: 3px; font-family: monospace; font-size: 9px; cursor: pointer;
+            outline: none; box-sizing: border-box;
+        `;
+        b.onclick = (e) => {
+            e.stopPropagation();
+            maskShape = s;
+            shapes.forEach(ss => {
+                shapeBtns[ss].style.borderColor = ss === s ? '#4CAF50' : 'white';
+            });
+            if (maskMode && maskTargetMesh) updateMaskOverlay();
+        };
+        shapeBtns[s] = b;
+        shapeRow.appendChild(b);
+    });
+    maskPanel.appendChild(shapeRow);
+
+    const scaleRow = document.createElement('div');
+    scaleRow.style.cssText = 'display: flex; align-items: center; gap: 4px;';
+    const scaleLabel = document.createElement('span');
+    scaleLabel.textContent = 'SIZE';
+    scaleLabel.style.cssText = 'color: #aaa; font-family: monospace; font-size: 7px;';
+    const maskScaleSlider = document.createElement('input');
+    maskScaleSlider.type = 'range';
+    maskScaleSlider.min = '10';
+    maskScaleSlider.max = '200';
+    maskScaleSlider.value = '100';
+    maskScaleSlider.style.cssText = 'flex: 1; height: 8px; cursor: pointer;';
+    const maskScaleVal = document.createElement('span');
+    maskScaleVal.textContent = '100%';
+    maskScaleVal.style.cssText = 'color: white; font-family: monospace; font-size: 7px; min-width: 28px; text-align: right;';
+    maskScaleSlider.oninput = (e) => {
+        e.stopPropagation();
+        maskScale = parseInt(maskScaleSlider.value) / 100;
+        maskScaleVal.textContent = maskScaleSlider.value + '%';
+        if (maskMode && maskTargetMesh) updateMaskOverlay();
+    };
+    maskScaleSlider.onmousedown = (e) => e.stopPropagation();
+    maskScaleSlider.ontouchstart = (e) => e.stopPropagation();
+    scaleRow.appendChild(scaleLabel);
+    scaleRow.appendChild(maskScaleSlider);
+    scaleRow.appendChild(maskScaleVal);
+    maskPanel.appendChild(scaleRow);
+
+    const applyMaskBtn = document.createElement('button');
+    applyMaskBtn.textContent = 'APPLY';
+    applyMaskBtn.style.cssText = `
+        background: black; color: white; border: 0.5px solid #4CAF50;
+        padding: 4px; font-family: monospace; font-size: 7px; cursor: pointer;
+        outline: none; box-sizing: border-box; letter-spacing: 1px;
+    `;
+    applyMaskBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (maskMode && maskTargetMesh) applyMask();
+    };
+    maskPanel.appendChild(applyMaskBtn);
+
+    const cancelMaskBtn = document.createElement('button');
+    cancelMaskBtn.textContent = 'CANCEL';
+    cancelMaskBtn.style.cssText = `
+        background: black; color: #888; border: 0.5px solid #555;
+        padding: 4px; font-family: monospace; font-size: 7px; cursor: pointer;
+        outline: none; box-sizing: border-box;
+    `;
+    cancelMaskBtn.onclick = (e) => {
+        e.stopPropagation();
+        exitMaskMode();
+    };
+    maskPanel.appendChild(cancelMaskBtn);
+    leftUiContainer.appendChild(maskPanel);
+
+    maskBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (maskMode) {
+            exitMaskMode();
+            return;
+        }
+        if (!selectedScaleElement || !selectedScaleElement.userData.isUploaded) {
+            maskBtn.style.borderColor = '#e33';
+            maskBtn.textContent = 'SELECT IMG';
+            setTimeout(() => {
+                maskBtn.style.borderColor = 'white';
+                maskBtn.textContent = 'MASK';
+            }, 1200);
+            return;
+        }
+        enterMaskMode(selectedScaleElement);
+    };
+
     // Handle file selection: load image as texture and add as draggable piece
     fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
@@ -3730,6 +3858,8 @@ function init() {
             trashButtonElement.style.display = 'none'; // Hide TRASH button
             exportButtonElement.style.display = 'none'; // Hide EXPORT button
             uploadButtonElement.style.display = 'none'; // Hide UPLOAD button
+            maskBtn.style.display = 'none'; // Hide MASK button
+            if (maskMode) exitMaskMode();
             const panel = document.getElementById('export-panel');
             if (panel) panel.classList.remove('open'); // Close export panel
             arrowContainer.style.top = '0px'; // Keep arrow at the top
@@ -3738,6 +3868,7 @@ function init() {
             leftUiContainer.style.top = '10px'; // Show it
             trashButtonElement.style.display = 'block'; // Show TRASH button
             uploadButtonElement.style.display = 'block'; // Show UPLOAD button
+            maskBtn.style.display = 'block'; // Show MASK button
             arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; // Move arrow below the UI
             arrowSpan.innerHTML = '&#x25B2'; // Change to up arrow
         }
@@ -3748,6 +3879,7 @@ function init() {
     trashButtonElement.style.display = 'none';
     exportButtonElement.style.display = 'none';
     uploadButtonElement.style.display = 'none';
+    maskBtn.style.display = 'none';
 
     window.addEventListener('resize', onWindowResize);
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
@@ -4012,6 +4144,214 @@ function createEyeIndicator() {
 function initSwapModeButton() {
     // Swap mode is now handled by the button in the left drop menu (#swap-mode-btn-left)
     // The original fixed button is hidden via CSS
+}
+
+// ── MASK SYSTEM ──
+
+function drawMaskShape(ctx, shape, cx, cy, radius) {
+    ctx.beginPath();
+    switch (shape) {
+        case 'square':
+            ctx.rect(cx - radius, cy - radius, radius * 2, radius * 2);
+            break;
+        case 'circle':
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            break;
+        case 'triangle': {
+            const h = radius * Math.sqrt(3);
+            ctx.moveTo(cx, cy - radius);
+            ctx.lineTo(cx + h / 2, cy + radius / 2);
+            ctx.lineTo(cx - h / 2, cy + radius / 2);
+            ctx.closePath();
+            break;
+        }
+        case 'star': {
+            const spikes = 5;
+            const outerR = radius;
+            const innerR = radius * 0.4;
+            for (let i = 0; i < spikes * 2; i++) {
+                const r = i % 2 === 0 ? outerR : innerR;
+                const angle = (Math.PI / 2 * -1) + (i * Math.PI / spikes);
+                const x = cx + Math.cos(angle) * r;
+                const y = cy + Math.sin(angle) * r;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            break;
+        }
+    }
+}
+
+function createMaskPreviewTexture(shape, scale, imgW, imgH, offX, offY) {
+    const canvas = document.createElement('canvas');
+    canvas.width = imgW;
+    canvas.height = imgH;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    ctx.fillRect(0, 0, imgW, imgH);
+
+    const minDim = Math.min(imgW, imgH);
+    const radius = (minDim / 2) * scale;
+    const cx = imgW / 2 + offX * imgW;
+    const cy = imgH / 2 - offY * imgH;
+
+    ctx.globalCompositeOperation = 'destination-out';
+    drawMaskShape(ctx, shape, cx, cy, radius);
+    ctx.fill();
+
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.lineWidth = Math.max(1, minDim * 0.003);
+    drawMaskShape(ctx, shape, cx, cy, radius);
+    ctx.stroke();
+
+    const tex = new THREE.Texture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.minFilter = THREE.LinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.generateMipmaps = false;
+    tex.needsUpdate = true;
+    return tex;
+}
+
+function enterMaskMode(mesh) {
+    maskMode = true;
+    maskTargetMesh = mesh;
+    maskOffsetX = 0;
+    maskOffsetY = 0;
+    maskScale = parseInt(document.getElementById('mask-panel').querySelector('input[type="range"]').value) / 100;
+
+    const btn = document.getElementById('mask-btn');
+    btn.textContent = 'MASK ON';
+    btn.style.borderColor = '#4CAF50';
+
+    document.getElementById('mask-panel').style.display = 'flex';
+
+    if (leftUiContainer.style.top === '10px' && arrowContainer) {
+        setTimeout(() => {
+            arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
+        }, 10);
+    }
+
+    updateMaskOverlay();
+}
+
+function exitMaskMode() {
+    maskMode = false;
+    maskTargetMesh = null;
+
+    const btn = document.getElementById('mask-btn');
+    btn.textContent = 'MASK';
+    btn.style.borderColor = 'white';
+
+    document.getElementById('mask-panel').style.display = 'none';
+
+    if (maskOverlayMesh) {
+        scene.remove(maskOverlayMesh);
+        if (maskOverlayMesh.geometry) maskOverlayMesh.geometry.dispose();
+        if (maskOverlayMesh.material) {
+            if (maskOverlayMesh.material.map) maskOverlayMesh.material.map.dispose();
+            maskOverlayMesh.material.dispose();
+        }
+        maskOverlayMesh = null;
+    }
+
+    if (leftUiContainer.style.top === '10px' && arrowContainer) {
+        setTimeout(() => {
+            arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
+        }, 10);
+    }
+}
+
+function updateMaskOverlay() {
+    if (!maskTargetMesh) return;
+
+    const img = maskTargetMesh.material.map.image;
+    const tex = createMaskPreviewTexture(maskShape, maskScale, img.width, img.height, maskOffsetX, maskOffsetY);
+
+    if (maskOverlayMesh) {
+        if (maskOverlayMesh.material.map) maskOverlayMesh.material.map.dispose();
+        maskOverlayMesh.material.map = tex;
+        maskOverlayMesh.material.needsUpdate = true;
+
+        const userScale = maskTargetMesh.userData.userScale || 1;
+        const baseW = maskTargetMesh.userData.initialScale.width * userScale;
+        const baseH = maskTargetMesh.userData.initialScale.height * userScale;
+        maskOverlayMesh.geometry.dispose();
+        maskOverlayMesh.geometry = new THREE.PlaneGeometry(baseW, baseH);
+        maskOverlayMesh.position.copy(maskTargetMesh.position);
+        maskOverlayMesh.position.z += 0.01;
+        maskOverlayMesh.rotation.copy(maskTargetMesh.rotation);
+    } else {
+        const userScale = maskTargetMesh.userData.userScale || 1;
+        const baseW = maskTargetMesh.userData.initialScale.width * userScale;
+        const baseH = maskTargetMesh.userData.initialScale.height * userScale;
+        const geom = new THREE.PlaneGeometry(baseW, baseH);
+        const mat = new THREE.MeshBasicMaterial({
+            map: tex,
+            transparent: true,
+            side: THREE.DoubleSide,
+            depthWrite: false
+        });
+        maskOverlayMesh = new THREE.Mesh(geom, mat);
+        maskOverlayMesh.position.copy(maskTargetMesh.position);
+        maskOverlayMesh.position.z += 0.01;
+        maskOverlayMesh.rotation.copy(maskTargetMesh.rotation);
+        maskOverlayMesh.userData.isMaskOverlay = true;
+        scene.add(maskOverlayMesh);
+    }
+}
+
+function applyMask() {
+    if (!maskTargetMesh || !maskTargetMesh.material.map) return;
+
+    const srcImg = maskTargetMesh.material.map.image;
+    const w = srcImg.width;
+    const h = srcImg.height;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+
+    ctx.drawImage(srcImg, 0, 0);
+
+    const minDim = Math.min(w, h);
+    const radius = (minDim / 2) * maskScale;
+    const cx = w / 2 + maskOffsetX * w;
+    const cy = h / 2 - maskOffsetY * h;
+
+    const maskCanvas = document.createElement('canvas');
+    maskCanvas.width = w;
+    maskCanvas.height = h;
+    const mctx = maskCanvas.getContext('2d');
+
+    mctx.fillStyle = 'white';
+    drawMaskShape(mctx, maskShape, cx, cy, radius);
+    mctx.fill();
+
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.drawImage(maskCanvas, 0, 0);
+
+    const newTex = new THREE.Texture(canvas);
+    newTex.colorSpace = THREE.SRGBColorSpace;
+    newTex.minFilter = THREE.LinearFilter;
+    newTex.magFilter = THREE.LinearFilter;
+    newTex.generateMipmaps = false;
+    if (renderer) newTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    newTex.needsUpdate = true;
+
+    if (maskTargetMesh.material.map) maskTargetMesh.material.map.dispose();
+    maskTargetMesh.material.map = newTex;
+    maskTargetMesh.material.needsUpdate = true;
+
+    if (typeof textureAlphaCanvasCache !== 'undefined') {
+        textureAlphaCanvasCache.delete(maskTargetMesh.material.map.id);
+    }
+
+    exitMaskMode();
 }
 
 function initElementControls() {
@@ -4305,7 +4645,7 @@ function animateOpacity(mesh, from, to, durationMs, onComplete) {
 // ══════════════════════════════════════════════════════════════
 
 function onPointerDown(event) {
-    
+
     isDragging = false;
     pointerDownPosition.set(event.clientX, event.clientY);
 
@@ -4320,6 +4660,17 @@ function onPointerDown(event) {
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);
+
+    // In mask mode, intercept clicks for mask dragging
+    if (maskMode && maskOverlayMesh) {
+        const maskHits = raycaster.intersectObject(maskOverlayMesh);
+        if (maskHits.length > 0) {
+            maskDragging = true;
+            maskDragStart = { x: event.clientX, y: event.clientY, offX: maskOffsetX, offY: maskOffsetY };
+            controls.enabled = false;
+            return;
+        }
+    }
 
     const intersects = raycaster.intersectObjects(draggableObjects, true); // Intersect with all descendants
 
@@ -4359,7 +4710,18 @@ function onPointerDown(event) {
 }
 
 function onPointerMove(event) {
-    
+
+    if (maskDragging && maskDragStart && maskTargetMesh) {
+        const dx = (event.clientX - maskDragStart.x) / window.innerWidth;
+        const dy = (event.clientY - maskDragStart.y) / window.innerHeight;
+        maskOffsetX = maskDragStart.offX + dx * 2;
+        maskOffsetY = maskDragStart.offY - dy * 2;
+        maskOffsetX = Math.max(-0.5, Math.min(0.5, maskOffsetX));
+        maskOffsetY = Math.max(-0.5, Math.min(0.5, maskOffsetY));
+        updateMaskOverlay();
+        return;
+    }
+
     if (selectedObject) {
         // Check if the pointer has moved beyond the drag threshold
         const currentPointerPosition = new THREE.Vector2(event.clientX, event.clientY);
@@ -4409,7 +4771,14 @@ function onPointerMove(event) {
 }
 
 function onPointerUp(event) {
-    
+
+    if (maskDragging) {
+        maskDragging = false;
+        maskDragStart = null;
+        controls.enabled = true;
+        return;
+    }
+
     if (isDragging || event.target.closest('#trash-button')) { // Check if dragging or if pointer released directly over trash button
         // Check if the pointer was released over the TRASH button
         if (trashButtonElement) {
@@ -4432,6 +4801,9 @@ function onPointerUp(event) {
                     if (configIndex !== -1) {
                         initialAssetConfigs[configIndex].removed = true;
                     }
+
+                    // Exit mask mode if trashing the masked target
+                    if (maskMode && maskTargetMesh === selectedObject) exitMaskMode();
 
                     // Object was dropped onto the trash button, remove it
                     scene.remove(selectedObject);
