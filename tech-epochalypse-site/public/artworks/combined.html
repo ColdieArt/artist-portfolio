@@ -3504,33 +3504,7 @@ function init() {
     };
     leftUiContainer.appendChild(swapBtn);
 
-    // Add the RESET button to both UI containers
-    const createResetButton = () => {
-        const button = document.createElement('button');
-        button.textContent = 'RESET';
-        button.style.cssText = `
-            background-color: black;
-            color: white;
-            padding: 4px;
-            margin-top: 10px;
-            border: 0.5px solid rgba(0, 0, 0, 0.8);
-            border-radius: 0;
-            cursor: pointer;
-            font-family: monospace;
-            font-size: 7px;
-            outline: none;
-            white-space: nowrap;
-            box-sizing: border-box;
-        `;
-        button.onmouseover = () => { button.style.borderColor = 'rgba(0, 0, 0, 1.0)'; };
-        button.onmouseout = () => { button.style.borderColor = 'rgba(0, 0, 0, 0.8)'; };
-        button.onclick = (event) => { event.stopPropagation(); resetPiecesToOriginalPositions(); };
-        return button;
-    };
-    leftUiContainer.appendChild(createResetButton());
-    rightUiContainer.appendChild(createResetButton());
-
-    // Create and append the DUPLICATE button below RESET
+    // Create the DUPLICATE button (appended after SWAP MODE)
     const duplicateBtn = document.createElement('button');
     duplicateBtn.id = 'duplicate-btn';
     duplicateBtn.textContent = 'DUPLICATE';
@@ -3593,84 +3567,7 @@ function init() {
     };
     leftUiContainer.appendChild(duplicateBtn);
 
-    // Create and append the TRASH button to the left UI container
-    const createTrashButton = () => {
-        const button = document.createElement('button');
-        button.id = 'trash-button'; // Unique ID for easy targeting
-        button.innerHTML = 'TRASH'; // Text with trashcan icon
-        button.style.cssText = `
-            background-color: black; /* Changed from #CC0000 to black */
-            color: white;
-            padding: 4px;
-            margin-top: 10px;
-            border: none;
-            border-radius: 0;
-            cursor: pointer;
-            font-family: monospace;
-            font-size: 7px;
-            outline: none;
-            white-space: nowrap;
-            box-sizing: border-box;
-        `;
-        button.onmouseover = () => { }; /* Removed border change on hover */
-        button.onmouseout = () => { }; /* Removed border change on mouseout */
-        // The actual removal logic will be in onPointerUp, triggered by dropping onto this button
-        return button;
-    };
-    trashButtonElement = createTrashButton(); // Store reference to the button element
-    leftUiContainer.appendChild(trashButtonElement);
-
-    // Create and append the EXPORT button below TRASH
-    const createExportButton = () => {
-        const button = document.createElement('button');
-        button.id = 'export-toggle';
-        button.innerHTML = 'RCS';
-        button.style.cssText = `
-            display: none !important;
-        `;
-        return button;
-    };
-    exportButtonElement = createExportButton();
-    exportButtonElement.style.display = 'none';
-    leftUiContainer.appendChild(exportButtonElement);
-
-    // Create hidden file input for image uploads
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/jpeg, image/png';
-    fileInput.style.display = 'none';
-    fileInput.id = 'image-upload-input';
-    document.body.appendChild(fileInput);
-
-    // Create and append the UPLOAD button below EXPORT
-    const createUploadButton = () => {
-        const button = document.createElement('button');
-        button.id = 'upload-button';
-        button.innerHTML = 'UPLOAD';
-        button.style.cssText = `
-            background-color: black;
-            color: white;
-            padding: 4px;
-            margin-top: 10px;
-            border: none;
-            border-radius: 0;
-            cursor: pointer;
-            font-family: monospace;
-            font-size: 7px;
-            outline: none;
-            white-space: nowrap;
-            box-sizing: border-box;
-        `;
-        button.onclick = (event) => {
-            event.stopPropagation();
-            fileInput.click();
-        };
-        return button;
-    };
-    uploadButtonElement = createUploadButton();
-    leftUiContainer.appendChild(uploadButtonElement);
-
-    // ── MASK UI ──
+    // ── MASK UI ── (appended after DUPLICATE)
     const maskBtn = document.createElement('button');
     maskBtn.id = 'mask-btn';
     maskBtn.textContent = 'MASK';
@@ -3778,6 +3675,109 @@ function init() {
     };
     maskPanel.appendChild(cancelMaskBtn);
     leftUiContainer.appendChild(maskPanel);
+
+    // Add the RESET button to both UI containers
+    const createResetButton = () => {
+        const button = document.createElement('button');
+        button.textContent = 'RESET';
+        button.style.cssText = `
+            background-color: black;
+            color: white;
+            padding: 4px;
+            margin-top: 10px;
+            border: 0.5px solid rgba(0, 0, 0, 0.8);
+            border-radius: 0;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 7px;
+            outline: none;
+            white-space: nowrap;
+            box-sizing: border-box;
+        `;
+        button.onmouseover = () => { button.style.borderColor = 'rgba(0, 0, 0, 1.0)'; };
+        button.onmouseout = () => { button.style.borderColor = 'rgba(0, 0, 0, 0.8)'; };
+        button.onclick = (event) => { event.stopPropagation(); resetPiecesToOriginalPositions(); };
+        return button;
+    };
+    leftUiContainer.appendChild(createResetButton());
+    rightUiContainer.appendChild(createResetButton());
+
+    // Create and append the TRASH button to the left UI container
+    const createTrashButton = () => {
+        const button = document.createElement('button');
+        button.id = 'trash-button'; // Unique ID for easy targeting
+        button.innerHTML = 'TRASH'; // Text with trashcan icon
+        button.style.cssText = `
+            background-color: black; /* Changed from #CC0000 to black */
+            color: white;
+            padding: 4px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 7px;
+            outline: none;
+            white-space: nowrap;
+            box-sizing: border-box;
+        `;
+        button.onmouseover = () => { }; /* Removed border change on hover */
+        button.onmouseout = () => { }; /* Removed border change on mouseout */
+        // The actual removal logic will be in onPointerUp, triggered by dropping onto this button
+        return button;
+    };
+    trashButtonElement = createTrashButton(); // Store reference to the button element
+    leftUiContainer.appendChild(trashButtonElement);
+
+    // Create and append the EXPORT button below TRASH
+    const createExportButton = () => {
+        const button = document.createElement('button');
+        button.id = 'export-toggle';
+        button.innerHTML = 'RCS';
+        button.style.cssText = `
+            display: none !important;
+        `;
+        return button;
+    };
+    exportButtonElement = createExportButton();
+    exportButtonElement.style.display = 'none';
+    leftUiContainer.appendChild(exportButtonElement);
+
+    // Create hidden file input for image uploads
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/jpeg, image/png';
+    fileInput.style.display = 'none';
+    fileInput.id = 'image-upload-input';
+    document.body.appendChild(fileInput);
+
+    // Create and append the UPLOAD button below EXPORT
+    const createUploadButton = () => {
+        const button = document.createElement('button');
+        button.id = 'upload-button';
+        button.innerHTML = 'UPLOAD';
+        button.style.cssText = `
+            background-color: black;
+            color: white;
+            padding: 4px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 7px;
+            outline: none;
+            white-space: nowrap;
+            box-sizing: border-box;
+        `;
+        button.onclick = (event) => {
+            event.stopPropagation();
+            fileInput.click();
+        };
+        return button;
+    };
+    uploadButtonElement = createUploadButton();
+    leftUiContainer.appendChild(uploadButtonElement);
 
     // ── SAVE / LOAD buttons ──
     const saveBtn = document.createElement('button');
