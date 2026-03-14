@@ -1135,13 +1135,17 @@ let arrowContainer = null; // Global reference for the arrow container
 // ── Mask mode state ──
 let maskMode = false;
 let maskTargetMesh = null;       // The uploaded image mesh being masked
-let maskShape = 'circle';        // Current shape: square, circle, triangle, star
+let maskShape = 'circle';        // Current shape: square, circle, triangle, star, draw
 let maskScale = 1.0;             // Scale of the mask relative to the image
 let maskOffsetX = 0;             // Mask center offset in UV space (0-1)
 let maskOffsetY = 0;
 let maskOverlayMesh = null;      // Visual overlay showing mask preview
 let maskDragging = false;        // Whether we're dragging the mask overlay
 let maskDragStart = null;        // Pointer start for mask drag
+let maskDrawCanvas = null;       // Canvas for freehand draw mask
+let maskDrawCtx = null;          // 2D context for draw mask canvas
+let maskDrawing = false;         // Whether we're actively drawing on the mask
+let maskDrawLastUV = null;       // Last UV point for smooth line drawing
 
 // Array to store initial configurations of assets for reloading
 const initialAssetConfigs = [];
@@ -3688,8 +3692,8 @@ function init() {
     // Shape buttons row
     const shapeRow = document.createElement('div');
     shapeRow.style.cssText = 'display: flex; gap: 3px; flex-wrap: wrap;';
-    const shapes = ['square', 'circle', 'triangle', 'star'];
-    const shapeLabels = { square: '■', circle: '●', triangle: '▲', star: '★' };
+    const shapes = ['square', 'circle', 'triangle', 'star', 'draw'];
+    const shapeLabels = { square: '■', circle: '●', triangle: '▲', star: '★', draw: '✎' };
     const shapeBtns = {};
     shapes.forEach(s => {
         const b = document.createElement('button');
@@ -3706,7 +3710,12 @@ function init() {
             shapes.forEach(ss => {
                 shapeBtns[ss].style.borderColor = ss === s ? '#4CAF50' : 'white';
             });
-            if (maskMode && maskTargetMesh) updateMaskOverlay();
+            // Update SIZE label for draw mode (brush size) vs shape mode (shape size)
+            scaleLabel.textContent = s === 'draw' ? 'BRUSH' : 'SIZE';
+            if (maskMode && maskTargetMesh) {
+                if (s === 'draw') initMaskDrawCanvas();
+                updateMaskOverlay();
+            }
         };
         shapeBtns[s] = b;
         shapeRow.appendChild(b);
@@ -4560,6 +4569,105 @@ function createMaskPreviewTexture(shape, scale, imgW, imgH, offX, offY) {
     return tex;
 }
 
+function initMaskDrawCanvas() {
+    if (!maskTargetMesh || !maskTargetMesh.material.map) return;
+    const img = maskTargetMesh.material.map.image;
+    maskDrawCanvas = document.createElement('canvas');
+    maskDrawCanvas.width = img.width;
+    maskDrawCanvas.height = img.height;
+    maskDrawCtx = maskDrawCanvas.getContext('2d');
+    // Start fully black (nothing visible) — user draws to reveal
+    maskDrawCtx.fillStyle = 'black';
+    maskDrawCtx.fillRect(0, 0, maskDrawCanvas.width, maskDrawCanvas.height);
+    maskDrawLastUV = null;
+}
+
+function paintOnMaskCanvas(u, v) {
+    if (!maskDrawCanvas || !maskDrawCtx) return;
+    const w = maskDrawCanvas.width;
+    const h = maskDrawCanvas.height;
+    // UV to pixel: u goes left-to-right, v goes bottom-to-top in Three.js
+    const px = u * w;
+    const py = (1 - v) * h;
+    const minDim = Math.min(w, h);
+    const brushRadius = (minDim / 2) * maskScale * 0.3; // Scale brush relative to image
+
+    maskDrawCtx.globalCompositeOperation = 'source-over';
+    maskDrawCtx.fillStyle = 'white';
+    maskDrawCtx.beginPath();
+
+    // If we have a previous point, draw a line of circles for smooth strokes
+    if (maskDrawLastUV) {
+        const prevPx = maskDrawLastUV.u * w;
+        const prevPy = (1 - maskDrawLastUV.v) * h;
+        const dist = Math.sqrt((px - prevPx) ** 2 + (py - prevPy) ** 2);
+        const steps = Math.max(1, Math.ceil(dist / (brushRadius * 0.5)));
+        for (let i = 0; i <= steps; i++) {
+            const t = i / steps;
+            const cx = prevPx + (px - prevPx) * t;
+            const cy = prevPy + (py - prevPy) * t;
+            maskDrawCtx.moveTo(cx + brushRadius, cy);
+            maskDrawCtx.arc(cx, cy, brushRadius, 0, Math.PI * 2);
+        }
+    } else {
+        maskDrawCtx.arc(px, py, brushRadius, 0, Math.PI * 2);
+    }
+    maskDrawCtx.fill();
+    maskDrawLastUV = { u, v };
+}
+
+function createDrawMaskPreviewTexture() {
+    if (!maskTargetMesh || !maskDrawCanvas) return null;
+    const img = maskTargetMesh.material.map.image;
+    const w = img.width;
+    const h = img.height;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+
+    // Dark overlay everywhere
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    ctx.fillRect(0, 0, w, h);
+
+    // Cut out the drawn areas (where mask canvas is white)
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.drawImage(maskDrawCanvas, 0, 0);
+
+    // Draw a subtle border around the drawn area
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = Math.max(1, Math.min(w, h) * 0.002);
+
+    // Get edge pixels from the draw canvas for border outline
+    const maskData = maskDrawCtx.getImageData(0, 0, w, h).data;
+    for (let y = 1; y < h - 1; y += 2) {
+        for (let x = 1; x < w - 1; x += 2) {
+            const idx = (y * w + x) * 4;
+            if (maskData[idx] > 128) {
+                // Check if any neighbor is black (edge pixel)
+                const top = ((y - 1) * w + x) * 4;
+                const bot = ((y + 1) * w + x) * 4;
+                const lft = (y * w + (x - 1)) * 4;
+                const rgt = (y * w + (x + 1)) * 4;
+                if (maskData[top] < 128 || maskData[bot] < 128 || maskData[lft] < 128 || maskData[rgt] < 128) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                    ctx.fillRect(x, y, 2, 2);
+                }
+            }
+        }
+    }
+
+    const tex = new THREE.Texture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.minFilter = THREE.LinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.generateMipmaps = false;
+    tex.needsUpdate = true;
+    return tex;
+}
+
 function enterMaskMode(mesh) {
     maskMode = true;
     maskTargetMesh = mesh;
@@ -4572,6 +4680,9 @@ function enterMaskMode(mesh) {
     btn.style.borderColor = '#4CAF50';
 
     document.getElementById('mask-panel').style.display = 'flex';
+
+    // Initialize draw canvas if in draw mode
+    if (maskShape === 'draw') initMaskDrawCanvas();
 
     // Recalculate arrow position since panel grew
     if (leftUiContainer.style.top === '10px' && arrowContainer) {
@@ -4586,6 +4697,10 @@ function enterMaskMode(mesh) {
 function exitMaskMode() {
     maskMode = false;
     maskTargetMesh = null;
+    maskDrawCanvas = null;
+    maskDrawCtx = null;
+    maskDrawing = false;
+    maskDrawLastUV = null;
 
     const btn = document.getElementById('mask-btn');
     btn.textContent = 'MASK';
@@ -4616,7 +4731,10 @@ function updateMaskOverlay() {
     if (!maskTargetMesh) return;
 
     const img = maskTargetMesh.material.map.image;
-    const tex = createMaskPreviewTexture(maskShape, maskScale, img.width, img.height, maskOffsetX, maskOffsetY);
+    const tex = (maskShape === 'draw')
+        ? createDrawMaskPreviewTexture()
+        : createMaskPreviewTexture(maskShape, maskScale, img.width, img.height, maskOffsetX, maskOffsetY);
+    if (!tex) return;
 
     if (maskOverlayMesh) {
         // Update existing overlay
@@ -4669,26 +4787,32 @@ function applyMask() {
     // Draw original image
     ctx.drawImage(srcImg, 0, 0);
 
-    // Apply mask — only keep pixels inside the shape
-    const minDim = Math.min(w, h);
-    const radius = (minDim / 2) * maskScale;
-    const cx = w / 2 + maskOffsetX * w;
-    const cy = h / 2 - maskOffsetY * h;
+    if (maskShape === 'draw' && maskDrawCanvas) {
+        // Use the freehand draw canvas as the mask
+        ctx.globalCompositeOperation = 'destination-in';
+        ctx.drawImage(maskDrawCanvas, 0, 0);
+    } else {
+        // Apply mask — only keep pixels inside the shape
+        const minDim = Math.min(w, h);
+        const radius = (minDim / 2) * maskScale;
+        const cx = w / 2 + maskOffsetX * w;
+        const cy = h / 2 - maskOffsetY * h;
 
-    // Create mask canvas
-    const maskCanvas = document.createElement('canvas');
-    maskCanvas.width = w;
-    maskCanvas.height = h;
-    const mctx = maskCanvas.getContext('2d');
+        // Create mask canvas
+        const maskCanvas = document.createElement('canvas');
+        maskCanvas.width = w;
+        maskCanvas.height = h;
+        const mctx = maskCanvas.getContext('2d');
 
-    // Fill shape in white on mask canvas
-    mctx.fillStyle = 'white';
-    drawMaskShape(mctx, maskShape, cx, cy, radius);
-    mctx.fill();
+        // Fill shape in white on mask canvas
+        mctx.fillStyle = 'white';
+        drawMaskShape(mctx, maskShape, cx, cy, radius);
+        mctx.fill();
 
-    // Use mask to clip the image
-    ctx.globalCompositeOperation = 'destination-in';
-    ctx.drawImage(maskCanvas, 0, 0);
+        // Use mask to clip the image
+        ctx.globalCompositeOperation = 'destination-in';
+        ctx.drawImage(maskCanvas, 0, 0);
+    }
 
     // Create new texture from masked result
     const newTex = new THREE.Texture(canvas);
@@ -5019,14 +5143,27 @@ function onPointerDown(event) {
 
     raycaster.setFromCamera(mouse, camera);
 
-    // In mask mode, intercept clicks for mask dragging
-    if (maskMode && maskOverlayMesh) {
-        const maskHits = raycaster.intersectObject(maskOverlayMesh);
-        if (maskHits.length > 0) {
-            maskDragging = true;
-            maskDragStart = { x: event.clientX, y: event.clientY, offX: maskOffsetX, offY: maskOffsetY };
-            controls.enabled = false;
-            return;
+    // In mask mode, intercept clicks for drawing or shape dragging
+    if (maskMode && maskTargetMesh) {
+        if (maskShape === 'draw') {
+            // Raycast against the target mesh to get UV for drawing
+            const drawHits = raycaster.intersectObject(maskTargetMesh);
+            if (drawHits.length > 0 && drawHits[0].uv) {
+                maskDrawing = true;
+                maskDrawLastUV = null;
+                controls.enabled = false;
+                paintOnMaskCanvas(drawHits[0].uv.x, drawHits[0].uv.y);
+                updateMaskOverlay();
+                return;
+            }
+        } else if (maskOverlayMesh) {
+            const maskHits = raycaster.intersectObject(maskOverlayMesh);
+            if (maskHits.length > 0) {
+                maskDragging = true;
+                maskDragStart = { x: event.clientX, y: event.clientY, offX: maskOffsetX, offY: maskOffsetY };
+                controls.enabled = false;
+                return;
+            }
         }
     }
 
@@ -5068,6 +5205,19 @@ function onPointerDown(event) {
 }
 
 function onPointerMove(event) {
+
+    // Handle freehand draw mask painting
+    if (maskDrawing && maskShape === 'draw' && maskTargetMesh) {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const drawHits = raycaster.intersectObject(maskTargetMesh);
+        if (drawHits.length > 0 && drawHits[0].uv) {
+            paintOnMaskCanvas(drawHits[0].uv.x, drawHits[0].uv.y);
+            updateMaskOverlay();
+        }
+        return;
+    }
 
     // Handle mask overlay dragging
     if (maskDragging && maskDragStart && maskTargetMesh) {
@@ -5131,6 +5281,14 @@ function onPointerMove(event) {
 }
 
 function onPointerUp(event) {
+
+    // Release mask draw painting
+    if (maskDrawing) {
+        maskDrawing = false;
+        maskDrawLastUV = null;
+        controls.enabled = true;
+        return;
+    }
 
     // Release mask dragging
     if (maskDragging) {
