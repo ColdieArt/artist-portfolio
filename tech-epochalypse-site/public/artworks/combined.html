@@ -5348,11 +5348,14 @@ function onPointerUp(event) {
 }
 
 function onClick(event) {
-    
+
     // Only process click if no dragging occurred and not clicking on UI
     if (isDragging || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#element-controls')) {
         return;
     }
+
+    // Do not process clicks while in mask mode (prevents Z-depth cycling during mask drawing/dragging)
+    if (maskMode) return;
 
     stopCameraAnimationAndReset(); // Only stop FLY camera on explicit click if not dragging and not on UI
 
