@@ -4801,6 +4801,8 @@ function applyMask() {
     // Replace texture on mesh
     if (maskTargetMesh.material.map) maskTargetMesh.material.map.dispose();
     maskTargetMesh.material.map = newTex;
+    maskTargetMesh.material.transparent = true;
+    maskTargetMesh.material.depthWrite = false; // Allow objects behind masked-out areas to render
     maskTargetMesh.material.needsUpdate = true;
 
     // Clear alpha cache for this texture so clicks work correctly
