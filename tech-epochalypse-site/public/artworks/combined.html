@@ -4576,9 +4576,8 @@ function initMaskDrawCanvas() {
     maskDrawCanvas.width = img.width;
     maskDrawCanvas.height = img.height;
     maskDrawCtx = maskDrawCanvas.getContext('2d');
-    // Start fully black (nothing visible) — user draws to reveal
-    maskDrawCtx.fillStyle = 'black';
-    maskDrawCtx.fillRect(0, 0, maskDrawCanvas.width, maskDrawCanvas.height);
+    // Start fully transparent (nothing visible) — user draws opaque white to reveal
+    maskDrawCtx.clearRect(0, 0, maskDrawCanvas.width, maskDrawCanvas.height);
     maskDrawLastUV = null;
 }
 
@@ -4631,33 +4630,9 @@ function createDrawMaskPreviewTexture() {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
     ctx.fillRect(0, 0, w, h);
 
-    // Cut out the drawn areas (where mask canvas is white)
+    // Cut out the drawn areas (where mask canvas is opaque white)
     ctx.globalCompositeOperation = 'destination-out';
     ctx.drawImage(maskDrawCanvas, 0, 0);
-
-    // Draw a subtle border around the drawn area
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-    ctx.lineWidth = Math.max(1, Math.min(w, h) * 0.002);
-
-    // Get edge pixels from the draw canvas for border outline
-    const maskData = maskDrawCtx.getImageData(0, 0, w, h).data;
-    for (let y = 1; y < h - 1; y += 2) {
-        for (let x = 1; x < w - 1; x += 2) {
-            const idx = (y * w + x) * 4;
-            if (maskData[idx] > 128) {
-                // Check if any neighbor is black (edge pixel)
-                const top = ((y - 1) * w + x) * 4;
-                const bot = ((y + 1) * w + x) * 4;
-                const lft = (y * w + (x - 1)) * 4;
-                const rgt = (y * w + (x + 1)) * 4;
-                if (maskData[top] < 128 || maskData[bot] < 128 || maskData[lft] < 128 || maskData[rgt] < 128) {
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                    ctx.fillRect(x, y, 2, 2);
-                }
-            }
-        }
-    }
 
     const tex = new THREE.Texture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
