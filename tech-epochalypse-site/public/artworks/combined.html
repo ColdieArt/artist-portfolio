@@ -4802,7 +4802,8 @@ function applyMask() {
     if (maskTargetMesh.material.map) maskTargetMesh.material.map.dispose();
     maskTargetMesh.material.map = newTex;
     maskTargetMesh.material.transparent = true;
-    maskTargetMesh.material.depthWrite = false; // Allow objects behind masked-out areas to render
+    maskTargetMesh.material.alphaTest = 0.01; // Discard fully transparent fragments (no color or depth write)
+    maskTargetMesh.material.depthWrite = true; // Visible pixels write depth normally
     maskTargetMesh.material.needsUpdate = true;
 
     // Clear alpha cache for this texture so clicks work correctly
