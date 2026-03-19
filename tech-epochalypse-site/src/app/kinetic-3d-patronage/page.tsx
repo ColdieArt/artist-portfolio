@@ -217,8 +217,7 @@ export default function Kinetic3DPatronagePage() {
                   <div className="flex items-baseline gap-3">
                     <span className="text-white/30 select-none">-</span>
                     <p>
-                      Collecting multiple overlords allows for mashup designs on
-                      each print.
+                      Full Set collectors can create multi-overlord mashup portraits
                     </p>
                   </div>
                 </div>
