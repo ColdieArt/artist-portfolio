@@ -297,8 +297,9 @@ export default function Kinetic3DPatronagePage() {
                       <div className="flex items-baseline gap-3">
                         <span className="text-white/30 select-none">-</span>
                         <p>
-                          Owning multiple digital pieces allows for mashup of
-                          elements on the physical work.
+                          Founding System Collectors (Full set) Owning can have a
+                          mashup of the five Overlord elements on the physical
+                          work.
                         </p>
                       </div>
                       <div className="flex items-baseline gap-3">
