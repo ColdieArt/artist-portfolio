@@ -35,11 +35,261 @@ export default function Kinetic3DPatronagePage() {
           </div>
         </ScrollReveal>
 
-        {/* Collection Overview Sidebar */}
-        <ScrollReveal>
-          <div className="flex flex-col lg:flex-row gap-8 mb-16 md:mb-24">
-            <div className="lg:flex-1" />
-            <div className="lg:w-96 shrink-0">
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
+          {/* Left: Benefits content */}
+          <div className="flex-1">
+            {/* Touch the Art */}
+            <ScrollReveal>
+              <div className="mb-16 md:mb-24">
+                <div className="classified-header">
+                  Benefit 001 -{' '}
+                  <span className="redacted">Stewardship</span>
+                </div>
+                <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
+                  Touch the Art
+                </h2>
+                <div className="space-y-4 text-white text-sm font-mono leading-relaxed">
+                  <p>
+                    Collectors get to be stewards of this new method of interactive
+                    3D collaboration. It is meant to be used and explored, pushing
+                    yourself to be creative and feel something.
+                  </p>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            <div className="line-accent mb-16" />
+
+            {/* Network Effect */}
+            <ScrollReveal>
+              <div className="mb-16 md:mb-24">
+                <div className="classified-header">
+                  Benefit 002 -{' '}
+                  <span className="redacted">Distribution</span>
+                </div>
+                <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
+                  Network Effect
+                </h2>
+                <div className="space-y-4 text-white text-sm font-mono leading-relaxed">
+                  <p>
+                    Sharing this art IRL and digitally invites viewers to
+                    &lsquo;touch the art,&rsquo; but only the token holders own it.
+                  </p>
+                </div>
+
+                <div className="mt-8 space-y-4">
+                  <div className="bg-charcoal/30 border border-white/5 p-6">
+                    <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-3 border-b border-white/10 pb-3">
+                      Project Hub
+                    </h3>
+                    <p className="text-white text-sm font-mono leading-relaxed">
+                      A mini-site will act as a hub for the project, to showcase the
+                      digital kinetic works and highlight the patrons of the project.
+                    </p>
+                  </div>
+
+                  <div className="bg-charcoal/30 border border-white/5 p-6">
+                    <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-3 border-b border-white/10 pb-3">
+                      Community Engagement
+                    </h3>
+                    <p className="text-white text-sm font-mono leading-relaxed">
+                      Community engagement with the digital works in ways that bring
+                      more visibility and incentive to &lsquo;touch the art&rsquo;
+                      which benefits collectors and creators.
+                    </p>
+                  </div>
+
+                  <div className="bg-charcoal/30 border border-white/5 p-6">
+                    <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-3 border-b border-white/10 pb-3">
+                      Free Art Releases
+                    </h3>
+                    <p className="text-white text-sm font-mono leading-relaxed">
+                      Includes free art (physical and digital) related to curated
+                      community releases, tied to the kinetic token held. For
+                      example, if there is an Elon Musk competition, holders of the
+                      Musk kinetic token will get one of the released items.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            <div className="line-accent mb-16" />
+
+            {/* Real-Time Evolution */}
+            <ScrollReveal>
+              <div className="mb-16 md:mb-24">
+                <div className="classified-header">
+                  Benefit 003 -{' '}
+                  <span className="redacted">Evolution</span>
+                </div>
+                <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
+                  Real-Time Evolution
+                </h2>
+                <div className="space-y-4 text-white text-sm font-mono leading-relaxed">
+                  <p>
+                    Because this is a ERC-7160 Doppelg&auml;nger contract, the token
+                    will be upgraded as I implement the longer term vision of the
+                    project. These are being developed at different phases of
+                    R&amp;D. I am releasing it now so we can see it grow together,
+                    in real-time.
+                  </p>
+                </div>
+
+                <div className="mt-8 space-y-4">
+                  <div className="bg-charcoal/30 border border-white/5 p-6">
+                    <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-3 border-b border-white/10 pb-3">
+                      Increased Interactivity
+                    </h3>
+                    <p className="text-white text-sm font-mono leading-relaxed">
+                      Allowing deeper control of assets.
+                    </p>
+                  </div>
+
+                  <div className="bg-charcoal/30 border border-white/5 p-6">
+                    <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-3 border-b border-white/10 pb-3">
+                      Advanced Viewing Methods
+                    </h3>
+                    <p className="text-white text-sm font-mono leading-relaxed">
+                      In-depth viewing experiences meant for public interaction and experimentation.
+                    </p>
+                  </div>
+
+                  <div className="bg-charcoal/30 border border-white/5 p-6">
+                    <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-3 border-b border-white/10 pb-3">
+                      New Functionality
+                    </h3>
+                    <p className="text-white text-sm font-mono leading-relaxed">
+                      Will open up doors for deeper impact.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            <div className="line-accent mb-16" />
+
+            {/* Added-Value: Collaborative Print */}
+            <ScrollReveal>
+              <div className="mb-16 md:mb-24">
+                <div className="classified-header">
+                  Benefit 004 -{' '}
+                  <span className="redacted">Added-Value</span>
+                </div>
+                <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
+                  Added-Value
+                </h2>
+                <div className="space-y-4 text-white text-sm font-mono leading-relaxed">
+                  <p>
+                    As a patron of the digital kinetic 3D series, there are inherent
+                    value-adds and opportunities to participate further with the
+                    project.
+                  </p>
+                </div>
+
+                <div className="mt-8">
+                  <div className="bg-charcoal/30 border border-white/5 p-6">
+                    <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-4 border-b border-white/10 pb-3">
+                      Collaborative Physical Print
+                    </h3>
+                    <div className="space-y-3 text-white text-sm font-mono leading-relaxed">
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-white/30 select-none">-</span>
+                        <p>
+                          Each token receives one gallery-quality print free of
+                          charge.
+                        </p>
+                      </div>
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-white/30 select-none">-</span>
+                        <p>
+                          Collector customizes their digital kinetic 3D layout to
+                          their preferred composition.
+                        </p>
+                      </div>
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-white/30 select-none">-</span>
+                        <p>12&Prime; &times; 18&Prime;</p>
+                      </div>
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-white/30 select-none">-</span>
+                        <p>Signed and numbered 1/1/10 per overlord.</p>
+                      </div>
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-white/30 select-none">-</span>
+                        <p>
+                          Full Set collectors can create multi-overlord mashup portraits
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            <div className="line-accent mb-16" />
+
+            {/* Physical Kinetic 3D Series */}
+            <ScrollReveal>
+              <div className="mb-16 md:mb-24">
+                <div className="classified-header">
+                  Benefit 005 -{' '}
+                  <span className="redacted">Physical</span>
+                </div>
+                <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
+                  Physical Kinetic 3D Series
+                </h2>
+                <div className="space-y-4 text-white text-sm font-mono leading-relaxed">
+                  <p>
+                    Collector has first right to collect the physical kinetic 3D
+                    version of their digital work.
+                  </p>
+                </div>
+
+                <div className="mt-8">
+                  <div className="bg-charcoal/30 border border-white/5 p-6">
+                    <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-4 border-b border-white/10 pb-3">
+                      Physical Edition Details
+                    </h3>
+                    <div className="space-y-3 text-white text-sm font-mono leading-relaxed">
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-white/30 select-none">-</span>
+                        <p>
+                          $6,000 discount applies toward the cost of the physical,
+                          if you choose to collect.
+                        </p>
+                      </div>
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-white/30 select-none">-</span>
+                        <p>18&Prime; &times; 24&Prime;</p>
+                      </div>
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-white/30 select-none">-</span>
+                        <p>Signed and numbered 1/10 per overlord.</p>
+                      </div>
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-white/30 select-none">-</span>
+                        <p>
+                          Owning multiple digital pieces allows for mashup of
+                          elements on the physical work.
+                        </p>
+                      </div>
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-white/30 select-none">-</span>
+                        <p>
+                          Release date TBD based on R&amp;D and production.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+
+          {/* Right: Collection Overview Sidebar */}
+          <div className="lg:w-96 shrink-0">
+            <ScrollReveal>
               <div className="bg-charcoal/30 border border-white/5 p-6">
                 <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-6 border-b border-white/10 pb-3">
                   Collection Overview
@@ -106,259 +356,9 @@ export default function Kinetic3DPatronagePage() {
               >
                 View Collectors
               </Link>
-            </div>
+            </ScrollReveal>
           </div>
-        </ScrollReveal>
-
-        <div className="line-accent mb-16" />
-
-        {/* Touch the Art */}
-        <ScrollReveal>
-          <div className="mb-16 md:mb-24">
-            <div className="classified-header">
-              Benefit 001 -{' '}
-              <span className="redacted">Stewardship</span>
-            </div>
-            <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
-              Touch the Art
-            </h2>
-            <div className="space-y-4 text-white text-sm font-mono leading-relaxed max-w-3xl">
-              <p>
-                Collectors get to be stewards of this new method of interactive
-                3D collaboration. It is meant to be used and explored, pushing
-                yourself to be creative and feel something.
-              </p>
-            </div>
-          </div>
-        </ScrollReveal>
-
-        <div className="line-accent mb-16" />
-
-        {/* Network Effect */}
-        <ScrollReveal>
-          <div className="mb-16 md:mb-24">
-            <div className="classified-header">
-              Benefit 002 -{' '}
-              <span className="redacted">Distribution</span>
-            </div>
-            <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
-              Network Effect
-            </h2>
-            <div className="space-y-4 text-white text-sm font-mono leading-relaxed max-w-3xl">
-              <p>
-                Sharing this art IRL and digitally invites viewers to
-                &lsquo;touch the art,&rsquo; but only the token holders own it.
-              </p>
-            </div>
-
-            <div className="mt-8 space-y-4 max-w-3xl">
-              <div className="bg-charcoal/30 border border-white/5 p-6">
-                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-3 border-b border-white/10 pb-3">
-                  Project Hub
-                </h3>
-                <p className="text-white text-sm font-mono leading-relaxed">
-                  A mini-site will act as a hub for the project, to showcase the
-                  digital kinetic works and highlight the patrons of the project.
-                </p>
-              </div>
-
-              <div className="bg-charcoal/30 border border-white/5 p-6">
-                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-3 border-b border-white/10 pb-3">
-                  Community Engagement
-                </h3>
-                <p className="text-white text-sm font-mono leading-relaxed">
-                  Community engagement with the digital works in ways that bring
-                  more visibility and incentive to &lsquo;touch the art&rsquo;
-                  which benefits collectors and creators.
-                </p>
-              </div>
-
-              <div className="bg-charcoal/30 border border-white/5 p-6">
-                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-3 border-b border-white/10 pb-3">
-                  Free Art Releases
-                </h3>
-                <p className="text-white text-sm font-mono leading-relaxed">
-                  Includes free art (physical and digital) related to curated
-                  community releases, tied to the kinetic token held. For
-                  example, if there is an Elon Musk competition, holders of the
-                  Musk kinetic token will get one of the released items.
-                </p>
-              </div>
-            </div>
-          </div>
-        </ScrollReveal>
-
-        <div className="line-accent mb-16" />
-
-        {/* Real-Time Evolution */}
-        <ScrollReveal>
-          <div className="mb-16 md:mb-24">
-            <div className="classified-header">
-              Benefit 003 -{' '}
-              <span className="redacted">Evolution</span>
-            </div>
-            <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
-              Real-Time Evolution
-            </h2>
-            <div className="space-y-4 text-white text-sm font-mono leading-relaxed max-w-3xl">
-              <p>
-                Because this is a ERC-7160 Doppelg&auml;nger contract, the token
-                will be upgraded as I implement the longer term vision of the
-                project. These are being developed at different phases of
-                R&amp;D. I am releasing it now so we can see it grow together,
-                in real-time.
-              </p>
-            </div>
-
-            <div className="mt-8 space-y-4 max-w-3xl">
-              <div className="bg-charcoal/30 border border-white/5 p-6">
-                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-3 border-b border-white/10 pb-3">
-                  Increased Interactivity
-                </h3>
-                <p className="text-white text-sm font-mono leading-relaxed">
-                  Allowing deeper control of assets.
-                </p>
-              </div>
-
-              <div className="bg-charcoal/30 border border-white/5 p-6">
-                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-3 border-b border-white/10 pb-3">
-                  Advanced Viewing Methods
-                </h3>
-                <p className="text-white text-sm font-mono leading-relaxed">
-                  In-depth viewing experiences meant for public interaction and experimentation.
-                </p>
-              </div>
-
-              <div className="bg-charcoal/30 border border-white/5 p-6">
-                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-3 border-b border-white/10 pb-3">
-                  New Functionality
-                </h3>
-                <p className="text-white text-sm font-mono leading-relaxed">
-                  Will open up doors for deeper impact.
-                </p>
-              </div>
-            </div>
-          </div>
-        </ScrollReveal>
-
-        <div className="line-accent mb-16" />
-
-        {/* Added-Value: Collaborative Print */}
-        <ScrollReveal>
-          <div className="mb-16 md:mb-24">
-            <div className="classified-header">
-              Benefit 004 -{' '}
-              <span className="redacted">Added-Value</span>
-            </div>
-            <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
-              Added-Value
-            </h2>
-            <div className="space-y-4 text-white text-sm font-mono leading-relaxed max-w-3xl">
-              <p>
-                As a patron of the digital kinetic 3D series, there are inherent
-                value-adds and opportunities to participate further with the
-                project.
-              </p>
-            </div>
-
-            <div className="mt-8 max-w-3xl">
-              <div className="bg-charcoal/30 border border-white/5 p-6">
-                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-4 border-b border-white/10 pb-3">
-                  Collaborative Physical Print
-                </h3>
-                <div className="space-y-3 text-white text-sm font-mono leading-relaxed">
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">-</span>
-                    <p>
-                      Each token receives one gallery-quality print free of
-                      charge.
-                    </p>
-                  </div>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">-</span>
-                    <p>
-                      Collector customizes their digital kinetic 3D layout to
-                      their preferred composition.
-                    </p>
-                  </div>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">-</span>
-                    <p>12&Prime; &times; 18&Prime;</p>
-                  </div>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">-</span>
-                    <p>Signed and numbered 1/1/10 per overlord.</p>
-                  </div>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">-</span>
-                    <p>
-                      Full Set collectors can create multi-overlord mashup portraits
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </ScrollReveal>
-
-        <div className="line-accent mb-16" />
-
-        {/* Physical Kinetic 3D Series */}
-        <ScrollReveal>
-          <div className="mb-16 md:mb-24">
-            <div className="classified-header">
-              Benefit 005 -{' '}
-              <span className="redacted">Physical</span>
-            </div>
-            <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
-              Physical Kinetic 3D Series
-            </h2>
-            <div className="space-y-4 text-white text-sm font-mono leading-relaxed max-w-3xl">
-              <p>
-                Collector has first right to collect the physical kinetic 3D
-                version of their digital work.
-              </p>
-            </div>
-
-            <div className="mt-8 max-w-3xl">
-              <div className="bg-charcoal/30 border border-white/5 p-6">
-                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-4 border-b border-white/10 pb-3">
-                  Physical Edition Details
-                </h3>
-                <div className="space-y-3 text-white text-sm font-mono leading-relaxed">
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">-</span>
-                    <p>
-                      $6,000 discount applies toward the cost of the physical,
-                      if you choose to collect.
-                    </p>
-                  </div>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">-</span>
-                    <p>18&Prime; &times; 24&Prime;</p>
-                  </div>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">-</span>
-                    <p>Signed and numbered 1/10 per overlord.</p>
-                  </div>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">-</span>
-                    <p>
-                      Owning multiple digital pieces allows for mashup of
-                      elements on the physical work.
-                    </p>
-                  </div>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">-</span>
-                    <p>
-                      Release date TBD based on R&amp;D and production.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </ScrollReveal>
+        </div>
 
         {/* Back to Series CTA */}
         <ScrollReveal>
