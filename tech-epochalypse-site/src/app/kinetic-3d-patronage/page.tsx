@@ -16,7 +16,7 @@ export default function Kinetic3DPatronagePage() {
         <ScrollReveal>
           <div className="text-center mb-16 md:mb-24">
             <p className="font-mono text-xs uppercase tracking-[0.4em] text-white mb-4">
-              Token Holder Benefits
+              Founding Collector Benefits
             </p>
             <h1 className="font-display text-4xl md:text-6xl text-white mb-4 uppercase tracking-[0.05em]">
               Kinetic 3D Patronage
