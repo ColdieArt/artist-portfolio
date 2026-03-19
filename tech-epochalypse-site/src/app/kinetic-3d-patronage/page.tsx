@@ -50,9 +50,16 @@ export default function Kinetic3DPatronagePage() {
                 </h2>
                 <div className="space-y-4 text-white text-sm font-mono leading-relaxed">
                   <p>
-                    Collectors get to be stewards of this new method of interactive
-                    3D collaboration. It is meant to be used and explored, pushing
-                    yourself to be creative and feel something.
+                    Collectors get to be stewards of this new medium of kinetic 3D
+                    collage. It is meant to be used and explored, pushing yourself
+                    to be creative and feel something. Art can be so much more than
+                    just something to stare at. As the series evolves and the
+                    ecosystem of networked art grows, the living art itself will
+                    remain the truth that all releases will be sourced from.
+                  </p>
+                  <p>
+                    This is Coldie&apos;s genesis series that features this medium
+                    of 3D kinetic collage.
                   </p>
                 </div>
               </div>
@@ -83,8 +90,10 @@ export default function Kinetic3DPatronagePage() {
                       Project Hub
                     </h3>
                     <p className="text-white text-sm font-mono leading-relaxed">
-                      A mini-site will act as a hub for the project, to showcase the
-                      digital kinetic works and highlight the patrons of the project.
+                      This mini-site acts as the networked hub for the Tech
+                      Epochalypse series, to showcase the digital kinetic works and
+                      highlight the patrons of the project that have helped bring
+                      this new medium of collage to life.
                     </p>
                   </div>
 
@@ -101,13 +110,14 @@ export default function Kinetic3DPatronagePage() {
 
                   <div className="bg-charcoal/30 border border-white/5 p-6">
                     <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-3 border-b border-white/10 pb-3">
-                      Free Art Releases
+                      Collector Allocations
                     </h3>
                     <p className="text-white text-sm font-mono leading-relaxed">
-                      Includes free art (physical and digital) related to curated
-                      community releases, tied to the kinetic token held. For
-                      example, if there is an Elon Musk competition, holders of the
-                      Musk kinetic token will get one of the released items.
+                      Kinetic token holders receive exclusive allocations from
+                      curated physical and digital releases tied to their specific
+                      work. Participation is determined by ownership at the time of
+                      each release, with distributions aligned to the corresponding
+                      Overlord.
                     </p>
                   </div>
                 </div>
@@ -124,15 +134,18 @@ export default function Kinetic3DPatronagePage() {
                   <span className="redacted">Evolution</span>
                 </div>
                 <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
-                  Real-Time Evolution
+                  Living Art Evolution
                 </h2>
                 <div className="space-y-4 text-white text-sm font-mono leading-relaxed">
                   <p>
-                    Because this is a ERC-7160 Doppelg&auml;nger contract, the token
-                    will be upgraded as I implement the longer term vision of the
-                    project. These are being developed at different phases of
-                    R&amp;D. I am releasing it now so we can see it grow together,
-                    in real-time.
+                    A living composition that evolves with its collectors.
+                  </p>
+                  <p>
+                    Because this is a ERC-7160 Doppelg&auml;nger contract
+                    (Transient Labs), the token will be upgraded as I implement the
+                    longer term vision of the project. I am releasing the current
+                    medium functionality as it lives now so we can experience its
+                    together, in real-time.
                   </p>
                 </div>
 
@@ -242,7 +255,18 @@ export default function Kinetic3DPatronagePage() {
                 <div className="space-y-4 text-white text-sm font-mono leading-relaxed">
                   <p>
                     Collector has first right to collect the physical kinetic 3D
-                    version of their digital work.
+                    version of their digital work. These works are able to be
+                    rearranged dynamically using magnets. Previously this medium
+                    was sold by Coldie at{' '}
+                    <a
+                      href="https://onlineonly.christies.com/s/first-open-post-war-contemporary-art/coldie-b-1982-286/245196"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:text-white/80 transition-colors"
+                    >
+                      Christie&apos;s Auction House
+                    </a>{' '}
+                    in 2024.
                   </p>
                 </div>
 
@@ -255,8 +279,11 @@ export default function Kinetic3DPatronagePage() {
                       <div className="flex items-baseline gap-3">
                         <span className="text-white/30 select-none">-</span>
                         <p>
-                          $6,000 discount applies toward the cost of the physical,
-                          if you choose to collect.
+                          $6,000 discount applies toward the cost of a single
+                          physical magnetic work. Owning multiple digital pieces
+                          does not increase the discount on a single physical work.
+                          Price TBD as we are developing new production and
+                          functionality tools currently.
                         </p>
                       </div>
                       <div className="flex items-baseline gap-3">
