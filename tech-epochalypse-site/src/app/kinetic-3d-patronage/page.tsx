@@ -145,7 +145,7 @@ export default function Kinetic3DPatronagePage() {
                     (Transient Labs), the token will be upgraded as I implement the
                     longer term vision of the project. I am releasing the current
                     medium functionality as it lives now so we can experience its
-                    together, in real-time.
+                    living art experience, together, in real-time.
                   </p>
                 </div>
 
@@ -209,8 +209,8 @@ export default function Kinetic3DPatronagePage() {
                       <div className="flex items-baseline gap-3">
                         <span className="text-white/30 select-none">-</span>
                         <p>
-                          Each token receives one gallery-quality print free of
-                          charge.
+                          The first collectors for these kinetic works will be
+                          allocated one gallery-quality print.
                         </p>
                       </div>
                       <div className="flex items-baseline gap-3">
@@ -297,8 +297,9 @@ export default function Kinetic3DPatronagePage() {
                       <div className="flex items-baseline gap-3">
                         <span className="text-white/30 select-none">-</span>
                         <p>
-                          Owning multiple digital pieces allows for mashup of
-                          elements on the physical work.
+                          Founding System Collectors (Full set) Owning can have a
+                          mashup of the five Overlord elements on the physical
+                          work.
                         </p>
                       </div>
                       <div className="flex items-baseline gap-3">
