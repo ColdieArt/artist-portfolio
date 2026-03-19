@@ -16,7 +16,7 @@ export default function Kinetic3DPatronagePage() {
         <ScrollReveal>
           <div className="text-center mb-16 md:mb-24">
             <p className="font-mono text-xs uppercase tracking-[0.4em] text-white mb-4">
-              Token Holder Benefits
+              Founding Collector Benefits
             </p>
             <h1 className="font-display text-4xl md:text-6xl text-white mb-4 uppercase tracking-[0.05em]">
               Kinetic 3D Patronage
@@ -190,7 +190,7 @@ export default function Kinetic3DPatronagePage() {
                   <span className="redacted">Added-Value</span>
                 </div>
                 <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
-                  Added-Value
+                  Custom Physical Print
                 </h2>
                 <div className="space-y-4 text-white text-sm font-mono leading-relaxed">
                   <p>
@@ -250,7 +250,7 @@ export default function Kinetic3DPatronagePage() {
                   <span className="redacted">Physical</span>
                 </div>
                 <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
-                  Physical Kinetic 3D Series
+                  Magnetic Physical Work
                 </h2>
                 <div className="space-y-4 text-white text-sm font-mono leading-relaxed">
                   <p>
