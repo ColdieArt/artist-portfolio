@@ -106,8 +106,12 @@ export default function CollectorsPage() {
 
                       {/* Owned pieces */}
                       <div className="mb-4">
-                        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-white mb-2">
-                          Collection
+                        <p className={`font-mono text-[11px] uppercase tracking-[0.2em] mb-2 ${
+                          collector.founding
+                            ? 'text-[#D4AF37]'
+                            : 'text-white'
+                        }`}>
+                          {collector.label}
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {collector.pieces.map((slug) => {
@@ -121,7 +125,11 @@ export default function CollectorsPage() {
                                     ? `/overlords/${slug}`
                                     : '/overlords'
                                 }
-                                className="flex items-center gap-2 bg-black/50 border border-white/5 px-3 py-1.5 hover:border-white/15 transition-colors group/piece"
+                                className={`flex items-center gap-2 bg-black/50 px-3 py-1.5 transition-colors group/piece ${
+                                  collector.founding
+                                    ? 'border border-[#D4AF37]/40 hover:border-[#D4AF37]/70'
+                                    : 'border border-white/5 hover:border-white/15'
+                                }`}
                               >
                                 {overlord.previewImage && (
                                   <img
