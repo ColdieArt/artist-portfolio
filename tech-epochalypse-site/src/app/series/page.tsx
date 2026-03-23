@@ -225,10 +225,6 @@ export default function SeriesPage() {
                       <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">Editions / Overlord</span>
                       <span className="font-display text-lg text-white">10</span>
                     </div>
-                    <div className="flex justify-between items-baseline">
-                      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">Price</span>
-                      <span className="font-display text-lg text-white">TBD <span className="font-mono text-[10px] text-white/50">(in ETH)</span></span>
-                    </div>
                   </div>
                 </div>
 
