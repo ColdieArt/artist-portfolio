@@ -255,7 +255,7 @@ export default function Kinetic3DPatronagePage() {
                   <div className="flex items-baseline gap-3">
                     <span className="text-white/30 select-none">-</span>
                     <p>
-                      $6,000 discount applies toward the cost of the physical,
+                      Discount applies toward the cost of the physical,
                       if you choose to collect.
                     </p>
                   </div>
