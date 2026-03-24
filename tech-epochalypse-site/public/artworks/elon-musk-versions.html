@@ -5,7 +5,6 @@
   <!-- Gallery API — update this URL after deploying the Cloudflare Worker -->
   <script>window.GALLERY_API_URL = window.location.origin;</script>
   <!-- Airtable submission handled server-side by the worker -->
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
   <script type="importmap">
     {
       "imports": {
@@ -40,58 +39,55 @@
     }
 
     /* ─── EXPORT PANEL ─── */
-    #export-wrapper {
-      position: fixed;
-      bottom: 10px;
-      right: 10px;
-      z-index: 200;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-    }
     #export-panel {
-      background: rgba(0,0,0,0.92);
-      border: 0.5px solid white;
-      border-bottom: none;
-      padding: 6px;
+      position: fixed;
+      left: 10px;
+      z-index: 201;
+      background: rgba(0,0,0,0.88);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px;
+      padding: 12px 14px;
       font-family: monospace;
       color: #ccc;
-      font-size: 7px;
+      font-size: 10px;
+      width: 200px;
       display: none;
       flex-direction: column;
-      gap: 5px;
+      gap: 8px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
     }
     #export-panel.open { display: flex; }
 
     #export-panel .panel-title {
       color: #fff;
-      font-size: 7px;
-      letter-spacing: 1px;
-      border-bottom: 0.5px solid rgba(255,255,255,0.3);
-      padding-bottom: 4px;
-      margin-bottom: 0;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      padding-bottom: 6px;
+      margin-bottom: 2px;
     }
 
     #export-panel .export-row {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 8px;
     }
     #export-panel .export-row label {
       flex: 1;
       color: #aaa;
-      font-size: 7px;
+      font-size: 10px;
       letter-spacing: 0.5px;
     }
     #export-panel .export-row select,
     #export-panel .export-row input[type="number"] {
       background: #111;
       color: #ddd;
-      border: 0.5px solid rgba(255,255,255,0.3);
-      padding: 2px 4px;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 2px;
+      padding: 3px 5px;
       font-family: monospace;
-      font-size: 7px;
-      width: 40px;
+      font-size: 10px;
+      width: 58px;
       outline: none;
     }
     #export-panel .export-row select:focus,
@@ -102,10 +98,11 @@
     #export-panel .export-btn {
       background: #000;
       color: #fff;
-      border: 0.5px solid white;
-      padding: 4px 0;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 2px;
+      padding: 5px 0;
       font-family: monospace;
-      font-size: 7px;
+      font-size: 10px;
       letter-spacing: 1px;
       cursor: pointer;
       text-align: center;
@@ -125,158 +122,58 @@
 
     #export-panel .status-line {
       color: #666;
-      font-size: 7px;
+      font-size: 9px;
       text-align: center;
-      min-height: 9px;
+      min-height: 11px;
       letter-spacing: 0.5px;
     }
     #export-panel .status-line.active { color: #4c4; }
     #export-panel .status-line.error   { color: #e66; }
 
-    /* ─── SWAP MODE TOGGLE BUTTON (now in left drop menu) ─── */
-    #swap-mode-btn {
-      display: none;
-    }
-
-    /* ─── ELEMENT CONTROLS PANEL (pops out to the right of left menu) ─── */
-    #element-controls {
-      position: fixed;
-      top: 10px;
-      left: 90px;
-      z-index: 200;
-      display: none;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 6px;
-      background: #000;
-      border: 1px solid #555;
-      padding: 10px 14px;
-      font-family: monospace;
-      font-size: 9px;
-      font-weight: bold;
-      color: #fff;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      user-select: none;
-      -webkit-user-select: none;
-      opacity: 1;
-      transition: opacity 0.3s, border-color 0.3s;
-    }
-    #element-controls.visible {
-      display: flex;
-      opacity: 1;
-    }
-    #element-controls .ctrl-label {
-      color: #fff;
-      font-size: 9px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      white-space: nowrap;
-      border-bottom: 1px solid #333;
-      padding-bottom: 6px;
-      margin-bottom: 2px;
-      text-align: right;
-    }
-    #element-controls .ctrl-section {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      margin-bottom: 0;
-    }
-    #element-controls .ctrl-section-title {
-      color: #888;
-      font-size: 8px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin-bottom: 0;
-      white-space: nowrap;
-      text-align: right;
-    }
-    #element-controls .ctrl-row {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 5px;
-      margin-bottom: 0;
-    }
-    #element-controls .ctrl-row label {
-      width: auto;
-      color: #666;
-      font-size: 8px;
-      text-align: right;
-    }
-    #element-controls input[type="range"] {
-      width: 90px;
-      height: 3px;
-      -webkit-appearance: none;
-      appearance: none;
-      background: #333;
-      border-radius: 2px;
-      outline: none;
-      cursor: pointer;
-    }
-    #element-controls input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 14px;
-      height: 14px;
-      border-radius: 0;
-      background: #808080;
-      cursor: pointer;
-      border: none;
-    }
-    #element-controls input[type="range"]::-moz-range-thumb {
-      width: 14px;
-      height: 14px;
-      border-radius: 0;
-      background: #808080;
-      cursor: pointer;
-      border: none;
-    }
-    #element-controls .ctrl-value {
-      color: #888;
-      font-size: 8px;
-      min-width: 30px;
-      text-align: right;
-    }
-
     /* ─── SUBMIT TO THE OVERLORD BUTTON ─── */
     #submit-overlord-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 200;
       background: #000;
       color: #fff;
-      border: 0.5px solid white;
-      padding: 4px;
+      border: 2px solid #fff;
+      padding: 14px 24px;
       font-family: monospace;
-      font-size: 7px;
+      font-size: 13px;
       font-weight: bold;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       cursor: pointer;
-      white-space: nowrap;
-      box-sizing: border-box;
-      outline: none;
+      transition: background 0.2s, border-color 0.2s;
     }
     #submit-overlord-btn:hover {
       background: #1a1a1a;
+      border-color: #ccc;
     }
 
     /* ─── POST TO X MODAL ─── */
     #post-modal {
       position: fixed;
-      bottom: 10px;
-      left: 10px;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.85);
       display: none;
+      justify-content: center;
+      align-items: center;
       z-index: 300;
     }
-    #post-modal.open { display: block; }
+    #post-modal.open { display: flex; }
 
     #post-modal-content {
-      background: rgba(0,0,0,0.92);
-      border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 4px;
-      padding: 20px 24px;
+      background: #000;
+      border: 2px solid #fff;
+      padding: 30px 40px;
       text-align: center;
       font-family: monospace;
       color: #fff;
-      max-width: 320px;
     }
 
     #post-modal h2 {
@@ -300,7 +197,7 @@
     }
     #post-modal-btn:hover { background: #1a8cd8; }
   </style>
-  <title>ALPHA - The Collective | Tech Epochalypse by Coldie</title>
+  <title>ELON-MUSK-AWS-MASTER | Made on juno.transient.xyz</title>
 </head>
 <body>
   
@@ -312,7 +209,6 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
-import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 
 let camera, scene, renderer, controls, composer;
 let raycaster, mouse;
@@ -560,168 +456,43 @@ const REDACTED_GLITCH_PHRASES = [
 let redactedGlitchPhraseData = []; // Array of objects {text: string, redactedWordIndices: number[], redactionApplied: boolean}
 
 // Define all layer URLs at the top of the script
-// ── HYBRID FACE COMPOSITION ──
-// Forehead from Zuckerberg, Hair from Altman, Nose from Bezos, Mouth from Huang, Ear from Altman
-// Eyes default to Musk (cyclable via right-click through all 5 overlords)
 const URL_BACKGROUND = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/K-Dallas-Region-BG.jpg';
-const URL_FOREHEAD = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Forehead.gif';
-const URL_MOUTH = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-mouth.gif';
+const URL_FOREHEAD = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0010_forehead.png';
+const URL_MOUTH = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0008_mouth.png';
 const URL_LEFT_EYE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0009_Eye-L.png';
-const URL_RIGHT_EYE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0007_Eye-R.png';
-const URL_NOSE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-nose.gif';
-const URL_HAIR = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_hair.gif';
-const URL_EAR = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_ear.gif';
-const URL_SIGNATURE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/coldie-sig.gif';
-
-// Branded elements - one from each overlord
-const URL_BRANDED_1 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0000_SpaceX.png';
-const URL_BRANDED_2 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-meta-headset-2.gif';
-const URL_BRANDED_3 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_OpenAI.gif';
-const URL_BRANDED_4 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/blue-origin.gif';
-const URL_BRANDED_5 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/card-01.gif';
-
-// Aliases for backward compatibility with base template code
-const URL_DOGECOIN_ORIGINAL = URL_BRANDED_2;
-const URL_TESLA_SWAP = URL_BRANDED_2;
-const URL_X_LOGO_SWAP = URL_BRANDED_1;
-const URL_SPACEX_ORIGINAL = URL_BRANDED_1;
-const URL_ROCKET = URL_BRANDED_4;
-const URL_BLUE_BILL = URL_BRANDED_3;
-const URL_FIAT_WORTHLESS = URL_BRANDED_5;
+const URL_X_LOGO_SWAP = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/X_Logo.png';
+const URL_NOSE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0003_nose-2.png';
+const URL_HAIR = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0001_hair.png';
+const URL_BLUE_BILL = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0018_K-bluebill.png';
+const URL_DOGECOIN_ORIGINAL = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/grok.gif';
+const URL_TESLA_SWAP = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/tesla.png';
+    const URL_SIGNATURE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/coldie-sig.gif';
+const URL_ROCKET = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0016_rocket.png';
+const URL_RIGHT_EYE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0007_Eye-R.png'; 
+const URL_SPACEX_ORIGINAL = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0000_SpaceX.png';
+const URL_EAR = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0002_ear.png';
+const URL_FIAT_WORTHLESS = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0005_Fiat-is-worthless-so-yes.png';
 
 // ── ARWEAVE FALLBACKS ──
 // AWS is primary; if it fails, retry from Arweave permanent storage.
 const ARWEAVE_FALLBACKS = {
-    [URL_BACKGROUND]:       'https://arweave.net/TSR-_jhbZMAwFewzYmR5hrvuZdMvjHtSK8tPQNbC-7k',
-    [URL_FOREHEAD]:         'https://arweave.net/HSyR6VYNWPUWDEErZ2ZRedu7rGbbJ-k-Kn087jbybDQ',
-    [URL_RIGHT_EYE]:        'https://arweave.net/AdwZo6TOOaLDOhZYHsL_WlkhyhaxFfB1_4O--fCrhQs',
-    [URL_MOUTH]:            'https://arweave.net/Z1URsvsW8tUDa1kmbXi79C0GFN-qc5wv72n3tRLjJOI',
-    [URL_EAR]:              'https://arweave.net/rAFpOlaAEIW_z_0iHfP3x9tqUyjtBeAgAbX-D4WH-dE',
-    [URL_LEFT_EYE]:         'https://arweave.net/6NDHcBsnCqDnPRF5Ixn9psrvCHlMj7aTflLgVXg6Dws',
-    [URL_SPACEX_ORIGINAL]:  'https://arweave.net/_3W9ZL7fNciwZmJC-Yd0ccyjNOQD90OoPcf-GyxklCc',
-    [URL_X_LOGO_SWAP]:      'https://arweave.net/m9snx1yLLujD2yOVwpMrK_iRLmyOmShAT9NJ9ZpOd7I',
-    [URL_NOSE]:             'https://arweave.net/EnV0qCN4HtmCuQZTYTMA_B1S3fqMKfb3BZkx_DNKu9k',
-    [URL_HAIR]:             'https://arweave.net/YUThcqGlSVR7Xj2FYwaEHCA_Gahi5-K63EWJWOBKTU0',
-    [URL_BLUE_BILL]:        'https://arweave.net/gFm9OPJrDu5ECLwp-0LOg1sNeaXpAw4PS7qlKmLKmQU',
-    [URL_DOGECOIN_ORIGINAL]:'https://arweave.net/3CrtSSB-NS67I1vxch_8mb3ucNPsR65d41OaxiHgsog',
-    [URL_TESLA_SWAP]:       'https://arweave.net/EsgF_VjABv6DkxLjKPcGPDblB1oqM2limnMzRo9ZMhU',
-    [URL_FIAT_WORTHLESS]:   'https://arweave.net/0p8obVcTCfvM8UxSqRhZ8bzZWtQRH3_ITB4xhABGN3c',
-    [URL_SIGNATURE]:        'https://arweave.net/CQiQ7anriy5AFq1m2ClDid-kwgkOWAPrrimOmXiaI3c',
-    [URL_ROCKET]:           'https://arweave.net/Z80AsFa7H0zPsyZ4cLx4Bk_XUEDoEG4RiYer1g7mVX0',
+    [URL_BACKGROUND]:        'https://arweave.net/TSR-_jhbZMAwFewzYmR5hrvuZdMvjHtSK8tPQNbC-7k',
+    [URL_FOREHEAD]:          'https://arweave.net/HSyR6VYNWPUWDEErZ2ZRedu7rGbbJ-k-Kn087jbybDQ',
+    [URL_RIGHT_EYE]:         'https://arweave.net/AdwZo6TOOaLDOhZYHsL_WlkhyhaxFfB1_4O--fCrhQs',
+    [URL_MOUTH]:             'https://arweave.net/Z1URsvsW8tUDa1kmbXi79C0GFN-qc5wv72n3tRLjJOI',
+    [URL_EAR]:               'https://arweave.net/rAFpOlaAEIW_z_0iHfP3x9tqUyjtBeAgAbX-D4WH-dE',
+    [URL_LEFT_EYE]:          'https://arweave.net/6NDHcBsnCqDnPRF5Ixn9psrvCHlMj7aTflLgVXg6Dws',
+    [URL_SPACEX_ORIGINAL]:   'https://arweave.net/_3W9ZL7fNciwZmJC-Yd0ccyjNOQD90OoPcf-GyxklCc',
+    [URL_X_LOGO_SWAP]:       'https://arweave.net/m9snx1yLLujD2yOVwpMrK_iRLmyOmShAT9NJ9ZpOd7I',
+    [URL_NOSE]:              'https://arweave.net/EnV0qCN4HtmCuQZTYTMA_B1S3fqMKfb3BZkx_DNKu9k',
+    [URL_HAIR]:              'https://arweave.net/YUThcqGlSVR7Xj2FYwaEHCA_Gahi5-K63EWJWOBKTU0',
+    [URL_BLUE_BILL]:         'https://arweave.net/gFm9OPJrDu5ECLwp-0LOg1sNeaXpAw4PS7qlKmLKmQU',
+    [URL_DOGECOIN_ORIGINAL]: 'https://arweave.net/3CrtSSB-NS67I1vxch_8mb3ucNPsR65d41OaxiHgsog',
+    [URL_TESLA_SWAP]:        'https://arweave.net/EsgF_VjABv6DkxLjKPcGPDblB1oqM2limnMzRo9ZMhU',
+    [URL_FIAT_WORTHLESS]:    'https://arweave.net/0p8obVcTCfvM8UxSqRhZ8bzZWtQRH3_ITB4xhABGN3c',
+    [URL_SIGNATURE]:         'https://arweave.net/CQiQ7anriy5AFq1m2ClDid-kwgkOWAPrrimOmXiaI3c',
+    [URL_ROCKET]:            'https://arweave.net/Z80AsFa7H0zPsyZ4cLx4Bk_XUEDoEG4RiYer1g7mVX0',
 };
-
-// ── ELEMENT CYCLING SYSTEM ──
-// Right-click any face element to cycle through all 5 overlords' versions
-const OVERLORD_NAMES = ['Elon Musk', 'Mark Zuckerberg', 'Sam Altman', 'Jeff Bezos', 'Jensen Huang'];
-const OVERLORD_NUMERALS = ['I', 'II', 'III', 'IV', 'V'];
-
-// Asset URLs per element per overlord (index 0=Musk, 1=Zuckerberg, 2=Altman, 3=Bezos, 4=Huang)
-const OVERLORD_ASSETS = {
-    rightEye: [
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0007_Eye-R.png',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Eye-R.gif',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_Eye-R.gif',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-Eye-R.gif',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-eyes.gif'
-    ],
-    leftEye: [
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0009_Eye-L.png',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Eye-L.gif',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_Eye-L.gif',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-Eye-L.gif',
-        ''
-    ],
-    nose: [
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0003_nose-2.png',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-nose.gif',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_nose.gif',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-nose.gif',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-nose.gif'
-    ],
-    mouth: [
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0008_mouth.png',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Mouth.gif',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_mouth-color.gif',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-mouth.gif',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-mouth.gif'
-    ],
-    forehead: [
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0010_forehead.png',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Forehead.gif',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_forehead-2.gif',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-Forehead.gif',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/fhead01.gif'
-    ],
-    hair: [
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0001_hair.png',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Hair.gif',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_hair.gif',
-        '',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-hair.gif'
-    ],
-    ear: [
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0002_ear.png',
-        '',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_ear.gif',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-ear.gif',
-        ''
-    ],
-    background: [
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/K-Dallas-Region-BG.jpg',
-        '',
-        '',
-        '',
-        ''
-    ],
-    mouthOverlay: [
-        '',
-        '',
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_mouth.gif',
-        '',
-        ''
-    ]
-};
-
-// Branded element cycle options (SpaceX, Tesla, Drone, Blue Origin, Blue Bill)
-const BRANDED_OPTIONS = [
-    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0000_SpaceX.png',
-    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/tesla.png',
-    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/drone-color.gif',
-    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/blue-origin.gif',
-    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_OpenAI.gif',
-    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-meta-headset-2.gif',
-    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/card-01.gif'
-];
-const BRANDED_LABELS = ['SPACEX', 'TESLA', 'DRONE', 'BLUE ORIGIN', 'BLUE BILL', 'META HEADSET', 'NVIDIA CARD'];
-// Add branded elements to OVERLORD_ASSETS so cycleElement can handle them
-OVERLORD_ASSETS['spacex'] = BRANDED_OPTIONS;
-OVERLORD_ASSETS['blueBill'] = BRANDED_OPTIONS;
-OVERLORD_ASSETS['rocket'] = BRANDED_OPTIONS;
-
-// Track which overlord index each element is currently showing
-const elementOverlordIndex = {
-    rightEye: 0,   // Musk default
-    leftEye: 0,    // Musk default
-    nose: 3,       // Bezos default
-    mouth: 4,      // Huang default
-    forehead: 1,   // Zuckerberg default
-    hair: 2,       // Altman default
-    ear: 2,            // Altman default
-    background: 0,     // Musk default
-    mouthOverlay: 4,   // Tracks mouth; default is Huang (no overlay)
-    spacex: 0,         // SpaceX (branded index 0)
-    blueBill: 4,       // Blue Bill/OpenAI (branded index 4)
-    rocket: 3          // Blue Origin (branded index 3)
-};
-
-// Cyclable element IDs (matches userData.id on meshes)
-const CYCLABLE_ELEMENTS = ['rightEye', 'leftEye', 'nose', 'mouth', 'forehead', 'hair', 'ear', 'background', 'spacex', 'blueBill', 'rocket'];
-
-// Preloaded textures: { elementId: [texture0, texture1, ...texture4] }
-let preloadedElementTextures = {};
-let combinedEyesMesh = null; // For Jensen Huang's combined eyes image
-let swapMode = false; // When true, clicks cycle overlord elements instead of Z-depth
-let selectedScaleElement = null; // Currently selected element for scale slider
 
 // Define the initial X position for the rocket (was missing)
 const ROCKET_INITIAL_X = -2.0;
@@ -1154,21 +925,6 @@ let uploadButtonElement = null; // Global reference for the upload button UI ele
 let uploadedImageCounter = 0; // Counter for unique IDs on uploaded images
 let leftUiContainer = null; // Global reference for the left UI container
 let arrowContainer = null; // Global reference for the arrow container
-
-// ── Mask mode state ──
-let maskMode = false;
-let maskTargetMesh = null;       // The uploaded image mesh being masked
-let maskShape = 'circle';        // Current shape: square, circle, triangle, star, draw
-let maskScale = 1.0;             // Scale of the mask relative to the image
-let maskOffsetX = 0;             // Mask center offset in UV space (0-1)
-let maskOffsetY = 0;
-let maskOverlayMesh = null;      // Visual overlay showing mask preview
-let maskDragging = false;        // Whether we're dragging the mask overlay
-let maskDragStart = null;        // Pointer start for mask drag
-let maskDrawCanvas = null;       // Canvas for freehand draw mask
-let maskDrawCtx = null;          // 2D context for draw mask canvas
-let maskDrawing = false;         // Whether we're actively drawing on the mask
-let maskDrawLastUV = null;       // Last UV point for smooth line drawing
 
 // Array to store initial configurations of assets for reloading
 const initialAssetConfigs = [];
@@ -1728,7 +1484,7 @@ function resetPiecesToOriginalPositions() {
             }
         });
     };
-
+    
     let loadedAssetsCount = 0;
     const totalAssetsToLoad = initialAssetConfigs.length + 3; // +3 for doge original, tesla, x logo
 
@@ -1739,7 +1495,71 @@ function resetPiecesToOriginalPositions() {
             return; // Wait for all textures
         }
         
-        // --- 3.1. Load and Position Signature (Using FIXED initialPosition) ---
+        // --- 3.1. Load and Position Dogecoin/Tesla (Using FIXED initialPosition) ---
+        const dogecoinConfig = initialAssetConfigs.find(c => c.id === 'dogecoin');
+        if (dogecoinConfig && !dogecoinConfig.removed) {
+            // Re-create the Tesla Greyscale Contrast Material
+            teslaGreyscaleContrastMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    tDiffuse: { value: teslaTexture },
+                    contrast: { value: GreyscaleContrastShader.uniforms.contrast.value }
+                },
+                vertexShader: GreyscaleContrastShader.vertexShader,
+                fragmentShader: GreyscaleContrastShader.fragmentShader,
+                transparent: true,
+                alphaTest: 0.5
+            });
+
+            // Re-create Dogecoin/Tesla mesh
+            const material = teslaGreyscaleContrastMaterial;
+            const dogecoinScaleFactor = 0.7;
+            const planeWidth = teslaTexture.image.width * baseScale * dogecoinScaleFactor;
+            const planeHeight = teslaTexture.image.height * baseScale * dogecoinScaleFactor;
+            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+            const dogecoin = new THREE.Mesh(geometry, material);
+            
+            // Set the position using the FIXED initialPosition stored in the config
+            dogecoin.position.copy(dogecoinConfig.initialPosition);
+
+            dogecoin.userData.currentLayer = dogecoinConfig.initialLayer;
+            dogecoin.userData.initialPosition = dogecoinConfig.initialPosition.clone();
+            dogecoin.userData.initialLayer = dogecoinConfig.initialLayer;
+            dogecoin.userData.originalTexture = dogecoinOriginalTexture;
+            dogecoin.userData.teslaTexture = teslaTexture;
+            dogecoin.userData.id = 'dogecoin';
+            dogecoin.userData.initialScale = { width: planeWidth, height: planeHeight };
+            scene.add(dogecoin);
+            draggableObjects.push(dogecoin);
+            cameraAnimationTargets.push(dogecoin);
+            dogecoinRef = dogecoin;
+        }
+
+        // --- 3.2. Load and Position Fiat Worthless (Using FIXED initialPosition) ---
+        const fiatWorthlessConfig = initialAssetConfigs.find(c => c.id === 'fiatWorthless');
+        if (fiatWorthlessConfig && !fiatWorthlessConfig.removed) {
+            loadTexture(fiatWorthlessConfig.url, (texture) => {
+                const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+                const aspectRatio = texture.image.width / texture.image.height;
+                const fiatWorthlessHeight = 0.3; // Fixed height
+                const fiatWorthlessWidth = fiatWorthlessHeight * aspectRatio;
+                const geometry = new THREE.PlaneGeometry(fiatWorthlessWidth, fiatWorthlessHeight);
+                const fiatWorthless = new THREE.Mesh(geometry, material);
+
+                // Set position using the FIXED initialPosition stored in the config
+                fiatWorthless.position.copy(fiatWorthlessConfig.initialPosition);
+
+                fiatWorthless.userData.currentLayer = fiatWorthlessConfig.initialLayer;
+                fiatWorthless.userData.initialPosition = fiatWorthlessConfig.initialPosition.clone();
+                fiatWorthless.userData.initialLayer = fiatWorthlessConfig.initialLayer;
+                fiatWorthless.userData.id = 'fiatWorthless';
+                fiatWorthless.userData.initialScale = { width: fiatWorthlessWidth, height: fiatWorthlessHeight };
+                scene.add(fiatWorthless);
+                draggableObjects.push(fiatWorthless);
+                cameraAnimationTargets.push(fiatWorthless);
+            });
+        }
+        
+        // --- 3.3. Load and Position Signature (Using FIXED initialPosition) ---
         const signatureConfig = initialAssetConfigs.find(c => c.id === 'signature');
         if (signatureConfig && !signatureConfig.removed) {
             loadTexture(signatureConfig.url, (texture) => {
@@ -2241,8 +2061,565 @@ function init() {
         });
     };
 
-    // ALPHA: Empty scene — no pre-loaded images. Users build from scratch via UPLOAD.
-    // The textureLoader and loadTexture helper are kept for upload and restore functionality.
+    // Load and add the background image
+    initialAssetConfigs.push({
+        id: 'background',
+        type: 'background',
+        url: URL_BACKGROUND,
+        initialPosition: new THREE.Vector3(0, 0, -4 * depthStep),
+        initialLayer: -4,
+        scaleFactor: 1.10,
+        removed: false // Add removed flag
+    });
+    loadTexture(URL_BACKGROUND, (texture) => {
+        const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+        const aspectRatio = texture.image.width / texture.image.height;
+        const scaleFactor = 1.10;
+        const planeHeight = 10 * scaleFactor;
+        const planeWidth = planeHeight * aspectRatio;
+        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight); // Fixed: Declare geometry here
+        backgroundMesh = new THREE.Mesh(geometry, material);
+        backgroundMesh.position.z = -4 * depthStep;
+        backgroundMesh.userData.initialPosition = backgroundMesh.position.clone();
+        backgroundMesh.userData.initialLayer = -4;
+        backgroundMesh.userData.id = 'background'; // Added ID
+        scene.add(backgroundMesh);
+        cameraAnimationTargets.push(backgroundMesh);
+    });
+
+    // Load and add the forehead image
+    initialAssetConfigs.push({
+        id: 'forehead',
+        type: 'image',
+        url: URL_FOREHEAD,
+        initialPosition: new THREE.Vector3(0, (0.5 + 2.666) * 1.10, (2 - 1) * depthStep),
+        initialLayer: 2,
+        baseScale: baseScale,
+        scaleFactor: 1.15,
+        removed: false // Add removed flag
+    });
+    loadTexture(URL_FOREHEAD, (texture) => {
+        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+        const scaleFactor = 1.15;
+        const planeWidth = texture.image.width * baseScale * scaleFactor;
+        const planeHeight = texture.image.height * baseScale * scaleFactor;
+        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+        const forehead = new THREE.Mesh(geometry, material);
+        forehead.position.set(0, (0.5 + 2.666) * 1.10, (2 - 1) * depthStep);
+        forehead.userData.currentLayer = 2;
+        forehead.userData.initialPosition = forehead.position.clone();
+        forehead.userData.initialLayer = 2;
+        forehead.userData.id = 'forehead'; // Added ID
+        forehead.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
+        scene.add(forehead);
+        draggableObjects.push(forehead);
+        cameraAnimationTargets.push(forehead);
+    });
+
+    // Load and add the right eye image
+    initialAssetConfigs.push({
+        id: 'rightEye',
+        type: 'image',
+        url: URL_RIGHT_EYE,
+        initialPosition: new THREE.Vector3(-0.84 * 1.2 * 1.2, (0.175 * 1.15 * 1.20 * 3) + 2.0 - 1.0, (7 - 1) * depthStep),
+        initialLayer: 7,
+        baseScale: baseScale,
+        scaleFactor: 1.0,
+        removed: false // Add removed flag
+    });
+    loadTexture(URL_RIGHT_EYE, (texture) => {
+        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+        const planeWidth = texture.image.width * baseScale;
+        const planeHeight = texture.image.height * baseScale;
+        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+        rightEyeMesh = new THREE.Mesh(geometry, material);
+        rightEyeMesh.position.set(-0.84 * 1.2 * 1.2, (0.175 * 1.15 * 1.20 * 3) + 2.0 - 1.0, (7 - 1) * depthStep);
+        rightEyeMesh.userData.currentLayer = 7;
+        rightEyeMesh.userData.initialPosition = rightEyeMesh.position.clone();
+        rightEyeMesh.userData.initialLayer = 7;
+        rightEyeMesh.userData.id = 'rightEye'; // Added ID
+        rightEyeMesh.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
+        scene.add(rightEyeMesh);
+        draggableObjects.push(rightEyeMesh);
+        cameraAnimationTargets.push(rightEyeMesh);
+
+        // Create and add the redaction rectangle for the right eye
+        const redactionWidth = planeWidth * 1.2;
+        const redactionHeight = planeHeight * 0.4; // Increased height by 15% (0.23 * 1.15)
+        // Set initial material color to black (0x000000)
+        const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
+        const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        rightEyeRedactionRect = new THREE.Mesh(redactionGeometry, redactionMaterial);
+        // Position it at the same X, Y as the eye, but 1.5 levels in front
+        rightEyeRedactionRect.position.set(
+            rightEyeMesh.position.x,
+            rightEyeMesh.position.y,
+            rightEyeMesh.position.z + (1.5 * depthStep)
+        );
+        rightEyeRedactionRect.visible = false;
+        scene.add(rightEyeRedactionRect);
+    });
+
+    // Load and add the mouth image
+    initialAssetConfigs.push({
+        id: 'mouth',
+        type: 'image',
+        url: URL_MOUTH,
+        initialPosition: new THREE.Vector3(0, -1.5, (9 - 1) * depthStep),
+        initialLayer: 9,
+        baseScale: baseScale,
+        scaleFactor: 1.0,
+        removed: false // Add removed flag
+    });
+    loadTexture(URL_MOUTH, (texture) => {
+        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+        const planeWidth = texture.image.width * baseScale;
+        const planeHeight = texture.image.height * baseScale;
+        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+        const mouth = new THREE.Mesh(geometry, material);
+        mouth.position.set(0, -1.5, (9 - 1) * depthStep);
+        mouth.userData.currentLayer = 9;
+        mouth.userData.initialPosition = mouth.position.clone();
+        mouth.userData.initialLayer = 9;
+        mouth.userData.id = 'mouth'; // Added ID
+        mouth.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
+        scene.add(mouth);
+        draggableObjects.push(mouth);
+        cameraAnimationTargets.push(mouth);
+    });
+
+    // Load and add the ear image
+    const earNewLayer = 5;
+    const earNewZ = (earNewLayer - 1) * depthStep;
+    // We calculate the initial X position based on screen size, but we need to run this calculation
+    // inside the texture loader callback *or* inside onWindowResize if the mesh is available.
+    // Since init calls onWindowResize, we set a temporary position here and let onWindowResize handle the final responsive positioning.
+    const earInitialX = -2.5; // Temporary initial X position before onWindowResize runs
+    initialAssetConfigs.push({
+        id: 'ear',
+        type: 'image',
+        url: URL_EAR,
+        initialPosition: new THREE.Vector3(earInitialX, 1.5, earNewZ),
+        initialRotation: new THREE.Euler(0, THREE.MathUtils.degToRad(-15), 0),
+        baseScale: baseScale,
+        scaleFactor: 1.0,
+        removed: false // Add removed flag
+    });
+    loadTexture(URL_EAR, (texture) => {
+        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+        const planeWidth = texture.image.width * baseScale;
+        const planeHeight = texture.image.height * baseScale;
+        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+        const ear = new THREE.Mesh(geometry, material);
+
+        // Set position using the initial X from config (will be corrected by onWindowResize shortly)
+        const earConfig = initialAssetConfigs.find(c => c.id === 'ear');
+        ear.position.copy(earConfig.initialPosition);
+        ear.rotation.y = THREE.MathUtils.degToRad(-15); // Pivot ear on y axis -15%
+        ear.userData.currentLayer = earNewLayer;
+        // NOTE: We do NOT set ear.userData.initialPosition here to the temporary value.
+        // We let onWindowResize calculate the correct responsive position and set it there.
+        // This prevents the "moves slightly" issue on load since the final position is set immediately after the mesh is created (by onWindowResize).
+        ear.userData.initialLayer = earNewLayer;
+        ear.userData.id = 'ear'; // Added ID
+        ear.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
+        scene.add(ear);
+        draggableObjects.push(ear);
+        cameraAnimationTargets.push(ear);
+        
+        // **CRITICAL FIX:** Force the initial position calculation and storage immediately after the mesh is created.
+        // This ensures the ear is placed correctly on load and the responsive position is stored as the initial position.
+        updateEarPosition(ear, earConfig);
+    });
+
+    // Load and add the left eye image
+    initialAssetConfigs.push({
+        id: 'leftEye',
+        type: 'image',
+        url: URL_LEFT_EYE,
+        initialPosition: new THREE.Vector3(0.84 * 1.2 * 1.2, (0.175 * 1.15 * 1.20 * 3) + 2.0 - 1.0, (9 - 1) * depthStep),
+        initialLayer: 9,
+        baseScale: baseScale,
+        scaleFactor: 1.0,
+        removed: false // Add removed flag
+    });
+    loadTexture(URL_LEFT_EYE, (texture) => {
+        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+        const planeWidth = texture.image.width * baseScale;
+        const planeHeight = texture.image.height * baseScale;
+        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+        leftEyeMesh = new THREE.Mesh(geometry, material);
+        leftEyeMesh.position.set(0.84 * 1.2 * 1.2, (0.175 * 1.15 * 1.20 * 3) + 2.0 - 1.0, (9 - 1) * depthStep);
+        leftEyeMesh.userData.currentLayer = 9;
+        leftEyeMesh.userData.initialPosition = leftEyeMesh.position.clone();
+        leftEyeMesh.userData.initialLayer = 9;
+        leftEyeMesh.userData.id = 'leftEye'; // Added ID
+        leftEyeMesh.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
+        scene.add(leftEyeMesh);
+        draggableObjects.push(leftEyeMesh);
+        cameraAnimationTargets.push(leftEyeMesh);
+
+        // Create and add the redaction rectangle for the left eye
+        const redactionWidth = planeWidth * 1.2;
+        const redactionHeight = planeHeight * 0.4; // Increased height by 15% (0.23 * 1.15)
+        // Set initial material color to black (0x000000)
+        const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
+        const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        leftEyeRedactionRect = new THREE.Mesh(redactionGeometry, redactionMaterial);
+        // Position it at the same X, Y as the eye, but 1.5 levels in front
+        leftEyeRedactionRect.position.set(
+            leftEyeMesh.position.x,
+            leftEyeMesh.position.y,
+            leftEyeMesh.position.z + (1.5 * depthStep)
+        );
+        leftEyeRedactionRect.visible = false;
+        scene.add(leftEyeRedactionRect);
+    });
+
+    // Load SpaceX and X textures
+    initialAssetConfigs.push({
+        id: 'spacex',
+        type: 'image',
+        url: URL_SPACEX_ORIGINAL,
+        originalTextureUrl: URL_SPACEX_ORIGINAL,
+        swapTextureUrl: URL_X_LOGO_SWAP,
+        initialPosition: new THREE.Vector3(0.5 + 1.0, -0.5, (7 - 1) * depthStep),
+        initialLayer: 7,
+        baseScale: baseScale,
+        scaleFactor: 1.0, // This will be calculated from texture.image.width / height later
+        removed: false // Add removed flag
+    });
+    loadTexture(URL_SPACEX_ORIGINAL, (spacexTex) => {
+        spacexOriginalTexture = spacexTex;
+
+        loadTexture(URL_X_LOGO_SWAP, (xTex) => {
+            xLogoTexture = xTex;
+
+            const material = new THREE.MeshBasicMaterial({ map: spacexOriginalTexture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+            const planeWidth = spacexOriginalTexture.image.width * baseScale;
+            const planeHeight = spacexOriginalTexture.image.height * baseScale;
+            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+            const leftCheek = new THREE.Mesh(geometry, material);
+            leftCheek.position.set(0.5 + 1.0, -0.5, (7 - 1) * depthStep);
+            leftCheek.userData.currentLayer = 7;
+            leftCheek.userData.initialPosition = leftCheek.position.clone();
+            leftCheek.userData.initialLayer = 7;
+            leftCheek.userData.originalTexture = spacexOriginalTexture; // Store original texture
+            leftCheek.userData.xLogoTexture = xLogoTexture; // Store X logo texture
+            leftCheek.userData.originalWidth = planeWidth; // Store original width
+            leftCheek.userData.originalHeight = planeHeight; // Store original height
+            leftCheek.userData.id = 'spacex'; // Added ID
+            leftCheek.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
+            scene.add(leftCheek);
+            draggableObjects.push(leftCheek);
+            cameraAnimationTargets.push(leftCheek);
+
+            spacexRef = leftCheek; // Store reference to spacex mesh
+        });
+    });
+
+    // Load and add the nose image
+    initialAssetConfigs.push({
+        id: 'nose',
+        type: 'image',
+        url: URL_NOSE,
+        initialPosition: new THREE.Vector3(0, 0.8, (11 - 1) * depthStep),
+        initialLayer: 11,
+        baseScale: baseScale,
+        scaleFactor: 0.93,
+        removed: false // Add removed flag
+    });
+    loadTexture(URL_NOSE, (texture) => {
+        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+        const scaleFactor = 0.93;
+        const planeWidth = texture.image.width * baseScale * scaleFactor;
+        const planeHeight = texture.image.height * baseScale * scaleFactor;
+        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+        const nose = new THREE.Mesh(geometry, material);
+        nose.position.set(0, 0.8, (11 - 1) * depthStep);
+        nose.userData.currentLayer = 11;
+        nose.userData.initialPosition = nose.position.clone();
+        nose.userData.initialLayer = 11;
+        nose.userData.id = 'nose'; // Added ID
+        nose.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
+        scene.add(nose);
+        draggableObjects.push(nose);
+        cameraAnimationTargets.push(nose);
+    });
+
+    // Load and add the hair image
+    initialAssetConfigs.push({
+        id: 'hair',
+        type: 'image',
+        url: URL_HAIR,
+        initialPosition: new THREE.Vector3(0, 3.5 * 1.10, (4 - 1) * depthStep),
+        initialLayer: 4,
+        baseScale: baseScale,
+        scaleFactor: 1.15,
+        removed: false // Add removed flag
+    });
+    loadTexture(URL_HAIR, (texture) => {
+        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+        const scaleFactor = 1.15;
+        const planeWidth = texture.image.width * baseScale * scaleFactor;
+        const planeHeight = texture.image.height * baseScale * scaleFactor;
+        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+        const hair = new THREE.Mesh(geometry, material);
+        hair.position.set(0, 3.5 * 1.10, (4 - 1) * depthStep);
+        hair.userData.currentLayer = 4;
+        hair.userData.initialPosition = hair.position.clone();
+        hair.userData.initialLayer = 4;
+        hair.userData.id = 'hair'; // Added ID
+        hair.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
+        scene.add(hair);
+        draggableObjects.push(hair);
+        cameraAnimationTargets.push(hair);
+    });
+
+    // Load and add the blue bill image
+    initialAssetConfigs.push({
+        id: 'blueBill',
+        type: 'image',
+        url: URL_BLUE_BILL,
+        initialPosition: new THREE.Vector3(2, -2, (3 - 1) * depthStep),
+        initialLayer: 10,
+        baseScale: baseScale,
+        scaleFactor: 1,
+        removed: false // Add removed flag
+    });
+    loadTexture(URL_BLUE_BILL, (texture) => {
+        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+        const planeWidth = texture.image.width * baseScale;
+        const planeHeight = texture.image.height * baseScale;
+        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+        const blueBill = new THREE.Mesh(geometry, material);
+        blueBill.position.set(2, -2, (3 - 1) * depthStep);
+        blueBill.userData.currentLayer = 10;
+        blueBill.userData.initialPosition = blueBill.position.clone();
+        blueBill.userData.initialLayer = 10;
+        blueBill.userData.id = 'blueBill'; // Added ID
+        blueBill.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
+        scene.add(blueBill);
+        draggableObjects.push(blueBill);
+        cameraAnimationTargets.push(blueBill);
+    });
+
+    // Load and add the rocket image
+    const rocketLayer = 1;
+    const rocketZ = (rocketLayer - 1) * depthStep;
+    const rocketInitialY = -.32; // Keep the existing Y position for the rocket
+    initialAssetConfigs.push({
+        id: 'rocket',
+        type: 'image',
+        url: URL_ROCKET,
+        initialPosition: new THREE.Vector3(ROCKET_INITIAL_X, rocketInitialY, rocketZ),
+        initialLayer: rocketLayer,
+        baseScale: baseScale,
+        scaleFactor: 1.04,
+        removed: false // Add removed flag
+    });
+    let rocketRef = null; // Local reference to the rocket mesh
+    loadTexture(URL_ROCKET, (texture) => {
+        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+        const rocketScaleFactor = 1.04;
+        const planeWidth = texture.image.width * baseScale * rocketScaleFactor;
+        const planeHeight = texture.image.height * baseScale * rocketScaleFactor;
+        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+        const rocket = new THREE.Mesh(geometry, material);
+
+        rocket.position.set(ROCKET_INITIAL_X, rocketInitialY, rocketZ);
+
+        rocket.userData.currentLayer = rocketLayer;
+        rocket.userData.initialPosition = rocket.position.clone();
+        rocket.userData.initialLayer = rocketLayer;
+        rocket.userData.id = 'rocket'; // Added ID
+        rocket.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
+        scene.add(rocket);
+        draggableObjects.push(rocket);
+        cameraAnimationTargets.push(rocket);
+        rocketRef = rocket; // Store the reference
+        
+        // After rocket is loaded, load dogecoin/tesla and calculate its position relative to the rocket/background
+        loadDogecoinAndFiat();
+    });
+
+    // Function to handle the interdependent loading and positioning of Dogecoin, Fiat, and Signature
+    function loadDogecoinAndFiat() {
+        const dogecoinLayer = 3;
+        const dogecoinZ = (dogecoinLayer - 1) * depthStep;
+        
+        // Initial position placeholder for config (will be updated by the calculation below)
+        let dogecoinInitialPos = new THREE.Vector3(0, 0, dogecoinZ);
+        let fiatWorthlessInitialPos = new THREE.Vector3();
+        let signatureInitialPos = new THREE.Vector3();
+        
+        // Define fiatWorthlessNewLayer here for scope consistency
+        const fiatWorthlessNewLayer = dogecoinLayer + 2; 
+
+        // Load necessary textures first
+        loadTexture(URL_DOGECOIN_ORIGINAL, (dogeTex) => {
+            dogecoinOriginalTexture = dogeTex;
+
+            loadTexture(URL_TESLA_SWAP, (teslaTex) => {
+                teslaTexture = teslaTex;
+                
+                // Load Fiat Worthless texture to determine its size for config
+                loadTexture(URL_FIAT_WORTHLESS, (fiatTex) => {
+                    const fiatWorthlessHeight = 0.3;
+                    const fiatWorthlessAspectRatio = fiatTex.image.width / fiatTex.image.height;
+                    const fiatWorthlessWidth = fiatWorthlessHeight * fiatWorthlessAspectRatio;
+
+                    // --- CALCULATE FIXED POSITIONS NOW (moved from onWindowResize) ---
+                    
+                    // 1. Calculate Dogecoin/Tesla Position
+                    // We must ensure backgroundMesh is ready before calculating positions relative to it
+                    if (!backgroundMesh) {
+                        console.error("Background mesh not loaded yet, deferring position calculation.");
+                        // Fallback position if background isn't ready
+                        dogecoinInitialPos.set(ROCKET_INITIAL_X, -3, dogecoinZ);
+                        fiatWorthlessInitialPos.set(ROCKET_INITIAL_X + 2, -3.5, dogecoinZ + depthStep * 2);
+                    } else {
+                        const bgBounds = getBackgroundBounds(backgroundMesh.position.z);
+                        const dogecoinScaleFactor = 0.7;
+                        const tempDogeWidth = teslaTexture.image.width * baseScale * dogecoinScaleFactor; 
+                        const tempDogeHeight = teslaTexture.image.height * baseScale * dogecoinScaleFactor;
+                        const targetX = ROCKET_INITIAL_X; // Same as ROCKET_INITIAL_X
+                        const paddingY = 0.5;
+                        const targetY = bgBounds.minY + tempDogeHeight / 2 + paddingY;
+                        dogecoinInitialPos.set(targetX, targetY, dogecoinZ);
+
+                        // 2. Calculate Fiat Worthless Position
+                        const fiatWorthlessNewZ = (fiatWorthlessNewLayer - 1) * depthStep;
+                        const fiatWorthlessInitialWorldX = dogecoinInitialPos.x + tempDogeWidth * 1.1 + .25; 
+                        const fiatWorthlessInitialWorldY = dogecoinInitialPos.y - tempDogeHeight * .11 - 0;
+                        fiatWorthlessInitialPos.set(fiatWorthlessInitialWorldX, fiatWorthlessInitialWorldY, fiatWorthlessNewZ);
+                    }
+
+                    // 3. Calculate Signature Position
+                    loadTexture(URL_SIGNATURE, (signatureTex) => {
+                        const signatureHeight = 1.0;
+                        const signatureAspectRatio = signatureTex.image.width / signatureTex.image.height;
+                        const signatureWidth = signatureHeight * signatureAspectRatio;
+                        const signatureNewLayer = 0; // (2 - 2)
+                        const signatureNewZ = (signatureNewLayer - 1) * depthStep;
+                        const signatureNewX = -2.0;
+                        const signatureNewY = -4.7;
+                        signatureInitialPos.set(signatureNewX, signatureNewY, signatureNewZ);
+
+                        // --- Store CONFIGS (if not already present) ---
+                        if (!initialAssetConfigs.find(c => c.id === 'dogecoin')) {
+                            initialAssetConfigs.push({
+                                id: 'dogecoin',
+                                type: 'image',
+                                url: URL_TESLA_SWAP,
+                                originalTextureUrl: URL_DOGECOIN_ORIGINAL,
+                                swapTextureUrl: URL_TESLA_SWAP,
+                                initialPosition: dogecoinInitialPos.clone(),
+                                initialLayer: dogecoinLayer,
+                                baseScale: baseScale,
+                                scaleFactor: 0.7,
+                                removed: false
+                            });
+                        } else {
+                             // Update existing config with the calculated fixed position
+                            initialAssetConfigs.find(c => c.id === 'dogecoin').initialPosition.copy(dogecoinInitialPos);
+                        }
+                        
+                        if (!initialAssetConfigs.find(c => c.id === 'fiatWorthless')) {
+                            initialAssetConfigs.push({
+                                id: 'fiatWorthless',
+                                type: 'image',
+                                url: URL_FIAT_WORTHLESS,
+                                initialPosition: fiatWorthlessInitialPos.clone(),
+                                initialLayer: fiatWorthlessNewLayer,
+                                baseScale: baseScale,
+                                scaleFactor: 0.3, // Used to derive the fixed height/width above
+                                removed: false
+                            });
+                        } else {
+                            // Update existing config with the calculated fixed position
+                            initialAssetConfigs.find(c => c.id === 'fiatWorthless').initialPosition.copy(fiatWorthlessInitialPos);
+                        }
+                        
+                        if (!initialAssetConfigs.find(c => c.id === 'signature')) {
+                            initialAssetConfigs.push({
+                                id: 'signature',
+                                type: 'image',
+                                url: URL_SIGNATURE,
+                                initialPosition: signatureInitialPos.clone(),
+                                initialLayer: signatureNewLayer,
+                                baseScale: baseScale,
+                                scaleFactor: 1.0,
+                                removed: false
+                            });
+                        } else {
+                            // Update existing config with the calculated fixed position
+                            initialAssetConfigs.find(c => c.id === 'signature').initialPosition.copy(signatureInitialPos);
+                        }
+
+                        // --- CREATE MESHES ---
+                        
+                        // 1. Dogecoin/Tesla
+                        teslaGreyscaleContrastMaterial = new THREE.ShaderMaterial({
+                            uniforms: {
+                                tDiffuse: { value: teslaTexture },
+                                contrast: { value: GreyscaleContrastShader.uniforms.contrast.value }
+                            },
+                            vertexShader: GreyscaleContrastShader.vertexShader,
+                            fragmentShader: GreyscaleContrastShader.fragmentShader,
+                            transparent: true,
+                            alphaTest: 0.5
+                        });
+                        const dogecoinScaleFactor = 0.7;
+                        const dogePlaneWidth = teslaTexture.image.width * baseScale * dogecoinScaleFactor;
+                        const dogePlaneHeight = teslaTexture.image.height * baseScale * dogecoinScaleFactor;
+                        const dogecoin = new THREE.Mesh(new THREE.PlaneGeometry(dogePlaneWidth, dogePlaneHeight), teslaGreyscaleContrastMaterial);
+                        dogecoin.userData.currentLayer = dogecoinLayer;
+                        dogecoin.userData.initialPosition = dogecoinInitialPos.clone();
+                        dogecoin.userData.initialLayer = dogecoinLayer;
+                        dogecoin.userData.originalTexture = dogecoinOriginalTexture;
+                        dogecoin.userData.teslaTexture = teslaTexture;
+                        dogecoin.userData.id = 'dogecoin';
+                        dogecoin.userData.initialScale = { width: dogePlaneWidth, height: dogePlaneHeight };
+                        dogecoinRef = dogecoin;
+                        scene.add(dogecoin);
+                        draggableObjects.push(dogecoin);
+                        cameraAnimationTargets.push(dogecoin);
+                        
+                        // Set position immediately after creation using the calculated fixed position
+                        dogecoin.position.copy(dogecoinInitialPos);
+
+                        // 2. Fiat Worthless
+                        const fiatWorthlessMaterial = new THREE.MeshBasicMaterial({ map: fiatTex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+                        const fiatWorthless = new THREE.Mesh(new THREE.PlaneGeometry(fiatWorthlessWidth, fiatWorthlessHeight), fiatWorthlessMaterial);
+                        fiatWorthless.position.copy(fiatWorthlessInitialPos);
+                        fiatWorthless.userData.currentLayer = fiatWorthlessNewLayer;
+                        fiatWorthless.userData.initialPosition = fiatWorthlessInitialPos.clone();
+                        fiatWorthless.userData.initialLayer = fiatWorthlessNewLayer;
+                        fiatWorthless.userData.id = 'fiatWorthless';
+                        fiatWorthless.userData.initialScale = { width: fiatWorthlessWidth, height: fiatWorthlessHeight };
+                        scene.add(fiatWorthless);
+                        draggableObjects.push(fiatWorthless);
+                        cameraAnimationTargets.push(fiatWorthless);
+
+                        // 3. Signature
+                        const signatureMaterial = new THREE.MeshBasicMaterial({ map: signatureTex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+                        const signature = new THREE.Mesh(new THREE.PlaneGeometry(signatureWidth, signatureHeight), signatureMaterial);
+                        signature.position.copy(signatureInitialPos);
+                        signature.userData.currentLayer = signatureNewLayer;
+                        signature.userData.id = 'signature';
+                        signature.userData.initialScale = { width: signatureWidth, height: signatureHeight };
+                        signature.userData.initialPosition = signatureInitialPos.clone();
+                        signature.userData.initialLayer = signatureNewLayer;
+                        scene.add(signature);
+                        
+                        // Call onWindowResize only to handle ear and text positions, not dogecoin/fiat/signature
+                        onWindowResize();
+                    });
+                });
+            });
+        });
+    }
 
     // Initialize the Marquee Text (for XRAY effect)
     marqueeTexture = createMarqueeTexture();
@@ -2358,16 +2735,6 @@ function init() {
     renderer.domElement.addEventListener('pointermove', onPointerMove);
     renderer.domElement.addEventListener('pointerup', onPointerUp);
     renderer.domElement.addEventListener('click', onClick);
-
-    // ── Preload all element textures for swap mode ──
-    preloadEyeTextures();
-
-    // ── Create swap mode indicator UI ──
-    createEyeIndicator();
-
-    // ── Wire swap mode toggle button and element controls panel ──
-    initSwapModeButton();
-    initElementControls();
 
     // Helper function to add a toggle button for an effect
     const addButtonToggle = (parentContainer, label, property, pass) => {
@@ -3024,7 +3391,7 @@ function init() {
     // Create and append the left UI container
     leftUiContainer = document.createElement('div'); // Assign to global variable
     leftUiContainer.id = 'left-ui-container';
-    leftUiContainer.style.position = 'fixed';
+    leftUiContainer.style.position = 'absolute';
     leftUiContainer.style.top = '-190px'; // Start mostly hidden, revealing only the arrow
     leftUiContainer.style.left = '10px';
     leftUiContainer.style.backgroundColor = 'rgba(0, 0, 0, 0)';
@@ -3085,235 +3452,6 @@ function init() {
             addButtonToggle(rightUiContainer, config.label, config.property, config.pass);
         }
     });
-
-    // Add SWAP MODE button to the left UI container
-    const swapBtn = document.createElement('button');
-    swapBtn.id = 'swap-mode-btn-left';
-    swapBtn.textContent = 'SWAP MODE';
-    swapBtn.style.cssText = `
-        background-color: black;
-        color: white;
-        padding: 4px;
-        margin: 0;
-        border: 0.5px solid white;
-        border-radius: 0;
-        cursor: pointer;
-        font-family: monospace;
-        font-size: 7px;
-        outline: none;
-        box-sizing: border-box;
-    `;
-    swapBtn.onmouseover = () => {
-        swapBtn.style.borderColor = swapMode ? '#999' : '#777';
-    };
-    swapBtn.onmouseout = () => {
-        swapBtn.style.borderColor = swapMode ? '#808080' : 'white';
-    };
-    swapBtn.onclick = (event) => {
-        event.stopPropagation();
-        swapMode = !swapMode;
-        swapBtn.textContent = swapMode ? 'SWAP MODE ON' : 'SWAP MODE';
-        swapBtn.style.borderColor = swapMode ? '#808080' : 'white';
-        swapBtn.style.color = swapMode ? '#808080' : 'white';
-
-        // Show/hide rotation options panel to the right
-        const panel = document.getElementById('element-controls');
-        if (panel) {
-            if (swapMode) {
-                panel.classList.add('visible');
-            } else {
-                panel.classList.remove('visible');
-            }
-        }
-
-        const indicator = document.getElementById('eye-indicator');
-        if (indicator) {
-            if (swapMode) {
-                indicator.style.opacity = '0.8';
-                indicator.innerHTML = '<span style="color:#808080;font-size:10px;">TAP ANY FACE ELEMENT TO CYCLE</span>';
-            } else {
-                indicator.style.opacity = '0';
-            }
-        }
-
-        // Change cursor to signal swap mode
-        if (renderer && renderer.domElement) {
-            renderer.domElement.style.cursor = swapMode ? 'crosshair' : 'grab';
-        }
-    };
-    leftUiContainer.appendChild(swapBtn);
-
-    // Create the DUPLICATE button (appended after SWAP MODE)
-    const duplicateBtn = document.createElement('button');
-    duplicateBtn.id = 'duplicate-btn';
-    duplicateBtn.textContent = 'DUPLICATE';
-    duplicateBtn.style.cssText = `
-        background-color: black;
-        color: white;
-        padding: 4px;
-        margin-top: 10px;
-        border: 0.5px solid #888;
-        border-radius: 0;
-        cursor: pointer;
-        font-family: monospace;
-        font-size: 7px;
-        outline: none;
-        white-space: nowrap;
-        box-sizing: border-box;
-    `;
-    duplicateBtn.onclick = (event) => {
-        event.stopPropagation();
-        const src = selectedScaleElement || selectedObject;
-        if (!src || !src.userData || !src.userData.id) {
-            duplicateBtn.textContent = 'SELECT PIECE';
-            duplicateBtn.style.borderColor = '#e33';
-            setTimeout(() => { duplicateBtn.textContent = 'DUPLICATE'; duplicateBtn.style.borderColor = '#888'; }, 1200);
-            return;
-        }
-        // Clone geometry and material
-        const newGeometry = src.geometry.clone();
-        const newMaterial = src.material.clone();
-        if (src.material.map) {
-            newMaterial.map = src.material.map; // Share texture reference
-        }
-        const clone = new THREE.Mesh(newGeometry, newMaterial);
-
-        // Offset: 10% right on X, 2 layers forward on Z
-        const xOffset = (src.userData.initialScale ? src.userData.initialScale.width : 1) * 0.1;
-        const zOffset = 2 * depthStep;
-        clone.position.set(src.position.x + xOffset, src.position.y, src.position.z + zOffset);
-        clone.rotation.copy(src.rotation);
-        clone.visible = src.visible;
-
-        // Set up userData
-        clone.userData.id = 'dup_' + src.userData.id + '_' + Date.now();
-        clone.userData.currentLayer = (src.userData.currentLayer || 0) + 2;
-        clone.userData.initialPosition = clone.position.clone();
-        clone.userData.initialLayer = clone.userData.currentLayer;
-        clone.userData.initialScale = src.userData.initialScale
-            ? { width: src.userData.initialScale.width, height: src.userData.initialScale.height }
-            : undefined;
-        clone.userData.userScale = src.userData.userScale || 1.0;
-        if (src.userData.isUploaded) clone.userData.isUploaded = true;
-
-        scene.add(clone);
-        draggableObjects.push(clone);
-        cameraAnimationTargets.push(clone);
-
-        duplicateBtn.textContent = 'DUPLICATED';
-        duplicateBtn.style.borderColor = '#4CAF50';
-        setTimeout(() => { duplicateBtn.textContent = 'DUPLICATE'; duplicateBtn.style.borderColor = '#888'; }, 1200);
-    };
-    leftUiContainer.appendChild(duplicateBtn);
-
-    // ── MASK UI ── (appended after DUPLICATE)
-    const maskBtn = document.createElement('button');
-    maskBtn.id = 'mask-btn';
-    maskBtn.textContent = 'MASK';
-    maskBtn.style.cssText = `
-        background-color: black; color: white; padding: 4px; margin-top: 10px;
-        border: 0.5px solid white; border-radius: 0; cursor: pointer;
-        font-family: monospace; font-size: 7px; outline: none;
-        white-space: nowrap; box-sizing: border-box;
-    `;
-    leftUiContainer.appendChild(maskBtn);
-
-    // Mask sub-panel (hidden until MASK is clicked)
-    const maskPanel = document.createElement('div');
-    maskPanel.id = 'mask-panel';
-    maskPanel.style.cssText = `
-        display: none; flex-direction: column; gap: 4px; padding: 4px 0 0 0;
-    `;
-
-    // Shape buttons row
-    const shapeRow = document.createElement('div');
-    shapeRow.style.cssText = 'display: flex; gap: 3px; flex-wrap: wrap;';
-    const shapes = ['square', 'circle', 'triangle', 'star', 'draw'];
-    const shapeLabels = { square: '■', circle: '●', triangle: '▲', star: '★', draw: '✎' };
-    const shapeBtns = {};
-    shapes.forEach(s => {
-        const b = document.createElement('button');
-        b.textContent = shapeLabels[s];
-        b.title = s;
-        b.style.cssText = `
-            flex: 1; background: black; color: white; border: 0.5px solid ${s === maskShape ? '#4CAF50' : 'white'};
-            padding: 3px; font-family: monospace; font-size: 9px; cursor: pointer;
-            outline: none; box-sizing: border-box;
-        `;
-        b.onclick = (e) => {
-            e.stopPropagation();
-            maskShape = s;
-            shapes.forEach(ss => {
-                shapeBtns[ss].style.borderColor = ss === s ? '#4CAF50' : 'white';
-            });
-            // Update SIZE label for draw mode (brush size) vs shape mode (shape size)
-            scaleLabel.textContent = s === 'draw' ? 'BRUSH' : 'SIZE';
-            if (maskMode && maskTargetMesh) {
-                if (s === 'draw') initMaskDrawCanvas();
-                updateMaskOverlay();
-            }
-        };
-        shapeBtns[s] = b;
-        shapeRow.appendChild(b);
-    });
-    maskPanel.appendChild(shapeRow);
-
-    // Scale row
-    const scaleRow = document.createElement('div');
-    scaleRow.style.cssText = 'display: flex; align-items: center; gap: 4px;';
-    const scaleLabel = document.createElement('span');
-    scaleLabel.textContent = 'SIZE';
-    scaleLabel.style.cssText = 'color: #aaa; font-family: monospace; font-size: 7px;';
-    const maskScaleSlider = document.createElement('input');
-    maskScaleSlider.type = 'range';
-    maskScaleSlider.min = '10';
-    maskScaleSlider.max = '200';
-    maskScaleSlider.value = '100';
-    maskScaleSlider.style.cssText = 'flex: 1; height: 8px; cursor: pointer;';
-    const maskScaleVal = document.createElement('span');
-    maskScaleVal.textContent = '100%';
-    maskScaleVal.style.cssText = 'color: white; font-family: monospace; font-size: 7px; min-width: 28px; text-align: right;';
-    maskScaleSlider.oninput = (e) => {
-        e.stopPropagation();
-        maskScale = parseInt(maskScaleSlider.value) / 100;
-        maskScaleVal.textContent = maskScaleSlider.value + '%';
-        if (maskMode && maskTargetMesh) updateMaskOverlay();
-    };
-    maskScaleSlider.onmousedown = (e) => e.stopPropagation();
-    maskScaleSlider.ontouchstart = (e) => e.stopPropagation();
-    scaleRow.appendChild(scaleLabel);
-    scaleRow.appendChild(maskScaleSlider);
-    scaleRow.appendChild(maskScaleVal);
-    maskPanel.appendChild(scaleRow);
-
-    // APPLY button
-    const applyMaskBtn = document.createElement('button');
-    applyMaskBtn.textContent = 'APPLY';
-    applyMaskBtn.style.cssText = `
-        background: black; color: white; border: 0.5px solid #4CAF50;
-        padding: 4px; font-family: monospace; font-size: 7px; cursor: pointer;
-        outline: none; box-sizing: border-box; letter-spacing: 1px;
-    `;
-    applyMaskBtn.onclick = (e) => {
-        e.stopPropagation();
-        if (maskMode && maskTargetMesh) applyMask();
-    };
-    maskPanel.appendChild(applyMaskBtn);
-
-    // CANCEL button
-    const cancelMaskBtn = document.createElement('button');
-    cancelMaskBtn.textContent = 'CANCEL';
-    cancelMaskBtn.style.cssText = `
-        background: black; color: #888; border: 0.5px solid #555;
-        padding: 4px; font-family: monospace; font-size: 7px; cursor: pointer;
-        outline: none; box-sizing: border-box;
-    `;
-    cancelMaskBtn.onclick = (e) => {
-        e.stopPropagation();
-        exitMaskMode();
-    };
-    maskPanel.appendChild(cancelMaskBtn);
-    leftUiContainer.appendChild(maskPanel);
 
     // Add the RESET button to both UI containers
     const createResetButton = () => {
@@ -3418,93 +3556,6 @@ function init() {
     uploadButtonElement = createUploadButton();
     leftUiContainer.appendChild(uploadButtonElement);
 
-    // ── SAVE / LOAD buttons ──
-    const saveBtn = document.createElement('button');
-    saveBtn.id = 'save-btn';
-    saveBtn.textContent = 'SAVE';
-    saveBtn.style.cssText = `
-        background-color: black; color: white; padding: 4px; margin-top: 10px;
-        border: 0.5px solid #4CAF50; border-radius: 0; cursor: pointer;
-        font-family: monospace; font-size: 7px; outline: none;
-        white-space: nowrap; box-sizing: border-box;
-    `;
-    saveBtn.onclick = (e) => {
-        e.stopPropagation();
-        downloadComposition();
-        saveBtn.textContent = 'SAVED';
-        saveBtn.style.borderColor = '#4CAF50';
-        setTimeout(() => { saveBtn.textContent = 'SAVE'; saveBtn.style.borderColor = '#4CAF50'; }, 1500);
-    };
-    leftUiContainer.appendChild(saveBtn);
-
-    const loadBtn = document.createElement('button');
-    loadBtn.id = 'load-btn';
-    loadBtn.textContent = 'LOAD';
-    loadBtn.style.cssText = `
-        background-color: black; color: white; padding: 4px;
-        border: 0.5px solid #2196F3; border-radius: 0; cursor: pointer;
-        font-family: monospace; font-size: 7px; outline: none;
-        white-space: nowrap; box-sizing: border-box;
-    `;
-    loadBtn.onclick = (e) => {
-        e.stopPropagation();
-        loadCompositionFromFile();
-    };
-    leftUiContainer.appendChild(loadBtn);
-
-    const clearSaveBtn = document.createElement('button');
-    clearSaveBtn.id = 'clear-save-btn';
-    clearSaveBtn.textContent = 'CLEAR SAVE';
-    clearSaveBtn.style.cssText = `
-        background-color: black; color: #888; padding: 4px;
-        border: 0.5px solid #555; border-radius: 0; cursor: pointer;
-        font-family: monospace; font-size: 7px; outline: none;
-        white-space: nowrap; box-sizing: border-box;
-    `;
-    clearSaveBtn.onclick = (e) => {
-        e.stopPropagation();
-        localStorage.removeItem(COMPOSITION_STORAGE_KEY);
-        clearSaveBtn.textContent = 'CLEARED';
-        setTimeout(() => { clearSaveBtn.textContent = 'CLEAR SAVE'; }, 1500);
-    };
-    leftUiContainer.appendChild(clearSaveBtn);
-
-    // ── AR button ──
-    const arBtn = document.createElement('button');
-    arBtn.id = 'ar-btn';
-    arBtn.textContent = 'AR';
-    arBtn.style.cssText = `
-        background-color: black; color: white; padding: 4px; margin-top: 10px;
-        border: 0.5px solid #9C27B0; border-radius: 0; cursor: pointer;
-        font-family: monospace; font-size: 7px; outline: none;
-        white-space: nowrap; box-sizing: border-box;
-    `;
-    arBtn.onclick = (e) => {
-        e.stopPropagation();
-        launchAR(arBtn);
-    };
-    leftUiContainer.appendChild(arBtn);
-
-    // MASK button click — enter/exit mask mode
-    maskBtn.onclick = (e) => {
-        e.stopPropagation();
-        if (maskMode) {
-            exitMaskMode();
-            return;
-        }
-        // Need a selected uploaded image — flash red border if none
-        if (!selectedScaleElement || !selectedScaleElement.userData.isUploaded) {
-            maskBtn.style.borderColor = '#e33';
-            maskBtn.textContent = 'SELECT IMG';
-            setTimeout(() => {
-                maskBtn.style.borderColor = 'white';
-                maskBtn.textContent = 'MASK';
-            }, 1200);
-            return;
-        }
-        enterMaskMode(selectedScaleElement);
-    };
-
     // Handle file selection: load image as texture and add as draggable piece
     fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
@@ -3565,7 +3616,7 @@ function init() {
     arrowContainer = document.createElement('div'); // Assign to global variable
     arrowContainer.id = 'arrow-container'; // Add ID for better targeting
     arrowContainer.style.cssText = `
-        position: fixed; /* Position relative to the viewport */
+        position: absolute; /* Position relative to the viewport */
         top: 0px; /* Initially at the top, peeking out */
         left: 20px;
         background-color: black;
@@ -3598,13 +3649,6 @@ function init() {
             trashButtonElement.style.display = 'none'; // Hide TRASH button
             exportButtonElement.style.display = 'none'; // Hide EXPORT button
             uploadButtonElement.style.display = 'none'; // Hide UPLOAD button
-            duplicateBtn.style.display = 'none'; // Hide DUPLICATE button
-            maskBtn.style.display = 'none'; // Hide MASK button
-            saveBtn.style.display = 'none'; // Hide SAVE button
-            loadBtn.style.display = 'none'; // Hide LOAD button
-            clearSaveBtn.style.display = 'none'; // Hide CLEAR SAVE button
-            arBtn.style.display = 'none'; // Hide AR button
-            if (maskMode) exitMaskMode();
             const panel = document.getElementById('export-panel');
             if (panel) panel.classList.remove('open'); // Close export panel
             arrowContainer.style.top = '0px'; // Keep arrow at the top
@@ -3613,12 +3657,6 @@ function init() {
             leftUiContainer.style.top = '10px'; // Show it
             trashButtonElement.style.display = 'block'; // Show TRASH button
             uploadButtonElement.style.display = 'block'; // Show UPLOAD button
-            duplicateBtn.style.display = 'block'; // Show DUPLICATE button
-            maskBtn.style.display = 'block'; // Show MASK button
-            saveBtn.style.display = 'block'; // Show SAVE button
-            loadBtn.style.display = 'block'; // Show LOAD button
-            clearSaveBtn.style.display = 'block'; // Show CLEAR SAVE button
-            arBtn.style.display = 'block'; // Show AR button
             arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; // Move arrow below the UI
             arrowSpan.innerHTML = '&#x25B2'; // Change to up arrow
         }
@@ -3629,19 +3667,13 @@ function init() {
     trashButtonElement.style.display = 'none';
     exportButtonElement.style.display = 'none';
     uploadButtonElement.style.display = 'none';
-    duplicateBtn.style.display = 'none';
-    maskBtn.style.display = 'none';
-    saveBtn.style.display = 'none';
-    loadBtn.style.display = 'none';
-    clearSaveBtn.style.display = 'none';
-    arBtn.style.display = 'none';
 
     window.addEventListener('resize', onWindowResize);
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
     renderer.domElement.addEventListener('pointermove', onPointerMove);
     renderer.domElement.addEventListener('pointerup', onPointerUp);
     renderer.domElement.addEventListener('click', onClick);
-
+    
     // Call onWindowResize once after init to ensure initial positions are calculated correctly
     // NOTE: This is called after the main assets are loaded in loadDogecoinAndFiat to ensure
     // responsive elements are placed correctly *after* the initial fixed elements are positioned.
@@ -3696,477 +3728,6 @@ function updateEarPosition(earMesh, earConfig) {
     }
 }
 
-
-// ── Save / Restore Composition ──
-
-const COMPOSITION_STORAGE_KEY = 'alpha_composition_v1';
-
-// Helper: round a number to N decimal places to reduce JSON size
-function _r(n, d = 4) { return Math.round(n * Math.pow(10, d)) / Math.pow(10, d); }
-
-// Helper: simple fast hash for deduplicating base64 image strings
-function _hash(str) {
-    let h = 0;
-    for (let i = 0; i < str.length; i++) {
-        h = ((h << 5) - h + str.charCodeAt(i)) | 0;
-    }
-    return 'img_' + (h >>> 0).toString(36);
-}
-
-function saveComposition() {
-    const meshStates = [];
-    const imageStore = {}; // Deduplicated image data: hash -> base64
-    const textureCache = new Map(); // texture.image -> { hash, base64 } to avoid re-encoding
-
-    scene.children.forEach(child => {
-        if (!child.userData || !child.userData.id) return;
-        const id = child.userData.id;
-
-        // Build state with rounded positions and only non-default values
-        const state = { id: id };
-
-        // Position (always needed)
-        state.p = { x: _r(child.position.x), y: _r(child.position.y), z: _r(child.position.z) };
-
-        // Rotation — only include if non-zero
-        if (child.rotation.x !== 0 || child.rotation.y !== 0 || child.rotation.z !== 0) {
-            state.r = { x: _r(child.rotation.x), y: _r(child.rotation.y), z: _r(child.rotation.z) };
-        }
-
-        // Only include non-default values
-        if (!child.visible) state.v = false;
-        const userScale = child.userData.userScale || 1.0;
-        if (userScale !== 1.0) state.s = _r(userScale, 3);
-        if (child.userData.currentLayer !== undefined) state.l = child.userData.currentLayer;
-        const opacity = child.material ? child.material.opacity : 1;
-        if (opacity < 1) state.o = _r(opacity, 3);
-
-        // Save uploaded image texture — deduplicated by texture identity
-        if (child.userData.isUploaded && child.material && child.material.map && child.material.map.image) {
-            try {
-                const img = child.material.map.image;
-                let cached = textureCache.get(img);
-                if (!cached) {
-                    // First time seeing this image source — encode once
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.naturalWidth || img.width;
-                    canvas.height = img.naturalHeight || img.height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    const hasAlpha = _canvasHasAlpha(canvas, ctx);
-                    const base64 = hasAlpha
-                        ? canvas.toDataURL('image/png')
-                        : canvas.toDataURL('image/jpeg', 0.8);
-                    const hash = _hash(base64);
-                    cached = { hash, base64 };
-                    textureCache.set(img, cached);
-                }
-                imageStore[cached.hash] = cached.base64;
-                state.img = cached.hash;
-                state.u = true; // isUploaded flag
-                if (child.userData.initialScale) {
-                    state.iw = _r(child.userData.initialScale.width, 3);
-                    state.ih = _r(child.userData.initialScale.height, 3);
-                }
-            } catch (e) {
-                console.warn('Could not save uploaded image:', id, e);
-            }
-        }
-        meshStates.push(state);
-    });
-
-    // Track which built-in assets have been removed
-    const removedAssets = initialAssetConfigs
-        .filter(c => c.removed)
-        .map(c => c.id);
-
-    // Only include non-default effect controls
-    const savedEffects = {};
-    for (const key in effectControls) {
-        const val = effectControls[key];
-        if (val !== false && val !== 0) savedEffects[key] = val;
-    }
-
-    const data = {
-        version: 2,
-        t: Date.now(),
-        m: meshStates,
-        i: Object.keys(imageStore).length > 0 ? imageStore : undefined,
-        rm: removedAssets.length > 0 ? removedAssets : undefined,
-        fx: Object.keys(savedEffects).length > 0 ? savedEffects : undefined,
-        cam: {
-            p: { x: _r(camera.position.x), y: _r(camera.position.y), z: _r(camera.position.z) },
-            t: { x: _r(controls.target.x), y: _r(controls.target.y), z: _r(controls.target.z) },
-        },
-    };
-    return data;
-}
-
-// Helper: check if a canvas has any non-opaque pixels (needs PNG)
-function _canvasHasAlpha(canvas, ctx) {
-    const data = ctx.getImageData(0, 0, Math.min(canvas.width, 64), Math.min(canvas.height, 64)).data;
-    for (let i = 3; i < data.length; i += 16) { // Sample every 4th pixel
-        if (data[i] < 250) return true;
-    }
-    return false;
-}
-
-function restoreComposition(data) {
-    if (!data) return false;
-
-    // ── Normalize v1 → v2 format for backward compatibility ──
-    if (data.version === 1) {
-        data = _migrateV1toV2(data);
-    }
-    if (data.version !== 2) return false;
-
-    const imageStore = data.i || {};
-
-    // 1. Remove assets that were trashed in the saved state
-    if (data.rm && data.rm.length > 0) {
-        data.rm.forEach(id => {
-            const mesh = scene.children.find(c => c.userData && c.userData.id === id);
-            if (mesh) {
-                scene.remove(mesh);
-                const idx = draggableObjects.indexOf(mesh);
-                if (idx !== -1) draggableObjects.splice(idx, 1);
-                const tIdx = cameraAnimationTargets.indexOf(mesh);
-                if (tIdx !== -1) cameraAnimationTargets.splice(tIdx, 1);
-            }
-            const configIndex = initialAssetConfigs.findIndex(c => c.id === id);
-            if (configIndex !== -1) initialAssetConfigs[configIndex].removed = true;
-        });
-    }
-
-    // 2. Restore uploaded images first (they need to be added to scene)
-    const uploadedStates = (data.m || []).filter(s => s.u && s.img);
-    const uploadPromises = uploadedStates.map(state => {
-        return new Promise((resolve) => {
-            const base64 = imageStore[state.img];
-            if (!base64) { console.warn('Missing image data for hash:', state.img); resolve(); return; }
-            const img = new Image();
-            img.onload = () => {
-                const texture = new THREE.Texture(img);
-                texture.colorSpace = THREE.SRGBColorSpace;
-                texture.needsUpdate = true;
-                const w = state.iw || 4;
-                const h = state.ih || 4;
-                const scale = state.s || 1.0;
-                const geometry = new THREE.PlaneGeometry(w * scale, h * scale);
-                const material = new THREE.MeshBasicMaterial({
-                    map: texture, transparent: true, side: THREE.DoubleSide,
-                    opacity: state.o !== undefined ? state.o : 1,
-                });
-                const mesh = new THREE.Mesh(geometry, material);
-                mesh.position.set(state.p.x, state.p.y, state.p.z);
-                const r = state.r || { x: 0, y: 0, z: 0 };
-                mesh.rotation.set(r.x, r.y, r.z);
-                mesh.visible = state.v !== false;
-                mesh.userData.currentLayer = state.l;
-                mesh.userData.initialPosition = mesh.position.clone();
-                mesh.userData.initialLayer = state.l;
-                mesh.userData.id = state.id;
-                mesh.userData.initialScale = { width: w, height: h };
-                mesh.userData.isUploaded = true;
-                mesh.userData.userScale = scale;
-                scene.add(mesh);
-                draggableObjects.push(mesh);
-                cameraAnimationTargets.push(mesh);
-                resolve();
-            };
-            img.onerror = () => {
-                console.warn('Failed to restore uploaded image:', state.id);
-                resolve();
-            };
-            img.src = base64;
-        });
-    });
-
-    // 3. Restore transforms for existing scene meshes
-    Promise.all(uploadPromises).then(() => {
-        (data.m || []).forEach(state => {
-            if (state.u) return; // Already handled above
-            const mesh = scene.children.find(c => c.userData && c.userData.id === state.id);
-            if (!mesh) return;
-            mesh.position.set(state.p.x, state.p.y, state.p.z);
-            const r = state.r || { x: 0, y: 0, z: 0 };
-            mesh.rotation.set(r.x, r.y, r.z);
-            mesh.visible = state.v !== false;
-            mesh.userData.currentLayer = state.l;
-            const userScale = state.s || 1.0;
-            if (userScale !== 1.0 && mesh.userData.initialScale) {
-                const baseW = mesh.userData.initialScale.width;
-                const baseH = mesh.userData.initialScale.height;
-                mesh.geometry.dispose();
-                mesh.geometry = new THREE.PlaneGeometry(baseW * userScale, baseH * userScale);
-                mesh.userData.userScale = userScale;
-            }
-            if (mesh.material && state.o !== undefined) {
-                mesh.material.opacity = state.o;
-                mesh.material.transparent = state.o < 1;
-                mesh.material.needsUpdate = true;
-            }
-        });
-
-        // 4. Restore camera
-        if (data.cam) {
-            camera.position.set(data.cam.p.x, data.cam.p.y, data.cam.p.z);
-            controls.target.set(data.cam.t.x, data.cam.t.y, data.cam.t.z);
-            controls.update();
-        }
-
-        // 5. Restore effects by simulating button clicks for active effects
-        if (data.fx) {
-            const skipKeys = ['thresholdValue', 'shadowBrightness', 'pixelSize'];
-            const presetEffects = ['anon', 'og', 'hacker', 'surveillance', 'greed'];
-
-            presetEffects.forEach(key => {
-                if (data.fx[key] && !effectControls[key]) {
-                    const btn = document.querySelector(`button[data-effect="${key}"]`);
-                    if (btn) btn.click();
-                }
-            });
-
-            for (const key in data.fx) {
-                if (skipKeys.includes(key)) continue;
-                if (presetEffects.includes(key)) continue;
-                const savedOn = data.fx[key];
-                const currentOn = effectControls[key];
-                if (savedOn && !currentOn) {
-                    const btn = document.querySelector(`button[data-effect="${key}"]`);
-                    if (btn) btn.click();
-                }
-            }
-
-            if (data.fx.thresholdValue !== undefined) effectControls.thresholdValue = data.fx.thresholdValue;
-            if (data.fx.shadowBrightness !== undefined) effectControls.shadowBrightness = data.fx.shadowBrightness;
-            if (data.fx.pixelSize !== undefined) effectControls.pixelSize = data.fx.pixelSize;
-        }
-
-        // 6. Update background color to match effect state
-        const needsBlackBackground = effectControls.shadow || effectControls.threshold || effectControls.anon || effectControls.matrix || effectControls.ascii || effectControls.og;
-        if (effectControls.redactedGlitch) {
-            renderer.setClearColor(0xFFAC1C);
-        } else if (needsBlackBackground) {
-            renderer.setClearColor(0x000000);
-        } else {
-            renderer.setClearColor(0x1e1e1e);
-        }
-    });
-
-    return true;
-}
-
-// Migrate v1 save format to v2
-function _migrateV1toV2(old) {
-    const imageStore = {};
-    const meshStates = (old.meshStates || []).map(s => {
-        const n = { id: s.id, p: s.position };
-        if (s.rotation && (s.rotation.x || s.rotation.y || s.rotation.z)) n.r = s.rotation;
-        if (!s.visible) n.v = false;
-        if (s.userScale && s.userScale !== 1.0) n.s = s.userScale;
-        if (s.currentLayer !== undefined) n.l = s.currentLayer;
-        if (s.opacity !== undefined && s.opacity < 1) n.o = s.opacity;
-        if (s.isUploaded && s.uploadedImageData) {
-            const hash = _hash(s.uploadedImageData);
-            imageStore[hash] = s.uploadedImageData;
-            n.img = hash;
-            n.u = true;
-            if (s.initialScale) { n.iw = s.initialScale.width; n.ih = s.initialScale.height; }
-        }
-        return n;
-    });
-    return {
-        version: 2,
-        t: old.timestamp,
-        m: meshStates,
-        i: Object.keys(imageStore).length > 0 ? imageStore : undefined,
-        rm: old.removedAssets && old.removedAssets.length > 0 ? old.removedAssets : undefined,
-        fx: old.effectControls || undefined,
-        cam: old.camera ? { p: old.camera.position, t: old.camera.target } : undefined,
-    };
-}
-
-function downloadComposition() {
-    const data = saveComposition();
-    const json = JSON.stringify(data);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'composition_' + new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-') + '.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    // Also save to localStorage as auto-save
-    try { localStorage.setItem(COMPOSITION_STORAGE_KEY, json); } catch (e) { /* quota exceeded */ }
-}
-
-function loadCompositionFromFile() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.style.display = 'none';
-    input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-            try {
-                const data = JSON.parse(evt.target.result);
-                const ok = restoreComposition(data);
-                if (ok) {
-                    // Save to localStorage so it auto-restores next time
-                    try { localStorage.setItem(COMPOSITION_STORAGE_KEY, evt.target.result); } catch (e) { /* quota exceeded */ }
-                }
-            } catch (err) {
-                console.error('Failed to load composition:', err);
-            }
-        };
-        reader.readAsText(file);
-        document.body.removeChild(input);
-    };
-    document.body.appendChild(input);
-    input.click();
-}
-
-function autoRestoreComposition() {
-    try {
-        const json = localStorage.getItem(COMPOSITION_STORAGE_KEY);
-        if (json) {
-            const data = JSON.parse(json);
-            restoreComposition(data);
-            return true;
-        }
-    } catch (e) {
-        console.warn('Auto-restore failed:', e);
-    }
-    return false;
-}
-
-// ── AR Launch ──
-// Render a texture through WebGL to produce an exportable CanvasTexture.
-// Cross-origin images taint the 2D canvas, so toDataURL() fails inside
-// GLTFExporter.  Reading pixels back from a WebGLRenderTarget sidesteps
-// that restriction because the GPU already owns the decoded image data.
-function bakeTextureForExport(texture) {
-    if (!texture || !texture.image) return texture;
-
-    const w = texture.image.width  || texture.image.naturalWidth  || 256;
-    const h = texture.image.height || texture.image.naturalHeight || 256;
-
-    const rt  = new THREE.WebGLRenderTarget(w, h);
-    const cam = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, 0, 1);
-    const sc  = new THREE.Scene();
-    const mat = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
-    sc.add(new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat));
-
-    renderer.setRenderTarget(rt);
-    renderer.render(sc, cam);
-
-    const px = new Uint8Array(w * h * 4);
-    renderer.readRenderTargetPixels(rt, 0, 0, w, h, px);
-    renderer.setRenderTarget(null);
-
-    // WebGL reads bottom-up; flip to top-down for the canvas
-    const canvas = document.createElement('canvas');
-    canvas.width  = w;
-    canvas.height = h;
-    const ctx = canvas.getContext('2d');
-    const img = ctx.createImageData(w, h);
-    for (let y = 0; y < h; y++) {
-        const src = (h - 1 - y) * w * 4;
-        const dst = y * w * 4;
-        img.data.set(px.subarray(src, src + w * 4), dst);
-    }
-    ctx.putImageData(img, 0, 0);
-
-    const out = new THREE.CanvasTexture(canvas);
-    out.flipY   = false;           // already in GLTF orientation
-    out.colorSpace = THREE.SRGBColorSpace;
-
-    rt.dispose();
-    mat.dispose();
-    return out;
-}
-
-function launchAR(btn) {
-    btn.textContent = 'LOADING...';
-    btn.style.borderColor = '#FF9800';
-
-    // Build a clean scene for export (only visible image planes)
-    const arScene = new THREE.Scene();
-    scene.children.forEach(child => {
-        if (!child.userData || !child.userData.id) return;
-        if (!child.visible) return;
-        if (!child.material || !child.material.map) return;
-
-        // Clone geometry and material so export doesn't affect the live scene
-        const geo = child.geometry.clone();
-        const mat = child.material.clone();
-        // Bake texture through WebGL so GLTFExporter can read the pixel data
-        mat.map = bakeTextureForExport(child.material.map);
-        const mesh = new THREE.Mesh(geo, mat);
-        mesh.position.copy(child.position);
-        mesh.rotation.copy(child.rotation);
-        mesh.scale.copy(child.scale);
-        arScene.add(mesh);
-    });
-
-    // Add ambient light so textures render in AR
-    arScene.add(new THREE.AmbientLight(0xffffff, 1));
-
-    const exporter = new GLTFExporter();
-    exporter.parse(arScene, (glb) => {
-        const blob = new Blob([glb], { type: 'model/gltf-binary' });
-        const url = URL.createObjectURL(blob);
-
-        // Create fullscreen model-viewer overlay
-        const overlay = document.createElement('div');
-        overlay.id = 'ar-overlay';
-        overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;';
-        overlay.innerHTML = `
-            <model-viewer
-                src="${url}"
-                ar
-                ar-modes="webxr scene-viewer quick-look"
-                camera-controls
-                touch-action="pan-y"
-                auto-rotate
-                style="width:100%;height:100%;background:#1e1e1e;"
-                ar-status="not-presenting"
-            >
-                <button slot="ar-button" style="
-                    position:absolute;bottom:24px;left:50%;transform:translateX(-50%);
-                    background:#9C27B0;color:#fff;border:none;padding:12px 32px;
-                    font-family:monospace;font-size:14px;cursor:pointer;text-transform:uppercase;
-                    letter-spacing:0.1em;border-radius:0;
-                ">View in AR</button>
-            </model-viewer>
-            <button id="ar-close" style="
-                position:absolute;top:16px;right:16px;z-index:100000;
-                background:rgba(0,0,0,0.7);color:#fff;border:1px solid rgba(255,255,255,0.3);
-                padding:8px 16px;font-family:monospace;font-size:12px;cursor:pointer;
-                text-transform:uppercase;letter-spacing:0.1em;
-            ">CLOSE</button>
-        `;
-        document.body.appendChild(overlay);
-
-        document.getElementById('ar-close').onclick = () => {
-            overlay.remove();
-            URL.revokeObjectURL(url);
-        };
-
-        btn.textContent = 'AR';
-        btn.style.borderColor = '#9C27B0';
-    }, (error) => {
-        console.error('GLTFExporter error:', error);
-        btn.textContent = 'ERROR';
-        btn.style.borderColor = '#e33';
-        setTimeout(() => { btn.textContent = 'AR'; btn.style.borderColor = '#9C27B0'; }, 2000);
-    }, { binary: true });
-}
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -4259,749 +3820,13 @@ function onWindowResize() {
     stopCameraAnimationAndReset();
 }
 
-// ══════════════════════════════════════════════════════════════
-// ── ELEMENT CYCLING SYSTEM ──
-// Right-click any face element to cycle through all 5 overlords' versions
-// ══════════════════════════════════════════════════════════════
-
-function preloadEyeTextures() {
-    // Actually preloads ALL element textures (name kept for backward compat with init calls)
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.setCrossOrigin('');
-
-    const loadTex = (url) => {
-        return new Promise((resolve) => {
-            if (!url) { resolve(null); return; }
-            const applySettings = (texture) => {
-                texture.colorSpace = THREE.SRGBColorSpace;
-                texture.minFilter = THREE.LinearFilter;
-                texture.magFilter = THREE.LinearFilter;
-                texture.generateMipmaps = false;
-                if (renderer) texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-            };
-            textureLoader.load(url, (texture) => {
-                applySettings(texture);
-                resolve(texture);
-            }, undefined, () => {
-                const fallback = ARWEAVE_FALLBACKS[url];
-                if (fallback) {
-                    console.warn('Preload AWS failed, trying Arweave:', url);
-                    textureLoader.load(fallback, (texture) => {
-                        applySettings(texture);
-                        console.log('Arweave preload succeeded:', fallback);
-                        resolve(texture);
-                    }, undefined, () => resolve(null));
-                } else {
-                    resolve(null);
-                }
-            });
-        });
-    };
-
-    // Preload textures for every element (including mouthOverlay companion)
-    const elementsToPreload = [...CYCLABLE_ELEMENTS, 'mouthOverlay'];
-    const preloadPromises = [];
-    for (const elementId of elementsToPreload) {
-        const urls = OVERLORD_ASSETS[elementId];
-        if (!urls) continue;
-        preloadedElementTextures[elementId] = new Array(urls.length).fill(null);
-        urls.forEach((url, index) => {
-            const p = loadTex(url).then((tex) => {
-                preloadedElementTextures[elementId][index] = tex;
-            });
-            preloadPromises.push(p);
-        });
-    }
-
-    // After all textures are preloaded, randomize face elements
-    Promise.all(preloadPromises).then(() => {
-        randomizeFaceElements();
-    });
-}
-
-function randomizeFaceElements() {
-    // Randomize all cyclable elements (face + branded)
-    const allElements = CYCLABLE_ELEMENTS;
-
-    for (const elementId of allElements) {
-        const urls = OVERLORD_ASSETS[elementId];
-        if (!urls) continue;
-
-        // Pick a random index that has an asset
-        const validIndices = [];
-        for (let i = 0; i < urls.length; i++) {
-            if (urls[i]) validIndices.push(i);
-        }
-        if (validIndices.length === 0) continue;
-
-        const randomIdx = validIndices[Math.floor(Math.random() * validIndices.length)];
-
-        // Skip if already showing this index
-        if (elementOverlordIndex[elementId] === randomIdx) continue;
-
-        elementOverlordIndex[elementId] = randomIdx;
-
-        // Apply the texture swap
-        if (elementId === 'rightEye') {
-            cycleRightEyeMesh(randomIdx);
-        } else if (elementId === 'leftEye') {
-            cycleLeftEyeMesh(randomIdx);
-        } else if (elementId === 'mouth') {
-            cycleGenericElement(elementId, randomIdx);
-            cycleMouthOverlay(randomIdx);
-        } else {
-            cycleGenericElement(elementId, randomIdx);
-        }
-    }
-
-    const isBranded = (id) => ['spacex', 'blueBill', 'rocket'].includes(id);
-    console.log('Elements randomized:', Object.fromEntries(
-        allElements.map(id => [id, isBranded(id) ? (BRANDED_LABELS[elementOverlordIndex[id]] || elementOverlordIndex[id]) : (OVERLORD_NAMES[elementOverlordIndex[id]] || elementOverlordIndex[id])])
-    ));
-}
-
-function createEyeIndicator() {
-    const indicator = document.createElement('div');
-    indicator.id = 'eye-indicator';
-    indicator.style.cssText = `
-        position: fixed;
-        bottom: 60px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 199;
-        font-family: monospace;
-        font-size: 10px;
-        color: #888;
-        letter-spacing: 1px;
-        text-align: center;
-        pointer-events: none;
-        transition: opacity 0.3s;
-        opacity: 0;
-    `;
-    indicator.innerHTML = '';
-    document.body.appendChild(indicator);
-}
-
-function initSwapModeButton() {
-    // Swap mode is now handled by the button in the left drop menu (#swap-mode-btn-left)
-    // The original fixed button is hidden via CSS
-}
-
-// ── MASK SYSTEM ──
-
-function drawMaskShape(ctx, shape, cx, cy, radius) {
-    ctx.beginPath();
-    switch (shape) {
-        case 'square':
-            ctx.rect(cx - radius, cy - radius, radius * 2, radius * 2);
-            break;
-        case 'circle':
-            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-            break;
-        case 'triangle': {
-            const h = radius * Math.sqrt(3);
-            ctx.moveTo(cx, cy - radius);
-            ctx.lineTo(cx + h / 2, cy + radius / 2);
-            ctx.lineTo(cx - h / 2, cy + radius / 2);
-            ctx.closePath();
-            break;
-        }
-        case 'star': {
-            const spikes = 5;
-            const outerR = radius;
-            const innerR = radius * 0.4;
-            for (let i = 0; i < spikes * 2; i++) {
-                const r = i % 2 === 0 ? outerR : innerR;
-                const angle = (Math.PI / 2 * -1) + (i * Math.PI / spikes);
-                const x = cx + Math.cos(angle) * r;
-                const y = cy + Math.sin(angle) * r;
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            }
-            ctx.closePath();
-            break;
-        }
-    }
-}
-
-function createMaskPreviewTexture(shape, scale, imgW, imgH, offX, offY) {
-    const canvas = document.createElement('canvas');
-    canvas.width = imgW;
-    canvas.height = imgH;
-    const ctx = canvas.getContext('2d');
-
-    // Semi-transparent dark overlay
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-    ctx.fillRect(0, 0, imgW, imgH);
-
-    // Cut out the shape (clear it so image shows through)
-    const minDim = Math.min(imgW, imgH);
-    const radius = (minDim / 2) * scale;
-    const cx = imgW / 2 + offX * imgW;
-    const cy = imgH / 2 - offY * imgH; // flip Y
-
-    ctx.globalCompositeOperation = 'destination-out';
-    drawMaskShape(ctx, shape, cx, cy, radius);
-    ctx.fill();
-
-    // Draw shape outline
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.lineWidth = Math.max(1, minDim * 0.003);
-    drawMaskShape(ctx, shape, cx, cy, radius);
-    ctx.stroke();
-
-    const tex = new THREE.Texture(canvas);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.minFilter = THREE.LinearFilter;
-    tex.magFilter = THREE.LinearFilter;
-    tex.generateMipmaps = false;
-    tex.needsUpdate = true;
-    return tex;
-}
-
-function initMaskDrawCanvas() {
-    if (!maskTargetMesh || !maskTargetMesh.material.map) return;
-    const img = maskTargetMesh.material.map.image;
-    maskDrawCanvas = document.createElement('canvas');
-    maskDrawCanvas.width = img.width;
-    maskDrawCanvas.height = img.height;
-    maskDrawCtx = maskDrawCanvas.getContext('2d');
-    // Start fully transparent (nothing visible) — user draws opaque white to reveal
-    maskDrawCtx.clearRect(0, 0, maskDrawCanvas.width, maskDrawCanvas.height);
-    maskDrawLastUV = null;
-}
-
-function paintOnMaskCanvas(u, v) {
-    if (!maskDrawCanvas || !maskDrawCtx) return;
-    const w = maskDrawCanvas.width;
-    const h = maskDrawCanvas.height;
-    // UV to pixel: u goes left-to-right, v goes bottom-to-top in Three.js
-    const px = u * w;
-    const py = (1 - v) * h;
-    const minDim = Math.min(w, h);
-    const brushRadius = (minDim / 2) * maskScale * 0.3; // Scale brush relative to image
-
-    maskDrawCtx.globalCompositeOperation = 'source-over';
-    maskDrawCtx.fillStyle = 'white';
-    maskDrawCtx.beginPath();
-
-    // If we have a previous point, draw a line of circles for smooth strokes
-    if (maskDrawLastUV) {
-        const prevPx = maskDrawLastUV.u * w;
-        const prevPy = (1 - maskDrawLastUV.v) * h;
-        const dist = Math.sqrt((px - prevPx) ** 2 + (py - prevPy) ** 2);
-        const steps = Math.max(1, Math.ceil(dist / (brushRadius * 0.5)));
-        for (let i = 0; i <= steps; i++) {
-            const t = i / steps;
-            const cx = prevPx + (px - prevPx) * t;
-            const cy = prevPy + (py - prevPy) * t;
-            maskDrawCtx.moveTo(cx + brushRadius, cy);
-            maskDrawCtx.arc(cx, cy, brushRadius, 0, Math.PI * 2);
-        }
-    } else {
-        maskDrawCtx.arc(px, py, brushRadius, 0, Math.PI * 2);
-    }
-    maskDrawCtx.fill();
-    maskDrawLastUV = { u, v };
-}
-
-function createDrawMaskPreviewTexture() {
-    if (!maskTargetMesh || !maskDrawCanvas) return null;
-    const img = maskTargetMesh.material.map.image;
-    const w = img.width;
-    const h = img.height;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext('2d');
-
-    // Dark overlay everywhere
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-    ctx.fillRect(0, 0, w, h);
-
-    // Cut out the drawn areas (where mask canvas is opaque white)
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.drawImage(maskDrawCanvas, 0, 0);
-
-    const tex = new THREE.Texture(canvas);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.minFilter = THREE.LinearFilter;
-    tex.magFilter = THREE.LinearFilter;
-    tex.generateMipmaps = false;
-    tex.needsUpdate = true;
-    return tex;
-}
-
-function enterMaskMode(mesh) {
-    maskMode = true;
-    maskTargetMesh = mesh;
-    maskOffsetX = 0;
-    maskOffsetY = 0;
-    maskScale = parseInt(document.getElementById('mask-panel').querySelector('input[type="range"]').value) / 100;
-
-    const btn = document.getElementById('mask-btn');
-    btn.textContent = 'MASK ON';
-    btn.style.borderColor = '#4CAF50';
-
-    document.getElementById('mask-panel').style.display = 'flex';
-
-    // Initialize draw canvas if in draw mode
-    if (maskShape === 'draw') initMaskDrawCanvas();
-
-    // Recalculate arrow position since panel grew
-    if (leftUiContainer.style.top === '10px' && arrowContainer) {
-        setTimeout(() => {
-            arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
-        }, 10);
-    }
-
-    updateMaskOverlay();
-}
-
-function exitMaskMode() {
-    maskMode = false;
-    maskTargetMesh = null;
-    maskDrawCanvas = null;
-    maskDrawCtx = null;
-    maskDrawing = false;
-    maskDrawLastUV = null;
-
-    const btn = document.getElementById('mask-btn');
-    btn.textContent = 'MASK';
-    btn.style.borderColor = 'white';
-
-    document.getElementById('mask-panel').style.display = 'none';
-
-    // Remove overlay
-    if (maskOverlayMesh) {
-        scene.remove(maskOverlayMesh);
-        if (maskOverlayMesh.geometry) maskOverlayMesh.geometry.dispose();
-        if (maskOverlayMesh.material) {
-            if (maskOverlayMesh.material.map) maskOverlayMesh.material.map.dispose();
-            maskOverlayMesh.material.dispose();
-        }
-        maskOverlayMesh = null;
-    }
-
-    // Recalculate arrow position
-    if (leftUiContainer.style.top === '10px' && arrowContainer) {
-        setTimeout(() => {
-            arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
-        }, 10);
-    }
-}
-
-function updateMaskOverlay() {
-    if (!maskTargetMesh) return;
-
-    const img = maskTargetMesh.material.map.image;
-    const tex = (maskShape === 'draw')
-        ? createDrawMaskPreviewTexture()
-        : createMaskPreviewTexture(maskShape, maskScale, img.width, img.height, maskOffsetX, maskOffsetY);
-    if (!tex) return;
-
-    if (maskOverlayMesh) {
-        // Update existing overlay
-        if (maskOverlayMesh.material.map) maskOverlayMesh.material.map.dispose();
-        maskOverlayMesh.material.map = tex;
-        maskOverlayMesh.material.needsUpdate = true;
-
-        // Match target geometry size
-        const userScale = maskTargetMesh.userData.userScale || 1;
-        const baseW = maskTargetMesh.userData.initialScale.width * userScale;
-        const baseH = maskTargetMesh.userData.initialScale.height * userScale;
-        maskOverlayMesh.geometry.dispose();
-        maskOverlayMesh.geometry = new THREE.PlaneGeometry(baseW, baseH);
-        maskOverlayMesh.position.copy(maskTargetMesh.position);
-        maskOverlayMesh.position.z += 0.01; // Slightly in front
-        maskOverlayMesh.rotation.copy(maskTargetMesh.rotation);
-    } else {
-        // Create new overlay
-        const userScale = maskTargetMesh.userData.userScale || 1;
-        const baseW = maskTargetMesh.userData.initialScale.width * userScale;
-        const baseH = maskTargetMesh.userData.initialScale.height * userScale;
-        const geom = new THREE.PlaneGeometry(baseW, baseH);
-        const mat = new THREE.MeshBasicMaterial({
-            map: tex,
-            transparent: true,
-            side: THREE.DoubleSide,
-            depthWrite: false
-        });
-        maskOverlayMesh = new THREE.Mesh(geom, mat);
-        maskOverlayMesh.position.copy(maskTargetMesh.position);
-        maskOverlayMesh.position.z += 0.01;
-        maskOverlayMesh.rotation.copy(maskTargetMesh.rotation);
-        maskOverlayMesh.userData.isMaskOverlay = true;
-        scene.add(maskOverlayMesh);
-    }
-}
-
-function applyMask() {
-    if (!maskTargetMesh || !maskTargetMesh.material.map) return;
-
-    const srcImg = maskTargetMesh.material.map.image;
-    const w = srcImg.width;
-    const h = srcImg.height;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext('2d');
-
-    // Draw original image
-    ctx.drawImage(srcImg, 0, 0);
-
-    if (maskShape === 'draw' && maskDrawCanvas) {
-        // Use the freehand draw canvas as the mask
-        ctx.globalCompositeOperation = 'destination-in';
-        ctx.drawImage(maskDrawCanvas, 0, 0);
-    } else {
-        // Apply mask — only keep pixels inside the shape
-        const minDim = Math.min(w, h);
-        const radius = (minDim / 2) * maskScale;
-        const cx = w / 2 + maskOffsetX * w;
-        const cy = h / 2 - maskOffsetY * h;
-
-        // Create mask canvas
-        const maskCanvas = document.createElement('canvas');
-        maskCanvas.width = w;
-        maskCanvas.height = h;
-        const mctx = maskCanvas.getContext('2d');
-
-        // Fill shape in white on mask canvas
-        mctx.fillStyle = 'white';
-        drawMaskShape(mctx, maskShape, cx, cy, radius);
-        mctx.fill();
-
-        // Use mask to clip the image
-        ctx.globalCompositeOperation = 'destination-in';
-        ctx.drawImage(maskCanvas, 0, 0);
-    }
-
-    // Create new texture from masked result
-    const newTex = new THREE.Texture(canvas);
-    newTex.colorSpace = THREE.SRGBColorSpace;
-    newTex.minFilter = THREE.LinearFilter;
-    newTex.magFilter = THREE.LinearFilter;
-    newTex.generateMipmaps = false;
-    if (renderer) newTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    newTex.needsUpdate = true;
-
-    // Replace texture on mesh
-    if (maskTargetMesh.material.map) maskTargetMesh.material.map.dispose();
-    maskTargetMesh.material.map = newTex;
-    maskTargetMesh.material.transparent = true;
-    maskTargetMesh.material.alphaTest = 0.01; // Discard fully transparent fragments (no color or depth write)
-    maskTargetMesh.material.depthWrite = true; // Visible pixels write depth normally
-    maskTargetMesh.material.needsUpdate = true;
-
-    // Clear alpha cache for this texture so clicks work correctly
-    if (typeof textureAlphaCanvasCache !== 'undefined') {
-        textureAlphaCanvasCache.delete(maskTargetMesh.material.map.id);
-    }
-
-    exitMaskMode();
-}
-
-function initElementControls() {
-    const panel = document.getElementById('element-controls');
-    const scaleSlider = document.getElementById('scale-slider');
-    const rotateX = document.getElementById('rotate-x');
-    const rotateY = document.getElementById('rotate-y');
-    const rotateZ = document.getElementById('rotate-z');
-    if (!panel) return;
-
-    // Scale slider
-    scaleSlider.addEventListener('input', () => {
-        if (!selectedScaleElement) return;
-        const pct = parseInt(scaleSlider.value);
-        const scale = pct / 100;
-        selectedScaleElement.userData.userScale = scale;
-        const baseW = selectedScaleElement.userData.initialScale.width;
-        const baseH = selectedScaleElement.userData.initialScale.height;
-        selectedScaleElement.geometry.dispose();
-        selectedScaleElement.geometry = new THREE.PlaneGeometry(baseW * scale, baseH * scale);
-        document.getElementById('scale-value').textContent = pct + '%';
-    });
-
-    // Rotation sliders
-    const applyRotation = () => {
-        if (!selectedScaleElement) return;
-        const rx = parseInt(rotateX.value);
-        const ry = parseInt(rotateY.value);
-        const rz = parseInt(rotateZ.value);
-        selectedScaleElement.rotation.set(
-            THREE.MathUtils.degToRad(rx),
-            THREE.MathUtils.degToRad(ry),
-            THREE.MathUtils.degToRad(rz)
-        );
-        document.getElementById('rotate-x-value').textContent = rx + '°';
-        document.getElementById('rotate-y-value').textContent = ry + '°';
-        document.getElementById('rotate-z-value').textContent = rz + '°';
-    };
-    rotateX.addEventListener('input', applyRotation);
-    rotateY.addEventListener('input', applyRotation);
-    rotateZ.addEventListener('input', applyRotation);
-
-    // Prevent interaction from propagating to scene
-    panel.addEventListener('mousedown', (e) => e.stopPropagation());
-    panel.addEventListener('touchstart', (e) => e.stopPropagation());
-    panel.addEventListener('click', (e) => e.stopPropagation());
-}
-
-function selectElementForControls(mesh) {
-    if (!mesh || !mesh.userData.id) return;
-    selectedScaleElement = mesh;
-
-    const panel = document.getElementById('element-controls');
-    const scaleSlider = document.getElementById('scale-slider');
-    const rotateX = document.getElementById('rotate-x');
-    const rotateY = document.getElementById('rotate-y');
-    const rotateZ = document.getElementById('rotate-z');
-
-    if (!panel) return;
-    panel.classList.add('visible');
-
-    // Update element name
-    const displayName = mesh.userData.id.replace(/([A-Z])/g, ' $1').toUpperCase().trim();
-    document.getElementById('ctrl-element-name').textContent = displayName;
-
-    // Update scale slider
-    const currentScale = Math.round((mesh.userData.userScale || 1.0) * 100);
-    scaleSlider.value = currentScale;
-    document.getElementById('scale-value').textContent = currentScale + '%';
-
-    // Update rotation sliders
-    const rx = Math.round(THREE.MathUtils.radToDeg(mesh.rotation.x));
-    const ry = Math.round(THREE.MathUtils.radToDeg(mesh.rotation.y));
-    const rz = Math.round(THREE.MathUtils.radToDeg(mesh.rotation.z));
-    rotateX.value = rx;
-    rotateY.value = ry;
-    rotateZ.value = rz;
-    document.getElementById('rotate-x-value').textContent = rx + '°';
-    document.getElementById('rotate-y-value').textContent = ry + '°';
-    document.getElementById('rotate-z-value').textContent = rz + '°';
-}
-
-function updateElementIndicator(elementId) {
-    const indicator = document.getElementById('eye-indicator');
-    if (indicator) {
-        const idx = elementOverlordIndex[elementId];
-        const label = elementId.replace(/([A-Z])/g, ' $1').toUpperCase().trim();
-        const isBranded = ['spacex', 'blueBill', 'rocket'].includes(elementId);
-
-        if (isBranded) {
-            indicator.innerHTML = `<span style="color:#fff;font-size:12px;">${BRANDED_LABELS[idx] || label}</span>`;
-        } else {
-            indicator.innerHTML = `<span style="color:#fff;font-size:12px;">${label}: ${OVERLORD_NUMERALS[idx]}</span><br><span style="font-size:9px;color:#555;">${OVERLORD_NAMES[idx].toUpperCase()}</span>`;
-        }
-
-        // Flash the indicator briefly
-        indicator.style.opacity = '1';
-        setTimeout(() => { indicator.style.opacity = '0.6'; }, 1500);
-    }
-}
-
-// Swap mode is handled inside onClick — no separate handler needed
-function onRightClickEyeCycle() { /* deprecated — swap mode uses onClick */ }
-
-function cycleElement(elementId) {
-    const urls = OVERLORD_ASSETS[elementId];
-    if (!urls) return;
-
-    const totalOptions = urls.length;
-
-    // Find next option that has an asset for this element
-    let nextIdx = elementOverlordIndex[elementId];
-    let attempts = 0;
-    do {
-        nextIdx = (nextIdx + 1) % totalOptions;
-        attempts++;
-    } while (!urls[nextIdx] && attempts < totalOptions);
-
-    if (attempts >= totalOptions) return; // No assets available
-
-    elementOverlordIndex[elementId] = nextIdx;
-
-    // Eyes cycle independently; mouth has overlay companion for Altman
-    if (elementId === 'rightEye') {
-        cycleRightEyeMesh(nextIdx);
-    } else if (elementId === 'leftEye') {
-        cycleLeftEyeMesh(nextIdx);
-    } else if (elementId === 'mouth') {
-        cycleGenericElement(elementId, nextIdx);
-        cycleMouthOverlay(nextIdx);
-    } else {
-        // Generic element cycling
-        cycleGenericElement(elementId, nextIdx);
-    }
-
-    updateElementIndicator(elementId);
-
-    // Log label: use branded labels or overlord names depending on element type
-    const isBranded = ['spacex', 'blueBill', 'rocket'].includes(elementId);
-    const logLabel = isBranded ? (BRANDED_LABELS[nextIdx] || nextIdx) : `${OVERLORD_NAMES[nextIdx]} (${OVERLORD_NUMERALS[nextIdx]})`;
-    console.log(`${elementId} cycled to: ${logLabel}`);
-}
-
-function cycleRightEyeMesh(overlordIdx) {
-    const rightTex = preloadedElementTextures['rightEye'] ? preloadedElementTextures['rightEye'][overlordIdx] : null;
-    if (rightEyeMesh && rightTex) {
-        swapMeshTexture(rightEyeMesh, rightTex);
-    }
-}
-
-function cycleLeftEyeMesh(overlordIdx) {
-    const leftTex = preloadedElementTextures['leftEye'] ? preloadedElementTextures['leftEye'][overlordIdx] : null;
-    if (leftEyeMesh && leftTex) {
-        swapMeshTexture(leftEyeMesh, leftTex);
-    }
-}
-
-let mouthOverlayMesh = null; // Altman's second mouth piece overlay
-
-function cycleMouthOverlay(overlordIdx) {
-    const ALTMAN_IDX = 2;
-    if (overlordIdx === ALTMAN_IDX) {
-        // Show Altman's overlay mouth
-        const overlayTex = preloadedElementTextures['mouthOverlay'] ? preloadedElementTextures['mouthOverlay'][ALTMAN_IDX] : null;
-        if (!mouthOverlayMesh && overlayTex) {
-            const baseScale = 0.005;
-            const material = new THREE.MeshBasicMaterial({
-                map: overlayTex, transparent: true, side: THREE.DoubleSide,
-                alphaTest: 0.5, blending: THREE.MultiplyBlending
-            });
-            const planeWidth = overlayTex.image.width * baseScale;
-            const planeHeight = overlayTex.image.height * baseScale;
-            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-            mouthOverlayMesh = new THREE.Mesh(geometry, material);
-            // Position at same place as mouth, slightly in front
-            const mouthMesh = draggableObjects.find(obj => obj.userData.id === 'mouth');
-            const mY = mouthMesh ? mouthMesh.position.y : -1.5;
-            const mZ = mouthMesh ? mouthMesh.position.z + 0.01 : (10 - 1) * 0.2;
-            mouthOverlayMesh.position.set(0, mY, mZ);
-            mouthOverlayMesh.userData.id = 'mouthOverlay';
-            mouthOverlayMesh.userData.currentLayer = mouthMesh ? mouthMesh.userData.currentLayer + 1 : 10;
-            mouthOverlayMesh.userData.initialPosition = mouthOverlayMesh.position.clone();
-            mouthOverlayMesh.userData.initialLayer = mouthOverlayMesh.userData.currentLayer;
-            mouthOverlayMesh.userData.initialScale = { width: planeWidth, height: planeHeight };
-            scene.add(mouthOverlayMesh);
-            draggableObjects.push(mouthOverlayMesh);
-        } else if (mouthOverlayMesh) {
-            fadeInMesh(mouthOverlayMesh);
-        }
-    } else {
-        // Hide overlay for non-Altman overlords
-        if (mouthOverlayMesh) fadeOutMesh(mouthOverlayMesh);
-    }
-}
-
-function cycleGenericElement(elementId, overlordIdx) {
-    const textures = preloadedElementTextures[elementId];
-    if (!textures) return;
-    const newTex = textures[overlordIdx];
-
-    // Find the mesh with this userData.id
-    let mesh = null;
-    if (elementId === 'background') {
-        mesh = backgroundMesh;
-    } else {
-        mesh = draggableObjects.find(obj => obj.userData.id === elementId);
-    }
-
-    if (!mesh) return;
-
-    if (!newTex) {
-        // No asset for this overlord - hide the element
-        fadeOutMesh(mesh);
-        return;
-    }
-
-    // Element was previously hidden - show it
-    if (!mesh.visible) {
-        mesh.visible = true;
-    }
-
-    swapMeshTexture(mesh, newTex);
-}
-
-function swapMeshTexture(mesh, newTexture) {
-    if (!mesh || !newTexture) return;
-    const baseScale = 0.005;
-
-    // Ensure mesh is visible (may have been hidden by fadeOutMesh)
-    mesh.visible = true;
-
-    // Fade out, swap, fade in
-    mesh.material.transparent = true;
-    mesh.material.opacity = 0;
-    mesh.material.map = newTexture;
-    mesh.material.needsUpdate = true;
-
-    // Rebuild geometry to match new texture dimensions
-    const newWidth = newTexture.image.width * baseScale;
-    const newHeight = newTexture.image.height * baseScale;
-
-    // Base dimensions (before user scale) for the new texture
-    const swapFactor = mesh.userData.swapScaleFactor || 1.0;
-    const baseW = newWidth * swapFactor;
-    const baseH = newHeight * swapFactor;
-
-    // Update initialScale so scale slider maintains correct 1:1 ratio
-    mesh.userData.initialScale = { width: baseW, height: baseH };
-
-    // Apply user scale from slider on top of base dimensions
-    const userScale = mesh.userData.userScale || 1.0;
-
-    mesh.geometry.dispose();
-    mesh.geometry = new THREE.PlaneGeometry(baseW * userScale, baseH * userScale);
-
-    // Animate opacity back in
-    animateOpacity(mesh, 0, 1, 200);
-}
-
-function fadeOutMesh(mesh) {
-    if (!mesh) return;
-    mesh.material.transparent = true;
-    animateOpacity(mesh, mesh.material.opacity, 0, 150, () => {
-        mesh.visible = false;
-    });
-}
-
-function fadeInMesh(mesh) {
-    if (!mesh) return;
-    mesh.visible = true;
-    mesh.material.transparent = true;
-    animateOpacity(mesh, 0, 1, 200);
-}
-
-function animateOpacity(mesh, from, to, durationMs, onComplete) {
-    const startTime = performance.now();
-    function step(time) {
-        const elapsed = time - startTime;
-        const t = Math.min(elapsed / durationMs, 1);
-        mesh.material.opacity = from + (to - from) * t;
-        mesh.material.needsUpdate = true;
-        if (t < 1) {
-            requestAnimationFrame(step);
-        } else if (onComplete) {
-            onComplete();
-        }
-    }
-    requestAnimationFrame(step);
-}
-
-// ══════════════════════════════════════════════════════════════
-
 function onPointerDown(event) {
-
+    
     isDragging = false;
     pointerDownPosition.set(event.clientX, event.clientY);
 
     // Check if the click is on a UI element
-    if (event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#element-controls')) {
+    if (event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) {
         selectedObject = null;
         controls.enabled = true;
         return;
@@ -5011,30 +3836,6 @@ function onPointerDown(event) {
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);
-
-    // In mask mode, intercept clicks for drawing or shape dragging
-    if (maskMode && maskTargetMesh) {
-        if (maskShape === 'draw') {
-            // Raycast against the target mesh to get UV for drawing
-            const drawHits = raycaster.intersectObject(maskTargetMesh);
-            if (drawHits.length > 0 && drawHits[0].uv) {
-                maskDrawing = true;
-                maskDrawLastUV = null;
-                controls.enabled = false;
-                paintOnMaskCanvas(drawHits[0].uv.x, drawHits[0].uv.y);
-                updateMaskOverlay();
-                return;
-            }
-        } else if (maskOverlayMesh) {
-            const maskHits = raycaster.intersectObject(maskOverlayMesh);
-            if (maskHits.length > 0) {
-                maskDragging = true;
-                maskDragStart = { x: event.clientX, y: event.clientY, offX: maskOffsetX, offY: maskOffsetY };
-                controls.enabled = false;
-                return;
-            }
-        }
-    }
 
     const intersects = raycaster.intersectObjects(draggableObjects, true); // Intersect with all descendants
 
@@ -5074,33 +3875,7 @@ function onPointerDown(event) {
 }
 
 function onPointerMove(event) {
-
-    // Handle freehand draw mask painting
-    if (maskDrawing && maskShape === 'draw' && maskTargetMesh) {
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(mouse, camera);
-        const drawHits = raycaster.intersectObject(maskTargetMesh);
-        if (drawHits.length > 0 && drawHits[0].uv) {
-            paintOnMaskCanvas(drawHits[0].uv.x, drawHits[0].uv.y);
-            updateMaskOverlay();
-        }
-        return;
-    }
-
-    // Handle mask overlay dragging
-    if (maskDragging && maskDragStart && maskTargetMesh) {
-        const dx = (event.clientX - maskDragStart.x) / window.innerWidth;
-        const dy = (event.clientY - maskDragStart.y) / window.innerHeight;
-        maskOffsetX = maskDragStart.offX + dx * 2;
-        maskOffsetY = maskDragStart.offY - dy * 2;
-        // Clamp offsets
-        maskOffsetX = Math.max(-0.5, Math.min(0.5, maskOffsetX));
-        maskOffsetY = Math.max(-0.5, Math.min(0.5, maskOffsetY));
-        updateMaskOverlay();
-        return;
-    }
-
+    
     if (selectedObject) {
         // Check if the pointer has moved beyond the drag threshold
         const currentPointerPosition = new THREE.Vector2(event.clientX, event.clientY);
@@ -5150,23 +3925,7 @@ function onPointerMove(event) {
 }
 
 function onPointerUp(event) {
-
-    // Release mask draw painting
-    if (maskDrawing) {
-        maskDrawing = false;
-        maskDrawLastUV = null;
-        controls.enabled = true;
-        return;
-    }
-
-    // Release mask dragging
-    if (maskDragging) {
-        maskDragging = false;
-        maskDragStart = null;
-        controls.enabled = true;
-        return;
-    }
-
+    
     if (isDragging || event.target.closest('#trash-button')) { // Check if dragging or if pointer released directly over trash button
         // Check if the pointer was released over the TRASH button
         if (trashButtonElement) {
@@ -5189,9 +3948,6 @@ function onPointerUp(event) {
                     if (configIndex !== -1) {
                         initialAssetConfigs[configIndex].removed = true;
                     }
-
-                    // Exit mask mode if trashing the masked target
-                    if (maskMode && maskTargetMesh === selectedObject) exitMaskMode();
 
                     // Object was dropped onto the trash button, remove it
                     scene.remove(selectedObject);
@@ -5242,14 +3998,11 @@ function onPointerUp(event) {
 }
 
 function onClick(event) {
-
+    
     // Only process click if no dragging occurred and not clicking on UI
-    if (isDragging || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#element-controls')) {
+    if (isDragging || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) {
         return;
     }
-
-    // Do not process clicks while in mask mode (prevents Z-depth cycling during mask drawing/dragging)
-    if (maskMode) return;
 
     stopCameraAnimationAndReset(); // Only stop FLY camera on explicit click if not dragging and not on UI
 
@@ -5287,17 +4040,45 @@ function onClick(event) {
     }
 
     if (clickedObject) {
-        // ── Select element for scale slider ──
-        selectElementForControls(clickedObject);
-
-        // ── SWAP MODE: cycle overlord element instead of Z-depth ──
-        if (swapMode) {
-            const id = clickedObject.userData.id;
-            if (CYCLABLE_ELEMENTS.includes(id)) {
-                cycleElement(id);
-                return; // Don't fall through to Z-depth cycling
+        // Handle Dogecoin/Tesla logo swap
+        if (clickedObject === dogecoinRef) {
+            if (dogecoinRef.material.map === dogecoinRef.userData.originalTexture) {
+                // Swap to Tesla texture with greyscale and high contrast effect
+                dogecoinRef.material = teslaGreyscaleContrastMaterial;
+                dogecoinRef.material.uniforms.tDiffuse.value = dogecoinRef.userData.teslaTexture;
+            } else {
+                // Swap back to original Dogecoin texture with basic material
+                dogecoinRef.material = new THREE.MeshBasicMaterial({ map: dogecoinRef.userData.originalTexture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
             }
-            // If not a cyclable element, fall through to normal Z-depth behavior
+            dogecoinRef.material.needsUpdate = true;
+        }
+
+        // Handle SpaceX/X logo swap
+        if (clickedObject === spacexRef) {
+            let newTexture;
+            let targetWidth;
+            let targetHeight;
+
+            if (spacexRef.material.map === spacexRef.userData.originalTexture) {
+                newTexture = spacexRef.userData.xLogoTexture;
+                // For X logo, ensure 1:1 ratio if the source image is 1:1, otherwise use its own ratio
+                // We'll base the new size on the original object's height to keep vertical scale consistent
+                targetHeight = spacexRef.userData.originalHeight; // Use the original object's height as a reference
+                targetWidth = targetHeight * (newTexture.image.width / newTexture.image.height);
+
+            } else {
+                newTexture = spacexRef.userData.originalTexture;
+                targetWidth = spacexRef.userData.originalWidth;
+                targetHeight = spacexRef.userData.originalHeight;
+            }
+
+            // Dispose of old geometry to prevent memory leaks
+            spacexRef.geometry.dispose();
+            // Create new geometry with updated dimensions
+            spacexRef.geometry = new THREE.PlaneGeometry(targetWidth, targetHeight);
+
+            spacexRef.material.map = newTexture;
+            spacexRef.material.needsUpdate = true;
         }
 
         // Skip depth cycling for non-draggable elements or those with special handling
@@ -5564,9 +4345,6 @@ function animate(currentTime) {
 init();
 animate();
 
-// Auto-restore saved composition after scene is ready
-setTimeout(() => { autoRestoreComposition(); }, 1500);
-
 // Expose for dae hooks
 setTimeout(function () {
     window.animate = typeof animate == "function" ? animate : () => { };
@@ -5586,61 +4364,27 @@ setTimeout(function () {
     }, 1000)
   </script>
 
-  <!-- ─── SWAP MODE TOGGLE ─── -->
-  <button id="swap-mode-btn">SWAP MODE</button>
-
-  <!-- ─── ELEMENT CONTROLS PANEL ─── -->
-  <div id="element-controls">
-    <div class="ctrl-label" id="ctrl-element-name">SELECT ELEMENT</div>
-    <div class="ctrl-section">
-      <div class="ctrl-section-title">Scale</div>
-      <div class="ctrl-row">
-        <input type="range" id="scale-slider" min="10" max="300" value="100" />
-        <span class="ctrl-value" id="scale-value">100%</span>
-      </div>
-    </div>
-    <div class="ctrl-section">
-      <div class="ctrl-section-title">Rot</div>
-      <div class="ctrl-row">
-        <label>X</label>
-        <input type="range" id="rotate-x" min="-180" max="180" value="0" />
-        <span class="ctrl-value" id="rotate-x-value">0°</span>
-      </div>
-      <div class="ctrl-row">
-        <label>Y</label>
-        <input type="range" id="rotate-y" min="-180" max="180" value="0" />
-        <span class="ctrl-value" id="rotate-y-value">0°</span>
-      </div>
-      <div class="ctrl-row">
-        <label>Z</label>
-        <input type="range" id="rotate-z" min="-180" max="180" value="0" />
-        <span class="ctrl-value" id="rotate-z-value">0°</span>
-      </div>
-    </div>
-  </div>
-
   <!-- ─── EXPORT PANEL HTML ─── -->
-  <div id="export-wrapper">
-    <div id="export-panel">
-      <div class="panel-title">EXPORT</div>
+  <button id="submit-overlord-btn">SUBMIT</button>
 
-      <div class="export-row" style="display:none;">
-        <label>Format</label>
-        <select id="export-format">
-          <option value="png">PNG</option>
-        </select>
-      </div>
+  <div id="export-panel">
+    <div class="panel-title">EXPORT</div>
 
-      <!-- Video duration row (hidden — PNG only) -->
-      <div class="export-row" id="duration-row" style="display:none;">
-        <label>Duration (sec)</label>
-        <input type="number" id="export-duration" value="11" min="1" max="60" step="1">
-      </div>
-
-      <button class="export-btn" id="export-start-btn">EXPORT</button>
-      <div class="status-line" id="export-status"></div>
+    <div class="export-row" style="display:none;">
+      <label>Format</label>
+      <select id="export-format">
+        <option value="png">PNG</option>
+      </select>
     </div>
-    <button id="submit-overlord-btn">SUBMIT</button>
+
+    <!-- Video duration row (hidden — PNG only) -->
+    <div class="export-row" id="duration-row" style="display:none;">
+      <label>Duration (sec)</label>
+      <input type="number" id="export-duration" value="5" min="1" max="60" step="1">
+    </div>
+
+    <button class="export-btn" id="export-start-btn">EXPORT</button>
+    <div class="status-line" id="export-status"></div>
   </div>
 
   <!-- ─── POST TO X MODAL ─── -->
@@ -5649,46 +4393,9 @@ setTimeout(function () {
       <h2>Share your overlord</h2>
       <p style="margin: 0 0 20px 0; font-size: 12px; color: #aaa;">Attach your downloaded file before posting</p>
       <button id="post-modal-btn">POST TO X</button>
-
+      
       <div style="margin: 20px 0; color: #666; font-size: 11px; text-align: center;">
         ── OR ──
-      </div>
-
-      <!-- Submission type toggle: Image or 11s Video -->
-      <div style="margin: 0 0 15px 0;">
-        <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 8px; letter-spacing: 1px;">SUBMISSION TYPE</label>
-        <div id="submit-type-toggle" style="display: flex; gap: 0; border: 1px solid #333;">
-          <button id="submit-type-image" class="submit-type-btn active" style="
-            flex: 1;
-            background: #fff;
-            color: #000;
-            border: none;
-            padding: 8px 0;
-            font-family: monospace;
-            font-size: 11px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: background 0.2s, color 0.2s;
-          ">IMAGE</button>
-          <button id="submit-type-video" class="submit-type-btn" style="
-            flex: 1;
-            background: #111;
-            color: #666;
-            border: none;
-            border-left: 1px solid #333;
-            padding: 8px 0;
-            font-family: monospace;
-            font-size: 11px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: background 0.2s, color 0.2s;
-          ">11s VIDEO</button>
-        </div>
-        <div id="video-hint" style="display: none; margin-top: 6px; font-family: monospace; font-size: 10px; color: #666; line-height: 1.4;">
-          Records an 11-second MP4 of your live artwork
-        </div>
       </div>
 
       <div style="margin: 0 0 15px 0;">
@@ -5767,16 +4474,8 @@ setTimeout(function () {
       toggle.style.display = 'none';
       const modal = document.getElementById('post-modal');
       if (modal) modal.style.display = 'none';
-      const exportWrapper = document.getElementById('export-wrapper');
-      if (exportWrapper) exportWrapper.style.display = 'none';
-      const eyeIndicator = document.getElementById('eye-indicator');
-      if (eyeIndicator) eyeIndicator.style.display = 'none';
-      const swapModeBtn = document.getElementById('swap-mode-btn');
-      if (swapModeBtn) swapModeBtn.style.display = 'none';
-      const swapModeBtnLeft = document.getElementById('swap-mode-btn-left');
-      if (swapModeBtnLeft) swapModeBtnLeft.style.display = 'none';
-      const elementControls = document.getElementById('element-controls');
-      if (elementControls) elementControls.style.display = 'none';
+      const submitOverlordBtn = document.getElementById('submit-overlord-btn');
+      if (submitOverlordBtn) submitOverlordBtn.style.display = 'none';
       return;
     }
     
@@ -5792,11 +4491,13 @@ setTimeout(function () {
     // ── Show POST TO X modal ──
     function showPostModal() {
       modal.classList.add('open');
+      // Close export panel
+      panel.classList.remove('open');
     }
 
     // Wire modal button to open Twitter compose page with pre-filled text
     modalBtn.onclick = () => {
-      const text = encodeURIComponent('Know your overlords. The Collective. #KnowYourOverlord #TheCollective\nTech Epochalypse by @Coldie');
+      const text = encodeURIComponent('Know your overlord. #KnowYourOverlord\nTech Epochalypse by @Coldie');
       window.open(`https://x.com/intent/post?text=${text}`, '_blank');
       // Close modal
       modal.classList.remove('open');
@@ -5805,94 +4506,7 @@ setTimeout(function () {
     // Wire judgment protocol button to submit via Airtable API
     const judgmentBtn = document.getElementById('judgment-btn');
     const judgmentStatus = document.getElementById('judgment-status');
-    const OVERLORD_NAME = 'combined';
-
-    // ── Submission type toggle ──
-    let submitType = 'image'; // 'image' or 'video'
-    const submitTypeImage = document.getElementById('submit-type-image');
-    const submitTypeVideo = document.getElementById('submit-type-video');
-    const videoHint = document.getElementById('video-hint');
-
-    function setSubmitType(type) {
-      submitType = type;
-      if (type === 'image') {
-        submitTypeImage.style.background = '#fff';
-        submitTypeImage.style.color = '#000';
-        submitTypeVideo.style.background = '#111';
-        submitTypeVideo.style.color = '#666';
-        videoHint.style.display = 'none';
-        judgmentBtn.textContent = 'SUBMIT TO JUDGMENT PROTOCOL';
-      } else {
-        submitTypeVideo.style.background = '#fff';
-        submitTypeVideo.style.color = '#000';
-        submitTypeImage.style.background = '#111';
-        submitTypeImage.style.color = '#666';
-        videoHint.style.display = 'block';
-        judgmentBtn.textContent = 'RECORD & SUBMIT 11s VIDEO';
-      }
-    }
-    submitTypeImage.onclick = () => setSubmitType('image');
-    submitTypeVideo.onclick = () => setSubmitType('video');
-
-    // ── Record 11-second MP4 from canvas ──
-    function recordVideoBlob() {
-      return new Promise(async (resolve, reject) => {
-        const r = await getRenderer();
-        const canvas = r.domElement;
-        const stream = canvas.captureStream(30);
-
-        const candidates = [
-          'video/mp4;codecs=avc1.42E01E',
-          'video/mp4;codecs=avc1.640028',
-          'video/mp4',
-          'video/webm;codecs=vp9',
-          'video/webm;codecs=vp8',
-          'video/webm'
-        ];
-        let usedMime = '';
-        for (const m of candidates) {
-          if (MediaRecorder.isTypeSupported(m)) { usedMime = m; break; }
-        }
-        if (!usedMime) { reject(new Error('No supported video codec')); return; }
-
-        const nativeMp4 = usedMime.startsWith('video/mp4');
-        const chunks = [];
-        const mr = new MediaRecorder(stream, { mimeType: usedMime, videoBitsPerSecond: 2500000 });
-
-        mr.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
-
-        mr.onstop = async () => {
-          try {
-            stream.getTracks().forEach(t => t.stop());
-            if (nativeMp4) {
-              resolve(new Blob(chunks, { type: 'video/mp4' }));
-            } else {
-              // Re-mux WebM into MP4 container
-              const arrays = [];
-              for (const c of chunks) {
-                const buf = await c.arrayBuffer();
-                arrays.push(new Uint8Array(buf));
-              }
-              let totalLen = 0;
-              for (const a of arrays) totalLen += a.length;
-              const payload = new Uint8Array(totalLen);
-              let off = 0;
-              for (const a of arrays) { payload.set(a, off); off += a.length; }
-              const mp4 = buildMP4(payload, 11000, canvas.width, canvas.height);
-              resolve(new Blob([mp4], { type: 'video/mp4' }));
-            }
-          } catch (err) {
-            // Fallback: return raw recording
-            resolve(new Blob(chunks, { type: usedMime }));
-          }
-        };
-
-        mr.onerror = () => reject(new Error('Recording failed'));
-
-        mr.start(100);
-        setTimeout(() => { mr.stop(); }, 11000);
-      });
-    }
+    const OVERLORD_NAME = 'elon-musk';
 
     judgmentBtn.onclick = async () => {
       const xAccount = document.getElementById('x-account-input').value.trim();
@@ -5900,30 +4514,20 @@ setTimeout(function () {
       judgmentBtn.disabled = true;
       judgmentBtn.style.opacity = '0.5';
       judgmentStatus.style.color = '#aaa';
+      judgmentStatus.textContent = 'SUBMITTING...';
 
       try {
-        let blob;
+        // Capture canvas as PNG
+        const r = await getRenderer();
+        if (window.composer) { window.composer.render(); }
+        else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
+        const dataUrl = r.domElement.toDataURL('image/png');
+        const blob = await (await fetch(dataUrl)).blob();
+
+        // Upload image + create Airtable record in one request via Cloudflare Worker
         const WORKER_URL = window.GALLERY_API_URL || window.location.origin;
         const form = new FormData();
-
-        if (submitType === 'video') {
-          judgmentStatus.textContent = 'RECORDING 11s…';
-          blob = await recordVideoBlob();
-          form.append('video', blob, 'export.mp4');
-        } else {
-          judgmentStatus.textContent = 'SUBMITTING...';
-          // Capture canvas as PNG
-          const r = await getRenderer();
-          if (window.composer) { window.composer.render(); }
-          else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
-          const dataUrl = r.domElement.toDataURL('image/png');
-          blob = await (await fetch(dataUrl)).blob();
-          form.append('image', blob, 'export.png');
-        }
-
-        judgmentStatus.textContent = 'UPLOADING…';
-
-        // Upload + create Airtable record in one request
+        form.append('image', blob, 'export.png');
         form.append('overlord', OVERLORD_NAME);
         form.append('xAccount', xAccount);
         form.append('title', title);
@@ -5942,7 +4546,6 @@ setTimeout(function () {
             judgmentStatus.textContent = '';
             judgmentBtn.disabled = false;
             judgmentBtn.style.opacity = '1';
-            setSubmitType('image'); // reset toggle
           }, 2000);
         } else {
           const errMsg = data.details || data.error || `HTTP ${res.status}`;
@@ -5964,18 +4567,29 @@ setTimeout(function () {
       if (e.target === modal) modal.classList.remove('open');
     };
 
-    // ── Toggle panel from SUBMIT button ──
-    const submitOverlordBtn = document.getElementById('submit-overlord-btn');
-    const exportWrapper = document.getElementById('export-wrapper');
-    submitOverlordBtn.onclick = (e) => {
+    // ── Toggle panel ──
+    toggle.onclick = (e) => {
       e.stopPropagation();
-      if (startBtn.classList.contains('recording')) return;
-      panel.classList.toggle('open');
+      if (panel.classList.contains('open')) {
+        panel.classList.remove('open');
+      } else {
+        // Position panel directly below the EXPORT button
+        const rect = toggle.getBoundingClientRect();
+        panel.style.top = (rect.bottom + 4) + 'px';
+        panel.style.left = rect.left + 'px';
+        panel.classList.add('open');
+      }
     };
     document.addEventListener('click', (e) => {
-      if (startBtn.classList.contains('recording')) return;
-      if (!exportWrapper.contains(e.target)) panel.classList.remove('open');
+      if (!panel.contains(e.target) && e.target !== toggle) panel.classList.remove('open');
     });
+
+    // ── SUBMIT YOURSELF button — capture PNG then show post modal ──
+    const submitOverlordBtn = document.getElementById('submit-overlord-btn');
+    submitOverlordBtn.onclick = (e) => {
+      e.stopPropagation();
+      exportPNG();
+    };
 
     // ── Format is PNG-only, duration row stays hidden ──
     fmtSel.onchange = () => {
@@ -6035,7 +4649,7 @@ setTimeout(function () {
           if (!blob) return;
           const form = new FormData();
           form.append('image', blob, 'export.jpg');
-          form.append('overlord', 'combined');
+          form.append('overlord', 'elon-musk');
           try {
             const res = await fetch(GALLERY_API + '/upload', { method: 'POST', body: form });
             if (!res.ok) console.warn('Gallery upload response:', res.status);
@@ -6061,7 +4675,7 @@ setTimeout(function () {
       }
       r.domElement.toBlob((blob) => {
         if (blob) {
-          triggerDownload(blob, 'combined-coldie.png');
+          triggerDownload(blob, 'elon-musk-coldie.png');
           saveToGallery(r.domElement);
           setStatus('PNG saved ✓ — added to gallery', 'active');
           showPostModal();
@@ -6113,7 +4727,7 @@ setTimeout(function () {
           if (nativeMp4) {
             // Browser produced a native MP4 – download directly
             const blob = new Blob(chunks, { type: 'video/mp4' });
-            triggerDownload(blob, 'combined-coldie.mp4');
+            triggerDownload(blob, 'elon-musk-coldie.mp4');
             setStatus(`MP4 saved ✓  (${(blob.size/1024/1024).toFixed(2)} MB)`, 'active');
             showPostModal();
           } else {
@@ -6134,7 +4748,7 @@ setTimeout(function () {
             // Build a minimal but valid fragmented MP4 shell
             const mp4 = buildMP4(payload, duration, canvas.width, canvas.height);
             const blob = new Blob([mp4], { type: 'video/mp4' });
-            triggerDownload(blob, 'combined-coldie.mp4');
+            triggerDownload(blob, 'elon-musk-coldie.mp4');
             setStatus(`MP4 saved ✓  (${(blob.size/1024/1024).toFixed(2)} MB)`, 'active');
             showPostModal();
           }
@@ -6143,7 +4757,7 @@ setTimeout(function () {
           console.error('MP4 mux error', err);
           const ext  = nativeMp4 ? 'mp4' : 'webm';
           const blob = new Blob(chunks, { type: usedMime });
-          triggerDownload(blob, `combined-coldie.${ext}`);
+          triggerDownload(blob, `elon-musk-coldie.${ext}`);
           setStatus(`Saved as .${ext} (mux failed)`, 'active');
         }
         lockUI(false);
