@@ -5,6 +5,7 @@
   <!-- Gallery API — update this URL after deploying the Cloudflare Worker -->
   <script>window.GALLERY_API_URL = window.location.origin;</script>
   <!-- Airtable submission handled server-side by the worker -->
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
   <script type="importmap">
     {
       "imports": {
@@ -311,6 +312,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
+import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 
 let camera, scene, renderer, controls, composer;
 let raycaster, mouse;
@@ -3830,6 +3832,22 @@ function init() {
     };
     leftUiContainer.appendChild(clearSaveBtn);
 
+    // ── AR button ──
+    const arBtn = document.createElement('button');
+    arBtn.id = 'ar-btn';
+    arBtn.textContent = 'AR';
+    arBtn.style.cssText = `
+        background-color: black; color: white; padding: 4px; margin-top: 10px;
+        border: 0.5px solid #9C27B0; border-radius: 0; cursor: pointer;
+        font-family: monospace; font-size: 7px; outline: none;
+        white-space: nowrap; box-sizing: border-box;
+    `;
+    arBtn.onclick = (e) => {
+        e.stopPropagation();
+        launchAR(arBtn);
+    };
+    leftUiContainer.appendChild(arBtn);
+
     // MASK button click — enter/exit mask mode
     maskBtn.onclick = (e) => {
         e.stopPropagation();
@@ -3948,6 +3966,7 @@ function init() {
             saveBtn.style.display = 'none'; // Hide SAVE button
             loadBtn.style.display = 'none'; // Hide LOAD button
             clearSaveBtn.style.display = 'none'; // Hide CLEAR SAVE button
+            arBtn.style.display = 'none'; // Hide AR button
             if (maskMode) exitMaskMode();
             const panel = document.getElementById('export-panel');
             if (panel) panel.classList.remove('open'); // Close export panel
@@ -3962,6 +3981,7 @@ function init() {
             saveBtn.style.display = 'block'; // Show SAVE button
             loadBtn.style.display = 'block'; // Show LOAD button
             clearSaveBtn.style.display = 'block'; // Show CLEAR SAVE button
+            arBtn.style.display = 'block'; // Show AR button
             arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; // Move arrow below the UI
             arrowSpan.innerHTML = '&#x25B2'; // Change to up arrow
         }
@@ -3977,6 +3997,7 @@ function init() {
     saveBtn.style.display = 'none';
     loadBtn.style.display = 'none';
     clearSaveBtn.style.display = 'none';
+    arBtn.style.display = 'none';
 
     window.addEventListener('resize', onWindowResize);
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
@@ -4290,6 +4311,80 @@ function autoRestoreComposition() {
         console.warn('Auto-restore failed:', e);
     }
     return false;
+}
+
+// ── AR Launch ──
+function launchAR(btn) {
+    btn.textContent = 'LOADING...';
+    btn.style.borderColor = '#FF9800';
+
+    // Build a clean scene for export (only visible image planes)
+    const arScene = new THREE.Scene();
+    scene.children.forEach(child => {
+        if (!child.userData || !child.userData.id) return;
+        if (!child.visible) return;
+        if (!child.material || !child.material.map) return;
+
+        const geo = child.geometry.clone();
+        const mat = child.material.clone();
+        mat.map = child.material.map;
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.copy(child.position);
+        mesh.rotation.copy(child.rotation);
+        mesh.scale.copy(child.scale);
+        arScene.add(mesh);
+    });
+
+    arScene.add(new THREE.AmbientLight(0xffffff, 1));
+
+    const exporter = new GLTFExporter();
+    exporter.parse(arScene, (glb) => {
+        const blob = new Blob([glb], { type: 'model/gltf-binary' });
+        const url = URL.createObjectURL(blob);
+
+        const overlay = document.createElement('div');
+        overlay.id = 'ar-overlay';
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;';
+        overlay.innerHTML = `
+            <model-viewer
+                src="${url}"
+                ar
+                ar-modes="webxr scene-viewer quick-look"
+                camera-controls
+                touch-action="pan-y"
+                auto-rotate
+                style="width:100%;height:100%;background:#1e1e1e;"
+                ar-status="not-presenting"
+            >
+                <button slot="ar-button" style="
+                    position:absolute;bottom:24px;left:50%;transform:translateX(-50%);
+                    background:#9C27B0;color:#fff;border:none;padding:12px 32px;
+                    font-family:monospace;font-size:14px;cursor:pointer;text-transform:uppercase;
+                    letter-spacing:0.1em;border-radius:0;
+                ">View in AR</button>
+            </model-viewer>
+            <button id="ar-close" style="
+                position:absolute;top:16px;right:16px;z-index:100000;
+                background:rgba(0,0,0,0.7);color:#fff;border:1px solid rgba(255,255,255,0.3);
+                padding:8px 16px;font-family:monospace;font-size:12px;cursor:pointer;
+                text-transform:uppercase;letter-spacing:0.1em;
+            ">CLOSE</button>
+        `;
+        document.body.appendChild(overlay);
+
+        document.getElementById('ar-close').onclick = () => {
+            overlay.remove();
+            URL.revokeObjectURL(url);
+        };
+
+        btn.textContent = 'AR';
+        btn.style.borderColor = '#9C27B0';
+    }, (error) => {
+        console.error('GLTFExporter error:', error);
+        btn.textContent = 'ERROR';
+        btn.style.borderColor = '#e33';
+        setTimeout(() => { btn.textContent = 'AR'; btn.style.borderColor = '#9C27B0'; }, 2000);
+    }, { binary: true });
 }
 
 function onWindowResize() {
