@@ -3640,6 +3640,7 @@ function _hash(str) {
 function saveComposition() {
     const meshStates = [];
     const imageStore = {}; // Deduplicated image data: hash -> base64
+    const textureCache = new Map(); // texture.image -> { hash, base64 } to avoid re-encoding
 
     scene.children.forEach(child => {
         if (!child.userData || !child.userData.id) return;
@@ -3664,23 +3665,28 @@ function saveComposition() {
         const opacity = child.material ? child.material.opacity : 1;
         if (opacity < 1) state.o = _r(opacity, 3);
 
-        // Save uploaded image texture — deduplicated via hash
+        // Save uploaded image texture — deduplicated by texture identity
         if (child.userData.isUploaded && child.material && child.material.map && child.material.map.image) {
             try {
                 const img = child.material.map.image;
-                const canvas = document.createElement('canvas');
-                canvas.width = img.naturalWidth || img.width;
-                canvas.height = img.naturalHeight || img.height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-                // Use JPEG at 80% quality for much smaller file size
-                const hasAlpha = _canvasHasAlpha(canvas, ctx);
-                const base64 = hasAlpha
-                    ? canvas.toDataURL('image/png')
-                    : canvas.toDataURL('image/jpeg', 0.8);
-                const hash = _hash(base64);
-                imageStore[hash] = base64; // Deduplicate: same hash overwrites
-                state.img = hash; // Reference, not the data itself
+                let cached = textureCache.get(img);
+                if (!cached) {
+                    // First time seeing this image source — encode once
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.naturalWidth || img.width;
+                    canvas.height = img.naturalHeight || img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    const hasAlpha = _canvasHasAlpha(canvas, ctx);
+                    const base64 = hasAlpha
+                        ? canvas.toDataURL('image/png')
+                        : canvas.toDataURL('image/jpeg', 0.8);
+                    const hash = _hash(base64);
+                    cached = { hash, base64 };
+                    textureCache.set(img, cached);
+                }
+                imageStore[cached.hash] = cached.base64;
+                state.img = cached.hash;
                 state.u = true; // isUploaded flag
                 if (child.userData.initialScale) {
                     state.iw = _r(child.userData.initialScale.width, 3);
