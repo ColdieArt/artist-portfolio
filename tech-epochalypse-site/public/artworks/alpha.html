@@ -3991,6 +3991,51 @@ function autoRestoreComposition() {
 }
 
 // ── AR Launch ──
+// Render a texture through WebGL to produce an exportable CanvasTexture.
+// Cross-origin images taint the 2D canvas, so toDataURL() fails inside
+// GLTFExporter.  Reading pixels back from a WebGLRenderTarget sidesteps
+// that restriction because the GPU already owns the decoded image data.
+function bakeTextureForExport(texture) {
+    if (!texture || !texture.image) return texture;
+
+    const w = texture.image.width  || texture.image.naturalWidth  || 256;
+    const h = texture.image.height || texture.image.naturalHeight || 256;
+
+    const rt  = new THREE.WebGLRenderTarget(w, h);
+    const cam = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, 0, 1);
+    const sc  = new THREE.Scene();
+    const mat = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+    sc.add(new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat));
+
+    renderer.setRenderTarget(rt);
+    renderer.render(sc, cam);
+
+    const px = new Uint8Array(w * h * 4);
+    renderer.readRenderTargetPixels(rt, 0, 0, w, h, px);
+    renderer.setRenderTarget(null);
+
+    // WebGL reads bottom-up; flip to top-down for the canvas
+    const canvas = document.createElement('canvas');
+    canvas.width  = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    const img = ctx.createImageData(w, h);
+    for (let y = 0; y < h; y++) {
+        const src = (h - 1 - y) * w * 4;
+        const dst = y * w * 4;
+        img.data.set(px.subarray(src, src + w * 4), dst);
+    }
+    ctx.putImageData(img, 0, 0);
+
+    const out = new THREE.CanvasTexture(canvas);
+    out.flipY   = false;           // already in GLTF orientation
+    out.colorSpace = THREE.SRGBColorSpace;
+
+    rt.dispose();
+    mat.dispose();
+    return out;
+}
+
 function launchAR(btn) {
     btn.textContent = 'LOADING...';
     btn.style.borderColor = '#FF9800';
@@ -4005,7 +4050,8 @@ function launchAR(btn) {
         // Clone geometry and material so export doesn't affect the live scene
         const geo = child.geometry.clone();
         const mat = child.material.clone();
-        mat.map = child.material.map; // share texture reference
+        // Bake texture through WebGL so GLTFExporter can read the pixel data
+        mat.map = bakeTextureForExport(child.material.map);
         const mesh = new THREE.Mesh(geo, mat);
         mesh.position.copy(child.position);
         mesh.rotation.copy(child.rotation);
