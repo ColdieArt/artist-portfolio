@@ -250,7 +250,7 @@ export default function SeriesPage() {
                   <div className="space-y-3">
                     <div className="flex justify-between items-baseline">
                       <span className="font-mono text-sm text-white">Elon Musk</span>
-                      <span className="font-mono text-[11px] text-white/60">5 ed. - <span className="text-white">2 avail</span></span>
+                      <span className="font-mono text-[11px] text-white/60">5 ed. - <span className="text-white">1 avail</span></span>
                     </div>
                     <div className="flex justify-between items-baseline">
                       <span className="font-mono text-sm text-white">Mark Zuckerberg</span>
