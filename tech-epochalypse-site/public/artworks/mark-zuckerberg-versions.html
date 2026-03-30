@@ -130,28 +130,6 @@
     #export-panel .status-line.active { color: #4c4; }
     #export-panel .status-line.error   { color: #e66; }
 
-    /* ─── SUBMIT TO THE OVERLORD BUTTON ─── */
-    #submit-overlord-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 200;
-      background: #000;
-      color: #fff;
-      border: 2px solid #fff;
-      padding: 14px 24px;
-      font-family: monospace;
-      font-size: 13px;
-      font-weight: bold;
-      letter-spacing: 1.5px;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    #submit-overlord-btn:hover {
-      background: #1a1a1a;
-      border-color: #ccc;
-    }
-
     /* ─── POST TO X MODAL ─── */
     #post-modal {
       position: fixed;
@@ -4207,8 +4185,6 @@ setTimeout(function () {
   </script>
 
   <!-- ─── EXPORT PANEL HTML ─── -->
-  <button id="submit-overlord-btn">SUBMIT</button>
-
   <div id="export-panel">
     <div class="panel-title">EXPORT</div>
 
@@ -4316,8 +4292,6 @@ setTimeout(function () {
       toggle.style.display = 'none';
       const modal = document.getElementById('post-modal');
       if (modal) modal.style.display = 'none';
-      const submitOverlordBtn = document.getElementById('submit-overlord-btn');
-      if (submitOverlordBtn) submitOverlordBtn.style.display = 'none';
       return;
     }
 
@@ -4425,13 +4399,6 @@ setTimeout(function () {
     document.addEventListener('click', (e) => {
       if (!panel.contains(e.target) && e.target !== toggle) panel.classList.remove('open');
     });
-
-    // ── SUBMIT YOURSELF button — capture PNG then show post modal ──
-    const submitOverlordBtn = document.getElementById('submit-overlord-btn');
-    submitOverlordBtn.onclick = (e) => {
-      e.stopPropagation();
-      exportPNG();
-    };
 
     // ── Format is PNG-only, duration row stays hidden ──
     fmtSel.onchange = () => {
