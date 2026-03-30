@@ -4,6 +4,8 @@
     "avatar": null,
     "pieces": ["elon-musk", "mark-zuckerberg", "sam-altman", "jeff-bezos", "jensen-huang"],
     "bio": null,
+    "label": "Founding System Collector 001",
+    "founding": true,
     "socials": {
       "twitter": "https://x.com/RaoulGMI",
       "instagram": null,
@@ -15,6 +17,8 @@
     "avatar": null,
     "pieces": ["elon-musk", "mark-zuckerberg", "sam-altman", "jeff-bezos", "jensen-huang"],
     "bio": null,
+    "label": "Founding System Collector 002",
+    "founding": true,
     "socials": {
       "twitter": "https://x.com/web3crusadr",
       "instagram": null,
@@ -26,6 +30,8 @@
     "avatar": null,
     "pieces": ["elon-musk"],
     "bio": null,
+    "label": "Series Collector",
+    "founding": false,
     "socials": {
       "twitter": "https://x.com/redbeardnft",
       "instagram": null,
@@ -37,6 +43,8 @@
     "avatar": null,
     "pieces": ["elon-musk"],
     "bio": null,
+    "label": "Series Collector",
+    "founding": false,
     "socials": {
       "twitter": "https://x.com/batsoupyum",
       "instagram": null,
@@ -48,6 +56,8 @@
     "avatar": null,
     "pieces": ["mark-zuckerberg"],
     "bio": null,
+    "label": "Series Collector",
+    "founding": false,
     "socials": {
       "twitter": null,
       "instagram": null,

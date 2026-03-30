@@ -169,24 +169,33 @@ export default function SeriesPage() {
 
                 <div className="space-y-4 text-white text-sm font-mono leading-relaxed max-w-xl">
                   <p>
-                    The core of Tech Epochalypse - fully interactive kinetic
-                    3D portraits of the five Overlords who shape our digital
-                    reality. These are not static images. Each portrait is a
-                    living, breathing composition that responds to the viewer.
+                    Tech Epochalypse marks the emergence of a new form of
+                    digital art—kinetic compositions that exist beyond the
+                    static image.
                   </p>
                   <p>
-                    Rotate, zoom, and explore each subject in real-time 3D.
-                    Every angle reveals new detail, new critique, new commentary
-                    on the systems of power built by these figures. The portraits
-                    are the source material from which all other series are
-                    derived.
+                    Each work is a fully interactive 3D system, where layered
+                    visual elements respond dynamically to the viewer. These are
+                    not fixed portraits, but living compositions that can be
+                    explored, reinterpreted, and experienced from multiple
+                    perspectives. Movement, depth, and interaction are not
+                    enhancements—they are fundamental to how the artwork exists.
                   </p>
                   <p>
-                    Built by{' '}
-                    <span className="text-white">Coldie</span>{' '}
-                    as the definitive statement on tech power - the
-                    Kinetic 3D series is the foundation of the entire
-                    Epochalypse universe.
+                    Within this framework, the five Overlords serve as the
+                    initial subjects through which the medium is expressed,
+                    representing the forces shaping our digital reality. The
+                    portraits function as both artwork and source material,
+                    forming the basis for an expandable system of recombination
+                    and transformation.
+                  </p>
+                  <p>
+                    Created by{' '}
+                    <span className="text-white">Coldie</span>, the Kinetic 3D
+                    series establishes the foundation for a broader shift—from
+                    static digital media to persistent, interactive
+                    composition—defining the opening chapter of the Epochalypse
+                    universe.
                   </p>
                 </div>
 
@@ -196,7 +205,7 @@ export default function SeriesPage() {
                     href="/kinetic-3d-patronage"
                     className="inline-flex items-center gap-3 px-6 py-3 border border-white/20 text-white font-mono text-sm uppercase tracking-[0.15em] hover:bg-white/5 transition-colors"
                   >
-                    Token Holder Benefits
+                    Founding Collector Benefits
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                       <path
                         d="M3 8h10M9 4l4 4-4 4"
