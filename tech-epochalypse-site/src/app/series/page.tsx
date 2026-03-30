@@ -234,10 +234,6 @@ export default function SeriesPage() {
                       <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">Editions / Overlord</span>
                       <span className="font-display text-lg text-white">10</span>
                     </div>
-                    <div className="flex justify-between items-baseline">
-                      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">Price</span>
-                      <span className="font-display text-lg text-white">$6,000 <span className="font-mono text-[10px] text-white/50">(in ETH)</span></span>
-                    </div>
                   </div>
                 </div>
 
@@ -248,10 +244,13 @@ export default function SeriesPage() {
                   </h3>
                   <div className="flex justify-between items-baseline mb-1">
                     <span className="font-mono text-sm text-white">5 Total</span>
-                    <span className="font-mono text-sm text-white">3 Available</span>
+                    <span className="font-mono text-sm text-white">2 Available</span>
                   </div>
-                  <p className="font-mono text-[10px] text-white/40 mb-5">
+                  <p className="font-mono text-[10px] text-white/40 mb-3">
                     Set of 5 Overlords
+                  </p>
+                  <p className="font-mono text-[10px] text-white/40 mb-5">
+                    Full sets include matching series numbers and offer buyer&apos;s consideration discount for the bulk purchase.
                   </p>
                 </div>
 
@@ -263,7 +262,7 @@ export default function SeriesPage() {
                   <div className="space-y-3">
                     <div className="flex justify-between items-baseline">
                       <span className="font-mono text-sm text-white">Elon Musk</span>
-                      <span className="font-mono text-[11px] text-white/60">5 ed. - <span className="text-white">2 avail</span></span>
+                      <span className="font-mono text-[11px] text-white/60">5 ed. - <span className="text-white">1 avail</span></span>
                     </div>
                     <div className="flex justify-between items-baseline">
                       <span className="font-mono text-sm text-white">Mark Zuckerberg</span>

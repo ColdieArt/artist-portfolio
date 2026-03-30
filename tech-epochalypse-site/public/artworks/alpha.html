@@ -300,7 +300,7 @@
     }
     #post-modal-btn:hover { background: #1a8cd8; }
   </style>
-  <title>THE COLLECTIVE - Combined Overlord | Tech Epochalypse by Coldie</title>
+  <title>ALPHA - The Collective | Tech Epochalypse by Coldie</title>
 </head>
 <body>
   
@@ -2186,426 +2186,8 @@ function init() {
         });
     };
 
-    // Load and add the background image
-    initialAssetConfigs.push({
-        id: 'background',
-        type: 'background',
-        url: URL_BACKGROUND,
-        initialPosition: new THREE.Vector3(0, 0, -4 * depthStep),
-        initialLayer: -4,
-        scaleFactor: 1.0,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_BACKGROUND, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
-        const aspectRatio = texture.image.width / texture.image.height;
-        const scaleFactor = 1.0;
-        const planeHeight = 10 * scaleFactor;
-        const planeWidth = planeHeight * aspectRatio;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight); // Fixed: Declare geometry here
-        backgroundMesh = new THREE.Mesh(geometry, material);
-        backgroundMesh.position.z = -4 * depthStep;
-        backgroundMesh.userData.initialPosition = backgroundMesh.position.clone();
-        backgroundMesh.userData.initialLayer = -4;
-        backgroundMesh.userData.id = 'background'; // Added ID
-        scene.add(backgroundMesh);
-        cameraAnimationTargets.push(backgroundMesh);
-    });
-
-    // Load and add the forehead image
-    initialAssetConfigs.push({
-        id: 'forehead',
-        type: 'image',
-        url: URL_FOREHEAD,
-        initialPosition: new THREE.Vector3(0, (0.5 + 2.666) * 1.10, (2 - 1) * depthStep),
-        initialLayer: 2,
-        baseScale: baseScale,
-        scaleFactor: 1.0,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_FOREHEAD, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const scaleFactor = 1.0;
-        const planeWidth = texture.image.width * baseScale * scaleFactor;
-        const planeHeight = texture.image.height * baseScale * scaleFactor;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        const forehead = new THREE.Mesh(geometry, material);
-        forehead.position.set(0, (0.5 + 2.666) * 1.10, (2 - 1) * depthStep);
-        forehead.userData.currentLayer = 2;
-        forehead.userData.initialPosition = forehead.position.clone();
-        forehead.userData.initialLayer = 2;
-        forehead.userData.id = 'forehead'; // Added ID
-        forehead.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(forehead);
-        draggableObjects.push(forehead);
-        cameraAnimationTargets.push(forehead);
-    });
-
-    // Load and add the right eye image
-    initialAssetConfigs.push({
-        id: 'rightEye',
-        type: 'image',
-        url: URL_RIGHT_EYE,
-        initialPosition: new THREE.Vector3(-0.84 * 1.2 * 1.2, (0.175 * 1.15 * 1.20 * 3) + 2.0 - 1.0, (7 - 1) * depthStep),
-        initialLayer: 7,
-        baseScale: baseScale,
-        scaleFactor: 1.0,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_RIGHT_EYE, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const planeWidth = texture.image.width * baseScale;
-        const planeHeight = texture.image.height * baseScale;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        rightEyeMesh = new THREE.Mesh(geometry, material);
-        rightEyeMesh.position.set(-0.84 * 1.2 * 1.2, (0.175 * 1.15 * 1.20 * 3) + 2.0 - 1.0, (7 - 1) * depthStep);
-        rightEyeMesh.userData.currentLayer = 7;
-        rightEyeMesh.userData.initialPosition = rightEyeMesh.position.clone();
-        rightEyeMesh.userData.initialLayer = 7;
-        rightEyeMesh.userData.id = 'rightEye'; // Added ID
-        rightEyeMesh.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(rightEyeMesh);
-        draggableObjects.push(rightEyeMesh);
-        cameraAnimationTargets.push(rightEyeMesh);
-
-        // Create and add the redaction rectangle for the right eye
-        const redactionWidth = planeWidth * 1.2;
-        const redactionHeight = planeHeight * 0.4; // Increased height by 15% (0.23 * 1.15)
-        // Set initial material color to black (0x000000)
-        const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
-        const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        rightEyeRedactionRect = new THREE.Mesh(redactionGeometry, redactionMaterial);
-        // Position it at the same X, Y as the eye, but 1.5 levels in front
-        rightEyeRedactionRect.position.set(
-            rightEyeMesh.position.x,
-            rightEyeMesh.position.y,
-            rightEyeMesh.position.z + (1.5 * depthStep)
-        );
-        rightEyeRedactionRect.visible = false;
-        scene.add(rightEyeRedactionRect);
-    });
-
-    // Load and add the mouth image
-    initialAssetConfigs.push({
-        id: 'mouth',
-        type: 'image',
-        url: URL_MOUTH,
-        initialPosition: new THREE.Vector3(0, -1.5, (9 - 1) * depthStep),
-        initialLayer: 9,
-        baseScale: baseScale,
-        scaleFactor: 1.0,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_MOUTH, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const planeWidth = texture.image.width * baseScale;
-        const planeHeight = texture.image.height * baseScale;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        const mouth = new THREE.Mesh(geometry, material);
-        mouth.position.set(0, -1.5, (9 - 1) * depthStep);
-        mouth.userData.currentLayer = 9;
-        mouth.userData.initialPosition = mouth.position.clone();
-        mouth.userData.initialLayer = 9;
-        mouth.userData.id = 'mouth'; // Added ID
-        mouth.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(mouth);
-        draggableObjects.push(mouth);
-        cameraAnimationTargets.push(mouth);
-    });
-
-    // Load and add the ear image
-    const earNewLayer = 5;
-    const earNewZ = (earNewLayer - 1) * depthStep;
-    // We calculate the initial X position based on screen size, but we need to run this calculation
-    // inside the texture loader callback *or* inside onWindowResize if the mesh is available.
-    // Since init calls onWindowResize, we set a temporary position here and let onWindowResize handle the final responsive positioning.
-    const earInitialX = -2.5; // Temporary initial X position before onWindowResize runs
-    initialAssetConfigs.push({
-        id: 'ear',
-        type: 'image',
-        url: URL_EAR,
-        initialPosition: new THREE.Vector3(earInitialX, 1.5, earNewZ),
-        initialRotation: new THREE.Euler(0, THREE.MathUtils.degToRad(-15), 0),
-        baseScale: baseScale,
-        scaleFactor: 1.0,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_EAR, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const planeWidth = texture.image.width * baseScale;
-        const planeHeight = texture.image.height * baseScale;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        const ear = new THREE.Mesh(geometry, material);
-
-        // Set position using the initial X from config (will be corrected by onWindowResize shortly)
-        const earConfig = initialAssetConfigs.find(c => c.id === 'ear');
-        ear.position.copy(earConfig.initialPosition);
-        ear.rotation.y = THREE.MathUtils.degToRad(-15); // Pivot ear on y axis -15%
-        ear.userData.currentLayer = earNewLayer;
-        // NOTE: We do NOT set ear.userData.initialPosition here to the temporary value.
-        // We let onWindowResize calculate the correct responsive position and set it there.
-        // This prevents the "moves slightly" issue on load since the final position is set immediately after the mesh is created (by onWindowResize).
-        ear.userData.initialLayer = earNewLayer;
-        ear.userData.id = 'ear'; // Added ID
-        ear.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(ear);
-        draggableObjects.push(ear);
-        cameraAnimationTargets.push(ear);
-        
-        // **CRITICAL FIX:** Force the initial position calculation and storage immediately after the mesh is created.
-        // This ensures the ear is placed correctly on load and the responsive position is stored as the initial position.
-        updateEarPosition(ear, earConfig);
-    });
-
-    // Load and add the left eye image
-    initialAssetConfigs.push({
-        id: 'leftEye',
-        type: 'image',
-        url: URL_LEFT_EYE,
-        initialPosition: new THREE.Vector3(0.84 * 1.2 * 1.2, (0.175 * 1.15 * 1.20 * 3) + 2.0 - 1.0, (9 - 1) * depthStep),
-        initialLayer: 9,
-        baseScale: baseScale,
-        scaleFactor: 1.0,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_LEFT_EYE, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const planeWidth = texture.image.width * baseScale;
-        const planeHeight = texture.image.height * baseScale;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        leftEyeMesh = new THREE.Mesh(geometry, material);
-        leftEyeMesh.position.set(0.84 * 1.2 * 1.2, (0.175 * 1.15 * 1.20 * 3) + 2.0 - 1.0, (9 - 1) * depthStep);
-        leftEyeMesh.userData.currentLayer = 9;
-        leftEyeMesh.userData.initialPosition = leftEyeMesh.position.clone();
-        leftEyeMesh.userData.initialLayer = 9;
-        leftEyeMesh.userData.id = 'leftEye'; // Added ID
-        leftEyeMesh.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(leftEyeMesh);
-        draggableObjects.push(leftEyeMesh);
-        cameraAnimationTargets.push(leftEyeMesh);
-
-        // Create and add the redaction rectangle for the left eye
-        const redactionWidth = planeWidth * 1.2;
-        const redactionHeight = planeHeight * 0.4; // Increased height by 15% (0.23 * 1.15)
-        // Set initial material color to black (0x000000)
-        const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
-        const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        leftEyeRedactionRect = new THREE.Mesh(redactionGeometry, redactionMaterial);
-        // Position it at the same X, Y as the eye, but 1.5 levels in front
-        leftEyeRedactionRect.position.set(
-            leftEyeMesh.position.x,
-            leftEyeMesh.position.y,
-            leftEyeMesh.position.z + (1.5 * depthStep)
-        );
-        leftEyeRedactionRect.visible = false;
-        scene.add(leftEyeRedactionRect);
-    });
-
-    // Load SpaceX and X textures
-    initialAssetConfigs.push({
-        id: 'spacex',
-        type: 'image',
-        url: URL_SPACEX_ORIGINAL,
-        originalTextureUrl: URL_SPACEX_ORIGINAL,
-        swapTextureUrl: URL_X_LOGO_SWAP,
-        initialPosition: new THREE.Vector3(0.5 + 1.0, -0.5, (7 - 1) * depthStep),
-        initialLayer: 7,
-        baseScale: baseScale,
-        scaleFactor: 1.0, // This will be calculated from texture.image.width / height later
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_SPACEX_ORIGINAL, (spacexTex) => {
-        spacexOriginalTexture = spacexTex;
-
-        loadTexture(URL_X_LOGO_SWAP, (xTex) => {
-            xLogoTexture = xTex;
-
-            const material = new THREE.MeshBasicMaterial({ map: spacexOriginalTexture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-            const planeWidth = spacexOriginalTexture.image.width * baseScale;
-            const planeHeight = spacexOriginalTexture.image.height * baseScale;
-            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-            const leftCheek = new THREE.Mesh(geometry, material);
-            leftCheek.position.set(0.5 + 1.0, -0.5, (7 - 1) * depthStep);
-            leftCheek.userData.currentLayer = 7;
-            leftCheek.userData.initialPosition = leftCheek.position.clone();
-            leftCheek.userData.initialLayer = 7;
-            leftCheek.userData.originalTexture = spacexOriginalTexture; // Store original texture
-            leftCheek.userData.xLogoTexture = xLogoTexture; // Store X logo texture
-            leftCheek.userData.originalWidth = planeWidth; // Store original width
-            leftCheek.userData.originalHeight = planeHeight; // Store original height
-            leftCheek.userData.id = 'spacex'; // Added ID
-            leftCheek.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-            scene.add(leftCheek);
-            draggableObjects.push(leftCheek);
-            cameraAnimationTargets.push(leftCheek);
-
-            spacexRef = leftCheek; // Store reference to spacex mesh
-        });
-    });
-
-    // Load and add the nose image
-    initialAssetConfigs.push({
-        id: 'nose',
-        type: 'image',
-        url: URL_NOSE,
-        initialPosition: new THREE.Vector3(0, 0.8, (11 - 1) * depthStep),
-        initialLayer: 11,
-        baseScale: baseScale,
-        scaleFactor: 1.0,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_NOSE, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const scaleFactor = 1.0;
-        const planeWidth = texture.image.width * baseScale * scaleFactor;
-        const planeHeight = texture.image.height * baseScale * scaleFactor;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        const nose = new THREE.Mesh(geometry, material);
-        nose.position.set(0, 0.8, (11 - 1) * depthStep);
-        nose.userData.currentLayer = 11;
-        nose.userData.initialPosition = nose.position.clone();
-        nose.userData.initialLayer = 11;
-        nose.userData.id = 'nose'; // Added ID
-        nose.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(nose);
-        draggableObjects.push(nose);
-        cameraAnimationTargets.push(nose);
-    });
-
-    // Load and add the hair image
-    initialAssetConfigs.push({
-        id: 'hair',
-        type: 'image',
-        url: URL_HAIR,
-        initialPosition: new THREE.Vector3(0, 3.5 * 1.10, (4 - 1) * depthStep),
-        initialLayer: 4,
-        baseScale: baseScale,
-        scaleFactor: 1.0,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_HAIR, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const scaleFactor = 1.0;
-        const planeWidth = texture.image.width * baseScale * scaleFactor;
-        const planeHeight = texture.image.height * baseScale * scaleFactor;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        const hair = new THREE.Mesh(geometry, material);
-        hair.position.set(0, 3.5 * 1.10, (4 - 1) * depthStep);
-        hair.userData.currentLayer = 4;
-        hair.userData.initialPosition = hair.position.clone();
-        hair.userData.initialLayer = 4;
-        hair.userData.id = 'hair'; // Added ID
-        hair.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(hair);
-        draggableObjects.push(hair);
-        cameraAnimationTargets.push(hair);
-    });
-
-    // Load and add the blue bill image
-    initialAssetConfigs.push({
-        id: 'blueBill',
-        type: 'image',
-        url: URL_BLUE_BILL,
-        initialPosition: new THREE.Vector3(2, -2, (3 - 1) * depthStep),
-        initialLayer: 10,
-        baseScale: baseScale,
-        scaleFactor: 1,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_BLUE_BILL, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const planeWidth = texture.image.width * baseScale;
-        const planeHeight = texture.image.height * baseScale;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        const blueBill = new THREE.Mesh(geometry, material);
-        blueBill.position.set(2, -2, (3 - 1) * depthStep);
-        blueBill.userData.currentLayer = 10;
-        blueBill.userData.initialPosition = blueBill.position.clone();
-        blueBill.userData.initialLayer = 10;
-        blueBill.userData.id = 'blueBill'; // Added ID
-        blueBill.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(blueBill);
-        draggableObjects.push(blueBill);
-        cameraAnimationTargets.push(blueBill);
-    });
-
-    // Load and add the rocket image
-    const rocketLayer = 1;
-    const rocketZ = (rocketLayer - 1) * depthStep;
-    const rocketInitialY = -.32; // Keep the existing Y position for the rocket
-    initialAssetConfigs.push({
-        id: 'rocket',
-        type: 'image',
-        url: URL_ROCKET,
-        initialPosition: new THREE.Vector3(ROCKET_INITIAL_X, rocketInitialY, rocketZ),
-        initialLayer: rocketLayer,
-        baseScale: baseScale,
-        scaleFactor: 1.0,
-        removed: false // Add removed flag
-    });
-    let rocketRef = null; // Local reference to the rocket mesh
-    loadTexture(URL_ROCKET, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const rocketScaleFactor = 1.0;
-        const planeWidth = texture.image.width * baseScale * rocketScaleFactor;
-        const planeHeight = texture.image.height * baseScale * rocketScaleFactor;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        const rocket = new THREE.Mesh(geometry, material);
-
-        rocket.position.set(ROCKET_INITIAL_X, rocketInitialY, rocketZ);
-
-        rocket.userData.currentLayer = rocketLayer;
-        rocket.userData.initialPosition = rocket.position.clone();
-        rocket.userData.initialLayer = rocketLayer;
-        rocket.userData.id = 'rocket'; // Added ID
-        rocket.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(rocket);
-        draggableObjects.push(rocket);
-        cameraAnimationTargets.push(rocket);
-        rocketRef = rocket; // Store the reference
-        
-        // After rocket is loaded, load dogecoin/tesla and calculate its position relative to the rocket/background
-        loadDogecoinAndFiat();
-    });
-
-    // Function to load signature after rocket is ready
-    function loadDogecoinAndFiat() {
-        loadTexture(URL_SIGNATURE, (signatureTex) => {
-            const signatureHeight = 1.0;
-            const signatureAspectRatio = signatureTex.image.width / signatureTex.image.height;
-            const signatureWidth = signatureHeight * signatureAspectRatio;
-            const signatureNewLayer = 0;
-            const signatureNewZ = (signatureNewLayer - 1) * depthStep;
-            const signatureNewX = -2.0;
-            const signatureNewY = -4.7;
-            const signatureInitialPos = new THREE.Vector3(signatureNewX, signatureNewY, signatureNewZ);
-
-            if (!initialAssetConfigs.find(c => c.id === 'signature')) {
-                initialAssetConfigs.push({
-                    id: 'signature',
-                    type: 'image',
-                    url: URL_SIGNATURE,
-                    initialPosition: signatureInitialPos.clone(),
-                    initialLayer: signatureNewLayer,
-                    baseScale: baseScale,
-                    scaleFactor: 1.0,
-                    removed: false
-                });
-            }
-
-            const signatureMaterial = new THREE.MeshBasicMaterial({ map: signatureTex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-            const signature = new THREE.Mesh(new THREE.PlaneGeometry(signatureWidth, signatureHeight), signatureMaterial);
-            signature.position.copy(signatureInitialPos);
-            signature.userData.currentLayer = signatureNewLayer;
-            signature.userData.id = 'signature';
-            signature.userData.initialScale = { width: signatureWidth, height: signatureHeight };
-            signature.userData.initialPosition = signatureInitialPos.clone();
-            signature.userData.initialLayer = signatureNewLayer;
-            scene.add(signature);
-
-            onWindowResize();
-        });
-    }
+    // ALPHA: Empty scene — no pre-loaded images. Users build from scratch via UPLOAD.
+    // The textureLoader and loadTexture helper are kept for upload and restore functionality.
 
     // Initialize the Marquee Text (for XRAY effect)
     marqueeTexture = createMarqueeTexture();
@@ -4062,35 +3644,75 @@ function updateEarPosition(earMesh, earConfig) {
 
 // ── Save / Restore Composition ──
 
-const COMPOSITION_STORAGE_KEY = 'combined_composition_v1';
+const COMPOSITION_STORAGE_KEY = 'alpha_composition_v1';
+
+// Helper: round a number to N decimal places to reduce JSON size
+function _r(n, d = 4) { return Math.round(n * Math.pow(10, d)) / Math.pow(10, d); }
+
+// Helper: simple fast hash for deduplicating base64 image strings
+function _hash(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+        h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+    }
+    return 'img_' + (h >>> 0).toString(36);
+}
 
 function saveComposition() {
     const meshStates = [];
+    const imageStore = {}; // Deduplicated image data: hash -> base64
+    const textureCache = new Map(); // texture.image -> { hash, base64 } to avoid re-encoding
+
     scene.children.forEach(child => {
         if (!child.userData || !child.userData.id) return;
         const id = child.userData.id;
-        const state = {
-            id: id,
-            position: { x: child.position.x, y: child.position.y, z: child.position.z },
-            rotation: { x: child.rotation.x, y: child.rotation.y, z: child.rotation.z },
-            visible: child.visible,
-            userScale: child.userData.userScale || 1.0,
-            currentLayer: child.userData.currentLayer,
-            opacity: child.material ? child.material.opacity : 1,
-            transparent: child.material ? child.material.transparent : false,
-        };
-        // Save uploaded image texture as base64
+
+        // Build state with rounded positions and only non-default values
+        const state = { id: id };
+
+        // Position (always needed)
+        state.p = { x: _r(child.position.x), y: _r(child.position.y), z: _r(child.position.z) };
+
+        // Rotation — only include if non-zero
+        if (child.rotation.x !== 0 || child.rotation.y !== 0 || child.rotation.z !== 0) {
+            state.r = { x: _r(child.rotation.x), y: _r(child.rotation.y), z: _r(child.rotation.z) };
+        }
+
+        // Only include non-default values
+        if (!child.visible) state.v = false;
+        const userScale = child.userData.userScale || 1.0;
+        if (userScale !== 1.0) state.s = _r(userScale, 3);
+        if (child.userData.currentLayer !== undefined) state.l = child.userData.currentLayer;
+        const opacity = child.material ? child.material.opacity : 1;
+        if (opacity < 1) state.o = _r(opacity, 3);
+
+        // Save uploaded image texture — deduplicated by texture identity
         if (child.userData.isUploaded && child.material && child.material.map && child.material.map.image) {
             try {
                 const img = child.material.map.image;
-                const canvas = document.createElement('canvas');
-                canvas.width = img.naturalWidth || img.width;
-                canvas.height = img.naturalHeight || img.height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-                state.uploadedImageData = canvas.toDataURL('image/png');
-                state.isUploaded = true;
-                state.initialScale = child.userData.initialScale;
+                let cached = textureCache.get(img);
+                if (!cached) {
+                    // First time seeing this image source — encode once
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.naturalWidth || img.width;
+                    canvas.height = img.naturalHeight || img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    const hasAlpha = _canvasHasAlpha(canvas, ctx);
+                    const base64 = hasAlpha
+                        ? canvas.toDataURL('image/png')
+                        : canvas.toDataURL('image/jpeg', 0.8);
+                    const hash = _hash(base64);
+                    cached = { hash, base64 };
+                    textureCache.set(img, cached);
+                }
+                imageStore[cached.hash] = cached.base64;
+                state.img = cached.hash;
+                state.u = true; // isUploaded flag
+                if (child.userData.initialScale) {
+                    state.iw = _r(child.userData.initialScale.width, 3);
+                    state.ih = _r(child.userData.initialScale.height, 3);
+                }
             } catch (e) {
                 console.warn('Could not save uploaded image:', id, e);
             }
@@ -4103,26 +3725,51 @@ function saveComposition() {
         .filter(c => c.removed)
         .map(c => c.id);
 
+    // Only include non-default effect controls
+    const savedEffects = {};
+    for (const key in effectControls) {
+        const val = effectControls[key];
+        if (val !== false && val !== 0) savedEffects[key] = val;
+    }
+
     const data = {
-        version: 1,
-        timestamp: Date.now(),
-        meshStates: meshStates,
-        removedAssets: removedAssets,
-        effectControls: { ...effectControls },
-        camera: {
-            position: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
-            target: { x: controls.target.x, y: controls.target.y, z: controls.target.z },
+        version: 2,
+        t: Date.now(),
+        m: meshStates,
+        i: Object.keys(imageStore).length > 0 ? imageStore : undefined,
+        rm: removedAssets.length > 0 ? removedAssets : undefined,
+        fx: Object.keys(savedEffects).length > 0 ? savedEffects : undefined,
+        cam: {
+            p: { x: _r(camera.position.x), y: _r(camera.position.y), z: _r(camera.position.z) },
+            t: { x: _r(controls.target.x), y: _r(controls.target.y), z: _r(controls.target.z) },
         },
     };
     return data;
 }
 
+// Helper: check if a canvas has any non-opaque pixels (needs PNG)
+function _canvasHasAlpha(canvas, ctx) {
+    const data = ctx.getImageData(0, 0, Math.min(canvas.width, 64), Math.min(canvas.height, 64)).data;
+    for (let i = 3; i < data.length; i += 16) { // Sample every 4th pixel
+        if (data[i] < 250) return true;
+    }
+    return false;
+}
+
 function restoreComposition(data) {
-    if (!data || data.version !== 1) return false;
+    if (!data) return false;
+
+    // ── Normalize v1 → v2 format for backward compatibility ──
+    if (data.version === 1) {
+        data = _migrateV1toV2(data);
+    }
+    if (data.version !== 2) return false;
+
+    const imageStore = data.i || {};
 
     // 1. Remove assets that were trashed in the saved state
-    if (data.removedAssets && data.removedAssets.length > 0) {
-        data.removedAssets.forEach(id => {
+    if (data.rm && data.rm.length > 0) {
+        data.rm.forEach(id => {
             const mesh = scene.children.find(c => c.userData && c.userData.id === id);
             if (mesh) {
                 scene.remove(mesh);
@@ -4137,29 +3784,32 @@ function restoreComposition(data) {
     }
 
     // 2. Restore uploaded images first (they need to be added to scene)
-    const uploadedStates = (data.meshStates || []).filter(s => s.isUploaded && s.uploadedImageData);
+    const uploadedStates = (data.m || []).filter(s => s.u && s.img);
     const uploadPromises = uploadedStates.map(state => {
         return new Promise((resolve) => {
+            const base64 = imageStore[state.img];
+            if (!base64) { console.warn('Missing image data for hash:', state.img); resolve(); return; }
             const img = new Image();
             img.onload = () => {
                 const texture = new THREE.Texture(img);
                 texture.colorSpace = THREE.SRGBColorSpace;
                 texture.needsUpdate = true;
-                const w = state.initialScale ? state.initialScale.width : 4;
-                const h = state.initialScale ? state.initialScale.height : 4;
-                const scale = state.userScale || 1.0;
+                const w = state.iw || 4;
+                const h = state.ih || 4;
+                const scale = state.s || 1.0;
                 const geometry = new THREE.PlaneGeometry(w * scale, h * scale);
                 const material = new THREE.MeshBasicMaterial({
                     map: texture, transparent: true, side: THREE.DoubleSide,
-                    opacity: state.opacity !== undefined ? state.opacity : 1,
+                    opacity: state.o !== undefined ? state.o : 1,
                 });
                 const mesh = new THREE.Mesh(geometry, material);
-                mesh.position.set(state.position.x, state.position.y, state.position.z);
-                mesh.rotation.set(state.rotation.x, state.rotation.y, state.rotation.z);
-                mesh.visible = state.visible;
-                mesh.userData.currentLayer = state.currentLayer;
+                mesh.position.set(state.p.x, state.p.y, state.p.z);
+                const r = state.r || { x: 0, y: 0, z: 0 };
+                mesh.rotation.set(r.x, r.y, r.z);
+                mesh.visible = state.v !== false;
+                mesh.userData.currentLayer = state.l;
                 mesh.userData.initialPosition = mesh.position.clone();
-                mesh.userData.initialLayer = state.currentLayer;
+                mesh.userData.initialLayer = state.l;
                 mesh.userData.id = state.id;
                 mesh.userData.initialScale = { width: w, height: h };
                 mesh.userData.isUploaded = true;
@@ -4173,61 +3823,59 @@ function restoreComposition(data) {
                 console.warn('Failed to restore uploaded image:', state.id);
                 resolve();
             };
-            img.src = state.uploadedImageData;
+            img.src = base64;
         });
     });
 
     // 3. Restore transforms for existing scene meshes
     Promise.all(uploadPromises).then(() => {
-        (data.meshStates || []).forEach(state => {
-            if (state.isUploaded) return; // Already handled above
+        (data.m || []).forEach(state => {
+            if (state.u) return; // Already handled above
             const mesh = scene.children.find(c => c.userData && c.userData.id === state.id);
             if (!mesh) return;
-            mesh.position.set(state.position.x, state.position.y, state.position.z);
-            mesh.rotation.set(state.rotation.x, state.rotation.y, state.rotation.z);
-            mesh.visible = state.visible;
-            mesh.userData.currentLayer = state.currentLayer;
-            if (state.userScale && state.userScale !== 1.0 && mesh.userData.initialScale) {
+            mesh.position.set(state.p.x, state.p.y, state.p.z);
+            const r = state.r || { x: 0, y: 0, z: 0 };
+            mesh.rotation.set(r.x, r.y, r.z);
+            mesh.visible = state.v !== false;
+            mesh.userData.currentLayer = state.l;
+            const userScale = state.s || 1.0;
+            if (userScale !== 1.0 && mesh.userData.initialScale) {
                 const baseW = mesh.userData.initialScale.width;
                 const baseH = mesh.userData.initialScale.height;
                 mesh.geometry.dispose();
-                mesh.geometry = new THREE.PlaneGeometry(baseW * state.userScale, baseH * state.userScale);
-                mesh.userData.userScale = state.userScale;
+                mesh.geometry = new THREE.PlaneGeometry(baseW * userScale, baseH * userScale);
+                mesh.userData.userScale = userScale;
             }
-            if (mesh.material && state.opacity !== undefined) {
-                mesh.material.opacity = state.opacity;
-                mesh.material.transparent = state.transparent || state.opacity < 1;
+            if (mesh.material && state.o !== undefined) {
+                mesh.material.opacity = state.o;
+                mesh.material.transparent = state.o < 1;
                 mesh.material.needsUpdate = true;
             }
         });
 
         // 4. Restore camera
-        if (data.camera) {
-            camera.position.set(data.camera.position.x, data.camera.position.y, data.camera.position.z);
-            controls.target.set(data.camera.target.x, data.camera.target.y, data.camera.target.z);
+        if (data.cam) {
+            camera.position.set(data.cam.p.x, data.cam.p.y, data.cam.p.z);
+            controls.target.set(data.cam.t.x, data.cam.t.y, data.cam.t.z);
             controls.update();
         }
 
         // 5. Restore effects by simulating button clicks for active effects
-        if (data.effectControls) {
-            // Determine which effects need to be turned on
-            // Skip non-toggle properties (numeric values, and effects managed by presets)
+        if (data.fx) {
             const skipKeys = ['thresholdValue', 'shadowBrightness', 'pixelSize'];
             const presetEffects = ['anon', 'og', 'hacker', 'surveillance', 'greed'];
 
-            // First restore presets (they turn on/off many sub-effects)
             presetEffects.forEach(key => {
-                if (data.effectControls[key] && !effectControls[key]) {
+                if (data.fx[key] && !effectControls[key]) {
                     const btn = document.querySelector(`button[data-effect="${key}"]`);
                     if (btn) btn.click();
                 }
             });
 
-            // Then restore individual effects that aren't managed by a preset
-            for (const key in data.effectControls) {
+            for (const key in data.fx) {
                 if (skipKeys.includes(key)) continue;
                 if (presetEffects.includes(key)) continue;
-                const savedOn = data.effectControls[key];
+                const savedOn = data.fx[key];
                 const currentOn = effectControls[key];
                 if (savedOn && !currentOn) {
                     const btn = document.querySelector(`button[data-effect="${key}"]`);
@@ -4235,10 +3883,9 @@ function restoreComposition(data) {
                 }
             }
 
-            // Restore numeric values
-            if (data.effectControls.thresholdValue !== undefined) effectControls.thresholdValue = data.effectControls.thresholdValue;
-            if (data.effectControls.shadowBrightness !== undefined) effectControls.shadowBrightness = data.effectControls.shadowBrightness;
-            if (data.effectControls.pixelSize !== undefined) effectControls.pixelSize = data.effectControls.pixelSize;
+            if (data.fx.thresholdValue !== undefined) effectControls.thresholdValue = data.fx.thresholdValue;
+            if (data.fx.shadowBrightness !== undefined) effectControls.shadowBrightness = data.fx.shadowBrightness;
+            if (data.fx.pixelSize !== undefined) effectControls.pixelSize = data.fx.pixelSize;
         }
 
         // 6. Update background color to match effect state
@@ -4253,6 +3900,36 @@ function restoreComposition(data) {
     });
 
     return true;
+}
+
+// Migrate v1 save format to v2
+function _migrateV1toV2(old) {
+    const imageStore = {};
+    const meshStates = (old.meshStates || []).map(s => {
+        const n = { id: s.id, p: s.position };
+        if (s.rotation && (s.rotation.x || s.rotation.y || s.rotation.z)) n.r = s.rotation;
+        if (!s.visible) n.v = false;
+        if (s.userScale && s.userScale !== 1.0) n.s = s.userScale;
+        if (s.currentLayer !== undefined) n.l = s.currentLayer;
+        if (s.opacity !== undefined && s.opacity < 1) n.o = s.opacity;
+        if (s.isUploaded && s.uploadedImageData) {
+            const hash = _hash(s.uploadedImageData);
+            imageStore[hash] = s.uploadedImageData;
+            n.img = hash;
+            n.u = true;
+            if (s.initialScale) { n.iw = s.initialScale.width; n.ih = s.initialScale.height; }
+        }
+        return n;
+    });
+    return {
+        version: 2,
+        t: old.timestamp,
+        m: meshStates,
+        i: Object.keys(imageStore).length > 0 ? imageStore : undefined,
+        rm: old.removedAssets && old.removedAssets.length > 0 ? old.removedAssets : undefined,
+        fx: old.effectControls || undefined,
+        cam: old.camera ? { p: old.camera.position, t: old.camera.target } : undefined,
+    };
 }
 
 function downloadComposition() {
@@ -4370,6 +4047,7 @@ function launchAR(btn) {
         if (!child.visible) return;
         if (!child.material || !child.material.map) return;
 
+        // Clone geometry and material so export doesn't affect the live scene
         const geo = child.geometry.clone();
         const mat = child.material.clone();
         // Bake texture through WebGL so GLTFExporter can read the pixel data
@@ -4381,6 +4059,7 @@ function launchAR(btn) {
         arScene.add(mesh);
     });
 
+    // Add ambient light so textures render in AR
     arScene.add(new THREE.AmbientLight(0xffffff, 1));
 
     const exporter = new GLTFExporter();
@@ -4388,6 +4067,7 @@ function launchAR(btn) {
         const blob = new Blob([glb], { type: 'model/gltf-binary' });
         const url = URL.createObjectURL(blob);
 
+        // Create fullscreen model-viewer overlay
         const overlay = document.createElement('div');
         overlay.id = 'ar-overlay';
         overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;';

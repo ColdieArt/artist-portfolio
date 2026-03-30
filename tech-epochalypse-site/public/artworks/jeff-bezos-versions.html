@@ -130,28 +130,6 @@
     #export-panel .status-line.active { color: #4c4; }
     #export-panel .status-line.error   { color: #e66; }
 
-    /* ─── SUBMIT TO THE OVERLORD BUTTON ─── */
-    #submit-overlord-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 200;
-      background: #000;
-      color: #fff;
-      border: 2px solid #fff;
-      padding: 14px 24px;
-      font-family: monospace;
-      font-size: 13px;
-      font-weight: bold;
-      letter-spacing: 1.5px;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    #submit-overlord-btn:hover {
-      background: #1a1a1a;
-      border-color: #ccc;
-    }
-
     /* ─── POST TO X MODAL ─── */
     #post-modal {
       position: fixed;
@@ -197,7 +175,7 @@
     }
     #post-modal-btn:hover { background: #1a8cd8; }
   </style>
-  <title>ELON-MUSK-AWS-MASTER | Made on juno.transient.xyz</title>
+  <title>JEFF-BEZOS-VERSIONS | Made on juno.transient.xyz</title>
 </head>
 <body>
   
@@ -222,7 +200,7 @@ const totalDepthLayers = 15; // Total number of depth layers available
 const subLayerOffset = 0.05; // Smaller offset for visual separation within a layer (0.25 levels * depthStep = 0.25 * 0.2 = 0.05)
 const zeroParallaxDepth = (5 - 1) * depthStep; // Z-position for level 5
 
-let isDragging = false; // Flag to indicate if a drag operation is in progress
+let isDragging = false; // Flag to indicate if a drag operation in progress
 let pointerDownPosition = new THREE.Vector2(); // To store the initial pointer down position
 const DRAG_THRESHOLD = 5; // Pixels threshold to consider a move as a drag
 
@@ -231,7 +209,6 @@ let backgroundMesh = null; // To store the background mesh for positioning calcu
 // Camera animation variables
 let cameraAnimationActive = false;
 let cameraAnimationTargets = [];
-let selectedTargetIndex = 0; // Index of the currently selected target
 let currentCameraTarget = null;
 let cameraAnimationState = 'idle'; // 'idle', 'exploring', 'returningToGlobalStart'
 let cameraAnimationStartTime = 0;
@@ -256,6 +233,9 @@ let yBounceInitialCameraZ = 0;
 const yBounceRangeX = 2.0; // 20% of a reasonable scene width (e.g., 10 units wide scene)
 const yBounceSpeed = 0.001; // Speed of the bounce
 
+// Inactivity timer variables
+let lastActivityTime = performance.now();
+const INACTIVITY_TIMEOUT = 3000; // 3 seconds
 let yRotationStartTime = 0; // New: To track when Y-rotation started
 const Y_ROTATION_DURATION_BEFORE_CAM_ANIM = 10000; // 10 seconds
 
@@ -342,7 +322,8 @@ const BIOMETRIC_PHRASES = [
     "MUSCLE TENSION: LOW",
     "HORMONE PROFILE: STABLE",
     "TOXIN LEVELS: UNDETECTED",
-    "ALLERGEN RESPONSE: NEGATIVE"
+    "ALLERGEN RESPONSE: NEGATIVE",
+    "PAIN RECEPTORS: INACTIVE"
 ];
 
 const DIAGNOSTIC_CAPTIONS = [
@@ -375,13 +356,13 @@ let biometricAnimationState = {
 let bloodTextMesh;
 let bloodTexture;
 let bloodScrollOffset = 0;
-const BLOOD_TEXT_FONT_SIZE = 120; // Reduced from 180 for mobile performance
+const BLOOD_TEXT_FONT_SIZE = 180; // Extremely large font size
 const BLOOD_TEXT_LINE_HEIGHT = BLOOD_TEXT_FONT_SIZE * 1.2; // Line height for spacing
-const BLOOD_TEXT_TOTAL_LINES = 15; // Reduced from 22 for mobile performance
-const BLOOD_TEXT_SCROLL_SPEED = 3.0; // Increased from 7.0 for snappier mobile feel
+const BLOOD_TEXT_TOTAL_LINES = 22; // Number of lines to display
+const BLOOD_TEXT_SCROLL_SPEED = 7.0; // Moderate scroll speed
 let shuffledBloodPhrases = []; // To store the shuffled phrases
 const BLOOD_TEXT_PHRASES = [
-      "BIAS REINFORCEMENT",
+    "BIAS REINFORCEMENT",
     "DARK ECONOMY",
     "REALITY DISTORTION",
     "EXPLOIT VULNERABILITIES",
@@ -395,7 +376,7 @@ const BLOOD_TEXT_PHRASES = [
     "DATA MINING",
     "DOPAMINE LOOP",
     "MAGNETIC CONTROL",
-    "VULNERABILITY TRACKING",
+    "VULNEARABILITY TRACKING",
     "ENGAGEMENT TRAPS",
     "EXPLOIT HUMAN FLAW",
     "PRIVACY EROSION",
@@ -404,11 +385,11 @@ const BLOOD_TEXT_PHRASES = [
     "AMPLIFIED INFLUENCE",
     "LOCATION TRACKING",
     "ECHO CHAMBERING",
-    "FEED INSTANT GRATITUDE",
+    "INSTANT GRATIFICATION",
     "LICK THE BOOT",
-    "CRY AND BOW",
+    "CRY & BOW",
     "ILLUSION OF CONTROL",
-    "COGNATIVE BIAS",
+    "COGNITIVE BIAS", 
 ];
 
 // Redacted Glitch Text variables
@@ -433,7 +414,7 @@ const REDACTED_GLITCH_PHRASES = [
     "THREAT ASSESSMENT LEVEL CLASSIFIED",
     "TARGET IDENTIFIED: UNKNOWN",
     "DATA EXFILTRATION PROTOCOL ACTIVE",
-    "SURVEILLANCE FEED ACTIVE",
+    "SURVEVEILLANCE FEED ACTIVE",
     "USER ACTIVITY RECORDED",
     "PRIVACY SETTINGS OVERRIDDEN",
     "CONNECTION LOGS STORED",
@@ -456,25 +437,55 @@ const REDACTED_GLITCH_PHRASES = [
 let redactedGlitchPhraseData = []; // Array of objects {text: string, redactedWordIndices: number[], redactionApplied: boolean}
 
 // Define all layer URLs at the top of the script
-const URL_BACKGROUND = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/K-Dallas-Region-BG.jpg';
-const URL_FOREHEAD = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0010_forehead.png';
-const URL_MOUTH = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0008_mouth.png';
-const URL_LEFT_EYE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0009_Eye-L.png';
-const URL_X_LOGO_SWAP = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/X_Logo.png';
-const URL_NOSE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0003_nose-2.png';
-const URL_HAIR = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0001_hair.png';
-const URL_BLUE_BILL = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0018_K-bluebill.png';
-const URL_DOGECOIN_ORIGINAL = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/grok.gif';
-const URL_TESLA_SWAP = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/tesla.png';
-    const URL_SIGNATURE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/coldie-sig.gif';
-const URL_ROCKET = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0016_rocket.png';
-const URL_RIGHT_EYE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0007_Eye-R.png'; 
-const URL_SPACEX_ORIGINAL = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0000_SpaceX.png';
-const URL_EAR = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0002_ear.png';
-const URL_FIAT_WORTHLESS = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0005_Fiat-is-worthless-so-yes.png';
+const URL_BLUE_ORIGIN = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/blue-origin.gif'; // New Blue Origin texture
+const URL_BACKGROUND = '';
+const URL_FOREHEAD = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-Forehead.gif';
+const URL_RIGHT_EYE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-Eye-R.gif';
+const URL_MOUTH = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-mouth.gif';
+const URL_EAR = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-ear.gif';
+const URL_LEFT_EYE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-Eye-L.gif';
+const URL_NOSE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-nose.gif';
+const URL_SIGNATURE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/coldie-sig.gif';
+const URL_HEADSET = ''; // Removed headset image
+const URL_SAM_ALTMAN = ''; // Sam Altman image URL
+const URL_JEFF_BEZOS_LABEL_BLUE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-label-blue.gif'; // New Jeff Bezos Label Blue image
+const URL_JEFF_BEZOS_LABEL_ORANGE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-label-orange.gif'; // New Jeff Bezos Label Orange image
+const URL_JEFF_BEZOS_LABEL_BLACK = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-label-black.gif'; // New Jeff Bezos Label Black image
+const URL_DRONE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/drone-color.gif'; // New Drone image
 
-// Define the initial X position for the rocket (was missing)
-const ROCKET_INITIAL_X = -2.0;
+// ── ARWEAVE FALLBACKS ──
+// AWS is primary; if it fails, retry from Arweave permanent storage.
+const ARWEAVE_FALLBACKS = {
+    [URL_BLUE_ORIGIN]:             'https://arweave.net/ZKtOFmxtOJuCfqqsPb3vyK7zb_4RqebN4umZxOFsXCc',
+    [URL_FOREHEAD]:                'https://arweave.net/q4PYWMGvsUbDDH4LW9CEDMXl-UA1pAmnhtb_ZY0e_S8',
+    [URL_RIGHT_EYE]:               'https://arweave.net/Dvo--6RUdJJhWKGsXT5GTOFr4S1N5jSKqXi0CXZcqRg',
+    [URL_MOUTH]:                   'https://arweave.net/QrXEzIDM7PvBnrKCBaavN6VvR8ajIJRL38q4V8Je31s',
+    [URL_EAR]:                     'https://arweave.net/Huf8hQIZe6KZDWiVfifVuJXyVdrKPXsLazI2rbddlbo',
+    [URL_LEFT_EYE]:                'https://arweave.net/LXB-1G7nKIuNsztHPbDo19H_EVgtZRhOY_eCgnQcOwU',
+    [URL_NOSE]:                    'https://arweave.net/q2KfZ3GSZ-raZ_dF-nwDiFxX5fs4ChgkVX0IPx963yU',
+    [URL_SIGNATURE]:               'https://arweave.net/CQiQ7anriy5AFq1m2ClDid-kwgkOWAPPimOmXiaI3c',
+    [URL_JEFF_BEZOS_LABEL_BLUE]:   'https://arweave.net/qwAMbLtWY-20QMEycjk1xQSIvOLy49whJ9PXR9fQ50Y',
+    [URL_JEFF_BEZOS_LABEL_ORANGE]: 'https://arweave.net/flk5T2K5orGNI0V08m7rPhzyDsqTaAS8biDe75MzgYw',
+    [URL_JEFF_BEZOS_LABEL_BLACK]:  'https://arweave.net/ocNBaN4Mu3wxks8r40Ye6eHXR2rTpjjMi-wmpqc62F8',
+    [URL_DRONE]:                   'https://arweave.net/CdtNG5msk0Qtc30dax7LfkXEa0meqgUWzQ2M-0-gzRU',
+};
+
+// Drone animation variables
+let droneMeshes = []; // Changed to an array to hold multiple drones
+const DRONE_HOVER_AMPLITUDE = 0.25; // How much it moves up and down
+const DRONE_HOVER_SPEED = 1.2; // How fast it moves
+// droneInitialY is now stored per drone in userData
+
+let blueOriginTexture; // Global variable to store the loaded Blue Origin texture
+let originalDroneTexture; // Global variable to store the loaded Original Drone texture
+
+// Define the clear color of the scene for post-processing shaders to use as background
+const CLEAR_COLOR = new THREE.Color(0x1e1e1e); // Dark gray
+
+// Global reference for the special material used to lighten face images when effects are active
+let luminanceBoostMaterial = null;
+
+const FACE_PART_IDS = ['forehead', 'rightEye', 'mouth', 'ear', 'leftEye', 'nose'];
 
 function initializeRedactedGlitchPhraseData() {
     redactedGlitchPhraseData = REDACTED_GLITCH_PHRASES.map(phrase => {
@@ -507,6 +518,38 @@ function initializeRedactedGlitchPhraseData() {
 }
 
 // Shader definitions
+
+// NEW SHADER: Luminance Boost Shader for face images
+const LuminanceBoostShader = {
+    uniforms: {
+        'tDiffuse': { value: null },
+        'boostFactor': { value: 0.75 } // 20% luminance boost
+    },
+    vertexShader: /* glsl */`
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: /* glsl */`
+        uniform sampler2D tDiffuse;
+        uniform float boostFactor;
+        varying vec2 vUv;
+        void main() {
+            vec4 texel = texture2D(tDiffuse, vUv);
+            
+            // Apply a simple brightness boost to the RGB channels
+            vec3 boostedColor = texel.rgb * boostFactor;
+            
+            // Clamp the boosted color to prevent overexposure (optional, but good practice)
+            boostedColor = clamp(boostedColor, 0.0, 1.0);
+            
+            gl_FragColor = vec4(boostedColor, texel.a);
+        }
+    `
+};
+
 const GreyscaleContrastShader = {
     uniforms: {
         'tDiffuse': { value: null },
@@ -559,7 +602,8 @@ const GreyScaleShader = {
 const ThresholdShader = {
     uniforms: {
         'tDiffuse': { value: null },
-        'threshold': { value: 0.5 }
+        'threshold': { value: 0.5 },
+        'clearColor': { value: CLEAR_COLOR } // Pass clear color
     },
     vertexShader: /* glsl */`
         varying vec2 vUv;
@@ -571,12 +615,16 @@ const ThresholdShader = {
     fragmentShader: /* glsl */`
         uniform sampler2D tDiffuse;
         uniform float threshold;
+        uniform vec3 clearColor;
         varying vec2 vUv;
         void main() {
             vec4 texel = texture2D(tDiffuse, vUv);
             float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
-            // Standard threshold: Dark becomes black (0.0), bright becomes white (1.0)
-            gl_FragColor = vec4(vec3(step(threshold, luma)), texel.a); 
+            // Standard threshold: anything above threshold becomes white (1.0), anything below becomes black (0.0)
+            float binary = step(threshold, luma); 
+            
+            // Output black and white (Standard: bright areas are white)
+            gl_FragColor = vec4(vec3(binary), texel.a); 
         }
     `
 };
@@ -585,7 +633,7 @@ const DarkShader = {
     uniforms: {
         'tDiffuse': { value: null },
         'threshold': { value: 0.5 },
-        'brightnessMultiplier': { value: 0.031 } // New uniform for brightness control
+        'clearColor': { value: CLEAR_COLOR } // Pass clear color
     },
     vertexShader: /* glsl */`
         varying vec2 vUv;
@@ -597,14 +645,15 @@ const DarkShader = {
     fragmentShader: /* glsl */`
         uniform sampler2D tDiffuse;
         uniform float threshold;
-        uniform float brightnessMultiplier;
+        uniform vec3 clearColor;
         varying vec2 vUv;
         void main() {
             vec4 texel = texture2D(tDiffuse, vUv);
             float luma = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
-            // Only keep bright pixels, then turn them into very dark gray (brightnessMultiplier)
-            // Anything below threshold is 0.0 (pure black)
-            gl_FragColor = vec4(vec3(step(threshold, luma) * brightnessMultiplier), texel.a);
+            
+            // Fix: If luma < threshold, output the clear color.
+            vec3 outputColor = mix(clearColor, vec3(0.04), step(threshold, luma));
+            gl_FragColor = vec4(outputColor, texel.a);
         }
     `
 };
@@ -872,7 +921,6 @@ const effectControls = {
     threshold: false,
     thresholdValue: 0.4, // Decreased by 20% (0.5 * 0.8 = 0.4)
     shadow: false, // Renamed from 'dark' to 'shadow'
-    shadowBrightness: 0.033, // New setting for shadow brightness (5% brighter than 0.02)
     pixelation: false,
     pixelSize: 8.0,
     glitch: false,
@@ -906,15 +954,6 @@ let arrowContainer = null; // Global reference for the arrow container
 // Array to store initial configurations of assets for reloading
 const initialAssetConfigs = [];
 
-let dogecoinRef = null; // To hold the dogecoin mesh for later reference
-let dogecoinOriginalTexture = null; // To store the original dogecoin texture
-let teslaTexture = null; // To store the Tesla logo texture
-let teslaGreyscaleContrastMaterial = null; // New: To store the Tesla greyscale high contrast material
-
-let spacexRef = null; // To hold the spacex mesh for later reference
-let spacexOriginalTexture = null; // To store the original spacex texture
-let xLogoTexture = null; // To store the X logo texture
-
 // Helper function to update UI button state
 const updateUIButtonState = (effectName, isActive) => {
     // Select all buttons with the given data-effect attribute
@@ -923,6 +962,17 @@ const updateUIButtonState = (effectName, isActive) => {
         button.style.borderColor = isActive ? '#4CAF50' : 'white';
     });
 };
+
+// Function to apply texture best practices
+function applyTextureSettings(texture, renderer) {
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = false;
+    if (renderer) {
+        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    }
+}
 
 function createTextTexture(text, fontSize = 60, color = 'white', backgroundColor = 'rgba(0,0,0,0.5)', font = 'monospace') {
     const canvas = document.createElement('canvas');
@@ -944,6 +994,7 @@ function createTextTexture(text, fontSize = 60, color = 'white', backgroundColor
     context.fillText(text, 10, fontSize + 10); // Position text with padding
 
     const texture = new THREE.CanvasTexture(canvas);
+    applyTextureSettings(texture, renderer); // Apply settings to CanvasTexture
     texture.needsUpdate = true;
     return texture;
 }
@@ -964,6 +1015,7 @@ function createMarqueeTexture() {
     canvas.height = MARQUEE_LINE_HEIGHT * (MARQUEE_TOTAL_LINES * 2); // Double the height to allow seamless scrolling
 
     marqueeTexture = new THREE.CanvasTexture(canvas);
+    applyTextureSettings(marqueeTexture, renderer); // Apply settings to CanvasTexture
     marqueeTexture.wrapS = THREE.RepeatWrapping;
     marqueeTexture.wrapT = THREE.RepeatWrapping;
     marqueeTexture.needsUpdate = true;
@@ -1023,6 +1075,7 @@ function createBiometricMarqueeTexture() {
     canvas.height = BIOMETRIC_MARQUEE_LINE_HEIGHT * (BIOMETRIC_MARQUEE_TOTAL_LINES * 2);
 
     biometricMarqueeTexture = new THREE.CanvasTexture(canvas);
+    applyTextureSettings(biometricMarqueeTexture, renderer); // Apply settings to CanvasTexture
     biometricMarqueeTexture.wrapS = THREE.RepeatWrapping;
     biometricMarqueeTexture.wrapT = THREE.RepeatWrapping;
     biometricMarqueeTexture.needsUpdate = true;
@@ -1172,8 +1225,8 @@ function updateBiometricMarqueeTexture(currentTime) {
             const captionX = (canvas.width * 0.1) + (Math.random() * (canvas.width * 0.7 - captionWidth));
             const captionY = yPos - (captionHeight / 2) + (Math.random() - 0.5) * (BIOMETRIC_MARQUEE_LINE_HEIGHT * 0.5);
 
+            const padding = 5; // Define padding here
             // Draw black box
-            const padding = 10;
             context.fillStyle = 'black';
             context.fillRect(captionX - padding, captionY - captionHeight * 0.7, captionWidth + padding * 2, captionHeight + padding);
 
@@ -1208,6 +1261,7 @@ function createBloodTextTexture() {
     canvas.height = BLOOD_TEXT_LINE_HEIGHT * (BLOOD_TEXT_TOTAL_LINES * 2); // Double height for scrolling
 
     bloodTexture = new THREE.CanvasTexture(canvas);
+    applyTextureSettings(bloodTexture, renderer); // Apply settings to CanvasTexture
     bloodTexture.wrapS = THREE.RepeatWrapping;
     bloodTexture.wrapT = THREE.RepeatWrapping;
     bloodTexture.needsUpdate = true;
@@ -1264,6 +1318,7 @@ function createRedactedGlitchTexture() {
     canvas.height = REDACTED_GLITCH_LINE_HEIGHT * (REDACTED_GLITCH_TOTAL_LINES * 2); // Double for seamless scrolling
 
     redactedGlitchTexture = new THREE.CanvasTexture(canvas);
+    applyTextureSettings(redactedGlitchTexture, renderer); // Apply settings to CanvasTexture
     redactedGlitchTexture.wrapS = THREE.RepeatWrapping;
     redactedGlitchTexture.wrapT = THREE.RepeatWrapping;
     redactedGlitchTexture.needsUpdate = true;
@@ -1277,8 +1332,7 @@ function updateRedactedGlitchTexture() {
     const context = canvas.getContext('2d');
 
     context.clearRect(0, 0, canvas.width, canvas.height);
-    // Change background to orange (#FFAC1C) for REDACTED GLITCH
-    context.fillStyle = '#FFAC1C';
+    context.fillStyle = 'rgba(255, 255, 255, 1.0)'; // White background for threshold effect
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     context.font = `${REDACTED_GLITCH_FONT_SIZE}px 'Courier New', monospace`;
@@ -1298,11 +1352,11 @@ function updateRedactedGlitchTexture() {
             yPos += singleSetHeight * 2;
         }
 
-        // Draw text in black so it appears black on the orange background.
+        // Draw text in black so it becomes white/visible with threshold effect
         context.fillStyle = 'black';
         context.fillText(line, 10, yPos + REDACTED_GLITCH_FONT_SIZE); // Add padding
 
-        // Draw redaction bars (black rectangles on orange background)
+        // Draw redaction bars (white rectangles on white background will appear black with threshold)
         if (redactedWordIndices.length > 0) {
             const words = line.split(/(\s+)/); // Split by one or more spaces, keeping spaces
             let currentX = 10; // Start X for text (accounting for padding)
@@ -1312,12 +1366,12 @@ function updateRedactedGlitchTexture() {
                 const wordWidth = context.measureText(word).width;
 
                 if (!/\s+/.test(word) && redactedWordIndices.includes(j)) { // If it's a word and flagged for redaction
-                    // Draw a black rectangle over the selected words
+                    // Draw a black rectangle over the selected words (will appear white with threshold)
                     context.fillStyle = 'black';
                     context.fillRect(currentX, yPos + REDACTED_GLITCH_FONT_SIZE * 0.2, wordWidth, REDACTED_GLITCH_FONT_SIZE * 0.9);
 
                     // Optionally draw a border around the redacted area to make it more pronounced
-                    context.strokeStyle = 'black'; // Black border
+                    context.strokeStyle = 'black'; // Black border (will be white with threshold)
                     context.lineWidth = 2;
                     context.strokeRect(currentX, yPos + REDACTED_GLITCH_FONT_SIZE * 0.2, wordWidth, REDACTED_GLITCH_FONT_SIZE * 0.9);
                 }
@@ -1329,32 +1383,7 @@ function updateRedactedGlitchTexture() {
     redactedGlitchTexture.needsUpdate = true;
 }
 
-function resetCameraToGlobalStart() {
-    // Ensure all camera motion flags are off
-    cameraAnimationActive = false;
-    effectControls.cameraAnimation = false;
-    effectControls.yRotation = false;
-
-    // Reset UI state for camera controls
-    updateUIButtonState('cameraAnimation', false);
-    updateUIButtonState('yRotation', false);
-
-    // Hard reset camera position and look-at target to initial load values
-    camera.position.copy(initialGlobalCameraPos);
-    controls.target.copy(initialGlobalCameraLookAt);
-    camera.lookAt(controls.target);
-    controls.enabled = true; // Re-enable orbit controls
-    controls.update(); // Ensure controls are updated after manual camera set
-
-    cameraAnimationState = 'idle';
-    assetsVisitedCount = 0;
-    yRotationStartTime = 0; // Reset Y-rotation auto-start timer
-}
-
 function stopCameraAnimationAndReset() {
-    // This function's primary role is to stop active camera motion (FLY or 3D)
-    // and re-enable OrbitControls, without forcing a position reset (unless explicitly requested by RESET button).
-    
     if (cameraAnimationActive || effectControls.yRotation) {
         cameraAnimationActive = false;
         effectControls.cameraAnimation = false;
@@ -1363,9 +1392,11 @@ function stopCameraAnimationAndReset() {
         updateUIButtonState('cameraAnimation', false);
         updateUIButtonState('yRotation', false);
 
-        // Keep current position, just stop the automatic movement
-        controls.enabled = true; 
-        controls.update(); 
+        camera.position.copy(initialGlobalCameraPos);
+        controls.target.copy(initialGlobalCameraLookAt);
+        camera.lookAt(controls.target);
+        controls.enabled = true; // Re-enable orbit controls
+        controls.update(); // Ensure controls are updated after manual camera set
 
         cameraAnimationState = 'idle';
         assetsVisitedCount = 0;
@@ -1373,257 +1404,261 @@ function stopCameraAnimationAndReset() {
     yRotationStartTime = 0; // Reset Y-rotation auto-start timer on interaction
 }
 
-function resetPiecesToOriginalPositions() {
-    // 1. Turn off all effects FIRST to ensure a clean visual state
-    turnOffAllEffects();
+/**
+ * Checks if any visual effect is currently active (excluding camera/rotation controls).
+ * @returns {boolean} True if any visual effect is active.
+ */
+function isAnyVisualEffectActive() {
+    for (const key in effectControls) {
+        if (effectControls.hasOwnProperty(key)) {
+            // Exclude camera/rotation and pure text visibility flags
+            if (key !== 'yRotation' && key !== 'cameraAnimation' && key !== 'marqueeText' && key !== 'biometricMarquee' && key !== 'bloodText' && key !== 'hacker' && key !== 'surveillance' && key !== 'greed' && effectControls[key]) {
+                return true;
+            }
+            // Include combined effects if they are active
+            if ((key === 'hacker' || key === 'og' || key === 'surveillance' || key === 'greed' || key === 'anon') && effectControls[key]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
-    // 2. Remove all current meshes from the scene
-    scene.children.slice().forEach(object => {
-        if (object.userData && object.userData.id) {
-             scene.remove(object);
-             if (object.geometry) object.geometry.dispose();
-             if (object.material) {
-                 if (Array.isArray(object.material)) {
-                     object.material.forEach(m => m.dispose());
-                 } else {
-                     object.material.dispose();
-                 }
-             }
+/**
+ * Switches the material of face parts between the default MeshBasicMaterial and the
+ * LuminanceBoostShader based on whether any visual effect is active.
+ */
+function updateFaceMaterialState() {
+    const shouldBoost = isAnyVisualEffectActive();
+
+    scene.traverse(object => {
+        if (object.isMesh && object.userData.id && FACE_PART_IDS.includes(object.userData.id)) {
+            // Ensure originalMaterial and boostedMaterial are stored in userData
+            if (!object.userData.originalMaterial || !object.userData.boostedMaterial) {
+                console.warn(`Face part ${object.userData.id} is missing material references.`);
+                return;
+            }
+
+            if (shouldBoost) {
+                // If an effect is active, use the boosted material
+                object.material = object.userData.boostedMaterial;
+            } else {
+                // If no effects are active, use the original material
+                object.material = object.userData.originalMaterial;
+            }
         }
     });
+}
 
+function resetPiecesToOriginalPositions() {
+    // Remove all current draggable objects and their associated meshes (like redaction rectangles)
+    draggableObjects.forEach(object => {
+        scene.remove(object);
+        if (object.geometry) object.geometry.dispose();
+        // Dispose of materials, including the custom boosted material if it exists
+        if (object.material) {
+            if (Array.isArray(object.material)) {
+                object.material.forEach(m => m.dispose());
+            } else {
+                object.material.dispose();
+            }
+        }
+        // Also dispose of stored materials if they were created per mesh
+        if (object.userData.originalMaterial) object.userData.originalMaterial.dispose();
+        if (object.userData.boostedMaterial) object.userData.boostedMaterial.dispose();
+    });
     draggableObjects = []; // Clear the array
     cameraAnimationTargets = []; // Clear camera animation targets
 
     // Reset specific global references
-    dogecoinRef = null;
-    spacexRef = null;
     rightEyeMesh = null;
     leftEyeMesh = null;
-    rightEyeRedactionRect = null;
-    leftEyeRedactionRect = null;
-    backgroundMesh = null; // Also reset background mesh reference
-    
-    // Remove existing text meshes before re-adding to avoid duplicates and ensure clean state
-    if (marqueeTextMesh) { marqueeTextMesh.geometry.dispose(); marqueeTextMesh.material.dispose(); marqueeTextMesh = null; }
-    if (biometricMarqueeTextMesh) { biometricMarqueeTextMesh.geometry.dispose(); biometricMarqueeTextMesh.material.dispose(); biometricMarqueeTextMesh = null; }
-    if (bloodTextMesh) { bloodTextMesh.geometry.dispose(); bloodTextMesh.material.dispose(); bloodTextMesh = null; }
-    if (redactedGlitchTextMesh) { redactedGlitchTextMesh.geometry.dispose(); redactedGlitchTextMesh.material.dispose(); redactedGlitchTextMesh = null; }
+    if (rightEyeRedactionRect) { scene.remove(rightEyeRedactionRect); rightEyeRedactionRect.geometry.dispose(); rightEyeRedactionRect.material.dispose(); rightEyeRedactionRect = null; }
+    if (leftEyeRedactionRect) { scene.remove(leftEyeRedactionRect); leftEyeRedactionRect.geometry.dispose(); leftEyeRedactionRect.material.dispose(); leftEyeRedactionRect = null; }
 
-    // 3. Reset the "removed" flag for all assets in the config
-    initialAssetConfigs.forEach(config => {
-        config.removed = false;
+    // Remove existing text meshes before re-adding to avoid duplicates and ensure clean state
+    if (marqueeTextMesh) { scene.remove(marqueeTextMesh); marqueeTextMesh.geometry.dispose(); marqueeTextMesh.material.dispose(); marqueeTextMesh = null; }
+    if (biometricMarqueeTextMesh) { scene.remove(biometricMarqueeTextMesh); biometricMarqueeTextMesh.geometry.dispose(); biometricMarqueeTextMesh.material.dispose(); biometricMarqueeTextMesh = null; }
+    if (bloodTextMesh) { scene.remove(bloodTextMesh); bloodTextMesh.geometry.dispose(); bloodTextMesh.material.dispose(); bloodTextMesh = null; }
+    if (redactedGlitchTextMesh) { scene.remove(redactedGlitchTextMesh); redactedGlitchTextMesh.geometry.dispose(); redactedGlitchTextMesh.material.dispose(); redactedGlitchTextMesh = null; }
+
+    // Clear droneMeshes array and remove all drones
+    droneMeshes.forEach(drone => {
+        scene.remove(drone);
+        if (drone.geometry) drone.geometry.dispose();
+        if (drone.material) drone.material.dispose();
+        // Also dispose of stored materials if they were created per mesh
+        if (drone.userData.originalTexture) drone.userData.originalTexture.dispose();
     });
+    droneMeshes = [];
+
+    // Turn off all effects on RESET (before re-adding assets)
+    turnOffAllEffects();
 
     // Re-add all assets from their initial configurations
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.setCrossOrigin(''); // Set cross-origin for texture loading
-
-    // Base scale factor to make images viewable at a reasonable size
-    const baseScale = 0.005; 
-
-    // Helper function for loading textures with best practices
-    const loadTexture = (url, callback) => {
-        textureLoader.load(url, (texture) => {
-            texture.colorSpace = THREE.SRGBColorSpace;
-            texture.minFilter = THREE.LinearFilter;
-            texture.magFilter = THREE.LinearFilter;
-            texture.generateMipmaps = false;
-            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-            callback(texture);
-        }, undefined, (error) => {
-            console.error('Error loading texture:', url, error);
-            // Fallback to placeholder
-            const placeholderCanvas = document.createElement('canvas');
-            placeholderCanvas.width = 1;
-            placeholderCanvas.height = 1;
-            const placeholderContext = placeholderCanvas.getContext('2d');
-            placeholderContext.fillStyle = 'red';
-            placeholderContext.fillRect(0, 0, 1, 1);
-            const placeholderTexture = new THREE.CanvasTexture(placeholderCanvas);
-            callback(placeholderTexture);
-        });
-    };
-    
-    let loadedAssetsCount = 0;
-    const totalAssetsToLoad = initialAssetConfigs.length + 3; // +3 for doge original, tesla, x logo
-
-    // Function to handle the complex, dependent loading after core assets are ready
-    const handleDependentLoading = () => {
-        // Ensure all necessary textures for swapping are loaded before proceeding
-        if (!dogecoinOriginalTexture || !teslaTexture || !xLogoTexture) {
-            return; // Wait for all textures
-        }
-        
-        // --- 3.1. Load and Position Dogecoin/Tesla (Using FIXED initialPosition) ---
-        const dogecoinConfig = initialAssetConfigs.find(c => c.id === 'dogecoin');
-        if (dogecoinConfig && !dogecoinConfig.removed) {
-            // Re-create the Tesla Greyscale Contrast Material
-            teslaGreyscaleContrastMaterial = new THREE.ShaderMaterial({
-                uniforms: {
-                    tDiffuse: { value: teslaTexture },
-                    contrast: { value: GreyscaleContrastShader.uniforms.contrast.value }
-                },
-                vertexShader: GreyscaleContrastShader.vertexShader,
-                fragmentShader: GreyscaleContrastShader.fragmentShader,
-                transparent: true,
-                alphaTest: 0.5
-            });
-
-            // Re-create Dogecoin/Tesla mesh
-            const material = teslaGreyscaleContrastMaterial;
-            const dogecoinScaleFactor = 0.7;
-            const planeWidth = teslaTexture.image.width * baseScale * dogecoinScaleFactor;
-            const planeHeight = teslaTexture.image.height * baseScale * dogecoinScaleFactor;
-            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-            const dogecoin = new THREE.Mesh(geometry, material);
-            
-            // Set the position using the FIXED initialPosition stored in the config
-            dogecoin.position.copy(dogecoinConfig.initialPosition);
-
-            dogecoin.userData.currentLayer = dogecoinConfig.initialLayer;
-            dogecoin.userData.initialPosition = dogecoinConfig.initialPosition.clone();
-            dogecoin.userData.initialLayer = dogecoinConfig.initialLayer;
-            dogecoin.userData.originalTexture = dogecoinOriginalTexture;
-            dogecoin.userData.teslaTexture = teslaTexture;
-            dogecoin.userData.id = 'dogecoin';
-            dogecoin.userData.initialScale = { width: planeWidth, height: planeHeight };
-            scene.add(dogecoin);
-            draggableObjects.push(dogecoin);
-            cameraAnimationTargets.push(dogecoin);
-            dogecoinRef = dogecoin;
-        }
-
-        // --- 3.2. Load and Position Fiat Worthless (Using FIXED initialPosition) ---
-        const fiatWorthlessConfig = initialAssetConfigs.find(c => c.id === 'fiatWorthless');
-        if (fiatWorthlessConfig && !fiatWorthlessConfig.removed) {
-            loadTexture(fiatWorthlessConfig.url, (texture) => {
-                const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-                const aspectRatio = texture.image.width / texture.image.height;
-                const fiatWorthlessHeight = 0.3; // Fixed height
-                const fiatWorthlessWidth = fiatWorthlessHeight * aspectRatio;
-                const geometry = new THREE.PlaneGeometry(fiatWorthlessWidth, fiatWorthlessHeight);
-                const fiatWorthless = new THREE.Mesh(geometry, material);
-
-                // Set position using the FIXED initialPosition stored in the config
-                fiatWorthless.position.copy(fiatWorthlessConfig.initialPosition);
-
-                fiatWorthless.userData.currentLayer = fiatWorthlessConfig.initialLayer;
-                fiatWorthless.userData.initialPosition = fiatWorthlessConfig.initialPosition.clone();
-                fiatWorthless.userData.initialLayer = fiatWorthlessConfig.initialLayer;
-                fiatWorthless.userData.id = 'fiatWorthless';
-                fiatWorthless.userData.initialScale = { width: fiatWorthlessWidth, height: fiatWorthlessHeight };
-                scene.add(fiatWorthless);
-                draggableObjects.push(fiatWorthless);
-                cameraAnimationTargets.push(fiatWorthless);
-            });
-        }
-        
-        // --- 3.3. Load and Position Signature (Using FIXED initialPosition) ---
-        const signatureConfig = initialAssetConfigs.find(c => c.id === 'signature');
-        if (signatureConfig && !signatureConfig.removed) {
-            loadTexture(signatureConfig.url, (texture) => {
-                const signatureMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-                const signatureAspectRatio = texture.image.width / texture.image.height;
-                const signatureHeight = 1.0; // Fixed height
-                const signatureWidth = signatureHeight * signatureAspectRatio;
-                const signatureGeometry = new THREE.PlaneGeometry(signatureWidth, signatureHeight);
-                const signature = new THREE.Mesh(signatureGeometry, signatureMaterial);
-
-                // Set position using the FIXED initialPosition stored in the config
-                signature.position.copy(signatureConfig.initialPosition);
-
-                signature.userData.currentLayer = signatureConfig.initialLayer;
-                signature.userData.id = 'signature';
-                signature.userData.initialScale = { width: signatureWidth, height: signatureHeight };
-                signature.userData.initialPosition = signatureConfig.initialPosition.clone(); // Ensure initialPosition is stored
-                signature.userData.initialLayer = signatureConfig.initialLayer;
-                scene.add(signature);
-            });
-        }
-        
-        // 4. Reset camera and controls
-        resetCameraToGlobalStart(); // Use the dedicated hard reset function
-
-        // 5. Reset background color to default dark gray
-        renderer.setClearColor(0x1e1e1e); // Default dark gray
-        
-        // 6. Force positioning of other dynamic elements like ear and marquee texts
-        onWindowResize();
-    };
-
-    // Load necessary swap textures first
-    loadTexture(URL_DOGECOIN_ORIGINAL, (tex) => { dogecoinOriginalTexture = tex; loadedAssetsCount++; });
-    loadTexture(URL_TESLA_SWAP, (tex) => { teslaTexture = tex; loadedAssetsCount++; });
-    loadTexture(URL_X_LOGO_SWAP, (tex) => { xLogoTexture = tex; loadedAssetsCount++; });
-
-    // Separate loading loop for all other assets
     initialAssetConfigs.forEach(config => {
-        if (config.removed || config.id === 'dogecoin' || config.id === 'fiatWorthless' || config.id === 'signature') {
-            return; // Skip assets that are loaded dependently or removed
-        }
-        
-        let material, geometry, mesh;
+        // Reset the 'removed' flag for all assets
+        config.removed = false;
+
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.setCrossOrigin('');
+        let geometry, mesh;
+
+        // Helper function for loading textures with Arweave fallback
+        // Tries AWS first; on failure falls back to Arweave if a mapping exists.
+        const loadTexture = (url, callback) => {
+            const applySettings = (texture) => {
+                texture.colorSpace = THREE.SRGBColorSpace;
+                texture.minFilter = THREE.LinearFilter;
+                texture.magFilter = THREE.LinearFilter;
+                texture.generateMipmaps = false;
+                texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            };
+            const makePlaceholder = () => {
+                const c = document.createElement('canvas');
+                c.width = 1; c.height = 1;
+                const ctx = c.getContext('2d');
+                ctx.fillStyle = 'red';
+                ctx.fillRect(0, 0, 1, 1);
+                return new THREE.CanvasTexture(c);
+            };
+            textureLoader.load(url, (texture) => {
+                applySettings(texture);
+                callback(texture);
+            }, undefined, (error) => {
+                console.warn('AWS load failed, trying Arweave fallback:', url, error);
+                const fallback = ARWEAVE_FALLBACKS[url];
+                if (fallback) {
+                    textureLoader.load(fallback, (texture) => {
+                        applySettings(texture);
+                        console.log('Arweave fallback succeeded:', fallback);
+                        callback(texture);
+                    }, undefined, (err2) => {
+                        console.error('Arweave fallback also failed:', fallback, err2);
+                        callback(makePlaceholder());
+                    });
+                } else {
+                    console.error('No Arweave fallback for:', url);
+                    callback(makePlaceholder());
+                }
+            });
+        };
 
         switch (config.type) {
-            case 'background':
-                loadTexture(config.url, (texture) => {
-                    material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
-                    const aspectRatio = texture.image.width / texture.image.height;
-                    const planeHeight = 10 * config.scaleFactor;
-                    const planeWidth = planeHeight * aspectRatio;
-                    geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-                    backgroundMesh = new THREE.Mesh(geometry, material);
-                    backgroundMesh.position.copy(config.initialPosition);
-                    backgroundMesh.userData.initialPosition = config.initialPosition.clone();
-                    backgroundMesh.userData.initialLayer = config.initialLayer;
-                    backgroundMesh.userData.id = config.id;
-                    scene.add(backgroundMesh);
-                    cameraAnimationTargets.push(backgroundMesh);
-                    loadedAssetsCount++;
-                });
-                break;
             case 'image':
-                loadTexture(config.url, (texture) => {
-                    let currentMaterial;
-                    const initialPlaneWidth = texture.image.width * baseScale * config.scaleFactor;
-                    const initialPlaneHeight = texture.image.height * baseScale * config.scaleFactor;
+                // Only re-add if not a signature image or if it's the *first* signature image
+                if (config.id === 'signature') {
+                    // Count existing signature images in the scene
+                    const existingSignatures = scene.children.filter(child => child.userData.id === 'signature');
+                    if (existingSignatures.length >= 1) {
+                        // If one signature already exists, skip adding another one
+                        return;
+                    }
+                }
+                // Skip adding removed assets
+                if (config.removed) return;
 
-                    if (config.id === 'spacex') {
-                        currentMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-                        spacexRef = new THREE.Mesh(new THREE.PlaneGeometry(initialPlaneWidth, initialPlaneHeight), currentMaterial);
-                        spacexOriginalTexture = texture;
-                        spacexRef.userData.originalTexture = spacexOriginalTexture;
-                        spacexRef.userData.xLogoTexture = xLogoTexture; // Should be loaded via loadTexture above
-                        spacexRef.userData.originalWidth = initialPlaneWidth;
-                        spacexRef.userData.originalHeight = initialPlaneHeight;
-                        mesh = spacexRef;
-                    } else {
-                        currentMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-                        geometry = new THREE.PlaneGeometry(initialPlaneWidth, initialPlaneHeight);
-                        mesh = new THREE.Mesh(geometry, currentMaterial);
+                // Filter out 'samAltmanGrid' images during reset
+                if (config.id.startsWith('samAltmanGrid')) return;
+                if (config.id.startsWith('samAltmanGridBack')) return;
+                if (config.id.startsWith('samAltmanGridFarBack')) return;
+
+                loadTexture(config.url, (texture) => {
+                    // APPLY TEXTURE SETTINGS
+                    applyTextureSettings(texture, renderer);
+
+                    let currentMaterial;
+                    let textureToUse = texture;
+                    
+                    // Determine the correct texture to use for the drone on reset
+                    if (config.id.startsWith('drone')) {
+                        // Check the stored currentTextureUrl to determine which texture to use
+                        if (config.currentTextureUrl === URL_BLUE_ORIGIN) {
+                            textureToUse = blueOriginTexture; 
+                        } else {
+                            // If it's the original drone URL, use the loaded texture (which is the original one)
+                            textureToUse = texture;
+                        }
                     }
 
-                    // Set properties common to all image meshes
-                    mesh.position.copy(config.initialPosition);
-                    mesh.rotation.copy(config.initialRotation ? config.initialRotation : new THREE.Euler());
+                    // For images loaded from initialAssetConfigs, use the stored initialScale if available
+                    let initialPlaneWidth = config.initialScale.width;
+                    let initialPlaneHeight = config.initialScale.height;
+
+                    // If it's a drone and the texture is the blue origin GIF, recalculate the width based on the GIF's aspect ratio
+                    if (config.id.startsWith('drone') && textureToUse === blueOriginTexture) {
+                        // Maintain the original height of the drone plane (stored in initialScale.height)
+                        const newAspectRatio = blueOriginTexture.image.width / blueOriginTexture.image.height;
+                        initialPlaneWidth = initialPlaneHeight * newAspectRatio;
+                    }
+                    
+                    // --- NEW MATERIAL LOGIC ---
+                    const originalMaterial = new THREE.MeshBasicMaterial({ map: textureToUse, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+                    
+                    let meshMaterial = originalMaterial;
+                    let boostedMaterial = null;
+
+                    if (FACE_PART_IDS.includes(config.id)) {
+                        // Create a unique boosted material for face parts if not already created globally
+                        boostedMaterial = new THREE.ShaderMaterial({
+                            uniforms: { ...LuminanceBoostShader.uniforms, tDiffuse: { value: textureToUse } },
+                            vertexShader: LuminanceBoostShader.vertexShader,
+                            fragmentShader: LuminanceBoostShader.fragmentShader,
+                            transparent: true,
+                            side: THREE.DoubleSide,
+                            alphaTest: 0.5
+                        });
+                        // Set initial material based on current effect state (which is none on reset)
+                        meshMaterial = originalMaterial;
+                    } else {
+                        meshMaterial = originalMaterial;
+                    }
+                    // --- END NEW MATERIAL LOGIC ---
+
+                    geometry = new THREE.PlaneGeometry(initialPlaneWidth, initialPlaneHeight); // Use calculated or stored initial dimensions
+                    mesh = new THREE.Mesh(geometry, meshMaterial);
+                    mesh.position.copy(config.initialPosition); // Use the stored initialPosition directly
+                    mesh.rotation.copy(config.initialRotation ? new THREE.Euler().copy(config.initialRotation) : new THREE.Euler()); // Apply initial rotation if present
                     mesh.userData.currentLayer = config.initialLayer;
-                    mesh.userData.initialPosition = config.initialPosition.clone();
+                    mesh.userData.initialPosition = config.initialPosition.clone(); // Clone for userData as well
                     mesh.userData.initialLayer = config.initialLayer;
                     mesh.userData.id = config.id;
-                    mesh.userData.initialScale = { width: initialPlaneWidth, height: initialPlaneHeight };
+                    mesh.userData.initialScale = { width: config.initialScale.width, height: config.initialScale.height }; // Store original scale
+                    
+                    // Store material references
+                    if (FACE_PART_IDS.includes(config.id)) {
+                        mesh.userData.originalMaterial = originalMaterial;
+                        mesh.userData.boostedMaterial = boostedMaterial;
+                    }
+                    
+                    if (config.id.startsWith('drone')) {
+                        // Restore drone-specific data
+                        mesh.userData.droneInitialY = mesh.position.y; // Store initial Y for hovering animation
+                        mesh.userData.droneHoverPhase = config.droneHoverPhase; // Restore unique hover phase
+                        mesh.userData.droneInitialX = mesh.position.x; // Restore initial X for hovering animation
+                        mesh.userData.droneHoverAmplitude = config.droneHoverAmplitude; // Restore unique amplitude
+                        mesh.userData.droneHoverSpeed = config.droneHoverSpeed; // Restore unique speed
+                        // The original texture is the one loaded by the callback, which is 'texture' here if URL_DRONE was used.
+                        mesh.userData.originalTexture = texture; 
+                        mesh.userData.currentTexture = textureToUse; // Store current texture
+                        scene.add(mesh);
+                        draggableObjects.push(mesh);
+                        cameraAnimationTargets.push(mesh);
+                        droneMeshes.push(mesh);
+                    } else if (config.id !== 'signature') { // Signature is static, add directly to scene without making draggable
+                        scene.add(mesh);
+                        draggableObjects.push(mesh);
+                        cameraAnimationTargets.push(mesh);
+                    } else {
+                        scene.add(mesh);
+                    }
 
-                    scene.add(mesh);
-                    draggableObjects.push(mesh);
-                    cameraAnimationTargets.push(mesh);
-
-                    // Re-create redaction rectangles for eyes
                     if (config.id === 'rightEye') {
                         rightEyeMesh = mesh;
                         const redactionWidth = initialPlaneWidth * 1.2;
-                        const redactionHeight = initialPlaneHeight * 0.4;
+                        const redactionHeight = initialPlaneHeight * 0.5;
                         const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
-                        const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                        const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
                         rightEyeRedactionRect = new THREE.Mesh(redactionGeometry, redactionMaterial);
                         rightEyeRedactionRect.position.set(mesh.position.x, mesh.position.y, mesh.position.z + (1.5 * depthStep));
                         rightEyeRedactionRect.visible = false;
@@ -1631,86 +1666,122 @@ function resetPiecesToOriginalPositions() {
                     } else if (config.id === 'leftEye') {
                         leftEyeMesh = mesh;
                         const redactionWidth = initialPlaneWidth * 1.2;
-                        const redactionHeight = initialPlaneHeight * 0.4; // FIX: Corrected typo from 'redaaactionHeight'
+                        const redactionHeight = initialPlaneHeight * 0.5;
                         const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
-                        const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                        const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
                         leftEyeRedactionRect = new THREE.Mesh(redactionGeometry, redactionMaterial);
                         leftEyeRedactionRect.position.set(mesh.position.x, mesh.position.y, mesh.position.z + (1.5 * depthStep));
                         leftEyeRedactionRect.visible = false;
                         scene.add(leftEyeRedactionRect);
                     }
-                    loadedAssetsCount++;
                 });
                 break;
             case 'textMesh':
                 // Re-initialize 3D text meshes (Marquee, Biometric, Blood, Redacted Glitch)
-                // Note: Textures are created synchronously here, but meshes are loaded back into the scene
-                // The geometry/material cloning ensures unique instances for the new scene
                 if (config.id === 'marqueeTextMesh') {
-                    marqueeTexture = createMarqueeTexture();
+                    // Re-create the mesh, as it was disposed earlier
+                    marqueeTexture = createMarqueeTexture(); // Settings applied inside this function
                     const newMarqueeMaterial = new THREE.MeshBasicMaterial({ map: marqueeTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
                     const newMarqueePlaneWidth = 20;
                     const newMarqueePlaneHeight = newMarqueePlaneWidth / (marqueeTexture.image.width / marqueeTexture.image.height);
                     const newMarqueeGeometry = new THREE.PlaneGeometry(newMarqueePlaneWidth, newMarqueePlaneHeight);
+
                     marqueeTextMesh = new THREE.Mesh(newMarqueeGeometry, newMarqueeMaterial);
-                    marqueeTextMesh.position.copy(config.initialPosition);
-                    marqueeTextMesh.userData.initialPosition = config.initialPosition.clone();
+                    marqueeTextMesh.position.copy(config.initialPosition); // Use the stored initialPosition directly
+                    marqueeTextMesh.userData.initialPosition = marqueeTextMesh.position.clone(); // Clone for userData as well
                     marqueeTextMesh.userData.initialLayer = config.initialLayer;
-                    marqueeTextMesh.visible = false; // Always start hidden on reset
-                    marqueeTextMesh.userData.id = config.id;
+                    marqueeTextMesh.visible = effectControls.xray; // Tied to XRAY effect
                     scene.add(marqueeTextMesh);
-                    loadedAssetsCount++;
                 } else if (config.id === 'biometricMarqueeTextMesh') {
-                    biometricMarqueeTexture = createBiometricMarqueeTexture();
+                    // Re-create the mesh, as it was disposed earlier
+                    biometricMarqueeTexture = createBiometricMarqueeTexture(); // Settings applied inside this function
                     const newBiometricMarqueeMaterial = new THREE.MeshBasicMaterial({ map: biometricMarqueeTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
                     const newBiometricMarqueePlaneWidth = 20;
                     const newBiometricMarqueePlaneHeight = newBiometricMarqueePlaneWidth / (biometricMarqueeTexture.image.width / biometricMarqueeTexture.image.height);
                     const newBiometricMarqueeGeometry = new THREE.PlaneGeometry(newBiometricMarqueePlaneWidth, newBiometricMarqueePlaneHeight);
+
                     biometricMarqueeTextMesh = new THREE.Mesh(newBiometricMarqueeGeometry, newBiometricMarqueeMaterial);
-                    biometricMarqueeTextMesh.position.copy(config.initialPosition);
-                    biometricMarqueeTextMesh.userData.initialPosition = config.initialPosition.clone();
+                    biometricMarqueeTextMesh.position.copy(config.initialPosition); // Use the stored initialPosition directly
+                    biometricMarqueeTextMesh.userData.initialPosition = biometricMarqueeTextMesh.position.clone(); // Clone for userData as well
                     biometricMarqueeTextMesh.userData.initialLayer = config.initialLayer;
-                    biometricMarqueeTextMesh.visible = false;
-                    biometricMarqueeTextMesh.userData.id = config.id;
+                    biometricMarqueeTextMesh.visible = effectControls.biometricMarquee || effectControls.og || effectControls.hacker || effectControls.surveillance || effectControls.greed; // Visibility depends on multiple effects
                     scene.add(biometricMarqueeTextMesh);
-                    loadedAssetsCount++;
                 } else if (config.id === 'bloodTextMesh') {
-                    bloodTexture = createBloodTextTexture();
+                    // Re-create the mesh, as it was disposed earlier
+                    bloodTexture = createBloodTextTexture(); // Settings applied inside this function
                     const newBloodTextMaterial = new THREE.MeshBasicMaterial({ map: bloodTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
                     const newBloodTextPlaneWidth = 20;
                     const newBloodTextPlaneHeight = newBloodTextPlaneWidth / (bloodTexture.image.width / bloodTexture.image.height);
                     const newBloodTextGeometry = new THREE.PlaneGeometry(newBloodTextPlaneWidth, newBloodTextPlaneHeight);
+
                     bloodTextMesh = new THREE.Mesh(newBloodTextGeometry, newBloodTextMaterial);
-                    bloodTextMesh.position.copy(config.initialPosition);
-                    bloodTextMesh.userData.initialPosition = config.initialPosition.clone();
+                    bloodTextMesh.position.copy(config.initialPosition); // Use the stored initialPosition directly
+                    bloodTextMesh.userData.initialPosition = bloodTextMesh.position.clone();
                     bloodTextMesh.userData.initialLayer = config.initialLayer;
+                    // Ensure bloodTextMesh is hidden on reset, as the effectControls are reset before this point
                     bloodTextMesh.visible = false;
-                    bloodTextMesh.userData.id = config.id;
                     scene.add(bloodTextMesh);
-                    loadedAssetsCount++;
                 } else if (config.id === 'redactedGlitchTextMesh') {
-                    redactedGlitchTexture = createRedactedGlitchTexture();
+                    // Re-create the mesh, as it was disposed earlier
+                    redactedGlitchTexture = createRedactedGlitchTexture(); // Settings applied inside this function
                     const redactedGlitchMaterial = new THREE.MeshBasicMaterial({ map: redactedGlitchTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
                     const redactedGlitchPlaneWidth = 15;
                     const redactedGlitchPlaneHeight = redactedGlitchPlaneWidth / (redactedGlitchTexture.image.width / redactedGlitchTexture.image.height);
                     const newRedactedGlitchGeometry = new THREE.PlaneGeometry(redactedGlitchPlaneWidth, redactedGlitchPlaneHeight);
+
                     redactedGlitchTextMesh = new THREE.Mesh(newRedactedGlitchGeometry, redactedGlitchMaterial);
-                    redactedGlitchTextMesh.position.copy(config.initialPosition);
-                    redactedGlitchTextMesh.userData.initialPosition = config.initialPosition.clone();
+                    redactedGlitchTextMesh.position.copy(config.initialPosition); // Use the stored initialPosition directly
+                    redactedGlitchTextMesh.userData.initialPosition = redactedGlitchTextMesh.position.clone();
                     redactedGlitchTextMesh.userData.initialLayer = config.initialLayer;
-                    redactedGlitchTextMesh.visible = false;
-                    redactedGlitchTextMesh.userData.id = config.id;
+                    redactedGlitchTextMesh.visible = effectControls.redactedGlitch; // Respect current effect control
                     scene.add(redactedGlitchTextMesh);
-                    initializeRedactedGlitchPhraseData();
-                    loadedAssetsCount++;
+                    initializeRedactedGlitchPhraseData(); // Re-initialize redaction patterns
                 }
                 break;
         }
     });
+
+    // Reset camera to initial global position and look-at
+    camera.position.copy(initialGlobalCameraPos);
+    controls.target.copy(initialGlobalCameraLookAt);
+    camera.lookAt(controls.target);
+    controls.update(); // Update controls after manual camera change
+
+    // Stop any active camera animations or Y-rotation
+    effectControls.cameraAnimation = false;
+    effectControls.yRotation = false;
+    cameraAnimationActive = false;
+    controls.enabled = true; // Re-enable orbit controls
+    // Update UI buttons for camera animation and Y-rotation
+    updateUIButtonState('yRotation', false);
+    updateUIButtonState('cameraAnimation', false);
+
+    // Also disable redacted effects as they are tied to eye positions
+    effectControls.redacted = false;
+    effectControls.redactedGlitch = false;
+    effectControls.anon = false; // Turn off anon effect on reset
+    effectControls.hacker = false; // Turn off hacker effect on reset
+    effectControls.surveillance = false; // Turn off surveillance effect on reset
+    effectControls.greed = false; // Turn off greed effect on reset
+    updateUIButtonState('redacted', false);
+    updateUIButtonState('redactedGlitch', false);
+    updateUIButtonState('anon', false);
+    updateUIButtonState('hacker', false);
+    updateUIButtonState('surveillance', false);
+    updateUIButtonState('greed', false);
+
+    // If threshold was forced on by redacted, turn it off if no other effect is using it.
+    if (!effectControls.redacted && !effectControls.redactedGlitch && !effectControls.anon && !effectControls.hacker && !effectControls.surveillance && !effectControls.greed) {
+        effectControls.threshold = false;
+        thresholdPass.enabled = false;
+        updateUIButtonState('threshold', false);
+    }
     
-    // Use a small timeout to ensure dependent textures are loaded before calling handleDependentLoading
-    // This is safer than relying on the async loadTexture to complete if the assets are cached.
-    setTimeout(handleDependentLoading, 100);
+    // Crucial: Update face materials to switch back to original (non-boosted) material
+    updateFaceMaterialState();
+
+    lastActivityTime = performance.now(); // Reset activity timer on reset
+    yRotationStartTime = 0; // Reset Y-rotation auto-start timer on reset
 }
 
 function turnOffAllEffects() {
@@ -1730,10 +1801,7 @@ function turnOffAllEffects() {
     // Reset all effect control booleans to false
     for (const prop in effectControls) {
         if (effectControls.hasOwnProperty(prop)) {
-            // Do not reset the brightness setting
-            if (prop !== 'shadowBrightness') {
-                effectControls[prop] = false;
-            }
+            effectControls[prop] = false;
         }
     }
 
@@ -1762,30 +1830,23 @@ function turnOffAllEffects() {
     updateUIButtonState('greed', false); // Update greed button state
 
     // Specific effect cleanups
-    if (rightEyeRedactionRect) {
-        rightEyeRedactionRect.visible = false;
-        // Ensure redacted eyes are black when all effects are off
-        rightEyeRedactionRect.material.color.setHex(0x000000);
-    }
-    if (leftEyeRedactionRect) {
-        leftEyeRedactionRect.visible = false;
-        // Ensure redacted eyes are black when all effects are off
-        leftEyeRedactionRect.material.color.setHex(0x000000);
-    }
+    if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false;
+    if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false;
     if (marqueeTextMesh) marqueeTextMesh.visible = false;
     if (biometricMarqueeTextMesh) biometricMarqueeTextMesh.visible = false;
     if (bloodTextMesh) bloodTextMesh.visible = false;
     if (redactedGlitchTextMesh) redactedGlitchTextMesh.visible = false;
+    
+    // Crucial: Update face materials to switch back to original (non-boosted) material
+    updateFaceMaterialState();
 
     cameraAnimationActive = false;
     controls.enabled = true; // Re-enable orbit controls
     cameraAnimationState = 'idle';
     assetsVisitedCount = 0;
 
+    lastActivityTime = performance.now(); // Reset activity timer
     yRotationStartTime = 0; // Reset Y-rotation auto-start timer
-    
-    // Reset background to default dark gray
-    renderer.setClearColor(0x1e1e1e); // Default dark gray
 }
 
 // Cache for canvas contexts to read texture alpha values efficiently
@@ -1819,72 +1880,6 @@ function getAlphaAtUV(texture, uv) {
     return pixelData[3] / 255; // Alpha channel
 }
 
-function getBackgroundBounds(z) {
-    if (!backgroundMesh) return null;
-    
-    // Calculate world height and width at the given Z-plane
-    const distance_from_camera = camera.position.z - z;
-    const world_height = 2 * distance_from_camera * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const world_width = world_height * camera.aspect;
-
-    // The background mesh is centered at (0, 0) in world space (ignoring its own depth offset)
-    // The background mesh's size is determined by its texture size and scale factor (1.10)
-    const bgMeshWidth = backgroundMesh.geometry.parameters.width;
-    const bgMeshHeight = backgroundMesh.geometry.parameters.height;
-    
-    // The background mesh is positioned at backgroundMesh.position.x/y/z.
-    const bgX = backgroundMesh.position.x;
-    const bgY = backgroundMesh.position.y;
-    
-    // The bounds of the background image in world coordinates (at its own Z-plane)
-    const minX = bgX - bgMeshWidth / 2;
-    const maxX = bgX + bgMeshWidth / 2;
-    const minY = bgY - bgMeshHeight / 2;
-    const maxY = bgY + bgMeshHeight / 2;
-    
-    return { minX, maxX, minY, maxY, width: bgMeshWidth, height: bgMeshHeight };
-}
-
-// Function to calculate Dogecoin/Tesla position (extracted from init/onWindowResize)
-const calculateDogecoinAndFiatPosition = (bgMesh, dogeMesh, dogeTexture, fiatMesh, fiatTexture, dogeConfig, fiatConfig) => {
-    if (!bgMesh || !dogeMesh || !dogeTexture || !fiatMesh || !fiatTexture) return;
-
-    const bgBounds = getBackgroundBounds(bgMesh.position.z);
-    if (!bgBounds) return;
-
-    const dogeWidth = dogeMesh.geometry.parameters.width;
-    const dogeHeight = dogeMesh.geometry.parameters.height;
-
-    // Target X: Same as ROCKET_INITIAL_X
-    const targetX = ROCKET_INITIAL_X;
-
-    // Target Y: Bottom edge of the background mesh + half the doge height + padding
-    const paddingY = 0.5;
-    const targetY = bgBounds.minY + dogeHeight / 2 + paddingY;
-    
-    // Ensure Z remains at dogecoinZ
-    const dogecoinZ = (dogeConfig.initialLayer - 1) * depthStep;
-
-    const dogecoinFinalPosition = new THREE.Vector3(targetX, targetY, dogecoinZ);
-
-    dogeMesh.position.copy(dogecoinFinalPosition);
-    
-    // Update the initial position in config
-    dogeConfig.initialPosition.copy(dogecoinFinalPosition);
-
-    // --- Fiat Worthless Position ---
-    const fiatWorthlessNewLayer = dogeConfig.initialLayer + 2; 
-    const fiatWorthlessNewZ = (fiatWorthlessNewLayer - 1) * depthStep;
-
-    // Position it slightly below and to the right of the dogecoin/tesla logo
-    const fiatWorthlessInitialWorldX = dogeMesh.position.x + dogeMesh.geometry.parameters.width * 1.1 + .25; 
-    const fiatWorthlessInitialWorldY = dogeMesh.position.y - dogeMesh.geometry.parameters.height * .11 - 0;
-    const fiatWorthlessFinalPosition = new THREE.Vector3(fiatWorthlessInitialWorldX, fiatWorthlessInitialWorldY, fiatWorthlessNewZ);
-
-    fiatMesh.position.copy(fiatWorthlessFinalPosition);
-    fiatConfig.initialPosition.copy(fiatWorthlessFinalPosition);
-};
-
 function init() {
     scene = new THREE.Scene();
 
@@ -1894,8 +1889,8 @@ function init() {
 
     renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x1e1e1e); // Dark gray background
-    renderer.outputColorSpace = THREE.SRGBColorSpace; // THREE.js best practice: set output color space
+    renderer.setClearColor(CLEAR_COLOR); // Use the defined dark gray background color
+    renderer.outputColorSpace = THREE.SRGBColorSpace; // Set renderer color space
     document.body.appendChild(renderer.domElement);
 
     renderer.sortObjects = true; // Enable object sorting for correct transparency rendering
@@ -1908,6 +1903,7 @@ function init() {
     controls.maxDistance = 20;
     controls.maxPolarAngle = Math.PI / 2;
     controls.addEventListener('change', () => {
+        lastActivityTime = performance.now();
         stopCameraAnimationAndReset(); // Stop animation on camera control interaction
     });
 
@@ -1917,6 +1913,7 @@ function init() {
 
     // Post-processing setup
     composer = new EffectComposer(renderer);
+    // Ensure the RenderPass is the first pass so the clear color is captured
     composer.addPass(new RenderPass(scene, camera));
 
     greyscalePass = new ShaderPass(GreyScaleShader);
@@ -1925,12 +1922,13 @@ function init() {
 
     thresholdPass = new ShaderPass(ThresholdShader);
     thresholdPass.uniforms['threshold'].value = effectControls.thresholdValue;
+    thresholdPass.uniforms['clearColor'].value = CLEAR_COLOR; // Ensure clear color is passed
     composer.addPass(thresholdPass);
     thresholdPass.enabled = effectControls.threshold;
 
     darkPass = new ShaderPass(DarkShader);
     darkPass.uniforms['threshold'].value = effectControls.thresholdValue;
-    darkPass.uniforms['brightnessMultiplier'].value = effectControls.shadowBrightness; // Set initial brightness
+    darkPass.uniforms['clearColor'].value = CLEAR_COLOR; // Ensure clear color is passed
     composer.addPass(darkPass);
     darkPass.enabled = effectControls.shadow;
 
@@ -1976,621 +1974,414 @@ function init() {
     mouse = new THREE.Vector2();
 
     const textureLoader = new THREE.TextureLoader();
-    textureLoader.setCrossOrigin(''); // FIX: Enable CORS for external texture loading
 
-    // Base scale factor to make images viewable at a reasonable size
-    const baseScale = 0.005;
-
-    // Helper function for loading textures with best practices
+    // Helper function for loading textures with Arweave fallback
+    // Tries AWS first; on failure falls back to Arweave if a mapping exists.
     const loadTexture = (url, callback) => {
-        textureLoader.load(url, (texture) => {
+        const applySettings = (texture) => {
             texture.colorSpace = THREE.SRGBColorSpace;
             texture.minFilter = THREE.LinearFilter;
             texture.magFilter = THREE.LinearFilter;
             texture.generateMipmaps = false;
             texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        };
+        const makePlaceholder = () => {
+            const c = document.createElement('canvas');
+            c.width = 1; c.height = 1;
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = 'red';
+            ctx.fillRect(0, 0, 1, 1);
+            return new THREE.CanvasTexture(c);
+        };
+        textureLoader.load(url, (texture) => {
+            applySettings(texture);
             callback(texture);
         }, undefined, (error) => {
-            console.error('Error loading texture:', url, error);
-            // Optionally use a placeholder texture or handle the error gracefully here
-            const placeholderCanvas = document.createElement('canvas');
-            placeholderCanvas.width = 1;
-            placeholderCanvas.height = 1;
-            const placeholderContext = placeholderCanvas.getContext('2d');
-            placeholderContext.fillStyle = 'red';
-            placeholderContext.fillRect(0, 0, 1, 1);
-            const placeholderTexture = new THREE.CanvasTexture(placeholderCanvas);
-            callback(placeholderTexture);
+            console.warn('AWS load failed, trying Arweave fallback:', url, error);
+            const fallback = ARWEAVE_FALLBACKS[url];
+            if (fallback) {
+                textureLoader.load(fallback, (texture) => {
+                    applySettings(texture);
+                    console.log('Arweave fallback succeeded:', fallback);
+                    callback(texture);
+                }, undefined, (err2) => {
+                    console.error('Arweave fallback also failed:', fallback, err2);
+                    callback(makePlaceholder());
+                });
+            } else {
+                console.error('No Arweave fallback for:', url);
+                callback(makePlaceholder());
+            }
         });
     };
 
-    // Load and add the background image
-    initialAssetConfigs.push({
-        id: 'background',
-        type: 'background',
-        url: URL_BACKGROUND,
-        initialPosition: new THREE.Vector3(0, 0, -4 * depthStep),
-        initialLayer: -4,
-        scaleFactor: 1.10,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_BACKGROUND, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
-        const aspectRatio = texture.image.width / texture.image.height;
-        const scaleFactor = 1.10;
-        const planeHeight = 10 * scaleFactor;
-        const planeWidth = planeHeight * aspectRatio;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight); // Fixed: Declare geometry here
-        backgroundMesh = new THREE.Mesh(geometry, material);
-        backgroundMesh.position.z = -4 * depthStep;
-        backgroundMesh.userData.initialPosition = backgroundMesh.position.clone();
-        backgroundMesh.userData.initialLayer = -4;
-        backgroundMesh.userData.id = 'background'; // Added ID
-        scene.add(backgroundMesh);
-        cameraAnimationTargets.push(backgroundMesh);
+    // Load the Blue Origin texture once, with best practices for GIF
+    loadTexture(URL_BLUE_ORIGIN, (texture) => {
+        blueOriginTexture = texture;
+        applyTextureSettings(blueOriginTexture, renderer); // Apply settings
     });
 
-    // Load and add the forehead image
-    initialAssetConfigs.push({
-        id: 'forehead',
-        type: 'image',
-        url: URL_FOREHEAD,
-        initialPosition: new THREE.Vector3(0, (0.5 + 2.666) * 1.10, (2 - 1) * depthStep),
-        initialLayer: 2,
-        baseScale: baseScale,
-        scaleFactor: 1.15,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_FOREHEAD, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const scaleFactor = 1.15;
-        const planeWidth = texture.image.width * baseScale * scaleFactor;
-        const planeHeight = texture.image.height * baseScale * scaleFactor;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        const forehead = new THREE.Mesh(geometry, material);
-        forehead.position.set(0, (0.5 + 2.666) * 1.10, (2 - 1) * depthStep);
-        forehead.userData.currentLayer = 2;
-        forehead.userData.initialPosition = forehead.position.clone();
-        forehead.userData.initialLayer = 2;
-        forehead.userData.id = 'forehead'; // Added ID
-        forehead.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(forehead);
-        draggableObjects.push(forehead);
-        cameraAnimationTargets.push(forehead);
-    });
+    // Base scale factor to make images viewable at a reasonable size
+    const baseScale = 0.005;
 
-    // Load and add the right eye image
-    initialAssetConfigs.push({
-        id: 'rightEye',
-        type: 'image',
-        url: URL_RIGHT_EYE,
-        initialPosition: new THREE.Vector3(-0.84 * 1.2 * 1.2, (0.175 * 1.15 * 1.20 * 3) + 2.0 - 1.0, (7 - 1) * depthStep),
-        initialLayer: 7,
-        baseScale: baseScale,
-        scaleFactor: 1.0,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_RIGHT_EYE, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const planeWidth = texture.image.width * baseScale;
-        const planeHeight = texture.image.height * baseScale;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        rightEyeMesh = new THREE.Mesh(geometry, material);
-        rightEyeMesh.position.set(-0.84 * 1.2 * 1.2, (0.175 * 1.15 * 1.20 * 3) + 2.0 - 1.0, (7 - 1) * depthStep);
-        rightEyeMesh.userData.currentLayer = 7;
-        rightEyeMesh.userData.initialPosition = rightEyeMesh.position.clone();
-        rightEyeMesh.userData.initialLayer = 7;
-        rightEyeMesh.userData.id = 'rightEye'; // Added ID
-        rightEyeMesh.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(rightEyeMesh);
-        draggableObjects.push(rightEyeMesh);
-        cameraAnimationTargets.push(rightEyeMesh);
+    // Function to create and add a face part
+    const addFacePart = (id, url, initialPosition, initialLayer, scaleFactor = 1, initialRotation = null) => {
+        loadTexture(url, (texture) => {
+            applyTextureSettings(texture, renderer);
 
-        // Create and add the redaction rectangle for the right eye
-        const redactionWidth = planeWidth * 1.2;
-        const redactionHeight = planeHeight * 0.4; // Increased height by 15% (0.23 * 1.15)
-        // Set initial material color to black (0x000000)
-        const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
-        const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        rightEyeRedactionRect = new THREE.Mesh(redactionGeometry, redactionMaterial);
-        // Position it at the same X, Y as the eye, but 1.5 levels in front
-        rightEyeRedactionRect.position.set(
-            rightEyeMesh.position.x,
-            rightEyeMesh.position.y,
-            rightEyeMesh.position.z + (1.5 * depthStep)
-        );
-        rightEyeRedactionRect.visible = false;
-        scene.add(rightEyeRedactionRect);
-    });
-
-    // Load and add the mouth image
-    initialAssetConfigs.push({
-        id: 'mouth',
-        type: 'image',
-        url: URL_MOUTH,
-        initialPosition: new THREE.Vector3(0, -1.5, (9 - 1) * depthStep),
-        initialLayer: 9,
-        baseScale: baseScale,
-        scaleFactor: 1.0,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_MOUTH, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const planeWidth = texture.image.width * baseScale;
-        const planeHeight = texture.image.height * baseScale;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        const mouth = new THREE.Mesh(geometry, material);
-        mouth.position.set(0, -1.5, (9 - 1) * depthStep);
-        mouth.userData.currentLayer = 9;
-        mouth.userData.initialPosition = mouth.position.clone();
-        mouth.userData.initialLayer = 9;
-        mouth.userData.id = 'mouth'; // Added ID
-        mouth.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(mouth);
-        draggableObjects.push(mouth);
-        cameraAnimationTargets.push(mouth);
-    });
-
-    // Load and add the ear image
-    const earNewLayer = 5;
-    const earNewZ = (earNewLayer - 1) * depthStep;
-    // We calculate the initial X position based on screen size, but we need to run this calculation
-    // inside the texture loader callback *or* inside onWindowResize if the mesh is available.
-    // Since init calls onWindowResize, we set a temporary position here and let onWindowResize handle the final responsive positioning.
-    const earInitialX = -2.5; // Temporary initial X position before onWindowResize runs
-    initialAssetConfigs.push({
-        id: 'ear',
-        type: 'image',
-        url: URL_EAR,
-        initialPosition: new THREE.Vector3(earInitialX, 1.5, earNewZ),
-        initialRotation: new THREE.Euler(0, THREE.MathUtils.degToRad(-15), 0),
-        baseScale: baseScale,
-        scaleFactor: 1.0,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_EAR, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const planeWidth = texture.image.width * baseScale;
-        const planeHeight = texture.image.height * baseScale;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        const ear = new THREE.Mesh(geometry, material);
-
-        // Set position using the initial X from config (will be corrected by onWindowResize shortly)
-        const earConfig = initialAssetConfigs.find(c => c.id === 'ear');
-        ear.position.copy(earConfig.initialPosition);
-        ear.rotation.y = THREE.MathUtils.degToRad(-15); // Pivot ear on y axis -15%
-        ear.userData.currentLayer = earNewLayer;
-        // NOTE: We do NOT set ear.userData.initialPosition here to the temporary value.
-        // We let onWindowResize calculate the correct responsive position and set it there.
-        // This prevents the "moves slightly" issue on load since the final position is set immediately after the mesh is created (by onWindowResize).
-        ear.userData.initialLayer = earNewLayer;
-        ear.userData.id = 'ear'; // Added ID
-        ear.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(ear);
-        draggableObjects.push(ear);
-        cameraAnimationTargets.push(ear);
-        
-        // **CRITICAL FIX:** Force the initial position calculation and storage immediately after the mesh is created.
-        // This ensures the ear is placed correctly on load and the responsive position is stored as the initial position.
-        updateEarPosition(ear, earConfig);
-    });
-
-    // Load and add the left eye image
-    initialAssetConfigs.push({
-        id: 'leftEye',
-        type: 'image',
-        url: URL_LEFT_EYE,
-        initialPosition: new THREE.Vector3(0.84 * 1.2 * 1.2, (0.175 * 1.15 * 1.20 * 3) + 2.0 - 1.0, (9 - 1) * depthStep),
-        initialLayer: 9,
-        baseScale: baseScale,
-        scaleFactor: 1.0,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_LEFT_EYE, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const planeWidth = texture.image.width * baseScale;
-        const planeHeight = texture.image.height * baseScale;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        leftEyeMesh = new THREE.Mesh(geometry, material);
-        leftEyeMesh.position.set(0.84 * 1.2 * 1.2, (0.175 * 1.15 * 1.20 * 3) + 2.0 - 1.0, (9 - 1) * depthStep);
-        leftEyeMesh.userData.currentLayer = 9;
-        leftEyeMesh.userData.initialPosition = leftEyeMesh.position.clone();
-        leftEyeMesh.userData.initialLayer = 9;
-        leftEyeMesh.userData.id = 'leftEye'; // Added ID
-        leftEyeMesh.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(leftEyeMesh);
-        draggableObjects.push(leftEyeMesh);
-        cameraAnimationTargets.push(leftEyeMesh);
-
-        // Create and add the redaction rectangle for the left eye
-        const redactionWidth = planeWidth * 1.2;
-        const redactionHeight = planeHeight * 0.4; // Increased height by 15% (0.23 * 1.15)
-        // Set initial material color to black (0x000000)
-        const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
-        const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        leftEyeRedactionRect = new THREE.Mesh(redactionGeometry, redactionMaterial);
-        // Position it at the same X, Y as the eye, but 1.5 levels in front
-        leftEyeRedactionRect.position.set(
-            leftEyeMesh.position.x,
-            leftEyeMesh.position.y,
-            leftEyeMesh.position.z + (1.5 * depthStep)
-        );
-        leftEyeRedactionRect.visible = false;
-        scene.add(leftEyeRedactionRect);
-    });
-
-    // Load SpaceX and X textures
-    initialAssetConfigs.push({
-        id: 'spacex',
-        type: 'image',
-        url: URL_SPACEX_ORIGINAL,
-        originalTextureUrl: URL_SPACEX_ORIGINAL,
-        swapTextureUrl: URL_X_LOGO_SWAP,
-        initialPosition: new THREE.Vector3(0.5 + 1.0, -0.5, (7 - 1) * depthStep),
-        initialLayer: 7,
-        baseScale: baseScale,
-        scaleFactor: 1.0, // This will be calculated from texture.image.width / height later
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_SPACEX_ORIGINAL, (spacexTex) => {
-        spacexOriginalTexture = spacexTex;
-
-        loadTexture(URL_X_LOGO_SWAP, (xTex) => {
-            xLogoTexture = xTex;
-
-            const material = new THREE.MeshBasicMaterial({ map: spacexOriginalTexture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-            const planeWidth = spacexOriginalTexture.image.width * baseScale;
-            const planeHeight = spacexOriginalTexture.image.height * baseScale;
+            const planeWidth = texture.image.width * baseScale * scaleFactor;
+            const planeHeight = texture.image.height * baseScale * scaleFactor;
             const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-            const leftCheek = new THREE.Mesh(geometry, material);
-            leftCheek.position.set(0.5 + 1.0, -0.5, (7 - 1) * depthStep);
-            leftCheek.userData.currentLayer = 7;
-            leftCheek.userData.initialPosition = leftCheek.position.clone();
-            leftCheek.userData.initialLayer = 7;
-            leftCheek.userData.originalTexture = spacexOriginalTexture; // Store original texture
-            leftCheek.userData.xLogoTexture = xLogoTexture; // Store X logo texture
-            leftCheek.userData.originalWidth = planeWidth; // Store original width
-            leftCheek.userData.originalHeight = planeHeight; // Store original height
-            leftCheek.userData.id = 'spacex'; // Added ID
-            leftCheek.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-            scene.add(leftCheek);
-            draggableObjects.push(leftCheek);
-            cameraAnimationTargets.push(leftCheek);
+            
+            // 1. Create the original (unboosted) material
+            const originalMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+            
+            // 2. Create the boosted material (ShaderMaterial)
+            const boostedMaterial = new THREE.ShaderMaterial({
+                uniforms: { ...LuminanceBoostShader.uniforms, tDiffuse: { value: texture } },
+                vertexShader: LuminanceBoostShader.vertexShader,
+                fragmentShader: LuminanceBoostShader.fragmentShader,
+                transparent: true,
+                side: THREE.DoubleSide,
+                alphaTest: 0.5
+            });
 
-            spacexRef = leftCheek; // Store reference to spacex mesh
+            const mesh = new THREE.Mesh(geometry, originalMaterial); // Start with original material
+            mesh.position.copy(initialPosition);
+            if (initialRotation) {
+                mesh.rotation.copy(initialRotation);
+            }
+            mesh.userData.currentLayer = initialLayer;
+            mesh.userData.initialPosition = mesh.position.clone();
+            mesh.userData.initialLayer = initialLayer;
+            mesh.userData.id = id;
+            mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
+            
+            // Store material references in userData
+            mesh.userData.originalMaterial = originalMaterial;
+            mesh.userData.boostedMaterial = boostedMaterial;
+
+            scene.add(mesh);
+            draggableObjects.push(mesh);
+            cameraAnimationTargets.push(mesh);
+
+            initialAssetConfigs.push({
+                id: id,
+                type: 'image',
+                url: url,
+                initialPosition: initialPosition.clone(),
+                initialRotation: initialRotation ? initialRotation.clone() : undefined,
+                initialLayer: initialLayer,
+                initialScale: { width: planeWidth, height: planeHeight },
+                removed: false
+            });
+
+            // Special handling for eyes to set up redaction rectangles
+            if (id === 'rightEye') {
+                rightEyeMesh = mesh;
+                const redactionWidth = planeWidth * 1.2;
+                const redactionHeight = planeHeight * 0.5;
+                const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
+                const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                rightEyeRedactionRect = new THREE.Mesh(redactionGeometry, redactionMaterial);
+                rightEyeRedactionRect.position.set(mesh.position.x, mesh.position.y, mesh.position.z + (1.5 * depthStep));
+                rightEyeRedactionRect.visible = false;
+                scene.add(rightEyeRedactionRect);
+            } else if (id === 'leftEye') {
+                leftEyeMesh = mesh;
+                const redactionWidth = planeWidth * 1.2;
+                const redactionHeight = planeHeight * 0.5;
+                const redactionGeometry = new THREE.PlaneGeometry(redactionWidth, redactionHeight);
+                const redactionMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                leftEyeRedactionRect = new THREE.Mesh(redactionGeometry, redactionMaterial);
+                leftEyeRedactionRect.position.set(mesh.position.x, mesh.position.y, mesh.position.z + (1.5 * depthStep));
+                leftEyeRedactionRect.visible = false;
+                scene.add(leftEyeRedactionRect);
+            }
+        });
+    };
+
+    // Load and add the face images using the new function
+    addFacePart('forehead', URL_FOREHEAD, new THREE.Vector3(0, (0.5 + 3.2) * 1.10, (2 - 1) * depthStep), 2, 1);
+    addFacePart('rightEye', URL_RIGHT_EYE, new THREE.Vector3(-2 * .7 * 1, (0.175 * 1.15 * 1.20 * 3) + 2.0 - 1.2, (7 - 1) * depthStep), 7, 1);
+    addFacePart('mouth', URL_MOUTH, new THREE.Vector3(0, -2.5, (9 - 1) * depthStep), 9, 1);
+    
+    const earNewLayer = 3;
+    const earNewZ = (earNewLayer - 1) * depthStep;
+    const distance_from_camera_ear = camera.position.z - earNewZ;
+    const world_height_at_ear_z = 2 * distance_from_camera_ear * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const world_width_at_ear_z = world_height_at_ear_z * camera.aspect;
+    const pixelToUnitFactorX_ear = world_width_at_ear_z / window.innerWidth;
+    const moveLeftUnits = 2 * pixelToUnitFactorX_ear;
+    const earInitialPosition = new THREE.Vector3(3.1 - moveLeftUnits, 1.25, earNewZ);
+    const earInitialRotation = new THREE.Euler(0, THREE.MathUtils.degToRad(45), 0);
+    addFacePart('ear', URL_EAR, earInitialPosition, earNewLayer, 1, earInitialRotation);
+
+    addFacePart('leftEye', URL_LEFT_EYE, new THREE.Vector3(1 * 1.2 * 1.2, (0.175 * 1.15 * 1.20 * 3) + 2.0 - 1.3, (9 - 1) * depthStep), 9, 1);
+    addFacePart('nose', URL_NOSE, new THREE.Vector3(0, 0.4, (11 - 1) * depthStep), 11, 0.93);
+
+
+    // Load and add the new Jeff Bezos Label Blue image
+    const jeffBezosLabelBlueInitialLayer = 4; // User requested level 4
+    const jeffBezosLabelBlueInitialZ = (jeffBezosLabelBlueInitialLayer - 1) * depthStep;
+    const jeffBezosLabelBlueInitialPosition = new THREE.Vector3(
+        -1.4 - 2.5, // To the left of right eye's initial X (-1.4)
+        1.40375 - 0.5, // Slightly below right eye's initial Y (1.40375)
+        jeffBezosLabelBlueInitialZ
+    );
+
+    loadTexture(URL_JEFF_BEZOS_LABEL_BLUE, (texture) => {
+        // APPLY TEXTURE SETTINGS
+        applyTextureSettings(texture, renderer);
+
+        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+        const planeWidth = texture.image.width * baseScale; 
+        const planeHeight = texture.image.height * baseScale; 
+        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+        const jeffBezosLabelBlue = new THREE.Mesh(geometry, material);
+        jeffBezosLabelBlue.position.copy(jeffBezosLabelBlueInitialPosition);
+        jeffBezosLabelBlue.userData.currentLayer = jeffBezosLabelBlueInitialLayer;
+        jeffBezosLabelBlue.userData.initialPosition = jeffBezosLabelBlue.position.clone();
+        jeffBezosLabelBlue.userData.initialLayer = jeffBezosLabelBlueInitialLayer;
+        jeffBezosLabelBlue.userData.id = 'jeffBezosLabelBlue'; // Added ID
+        jeffBezosLabelBlue.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
+        scene.add(jeffBezosLabelBlue);
+        draggableObjects.push(jeffBezosLabelBlue);
+        cameraAnimationTargets.push(jeffBezosLabelBlue);
+
+        initialAssetConfigs.push({
+            id: 'jeffBezosLabelBlue',
+            type: 'image',
+            url: URL_JEFF_BEZOS_LABEL_BLUE,
+            initialPosition: jeffBezosLabelBlueInitialPosition.clone(),
+            initialLayer: jeffBezosLabelBlueInitialLayer,
+            initialScale: { width: planeWidth, height: planeHeight },
+            removed: false
         });
     });
 
-    // Load and add the nose image
-    initialAssetConfigs.push({
-        id: 'nose',
-        type: 'image',
-        url: URL_NOSE,
-        initialPosition: new THREE.Vector3(0, 0.8, (11 - 1) * depthStep),
-        initialLayer: 11,
-        baseScale: baseScale,
-        scaleFactor: 0.93,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_NOSE, (texture) => {
+    // Load and add the new Jeff Bezos Label Orange image
+    const jeffBezosLabelOrangeInitialLayer = 6; // User requested level 12
+    const jeffBezosLabelOrangeInitialZ = (jeffBezosLabelOrangeInitialLayer - 1) * depthStep;
+    const jeffBezosLabelOrangeInitialPosition = new THREE.Vector3(
+        -2, // Centered where mouth is
+        -.2, // Same Y as mouth
+        jeffBezosLabelOrangeInitialZ
+    );
+
+    loadTexture(URL_JEFF_BEZOS_LABEL_ORANGE, (texture) => {
+        // APPLY TEXTURE SETTINGS
+        applyTextureSettings(texture, renderer);
+
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const scaleFactor = 0.93;
-        const planeWidth = texture.image.width * baseScale * scaleFactor;
-        const planeHeight = texture.image.height * baseScale * scaleFactor;
+        const planeWidth = texture.image.width * baseScale; 
+        const planeHeight = texture.image.height * baseScale; 
         const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        const nose = new THREE.Mesh(geometry, material);
-        nose.position.set(0, 0.8, (11 - 1) * depthStep);
-        nose.userData.currentLayer = 11;
-        nose.userData.initialPosition = nose.position.clone();
-        nose.userData.initialLayer = 11;
-        nose.userData.id = 'nose'; // Added ID
-        nose.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(nose);
-        draggableObjects.push(nose);
-        cameraAnimationTargets.push(nose);
+        const jeffBezosLabelOrange = new THREE.Mesh(geometry, material);
+        jeffBezosLabelOrange.position.copy(jeffBezosLabelOrangeInitialPosition);
+        jeffBezosLabelOrange.userData.currentLayer = jeffBezosLabelOrangeInitialLayer;
+        jeffBezosLabelOrange.userData.initialPosition = jeffBezosLabelOrange.position.clone();
+        jeffBezosLabelOrange.userData.initialLayer = jeffBezosLabelOrangeInitialLayer;
+        jeffBezosLabelOrange.userData.id = 'jeffBezosLabelOrange'; // Added ID
+        jeffBezosLabelOrange.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
+        scene.add(jeffBezosLabelOrange);
+        draggableObjects.push(jeffBezosLabelOrange);
+        cameraAnimationTargets.push(jeffBezosLabelOrange);
+
+        initialAssetConfigs.push({
+            id: 'jeffBezosLabelOrange',
+            type: 'image',
+            url: URL_JEFF_BEZOS_LABEL_ORANGE,
+            initialPosition: jeffBezosLabelOrangeInitialPosition.clone(),
+            initialLayer: jeffBezosLabelOrangeInitialLayer,
+            initialScale: { width: planeWidth, height: planeHeight },
+            removed: false
+        });
     });
 
-    // Load and add the hair image
-    initialAssetConfigs.push({
-        id: 'hair',
-        type: 'image',
-        url: URL_HAIR,
-        initialPosition: new THREE.Vector3(0, 3.5 * 1.10, (4 - 1) * depthStep),
-        initialLayer: 4,
-        baseScale: baseScale,
-        scaleFactor: 1.15,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_HAIR, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const scaleFactor = 1.15;
-        const planeWidth = texture.image.width * baseScale * scaleFactor;
-        const planeHeight = texture.image.height * baseScale * scaleFactor;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        const hair = new THREE.Mesh(geometry, material);
-        hair.position.set(0, 3.5 * 1.10, (4 - 1) * depthStep);
-        hair.userData.currentLayer = 4;
-        hair.userData.initialPosition = hair.position.clone();
-        hair.userData.initialLayer = 4;
-        hair.userData.id = 'hair'; // Added ID
-        hair.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(hair);
-        draggableObjects.push(hair);
-        cameraAnimationTargets.push(hair);
-    });
+    // Load and add the new Jeff Bezos Label Black image
+    const jeffBezosLabelBlackInitialLayer = 6.5; // User requested level 7
+    const jeffBezosLabelBlackInitialZ = (jeffBezosLabelBlackInitialLayer - 1) * depthStep;
+    const jeffBezosLabelBlackInitialPosition = new THREE.Vector3(
+        1.44 + 0.5, // Right next to left eye's X (1.44)
+        1.3, // Similar Y to left eye
+        jeffBezosLabelBlackInitialZ
+    );
 
-    // Load and add the blue bill image
-    initialAssetConfigs.push({
-        id: 'blueBill',
-        type: 'image',
-        url: URL_BLUE_BILL,
-        initialPosition: new THREE.Vector3(2, -2, (3 - 1) * depthStep),
-        initialLayer: 10,
-        baseScale: baseScale,
-        scaleFactor: 1,
-        removed: false // Add removed flag
-    });
-    loadTexture(URL_BLUE_BILL, (texture) => {
+    loadTexture(URL_JEFF_BEZOS_LABEL_BLACK, (texture) => {
+        // APPLY TEXTURE SETTINGS
+        applyTextureSettings(texture, renderer);
+
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const planeWidth = texture.image.width * baseScale;
         const planeHeight = texture.image.height * baseScale;
         const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        const blueBill = new THREE.Mesh(geometry, material);
-        blueBill.position.set(2, -2, (3 - 1) * depthStep);
-        blueBill.userData.currentLayer = 10;
-        blueBill.userData.initialPosition = blueBill.position.clone();
-        blueBill.userData.initialLayer = 10;
-        blueBill.userData.id = 'blueBill'; // Added ID
-        blueBill.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(blueBill);
-        draggableObjects.push(blueBill);
-        cameraAnimationTargets.push(blueBill);
+        const jeffBezosLabelBlack = new THREE.Mesh(geometry, material);
+        jeffBezosLabelBlack.position.copy(jeffBezosLabelBlackInitialPosition);
+        jeffBezosLabelBlack.userData.currentLayer = jeffBezosLabelBlackInitialLayer;
+        jeffBezosLabelBlack.userData.initialPosition = jeffBezosLabelBlack.position.clone();
+        jeffBezosLabelBlack.userData.initialLayer = jeffBezosLabelBlackInitialLayer;
+        jeffBezosLabelBlack.userData.id = 'jeffBezosLabelBlack'; // Added ID
+        jeffBezosLabelBlack.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
+        scene.add(jeffBezosLabelBlack);
+        draggableObjects.push(jeffBezosLabelBlack);
+        cameraAnimationTargets.push(jeffBezosLabelBlack);
+
+        initialAssetConfigs.push({
+            id: 'jeffBezosLabelBlack',
+            type: 'image',
+            url: URL_JEFF_BEZOS_LABEL_BLACK,
+            initialPosition: jeffBezosLabelBlackInitialPosition.clone(),
+            initialLayer: jeffBezosLabelBlackInitialLayer,
+            initialScale: { width: planeWidth, height: planeHeight },
+            removed: false
+        });
     });
 
-    // Load and add the rocket image
-    const rocketLayer = 1;
-    const rocketZ = (rocketLayer - 1) * depthStep;
-    const rocketInitialY = -.32; // Keep the existing Y position for the rocket
-    initialAssetConfigs.push({
-        id: 'rocket',
-        type: 'image',
-        url: URL_ROCKET,
-        initialPosition: new THREE.Vector3(ROCKET_INITIAL_X, rocketInitialY, rocketZ),
-        initialLayer: rocketLayer,
-        baseScale: baseScale,
-        scaleFactor: 1.04,
-        removed: false // Add removed flag
-    });
-    let rocketRef = null; // Local reference to the rocket mesh
-    loadTexture(URL_ROCKET, (texture) => {
-        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const rocketScaleFactor = 1.04;
-        const planeWidth = texture.image.width * baseScale * rocketScaleFactor;
-        const planeHeight = texture.image.height * baseScale * rocketScaleFactor;
-        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        const rocket = new THREE.Mesh(geometry, material);
+            // Load and add the signature image
+            const signatureNewLayer = 2 - 2; // 2 levels behind where rocket was (rocket was layer 2) -> layer 0
+            const signatureNewZ = (signatureNewLayer - 1) * depthStep; // (0 - 1) * 0.2 = -0.2
+            const signatureNewX = -2.0; // Moved to the right from -2.5
+            const signatureNewY = -4.7; // Same Y as where fiatWorthless was
+            const signatureInitialPosition = new THREE.Vector3(signatureNewX, signatureNewY, signatureNewZ);
 
-        rocket.position.set(ROCKET_INITIAL_X, rocketInitialY, rocketZ);
+            loadTexture(URL_SIGNATURE, (signatureTexture) => {
+                // APPLY TEXTURE SETTINGS
+                applyTextureSettings(signatureTexture, renderer);
 
-        rocket.userData.currentLayer = rocketLayer;
-        rocket.userData.initialPosition = rocket.position.clone();
-        rocket.userData.initialLayer = rocketLayer;
-        rocket.userData.id = 'rocket'; // Added ID
-        rocket.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(rocket);
-        draggableObjects.push(rocket);
-        cameraAnimationTargets.push(rocket);
-        rocketRef = rocket; // Store the reference
-        
-        // After rocket is loaded, load dogecoin/tesla and calculate its position relative to the rocket/background
-        loadDogecoinAndFiat();
-    });
+                const signatureMaterial = new THREE.MeshBasicMaterial({ map: signatureTexture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+                const signatureAspectRatio = signatureTexture.image.width / signatureTexture.image.height;
+                const signatureHeight = 1.0;
+                const signatureWidth = signatureHeight * signatureAspectRatio;
+                const signatureGeometry = new THREE.PlaneGeometry(signatureWidth, signatureHeight);
+                const signature = new THREE.Mesh(signatureGeometry, signatureMaterial);
 
-    // Function to handle the interdependent loading and positioning of Dogecoin, Fiat, and Signature
-    function loadDogecoinAndFiat() {
-        const dogecoinLayer = 3;
-        const dogecoinZ = (dogecoinLayer - 1) * depthStep;
-        
-        // Initial position placeholder for config (will be updated by the calculation below)
-        let dogecoinInitialPos = new THREE.Vector3(0, 0, dogecoinZ);
-        let fiatWorthlessInitialPos = new THREE.Vector3();
-        let signatureInitialPos = new THREE.Vector3();
-        
-        // Define fiatWorthlessNewLayer here for scope consistency
-        const fiatWorthlessNewLayer = dogecoinLayer + 2; 
+                signature.position.copy(signatureInitialPosition);
 
-        // Load necessary textures first
-        loadTexture(URL_DOGECOIN_ORIGINAL, (dogeTex) => {
-            dogecoinOriginalTexture = dogeTex;
+                signature.userData.currentLayer = signatureNewLayer;
+                signature.userData.id = 'signature'; // Added ID
+                signature.userData.initialScale = { width: signatureWidth, height: signatureHeight }; // Store initial scale
+                scene.add(signature);
+                // Note: signature is NOT added to draggableObjects, making it static and locked.
 
-            loadTexture(URL_TESLA_SWAP, (teslaTex) => {
-                teslaTexture = teslaTex;
-                
-                // Load Fiat Worthless texture to determine its size for config
-                loadTexture(URL_FIAT_WORTHLESS, (fiatTex) => {
-                    const fiatWorthlessHeight = 0.3;
-                    const fiatWorthlessAspectRatio = fiatTex.image.width / fiatTex.image.height;
-                    const fiatWorthlessWidth = fiatWorthlessHeight * fiatWorthlessAspectRatio;
-
-                    // --- CALCULATE FIXED POSITIONS NOW (moved from onWindowResize) ---
-                    
-                    // 1. Calculate Dogecoin/Tesla Position
-                    // We must ensure backgroundMesh is ready before calculating positions relative to it
-                    if (!backgroundMesh) {
-                        console.error("Background mesh not loaded yet, deferring position calculation.");
-                        // Fallback position if background isn't ready
-                        dogecoinInitialPos.set(ROCKET_INITIAL_X, -3, dogecoinZ);
-                        fiatWorthlessInitialPos.set(ROCKET_INITIAL_X + 2, -3.5, dogecoinZ + depthStep * 2);
-                    } else {
-                        const bgBounds = getBackgroundBounds(backgroundMesh.position.z);
-                        const dogecoinScaleFactor = 0.7;
-                        const tempDogeWidth = teslaTexture.image.width * baseScale * dogecoinScaleFactor; 
-                        const tempDogeHeight = teslaTexture.image.height * baseScale * dogecoinScaleFactor;
-                        const targetX = ROCKET_INITIAL_X; // Same as ROCKET_INITIAL_X
-                        const paddingY = 0.5;
-                        const targetY = bgBounds.minY + tempDogeHeight / 2 + paddingY;
-                        dogecoinInitialPos.set(targetX, targetY, dogecoinZ);
-
-                        // 2. Calculate Fiat Worthless Position
-                        const fiatWorthlessNewZ = (fiatWorthlessNewLayer - 1) * depthStep;
-                        const fiatWorthlessInitialWorldX = dogecoinInitialPos.x + tempDogeWidth * 1.1 + .25; 
-                        const fiatWorthlessInitialWorldY = dogecoinInitialPos.y - tempDogeHeight * .11 - 0;
-                        fiatWorthlessInitialPos.set(fiatWorthlessInitialWorldX, fiatWorthlessInitialWorldY, fiatWorthlessNewZ);
-                    }
-
-                    // 3. Calculate Signature Position
-                    loadTexture(URL_SIGNATURE, (signatureTex) => {
-                        const signatureHeight = 1.0;
-                        const signatureAspectRatio = signatureTex.image.width / signatureTex.image.height;
-                        const signatureWidth = signatureHeight * signatureAspectRatio;
-                        const signatureNewLayer = 0; // (2 - 2)
-                        const signatureNewZ = (signatureNewLayer - 1) * depthStep;
-                        const signatureNewX = -2.0;
-                        const signatureNewY = -4.7;
-                        signatureInitialPos.set(signatureNewX, signatureNewY, signatureNewZ);
-
-                        // --- Store CONFIGS (if not already present) ---
-                        if (!initialAssetConfigs.find(c => c.id === 'dogecoin')) {
-                            initialAssetConfigs.push({
-                                id: 'dogecoin',
-                                type: 'image',
-                                url: URL_TESLA_SWAP,
-                                originalTextureUrl: URL_DOGECOIN_ORIGINAL,
-                                swapTextureUrl: URL_TESLA_SWAP,
-                                initialPosition: dogecoinInitialPos.clone(),
-                                initialLayer: dogecoinLayer,
-                                baseScale: baseScale,
-                                scaleFactor: 0.7,
-                                removed: false
-                            });
-                        } else {
-                             // Update existing config with the calculated fixed position
-                            initialAssetConfigs.find(c => c.id === 'dogecoin').initialPosition.copy(dogecoinInitialPos);
-                        }
-                        
-                        if (!initialAssetConfigs.find(c => c.id === 'fiatWorthless')) {
-                            initialAssetConfigs.push({
-                                id: 'fiatWorthless',
-                                type: 'image',
-                                url: URL_FIAT_WORTHLESS,
-                                initialPosition: fiatWorthlessInitialPos.clone(),
-                                initialLayer: fiatWorthlessNewLayer,
-                                baseScale: baseScale,
-                                scaleFactor: 0.3, // Used to derive the fixed height/width above
-                                removed: false
-                            });
-                        } else {
-                            // Update existing config with the calculated fixed position
-                            initialAssetConfigs.find(c => c.id === 'fiatWorthless').initialPosition.copy(fiatWorthlessInitialPos);
-                        }
-                        
-                        if (!initialAssetConfigs.find(c => c.id === 'signature')) {
-                            initialAssetConfigs.push({
-                                id: 'signature',
-                                type: 'image',
-                                url: URL_SIGNATURE,
-                                initialPosition: signatureInitialPos.clone(),
-                                initialLayer: signatureNewLayer,
-                                baseScale: baseScale,
-                                scaleFactor: 1.0,
-                                removed: false
-                            });
-                        } else {
-                            // Update existing config with the calculated fixed position
-                            initialAssetConfigs.find(c => c.id === 'signature').initialPosition.copy(signatureInitialPos);
-                        }
-
-                        // --- CREATE MESHES ---
-                        
-                        // 1. Dogecoin/Tesla
-                        teslaGreyscaleContrastMaterial = new THREE.ShaderMaterial({
-                            uniforms: {
-                                tDiffuse: { value: teslaTexture },
-                                contrast: { value: GreyscaleContrastShader.uniforms.contrast.value }
-                            },
-                            vertexShader: GreyscaleContrastShader.vertexShader,
-                            fragmentShader: GreyscaleContrastShader.fragmentShader,
-                            transparent: true,
-                            alphaTest: 0.5
-                        });
-                        const dogecoinScaleFactor = 0.7;
-                        const dogePlaneWidth = teslaTexture.image.width * baseScale * dogecoinScaleFactor;
-                        const dogePlaneHeight = teslaTexture.image.height * baseScale * dogecoinScaleFactor;
-                        const dogecoin = new THREE.Mesh(new THREE.PlaneGeometry(dogePlaneWidth, dogePlaneHeight), teslaGreyscaleContrastMaterial);
-                        dogecoin.userData.currentLayer = dogecoinLayer;
-                        dogecoin.userData.initialPosition = dogecoinInitialPos.clone();
-                        dogecoin.userData.initialLayer = dogecoinLayer;
-                        dogecoin.userData.originalTexture = dogecoinOriginalTexture;
-                        dogecoin.userData.teslaTexture = teslaTexture;
-                        dogecoin.userData.id = 'dogecoin';
-                        dogecoin.userData.initialScale = { width: dogePlaneWidth, height: dogePlaneHeight };
-                        dogecoinRef = dogecoin;
-                        scene.add(dogecoin);
-                        draggableObjects.push(dogecoin);
-                        cameraAnimationTargets.push(dogecoin);
-                        
-                        // Set position immediately after creation using the calculated fixed position
-                        dogecoin.position.copy(dogecoinInitialPos);
-
-                        // 2. Fiat Worthless
-                        const fiatWorthlessMaterial = new THREE.MeshBasicMaterial({ map: fiatTex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-                        const fiatWorthless = new THREE.Mesh(new THREE.PlaneGeometry(fiatWorthlessWidth, fiatWorthlessHeight), fiatWorthlessMaterial);
-                        fiatWorthless.position.copy(fiatWorthlessInitialPos);
-                        fiatWorthless.userData.currentLayer = fiatWorthlessNewLayer;
-                        fiatWorthless.userData.initialPosition = fiatWorthlessInitialPos.clone();
-                        fiatWorthless.userData.initialLayer = fiatWorthlessNewLayer;
-                        fiatWorthless.userData.id = 'fiatWorthless';
-                        fiatWorthless.userData.initialScale = { width: fiatWorthlessWidth, height: fiatWorthlessHeight };
-                        scene.add(fiatWorthless);
-                        draggableObjects.push(fiatWorthless);
-                        cameraAnimationTargets.push(fiatWorthless);
-
-                        // 3. Signature
-                        const signatureMaterial = new THREE.MeshBasicMaterial({ map: signatureTex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-                        const signature = new THREE.Mesh(new THREE.PlaneGeometry(signatureWidth, signatureHeight), signatureMaterial);
-                        signature.position.copy(signatureInitialPos);
-                        signature.userData.currentLayer = signatureNewLayer;
-                        signature.userData.id = 'signature';
-                        signature.userData.initialScale = { width: signatureWidth, height: signatureHeight };
-                        signature.userData.initialPosition = signatureInitialPos.clone();
-                        signature.userData.initialLayer = signatureNewLayer;
-                        scene.add(signature);
-                        
-                        // Call onWindowResize only to handle ear and text positions, not dogecoin/fiat/signature
-                        onWindowResize();
-                    });
+                initialAssetConfigs.push({
+                    id: 'signature',
+                    type: 'image',
+                    url: URL_SIGNATURE,
+                    initialPosition: signatureInitialPosition.clone(),
+                    initialLayer: signatureNewLayer,
+                    initialScale: { width: signatureWidth, height: signatureHeight },
+                    removed: false // Add removed flag
                 });
             });
+
+    // Function to add a single drone
+    const addDrone = (id, initialLayer, initialX, initialY) => {
+        const droneInitialZ = (initialLayer - 1) * depthStep;
+        const droneInitialPosition = new THREE.Vector3(initialX, initialY, droneInitialZ);
+        
+        // Generate a random hover phase for unique movement timing
+        const droneHoverPhase = Math.random() * Math.PI * 2; 
+        
+        // Generate a random hover amplitude and speed for unique movement style
+        const droneHoverAmplitude = DRONE_HOVER_AMPLITUDE * (0.5 + Math.random() * 1.5); // 50% to 200% of base amplitude
+        const droneHoverSpeed = DRONE_HOVER_SPEED * (0.5 + Math.random() * 1.5); // 50% to 200% of base speed
+
+        loadTexture(URL_DRONE, (texture) => {
+            // APPLY TEXTURE SETTINGS
+            applyTextureSettings(texture, renderer);
+            
+            const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+            const planeWidth = texture.image.width * baseScale;
+            const planeHeight = texture.image.height * baseScale;
+            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+            const drone = new THREE.Mesh(geometry, material);
+            drone.position.copy(droneInitialPosition);
+            drone.userData.currentLayer = initialLayer;
+            drone.userData.initialPosition = drone.position.clone();
+            drone.userData.initialLayer = initialLayer;
+            drone.userData.id = id;
+            // IMPORTANT: Store the initial dimensions based on the original drone texture
+            drone.userData.initialScale = { width: planeWidth, height: planeHeight };
+            drone.userData.droneInitialY = drone.position.y; // Store initial Y center for hovering animation
+            drone.userData.droneHoverPhase = droneHoverPhase; // Store unique hover phase
+            drone.userData.droneInitialX = drone.position.x; // Store initial X center for hovering animation
+            drone.userData.droneHoverAmplitude = droneHoverAmplitude; // Store unique amplitude
+            drone.userData.droneHoverSpeed = droneHoverSpeed; // Store unique speed
+            drone.userData.originalTexture = texture; // Store the original drone texture
+            drone.userData.currentTexture = texture; // Store the current texture (initially original)
+            scene.add(drone);
+            draggableObjects.push(drone);
+            cameraAnimationTargets.push(drone);
+            droneMeshes.push(drone); // Add to the array of drone meshes
+
+            initialAssetConfigs.push({
+                id: id,
+                type: 'image',
+                url: URL_DRONE,
+                initialPosition: droneInitialPosition.clone(),
+                initialLayer: initialLayer,
+                initialScale: { width: planeWidth, height: planeHeight },
+                droneHoverPhase: droneHoverPhase, // Store phase for reset
+                droneHoverAmplitude: droneHoverAmplitude, // Store amplitude for reset
+                droneHoverSpeed: droneHoverSpeed, // Store speed for reset
+                currentTextureUrl: URL_DRONE, // Store the URL of the current texture
+                removed: false
+            });
         });
+    };
+
+    // Add the original drone
+    addDrone('drone0', 13, 0, 2.5);
+
+    // Add 9 more drones with z-axis levels from -25 to 18
+    const minZLevel = -25;
+    const maxZLevel = 18;
+    const numNewDrones = 5;
+
+    for (let i = 1; i <= numNewDrones; i++) {
+        const id = `drone${i}`;
+        // Distribute Z levels somewhat evenly
+        const currentZLevel = minZLevel + (i / numNewDrones) * (maxZLevel - minZLevel);
+        const initialLayer = Math.round(currentZLevel);
+
+        // Random X and Y positions within a reasonable range
+        const initialX = (Math.random() * 8) - 4; // From -4 to 4
+        const initialY = (Math.random() * 6) - 3; // From -3 to 3
+
+        addDrone(id, initialLayer, initialX, initialY);
     }
 
     // Initialize the Marquee Text (for XRAY effect)
-    marqueeTexture = createMarqueeTexture();
+    marqueeTexture = createMarqueeTexture(); // Settings applied inside this function
     const marqueeMaterial = new THREE.MeshBasicMaterial({ map: marqueeTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
     // The plane size should be relative to the background or screen to fill it
     const marqueePlaneWidth = 20;
     const marqueePlaneHeight = marqueePlaneWidth / (marqueeTexture.image.width / marqueeTexture.image.height);
     const marqueeGeometry = new THREE.PlaneGeometry(marqueePlaneWidth, marqueePlaneHeight);
-    initialAssetConfigs.push({
-        id: 'marqueeTextMesh',
-        type: 'textMesh',
-        initialPosition: new THREE.Vector3(0, 0, -3 * depthStep),
-        initialLayer: -3,
-        geometry: marqueeGeometry.clone(),
-        material: marqueeMaterial.clone(),
-        removed: false // Add removed flag
-    });
+    const marqueeTextMeshInitialPosition = new THREE.Vector3(0, 0, -3 * depthStep);
+
     marqueeTextMesh = new THREE.Mesh(marqueeGeometry, marqueeMaterial);
     // Position far back in the background, but in front of the actual background image
-    marqueeTextMesh.position.z = -3 * depthStep;
+    marqueeTextMesh.position.copy(marqueeTextMeshInitialPosition);
     marqueeTextMesh.visible = false;
     marqueeTextMesh.userData.initialPosition = marqueeTextMesh.position.clone();
     marqueeTextMesh.userData.initialLayer = -3;
     marqueeTextMesh.userData.id = 'marqueeTextMesh'; // Added ID
     scene.add(marqueeTextMesh);
 
+    initialAssetConfigs.push({
+        id: 'marqueeTextMesh',
+        type: 'textMesh',
+        initialPosition: marqueeTextMeshInitialPosition.clone(),
+        initialLayer: -3,
+        geometry: marqueeGeometry.clone(),
+        material: marqueeMaterial.clone(),
+        removed: false // Add removed flag
+    });
+
     // Initialize the new Biometric Marquee Text
-    biometricMarqueeTexture = createBiometricMarqueeTexture();
+    biometricMarqueeTexture = createBiometricMarqueeTexture(); // Settings applied inside this function
     const biometricMarqueeMaterial = new THREE.MeshBasicMaterial({ map: biometricMarqueeTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
     const biometricMarqueePlaneWidth = 20; // Same width as main marquee for consistency
     const biometricMarqueePlaneHeight = biometricMarqueePlaneWidth / (biometricMarqueeTexture.image.width / biometricMarqueeTexture.image.height);
@@ -2600,76 +2391,83 @@ function init() {
     const world_height_biometric = 2 * distance_from_camera_biometric * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     const pixelToUnitFactorX_biometric = (world_height_biometric * camera.aspect) / window.innerWidth;
     const moveRightUnits_biometric = 30 * pixelToUnitFactorX_biometric;
-    initialAssetConfigs.push({
-        id: 'biometricMarqueeTextMesh',
-        type: 'textMesh',
-        initialPosition: new THREE.Vector3(moveRightUnits_biometric, 0, biometricMarqueeZ),
-        initialLayer: 5,
-        geometry: biometricMarqueeGeometry.clone(),
-        material: biometricMarqueeMaterial.clone(),
-        removed: false // Add removed flag
-    });
+    const biometricMarqueeTextMeshInitialPosition = new THREE.Vector3(moveRightUnits_biometric, 0, biometricMarqueeZ);
+
     biometricMarqueeTextMesh = new THREE.Mesh(biometricMarqueeGeometry, biometricMarqueeMaterial);
-    biometricMarqueeTextMesh.position.set(moveRightUnits_biometric, 0, biometricMarqueeZ);
+    biometricMarqueeTextMesh.position.copy(biometricMarqueeTextMeshInitialPosition);
     biometricMarqueeTextMesh.visible = false; // Initially hidden
     biometricMarqueeTextMesh.userData.initialPosition = biometricMarqueeTextMesh.position.clone();
     biometricMarqueeTextMesh.userData.initialLayer = 5;
     biometricMarqueeTextMesh.userData.id = 'biometricMarqueeTextMesh'; // Added ID
     scene.add(biometricMarqueeTextMesh);
 
+    initialAssetConfigs.push({
+        id: 'biometricMarqueeTextMesh',
+        type: 'textMesh',
+        initialPosition: biometricMarqueeTextMeshInitialPosition.clone(),
+        initialLayer: 5,
+        geometry: biometricMarqueeGeometry.clone(),
+        material: biometricMarqueeMaterial.clone(),
+        removed: false // Add removed flag
+    });
+
     // Initialize the new Blood Text
-    bloodTexture = createBloodTextTexture();
+    bloodTexture = createBloodTextTexture(); // Settings applied inside this function
     const bloodTextMaterial = new THREE.MeshBasicMaterial({ map: bloodTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
     const bloodTextPlaneWidth = 20; // Similar width to other marquees
     const bloodTextPlaneHeight = bloodTextPlaneWidth / (bloodTexture.image.width / bloodTexture.image.height);
     const bloodTextGeometry = new THREE.PlaneGeometry(bloodTextPlaneWidth, bloodTextPlaneHeight);
-    const bloodTextZ = (8 - 1) * depthStep; // Calculate Z once
-    initialAssetConfigs.push({
-        id: 'bloodTextMesh',
-        type: 'textMesh',
-        // Set placeholder Y=0. Position will be calculated and set in onWindowResize
-        initialPosition: new THREE.Vector3(0, 0, bloodTextZ),
-        initialLayer: 8,
-        geometry: bloodTextGeometry.clone(),
-        material: bloodTextMaterial.clone(),
-        removed: false // Add removed flag
-    });
+    const bloodTextMeshInitialPosition = new THREE.Vector3(0, 30, (8 - 1) * depthStep);
+
     bloodTextMesh = new THREE.Mesh(bloodTextGeometry, bloodTextMaterial);
-    // Position on Level 8 (using placeholder Y=0, will be corrected by onWindowResize)
-    bloodTextMesh.position.set(0, 0, bloodTextZ);
+    // Position on Level 8 (moved back from Level 12 by 4 levels)
+    bloodTextMesh.position.copy(bloodTextMeshInitialPosition);
     bloodTextMesh.visible = false; // Initially hidden
     bloodTextMesh.userData.initialPosition = bloodTextMesh.position.clone();
     bloodTextMesh.userData.initialLayer = 8;
     bloodTextMesh.userData.id = 'bloodTextMesh'; // Added ID
     scene.add(bloodTextMesh);
 
+    initialAssetConfigs.push({
+        id: 'bloodTextMesh',
+        type: 'textMesh',
+        initialPosition: bloodTextMeshInitialPosition.clone(),
+        initialLayer: 8,
+        geometry: bloodTextGeometry.clone(),
+        material: bloodTextMaterial.clone(),
+        removed: false // Add removed flag
+    });
+
     // Initialize the new Redacted Glitch Text
-    redactedGlitchTexture = createRedactedGlitchTexture();
+    redactedGlitchTexture = createRedactedGlitchTexture(); // Settings applied inside this function
     const redactedGlitchMaterial = new THREE.MeshBasicMaterial({ map: redactedGlitchTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false });
     const redactedGlitchPlaneWidth = 15; // Width for the text block
     const redactedGlitchPlaneHeight = redactedGlitchPlaneWidth / (redactedGlitchTexture.image.width / redactedGlitchTexture.image.height);
     const redactedGlitchGeometry = new THREE.PlaneGeometry(redactedGlitchPlaneWidth, redactedGlitchPlaneHeight);
-    const redactedGlitchTextZ = (1 - 1) * depthStep;
+    const redactedGlitchTextZ = (1 - 8) * depthStep;
     const distance_from_camera_redacted = camera.position.z - redactedGlitchTextZ;
     const world_height_redacted = 2 * distance_from_camera_redacted * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     const pixelToUnitFactorX_redacted = (world_height_redacted * camera.aspect) / window.innerWidth;
     const moveRightUnits_redacted = 40 * pixelToUnitFactorX_redacted;
-    initialAssetConfigs.push({
-        id: 'redactedGlitchTextMesh',
-        type: 'textMesh',
-        initialPosition: new THREE.Vector3(-5 + moveRightUnits_redacted, 0, redactedGlitchTextZ),
-        initialLayer: 1,
-        geometry: redactedGlitchGeometry.clone(),
-        material: redactedGlitchMaterial.clone(),
-        removed: false // Add removed flag
-    });
+    const redactedGlitchTextMeshInitialPosition = new THREE.Vector3(-5 + moveRightUnits_redacted, 0, redactedGlitchTextZ);
+
     redactedGlitchTextMesh = new THREE.Mesh(redactedGlitchGeometry, redactedGlitchMaterial);
-    redactedGlitchTextMesh.position.set(-5 + moveRightUnits_redacted, 0, redactedGlitchTextZ); // Level 1
+    redactedGlitchTextMesh.position.copy(redactedGlitchTextMeshInitialPosition);
     redactedGlitchTextMesh.visible = false; // Initially hidden
     redactedGlitchTextMesh.userData.initialPosition = redactedGlitchTextMesh.position.clone();
     redactedGlitchTextMesh.userData.initialLayer = 1;
     redactedGlitchTextMesh.userData.id = 'redactedGlitchTextMesh'; // Added ID
     scene.add(redactedGlitchTextMesh);
+
+    initialAssetConfigs.push({
+        id: 'redactedGlitchTextMesh',
+        type: 'textMesh',
+        initialPosition: redactedGlitchTextMeshInitialPosition.clone(),
+        initialLayer: 1,
+        geometry: redactedGlitchGeometry.clone(),
+        material: redactedGlitchMaterial.clone(),
+        removed: false // Add removed flag
+    });
 
     initializeRedactedGlitchPhraseData(); // Initialize the redaction patterns
 
@@ -2714,7 +2512,7 @@ function init() {
         button.onclick = (event) => {
             // Prevent event from bubbling up to document and triggering other handlers
             event.stopPropagation();
-            
+
             let targetProperty = property; // Default to the button's own property
 
             // If HACKER is clicked, toggle the 'og' effect and keep hacker state in sync for UI update
@@ -2773,8 +2571,7 @@ function init() {
                     if (effectControls.marqueeText) { effectControls.marqueeText = false; marqueeTextMesh.visible = false; updateUIButtonState('marqueeText', false); } // Turn off Marquee
                     if (effectControls.matrix) { effectControls.matrix = false; matrixPass.enabled = false; updateUIButtonState('matrix', false); } // Turn off Matrix
                     if (effectControls.pixelation) { effectControls.pixelation = false; pixelationPass.enabled = false; updateUIButtonState('pixelation', false); } // Turn off Pixelation
-                    if (effectControls.ascii) { effectControls.ascii = false; asciiPass.enabled = false; updateUIButtonState('ascii', false); } // Turn off ASCII
-                    if (effectControls.greyscale) { effectControls.greyscale = false; greyscalePass.enabled = false; updateUIButtonState('greyscale', false); } // Turn off Greyscale
+                    if (effectControls.ascii) { effectControls.ascii = false; asciiPass.enabled = false; updateUIButtonState('ascii', false); } // Turn off Greyscale
                 } else if (targetProperty === 'redacted') {
                     if (effectControls.redactedGlitch) { effectControls.redactedGlitch = false; redactedGlitchTextMesh.visible = false; updateUIButtonState('redactedGlitch', false); } // Turn off redacted glitch
                     if (effectControls.surveillance) { effectControls.surveillance = false; updateUIButtonState('surveillance', false); } // Turn off surveillance
@@ -2817,7 +2614,7 @@ function init() {
                 // Turn off all other non-combined visual effects if 'Anon' is being turned ON
                 if (targetProperty === 'anon') {
                     for (const key in effectControls) {
-                        if (effectControls.hasOwnProperty(key) && key !== 'anon' && key !== 'redacted' && key !== 'redactedGlitch' && key !== 'threshold' && key !== 'blood' && key !== 'glitch' && key !== 'marqueeText' && key !== 'biometricMarquee' && key !== 'yRotation' && key !== 'cameraAnimation' && key !== 'og' && key !== 'bloodText' && key !== 'hacker' && key !== 'surveillance' && key !== 'greed' && key !== 'shadowBrightness') { // Added greed and shadowBrightness
+                        if (effectControls.hasOwnProperty(key) && key !== 'anon' && key !== 'redacted' && key !== 'redactedGlitch' && key !== 'threshold' && key !== 'blood' && key !== 'glitch' && key !== 'marqueeText' && key !== 'biometricMarquee' && key !== 'yRotation' && key !== 'cameraAnimation' && key !== 'og' && key !== 'bloodText' && key !== 'hacker' && key !== 'surveillance' && key !== 'greed') { // Added greed
                             if (effectControls[key]) {
                                 effectControls[key] = false;
                                 const p = getPassByName(key);
@@ -2864,7 +2661,7 @@ function init() {
                 if (targetProperty === 'og') {
                     // Turn off all other visual effects, excluding camera/y-rotation/feargreedindex
                     for (const key in effectControls) {
-                        if (effectControls.hasOwnProperty(key) && key !== 'og' && key !== 'hacker' && key !== 'yRotation' && key !== 'cameraAnimation' && key !== 'bloodText' && key !== 'surveillance' && key !== 'greed' && key !== 'shadowBrightness') { // Added greed and shadowBrightness
+                        if (effectControls.hasOwnProperty(key) && key !== 'og' && key !== 'hacker' && key !== 'yRotation' && key !== 'cameraAnimation' && key !== 'bloodText' && key !== 'surveillance' && key !== 'greed') { // Added greed
                             if (effectControls[key]) {
                                 effectControls[key] = false;
                                 const p = getPassByName(key);
@@ -2904,8 +2701,7 @@ function init() {
                             key !== 'glitch' && // Added glitch to exclusion list for turning off
                             key !== 'yRotation' &&
                             key !== 'cameraAnimation' &&
-                            key !== 'greed' && // Exclude greed from being turned off by surveillance
-                            key !== 'shadowBrightness'
+                            key !== 'greed' // Exclude greed from being turned off by surveillance
                         ) {
                             if (effectControls[key]) {
                                 effectControls[key] = false;
@@ -2946,8 +2742,7 @@ function init() {
                             key !== 'blood' &&
                             key !== 'bloodText' &&
                             key !== 'yRotation' &&
-                            key !== 'cameraAnimation' &&
-                            key !== 'shadowBrightness'
+                            key !== 'cameraAnimation'
                         ) {
                             if (effectControls[key]) {
                                 effectControls[key] = false;
@@ -3007,20 +2802,6 @@ function init() {
                 effectControls[property] = !effectControls[property];
             }
 
-            // --- Begin Background Color Management ---
-            // Set the clear color to black if any effect that relies on a black background is active
-            const needsBlackBackground = effectControls.shadow || effectControls.threshold || effectControls.anon || effectControls.matrix || effectControls.ascii || effectControls.og;
-            
-            // If REDACTED GLITCH is active, use the orange background
-            if (effectControls.redactedGlitch) {
-                renderer.setClearColor(0xFFAC1C); // Orange
-            } else if (needsBlackBackground) {
-                renderer.setClearColor(0x000000); // Black
-            } else {
-                renderer.setClearColor(0x1e1e1e); // Default dark gray
-            }
-            // --- End Background Color Management ---
-
             if (targetProperty === 'shadow') {
                 darkPass.enabled = effectControls.shadow;
                 // If SHADOW is active, also activate Glitch
@@ -3053,8 +2834,7 @@ function init() {
                     updateUIButtonState('blood', true);
                     // On initial enable, set bloodScrollOffset to ensure the text starts higher
                     if (bloodTextMesh && bloodTextMesh.material.map) {
-                        // bloodScrollOffset = bloodTextMesh.material.map.image.height; // Use the height of the texture canvas
-                        bloodScrollOffset = 0; // The text mesh is already aligned to the bottom of the screen, so start scroll offset at 0.
+                        bloodScrollOffset = bloodTextMesh.material.map.image.height; // Start at the bottom of the canvas
                         shuffledBloodPhrases = shuffleArray([...BLOOD_TEXT_PHRASES]);
                     }
                 }
@@ -3090,7 +2870,7 @@ function init() {
                 // If turning on, ensure text starts from bottom and reshuffle
                 if (effectControls.greed) {
                     if (bloodTextMesh && bloodTextMesh.material.map) {
-                        bloodScrollOffset = 0; // The text mesh is already aligned to the bottom of the screen, so start scroll offset at 0.
+                        bloodScrollOffset = bloodTextMesh.material.map.image.height; // Start at the bottom of the canvas
                         shuffledBloodPhrases = shuffleArray([...BLOOD_TEXT_PHRASES]);
                     }
                 }
@@ -3101,7 +2881,7 @@ function init() {
             } else if (targetProperty === 'redactedGlitch') { // Handle Redacted Glitch effect toggle
                 if (rightEyeRedactionRect) rightEyeRedactionRect.visible = effectControls.redactedGlitch;
                 if (leftEyeRedactionRect) leftEyeRedactionRect.visible = effectControls.redactedGlitch;
-                // Removed glitchPass.enabled = effectControls.redactedGlitch;
+                glitchPass.enabled = effectControls.redactedGlitch;
                 redactedGlitchTextMesh.visible = effectControls.redactedGlitch;
 
                 // When redactedGlitch is active, force threshold effect on
@@ -3125,7 +2905,7 @@ function init() {
                     }
                 }
                 updateUIButtonState('redactedGlitch', effectControls.redactedGlitch);
-                // Removed updateUIButtonState('glitch', effectControls.redactedGlitch); // Sync glitch button
+                updateUIButtonState('glitch', effectControls.redactedGlitch); // Sync glitch button
 
             } else if (pass) {
                 pass.enabled = effectControls[targetProperty];
@@ -3180,20 +2960,8 @@ function init() {
                     thresholdPass.enabled = true;
                     bloodPass.enabled = true;
                     glitchPass.enabled = true;
-                    if (rightEyeRedactionRect) {
-                        rightEyeRedactionRect.visible = true;
-                        // Set Anon/Redacted eyes to white (0xffffff)
-                        if (rightEyeRedactionRect.material.color.getHex() !== 0xffffff) {
-                            rightEyeRedactionRect.material.color.setHex(0xffffff);
-                        }
-                    }
-                    if (leftEyeRedactionRect) {
-                        leftEyeRedactionRect.visible = true;
-                        // Set Anon/Redacted eyes to white (0xffffff)
-                        if (leftEyeRedactionRect.material.color.getHex() !== 0xffffff) {
-                            leftEyeRedactionRect.material.color.setHex(0xffffff);
-                        }
-                    }
+                    if (rightEyeRedactionRect) rightEyeRedactionRect.visible = true;
+                    if (leftEyeRedactionRect) leftEyeRedactionRect.visible = true;
 
                     // Ensure shadow is off if threshold is forced on by Anon
                     if (effectControls.shadow) {
@@ -3207,20 +2975,8 @@ function init() {
                     thresholdPass.enabled = false;
                     bloodPass.enabled = false;
                     glitchPass.enabled = false;
-                    if (rightEyeRedactionRect) {
-                        rightEyeRedactionRect.visible = false;
-                        // Reset Anon/Redacted eyes to black (0x000000) when turning off
-                        if (rightEyeRedactionRect.material.color.getHex() !== 0x000000) {
-                            rightEyeRedactionRect.material.color.setHex(0x000000);
-                        }
-                    }
-                    if (leftEyeRedactionRect) {
-                        leftEyeRedactionRect.visible = false;
-                        // Reset Anon/Redacted eyes to black (0x000000) when turning off
-                        if (leftEyeRedactionRect.material.color.getHex() !== 0x000000) {
-                            leftEyeRedactionRect.material.color.setHex(0x000000);
-                        }
-                    }
+                    if (rightEyeRedactionRect) rightEyeRedactionRect.visible = false;
+                    if (leftEyeRedactionRect) leftEyeRedactionRect.visible = false;
                 }
                 // Update threshold, blood, glitch buttons to reflect Anon's state
                 updateUIButtonState('threshold', effectControls.anon);
@@ -3248,7 +3004,9 @@ function init() {
                     startCameraAnimation(performance.now());
                 } else {
                     // Reset camera to default or current OrbitControls view when animation stops
-                    // No need to reset position here, the camera stays where it is.
+                    camera.position.copy(initialGlobalCameraPos);
+                    controls.target.copy(initialGlobalCameraLookAt);
+                    camera.lookAt(controls.target);
                     cameraAnimationState = 'idle';
                     assetsVisitedCount = 0;
                     // Re-enable controls if Y-rotation is not active
@@ -3282,7 +3040,11 @@ function init() {
                     camera.lookAt(controls.target);
                     yRotationStartTime = 0; // Reset Y-rotation auto-start timer if Y-rotation is manually toggled off
                 }
+                lastActivityTime = performance.now();
             }
+            
+            // Crucial: Update face materials after any effect toggle
+            updateFaceMaterialState();
         };
         button.setAttribute('data-effect', property);
         parentContainer.appendChild(button);
@@ -3322,13 +3084,14 @@ function init() {
         { label: 'DATA SCRAPER', property: 'hacker', pass: null },
         { label: 'BIO-CODER', property: 'surveillance', pass: null },
         { label: 'HIDDEN HAND', property: 'greed', pass: null },
+        { label: 'Greyscale', property: 'greyscale', pass: greyscalePass },
         { label: 'Threshold', property: 'threshold', pass: thresholdPass },
         { label: 'Pixelation', property: 'pixelation', pass: pixelationPass },
         { label: 'Glitch', property: 'glitch', pass: glitchPass },
         { label: 'Matrix', property: 'matrix', pass: matrixPass },
         { label: 'XRAY', property: 'xray', pass: xrayPass },
         { label: 'CCTV FEED', property: 'cctvFeed', pass: cctvFeedPass },
-        { label: 'GREYSCALE', property: 'greyscale', pass: greyscalePass }
+
     ];
 
     // Create and append the left UI container
@@ -3371,11 +3134,11 @@ function init() {
     const leftUiOrder = [
         'yRotation', // 3D
         'cameraAnimation', // FLY
-        'surveillance', // BIO-CODER
-        'greed', // HIDDEN HAND
-        'hacker', // DATA SCRAPER
-        'shadow', // SHADOW
-        'redactedGlitch' // REDACTED
+        'surveillance', // NEW SURVEILLANCE BUTTON
+        'greed', // NEW GREED BUTTON (now ULTERIOR MOVTIVES)
+        'hacker', // HACKER moved to position 5
+        'shadow',
+        'redactedGlitch'
     ];
 
     // Map property names to their full config objects for easy lookup
@@ -3401,7 +3164,7 @@ function init() {
         const button = document.createElement('button');
         button.textContent = 'RESET';
         button.style.cssText = `
-            background-color: black;
+            background-color: black; /* Changed from #CC0000 to black */
             color: white;
             padding: 4px;
             margin-top: 10px;
@@ -3463,6 +3226,7 @@ function init() {
     exportButtonElement.style.display = 'none';
     leftUiContainer.appendChild(exportButtonElement);
 
+
     // Add the thin black rectangle with a down-facing arrow below the TRASH button
     arrowContainer = document.createElement('div'); // Assign to global variable
     arrowContainer.id = 'arrow-container'; // Add ID for better targeting
@@ -3499,8 +3263,6 @@ function init() {
             leftUiContainer.style.top = '-190px'; // Hide it, revealing only the arrow
             trashButtonElement.style.display = 'none'; // Hide TRASH button
             exportButtonElement.style.display = 'none'; // Hide EXPORT button
-            const panel = document.getElementById('export-panel');
-            if (panel) panel.classList.remove('open'); // Close export panel
             arrowContainer.style.top = '0px'; // Keep arrow at the top
             arrowSpan.innerHTML = '&#x25BC;'; // Change to down arrow
         } else {
@@ -3511,8 +3273,8 @@ function init() {
         }
     };
 
-    // Initial state setup for TRASH/EXPORT buttons and arrowContainer
-    // When the page loads, the left UI is hidden, so these buttons should be hidden.
+    // Initial state setup for TRASH button and arrowContainer
+    // When the page loads, the left UI is hidden, so the trash button should be hidden.
     trashButtonElement.style.display = 'none';
     exportButtonElement.style.display = 'none';
 
@@ -3521,61 +3283,7 @@ function init() {
     renderer.domElement.addEventListener('pointermove', onPointerMove);
     renderer.domElement.addEventListener('pointerup', onPointerUp);
     renderer.domElement.addEventListener('click', onClick);
-    
-    // Call onWindowResize once after init to ensure initial positions are calculated correctly
-    // NOTE: This is called after the main assets are loaded in loadDogecoinAndFiat to ensure
-    // responsive elements are placed correctly *after* the initial fixed elements are positioned.
-    // However, calling it here ensures the camera/composer/UI are sized correctly from the start.
-    onWindowResize();
 }
-
-/**
- * Calculates the responsive position for the ear mesh and updates both the mesh position
- * and the initialPosition in its config.
- * @param {THREE.Mesh} earMesh 
- * @param {object} earConfig 
- */
-function updateEarPosition(earMesh, earConfig) {
-    // Check if the necessary objects and properties exist
-    if (!earMesh || !earConfig || !earConfig.initialPosition) return;
-    
-    const earNewZ = earConfig.initialPosition.z; // Use Z from config
-    const distance_from_camera_ear = camera.position.z - earNewZ;
-    const world_height_at_ear_z = 2 * distance_from_camera_ear * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const world_width_at_ear_z = world_height_at_ear_z * camera.aspect;
-    const pixelToUnitFactorX_ear = world_width_at_ear_z / window.innerWidth;
-    const moveLeftUnits = 2 * pixelToUnitFactorX_ear;
-    
-    // The fixed initial X position is the base - the responsive offset
-    // We use the hardcoded starting X (-2.5) as the base for the responsive offset
-    const baseInitialX = -2.5; 
-    const calculatedInitialX = baseInitialX - moveLeftUnits; 
-    
-    // Check if the mesh has been dragged away from its *last stored* position
-    // We use a small tolerance to check if it's close to the stored config position (which is the last calculated responsive position)
-    const currentInitialX = earConfig.initialPosition.x;
-    
-    let targetX;
-    
-    // If the mesh's current position is close to the stored initial position (meaning it hasn't been dragged far)
-    if (Math.abs(earMesh.position.x - currentInitialX) < 0.01) {
-        // It hasn't been dragged, so update its position to the new responsive X.
-        targetX = calculatedInitialX;
-    } else {
-        // It has been dragged, maintain its current position.
-        targetX = earMesh.position.x;
-    }
-
-    // Apply the position and ensure the Y and Z are maintained from the config
-    earMesh.position.set(targetX, earConfig.initialPosition.y, earConfig.initialPosition.z);
-
-    // If we updated the position, update the config and user data for future checks/resets
-    if (targetX === calculatedInitialX) {
-        earConfig.initialPosition.copy(earMesh.position);
-        earMesh.userData.initialPosition = earMesh.position.clone(); 
-    }
-}
-
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -3600,76 +3308,13 @@ function onWindowResize() {
         arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
     }
 
-    // --- Dynamic Repositioning of Ear and Marquee Text ---
-    const earConfig = initialAssetConfigs.find(c => c.id === 'ear');
-    const earMesh = scene.children.find(c => c.userData.id === 'ear');
-    
-    // Use the dedicated helper function to handle ear position update
-    if (earMesh && earConfig) {
-        updateEarPosition(earMesh, earConfig);
-    }
-    
-    // The biometric marquee position relies on pixelToUnitFactorX_biometric
-    const biometricMarqueeConfig = initialAssetConfigs.find(c => c.id === 'biometricMarqueeTextMesh');
-    if (biometricMarqueeTextMesh && biometricMarqueeConfig) {
-        const biometricMarqueeZ = biometricMarqueeConfig.initialPosition.z;
-        const distance_from_camera_biometric = camera.position.z - biometricMarqueeZ;
-        const world_height_biometric = 2 * distance_from_camera_biometric * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-        const pixelToUnitFactorX_biometric = (world_height_biometric * camera.aspect) / window.innerWidth;
-        const moveRightUnits_biometric = 30 * pixelToUnitFactorX_biometric;
-        
-        // Only update position if the mesh is at its initial position
-        if (biometricMarqueeTextMesh.position.distanceTo(biometricMarqueeConfig.initialPosition) < 0.01) {
-            biometricMarqueeTextMesh.position.x = moveRightUnits_biometric;
-            biometricMarqueeConfig.initialPosition.copy(biometricMarqueeTextMesh.position); // Update config with new responsive position
-        }
-    }
-    
-    // The redacted glitch text position relies on pixelToUnitFactorX_redacted
-    const redactedGlitchConfig = initialAssetConfigs.find(c => c.id === 'redactedGlitchTextMesh');
-    if (redactedGlitchTextMesh && redactedGlitchConfig) {
-        const redactedGlitchTextZ = redactedGlitchConfig.initialPosition.z;
-        const distance_from_camera_redacted = camera.position.z - redactedGlitchTextZ;
-        const world_height_redacted = 2 * distance_from_camera_redacted * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-        const pixelToUnitFactorX_redacted = (world_height_redacted * camera.aspect) / window.innerWidth;
-        const moveRightUnits_redacted = 40 * pixelToUnitFactorX_redacted;
-        
-        // Only update position if the mesh is at its initial position
-        if (redactedGlitchTextMesh.position.distanceTo(redactedGlitchConfig.initialPosition) < 0.01) {
-            redactedGlitchTextMesh.position.x = -5 + moveRightUnits_redacted;
-            redactedGlitchConfig.initialPosition.copy(redactedGlitchTextMesh.position); // Update config with new responsive position
-        }
-    }
-    
-    // --- Dynamic Repositioning of Blood Text (to bottom of screen) ---
-    const bloodTextConfig = initialAssetConfigs.find(c => c.id === 'bloodTextMesh');
-    if (bloodTextMesh && bloodTextConfig) {
-        const bloodTextZ = bloodTextConfig.initialPosition.z;
-        const bloodTextPlaneHeight = bloodTextMesh.geometry.parameters.height;
-        
-        // Calculate the world height of the camera frustum at the text's Z depth
-        const distance_from_camera_blood = camera.position.z - bloodTextZ;
-        const world_height_blood = 2 * distance_from_camera_blood * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-        
-        // Y_center = -WorldHeight/2 + Height/2
-        // This positions the bottom edge of the plane at the bottom of the visible screen (-WorldHeight/2)
-        const yStart = -world_height_blood / 2 + bloodTextPlaneHeight / 2;
-        
-        // Only update position if the mesh is at its initial position (or close to the initial placeholder (0,0,Z))
-        if (bloodTextMesh.position.distanceTo(bloodTextConfig.initialPosition) < 0.01) {
-            bloodTextMesh.position.y = yStart;
-            // Update config with new responsive position
-            bloodTextConfig.initialPosition.copy(bloodTextMesh.position); 
-            bloodTextMesh.userData.initialPosition.copy(bloodTextMesh.position);
-        }
-    }
-    // --- End Dynamic Repositioning ---
-
+    lastActivityTime = performance.now();
     stopCameraAnimationAndReset();
 }
 
 function onPointerDown(event) {
-    
+    lastActivityTime = performance.now();
+    // stopCameraAnimationAndReset(); // Removed: Only stop FLY camera on explicit click
     isDragging = false;
     pointerDownPosition.set(event.clientX, event.clientY);
 
@@ -3704,7 +3349,7 @@ function onPointerDown(event) {
                 offset.copy(intersect.point).sub(selectedObject.position);
                 break; // Found a draggable opaque part, stop searching
             }
-        } else if (material && material.alphaTest !== undefined && material.alphaTest > 0) {
+        } else if (material instanceof THREE.ShaderMaterial && material.alphaTest !== undefined && material.alphaTest > 0) {
             // For ShaderMaterial with alphaTest, treat as always opaque if intersect occurs
             selectedObject = object;
             controls.enabled = false;
@@ -3723,7 +3368,8 @@ function onPointerDown(event) {
 }
 
 function onPointerMove(event) {
-    
+    lastActivityTime = performance.now();
+    // stopCameraAnimationAndReset(); // Removed: Only stop FLY camera on explicit click
     if (selectedObject) {
         // Check if the pointer has moved beyond the drag threshold
         const currentPointerPosition = new THREE.Vector2(event.clientX, event.clientY);
@@ -3747,14 +3393,6 @@ function onPointerMove(event) {
             selectedObject.position.x = intersection.x - offset.x;
             selectedObject.position.y = intersection.y - offset.y;
             selectedObject.position.z = initialObjectZ;
-            
-            // If the object is the ear, update its initialPosition in userData so it doesn't snap back on resize until reset
-            if (selectedObject.userData.id === 'ear') {
-                 selectedObject.userData.initialPosition.copy(selectedObject.position);
-                 // Also update the config for reset consistency
-                 const earConfig = initialAssetConfigs.find(c => c.id === 'ear');
-                 if (earConfig) earConfig.initialPosition.copy(selectedObject.position);
-            }
 
             // Update redaction rectangle positions if the selected object is an eye
             if (selectedObject === rightEyeMesh) {
@@ -3773,8 +3411,16 @@ function onPointerMove(event) {
 }
 
 function onPointerUp(event) {
-    
-    if (isDragging || event.target.closest('#trash-button')) { // Check if dragging or if pointer released directly over trash button
+    lastActivityTime = performance.now();
+    // stopCameraAnimationAndReset(); // Removed: Only stop FLY camera on explicit click
+
+    if (isDragging && selectedObject) {
+        // If the selected object is a drone, update its droneInitialY and droneInitialX to its new position
+        if (selectedObject.userData.id && selectedObject.userData.id.startsWith('drone')) {
+            selectedObject.userData.droneInitialY = selectedObject.position.y;
+            selectedObject.userData.droneInitialX = selectedObject.position.x;
+        }
+
         // Check if the pointer was released over the TRASH button
         if (trashButtonElement) {
             const rect = trashButtonElement.getBoundingClientRect();
@@ -3790,49 +3436,44 @@ function onPointerUp(event) {
             if (event.clientX >= expandedRect.left && event.clientX <= expandedRect.right &&
                 event.clientY >= expandedRect.top && event.clientY <= expandedRect.bottom) {
 
-                if (selectedObject) {
-                    // Mark the object as removed in the initialAssetConfigs for later reloading
-                    const configIndex = initialAssetConfigs.findIndex(config => config.id === selectedObject.userData.id);
-                    if (configIndex !== -1) {
-                        initialAssetConfigs[configIndex].removed = true;
-                    }
-
-                    // Object was dropped onto the trash button, remove it
-                    scene.remove(selectedObject);
-                    // Remove from draggableObjects array
-                    draggableObjects = draggableObjects.filter(obj => obj !== selectedObject);
-                    // Remove from cameraAnimationTargets array
-                    cameraAnimationTargets = cameraAnimationTargets.filter(obj => obj !== selectedObject);
-
-                    // Dispose of geometry and material to free up memory
-                    if (selectedObject.geometry) selectedObject.geometry.dispose();
-                    if (selectedObject.material) {
-                        if (Array.isArray(selectedObject.material)) {
-                            selectedObject.material.forEach(m => m.dispose());
-                        } else {
-                            selectedObject.material.dispose();
-                        }
-                    }
-
-                    // Special handling for specific removed objects (set global refs to null)
-                    if (selectedObject.userData.id === 'dogecoin') {
-                        dogecoinRef = null;
-                    }
-                    if (selectedObject.userData.id === 'spacex') {
-                        spacexRef = null;
-                    }
-                    if (selectedObject.userData.id === 'rightEye') {
-                        if (rightEyeRedactionRect) { scene.remove(rightEyeRedactionRect); rightEyeRedactionRect.geometry.dispose(); rightEyeRedactionRect.material.dispose(); }
-                        rightEyeMesh = null;
-                        rightEyeRedactionRect = null;
-                    }
-                    if (selectedObject.userData.id === 'leftEye') {
-                        if (leftEyeRedactionRect) { scene.remove(leftEyeRedactionRect); leftEyeRedactionRect.geometry.dispose(); leftEyeRedactionRect.material.dispose(); }
-                        leftEyeMesh = null;
-                        leftEyeRedactionRect = null;
-                    }
-                    console.log("Object removed:", selectedObject.name || selectedObject.uuid);
+                // Mark the object as removed in the initialAssetConfigs for later reloading
+                const configIndex = initialAssetConfigs.findIndex(config => config.id === selectedObject.userData.id);
+                if (configIndex !== -1) {
+                    initialAssetConfigs[configIndex].removed = true;
                 }
+
+                // Object was dropped onto the trash button, remove it
+                scene.remove(selectedObject);
+                // Remove from draggableObjects array
+                draggableObjects = draggableObjects.filter(obj => obj !== selectedObject);
+                // Remove from cameraAnimationTargets array
+                cameraAnimationTargets = cameraAnimationTargets.filter(obj => obj !== selectedObject);
+
+                // Dispose of geometry and material to free up memory
+                if (selectedObject.geometry) selectedObject.geometry.dispose();
+                if (selectedObject.material) {
+                    if (Array.isArray(selectedObject.material)) {
+                        selectedObject.material.forEach(m => m.dispose());
+                    } else {
+                        selectedObject.material.dispose();
+                    }
+                }
+
+                // Special handling for specific removed objects (set global refs to null)
+                if (selectedObject.userData.id === 'rightEye') {
+                    if (rightEyeRedactionRect) { scene.remove(rightEyeRedactionRect); rightEyeRedactionRect.geometry.dispose(); rightEyeRedactionRect.material.dispose(); }
+                    rightEyeMesh = null;
+                    rightEyeRedactionRect = null;
+                }
+                if (selectedObject.userData.id === 'leftEye') {
+                    if (leftEyeRedactionRect) { scene.remove(leftEyeRedactionRect); leftEyeRedactionRect.geometry.dispose(); leftEyeRedactionRect.material.dispose(); }
+                    leftEyeMesh = null;
+                    leftEyeRedactionRect = null;
+                }
+                if (selectedObject.userData.id.startsWith('drone')) { // Handle all drones
+                    droneMeshes = droneMeshes.filter(drone => drone !== selectedObject);
+                }
+                console.log("Object removed:", selectedObject.name || selectedObject.uuid);
             }
         }
     }
@@ -3846,7 +3487,10 @@ function onPointerUp(event) {
 }
 
 function onClick(event) {
-    
+    lastActivityTime = performance.now();
+    // Use performance.now() to get current time for button interactions
+    const currentTime = performance.now();
+    // stopCameraAnimationAndReset(); // Moved: Only stop FLY camera on explicit click if not dragging and not on UI
     // Only process click if no dragging occurred and not clicking on UI
     if (isDragging || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) {
         return;
@@ -3888,46 +3532,6 @@ function onClick(event) {
     }
 
     if (clickedObject) {
-        // Handle Dogecoin/Tesla logo swap
-        if (clickedObject === dogecoinRef) {
-            if (dogecoinRef.material.map === dogecoinRef.userData.originalTexture) {
-                // Swap to Tesla texture with greyscale and high contrast effect
-                dogecoinRef.material = teslaGreyscaleContrastMaterial;
-                dogecoinRef.material.uniforms.tDiffuse.value = dogecoinRef.userData.teslaTexture;
-            } else {
-                // Swap back to original Dogecoin texture with basic material
-                dogecoinRef.material = new THREE.MeshBasicMaterial({ map: dogecoinRef.userData.originalTexture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-            }
-            dogecoinRef.material.needsUpdate = true;
-        }
-
-        // Handle SpaceX/X logo swap
-        if (clickedObject === spacexRef) {
-            let newTexture;
-            let targetWidth;
-            let targetHeight;
-
-            if (spacexRef.material.map === spacexRef.userData.originalTexture) {
-                newTexture = spacexRef.userData.xLogoTexture;
-                // For X logo, ensure 1:1 ratio if the source image is 1:1, otherwise use its own ratio
-                // We'll base the new size on the original object's height to keep vertical scale consistent
-                targetHeight = spacexRef.userData.originalHeight; // Use the original object's height as a reference
-                targetWidth = targetHeight * (newTexture.image.width / newTexture.image.height);
-
-            } else {
-                newTexture = spacexRef.userData.originalTexture;
-                targetWidth = spacexRef.userData.originalWidth;
-                targetHeight = spacexRef.userData.originalHeight;
-            }
-
-            // Dispose of old geometry to prevent memory leaks
-            spacexRef.geometry.dispose();
-            // Create new geometry with updated dimensions
-            spacexRef.geometry = new THREE.PlaneGeometry(targetWidth, targetHeight);
-
-            spacexRef.material.map = newTexture;
-            spacexRef.material.needsUpdate = true;
-        }
 
         // Skip depth cycling for non-draggable elements or those with special handling
         if (clickedObject === backgroundMesh || clickedObject === rightEyeRedactionRect || clickedObject === leftEyeRedactionRect || clickedObject === marqueeTextMesh || clickedObject === biometricMarqueeTextMesh || clickedObject === bloodTextMesh || clickedObject === redactedGlitchTextMesh) { // Added redactedGlitchTextMesh
@@ -3942,6 +3546,43 @@ function onClick(event) {
         }
         clickedObject.userData.currentLayer = currentLayer;
         clickedObject.position.z = (currentLayer - 1) * depthStep;
+
+        // --- NEW DRONE LOGIC: Toggle texture and resize ---
+        if (clickedObject.userData.id && clickedObject.userData.id.startsWith('drone')) {
+            const originalTexture = clickedObject.userData.originalTexture;
+            const blueOrigin = blueOriginTexture;
+            let targetTexture;
+            let targetUrl;
+
+            // Determine the next texture to use
+            if (clickedObject.userData.currentTexture === blueOrigin) {
+                targetTexture = originalTexture;
+                targetUrl = URL_DRONE;
+            } else {
+                targetTexture = blueOrigin;
+                targetUrl = URL_BLUE_ORIGIN;
+            }
+
+            // 1. Apply the new texture
+            clickedObject.material.map = targetTexture;
+            clickedObject.userData.currentTexture = targetTexture; // Update current texture reference
+            
+            // 2. Calculate new dimensions based on the target texture's aspect ratio
+            const currentHeight = clickedObject.userData.initialScale.height; // Use the original drone height as the anchor
+            const newAspectRatio = targetTexture.image.width / targetTexture.image.height;
+            const newWidth = currentHeight * newAspectRatio;
+
+            // 3. Update geometry (dispose old one first)
+            clickedObject.geometry.dispose();
+            clickedObject.geometry = new THREE.PlaneGeometry(newWidth, currentHeight);
+            
+            // 4. Update the initialAssetConfigs array to reflect the new texture, so it persists on reset
+            const configIndex = initialAssetConfigs.findIndex(config => config.id === clickedObject.userData.id);
+            if (configIndex !== -1) {
+                initialAssetConfigs[configIndex].currentTextureUrl = targetUrl;
+            }
+        }
+        // --- END NEW DRONE LOGIC ---
 
         // Update redaction rectangle Z position if the clicked object is an eye
         if (clickedObject === rightEyeMesh) {
@@ -3980,15 +3621,27 @@ function startCameraAnimation(currentTime) {
         duration = cameraReturnDuration;
     }
 
+    // Filter out 'samAltmanGrid' images from potential targets
+    const validTargets = cameraAnimationTargets.filter(obj => !obj.userData.id.startsWith('samAltmanGrid'));
+
+    if (validTargets.length === 0) {
+        console.warn("No valid camera animation targets found (excluding 'samAltmanGrid' images).");
+        cameraAnimationActive = false;
+        effectControls.cameraAnimation = false;
+        updateUIButtonState('cameraAnimation', false);
+        controls.enabled = true;
+        return;
+    }
+
     if (cameraAnimationState === 'returningToGlobalStart' || assetsVisitedCount >= ASSETS_PER_GLOBAL_RETURN) {
         cameraAnimationState = 'exploring';
         assetsVisitedCount = 0;
 
-        // Pick a random target for the next exploration
+        // Pick a random target for the next exploration from validTargets
         let newTarget;
         do {
-            newTarget = cameraAnimationTargets[Math.floor(Math.random() * cameraAnimationTargets.length)];
-        } while (newTarget === cameraTargetObject && cameraAnimationTargets.length > 1);
+            newTarget = validTargets[Math.floor(Math.random() * validTargets.length)];
+        } while (newTarget === cameraTargetObject && validTargets.length > 1);
         cameraTargetObject = newTarget;
 
         // Calculate end position and lookAt based on the target object
@@ -4025,8 +3678,8 @@ function startCameraAnimation(currentTime) {
         // Pick a random target, ensuring it's not the same as the previous one if possible
         let newTarget;
         do {
-            newTarget = cameraAnimationTargets[Math.floor(Math.random() * cameraAnimationTargets.length)];
-        } while (newTarget === cameraTargetObject && cameraAnimationTargets.length > 1);
+            newTarget = validTargets[Math.floor(Math.random() * validTargets.length)];
+        } while (newTarget === cameraTargetObject && validTargets.length > 1);
         cameraTargetObject = newTarget;
 
         // Calculate end position and lookAt based on the target object
@@ -4122,24 +3775,28 @@ function animate(currentTime) {
     } else if (!effectControls.yRotation) {
         controls.update();
     }
-    
-    // --- Background Color Management (repeated in animate loop for persistent check) ---
-    const needsBlackBackground = effectControls.shadow || effectControls.threshold || effectControls.anon || effectControls.matrix || effectControls.ascii || effectControls.og;
-    
-    // If REDACTED GLITCH is active, use the orange background
-    if (effectControls.redactedGlitch) {
-        renderer.setClearColor(0xFFAC1C); // Orange
-    } else if (needsBlackBackground) {
-        renderer.setClearColor(0x000000); // Black
-    } else {
-        renderer.setClearColor(0x1e1e1e); // Default dark gray
-    }
-    // --- End Background Color Management ---
 
-    // Update the time uniform for the CCTVFeedShader
-    if (cctvFeedPass.enabled) {
-        cctvFeedPass.uniforms['time'].value = currentTime * 0.001;
-    }
+    // Update drone hovering animation for all drones
+    droneMeshes.forEach(drone => {
+        // Only apply hover animation if the drone is not currently being dragged
+        if (drone !== selectedObject && drone.userData.droneInitialY !== undefined) {
+            
+            const phase = drone.userData.droneHoverPhase || 0;
+            const amp = drone.userData.droneHoverAmplitude || DRONE_HOVER_AMPLITUDE;
+            const speed = drone.userData.droneHoverSpeed || DRONE_HOVER_SPEED;
+
+            // Apply Y-axis hover animation around its initial Y position
+            drone.position.y = drone.userData.droneInitialY + Math.sin(currentTime * speed * 0.001 + phase) * amp;
+            
+            // Apply X-axis drift/hover around its initial X position
+            // Use a different frequency and amplitude for X to make movement unique
+            const xAmp = amp * 0.5; // Smaller X movement
+            const xSpeed = speed * 0.7; // Slower X movement
+            const xPhase = phase + Math.PI / 2; // Offset phase for different timing
+            const xInitial = drone.userData.droneInitialX; // Use initial X center
+            drone.position.x = xInitial + Math.sin(currentTime * xSpeed * 0.001 + xPhase) * xAmp;
+        }
+    });
 
     // Update marquee text scrolling
     if (effectControls.xray) { // Marquee text is now only tied to XRAY effect
@@ -4201,20 +3858,18 @@ setTimeout(function () {
     window.scene = typeof scene != "undefined" ? scene : undefined;
     window.composer = typeof composer != "undefined" ? composer : undefined;
 }, 1000)
-    
+
     // Expose for dae hooks
     setTimeout(function() {
       window.animate = typeof animate == "function" ? animate : () => {};
       window.camera = typeof camera != "undefined" ? camera : undefined;
       window.renderer = typeof renderer != "undefined" ? renderer : undefined;
       window.scene = typeof scene != "undefined" ? scene : undefined;
-      window.composer = typeof composer != "undefined" ? composer : undefined; 
+      window.composer = typeof composer != "undefined" ? composer : undefined;
     }, 1000)
   </script>
 
   <!-- ─── EXPORT PANEL HTML ─── -->
-  <button id="submit-overlord-btn">SUBMIT</button>
-
   <div id="export-panel">
     <div class="panel-title">EXPORT</div>
 
@@ -4322,8 +3977,6 @@ setTimeout(function () {
       toggle.style.display = 'none';
       const modal = document.getElementById('post-modal');
       if (modal) modal.style.display = 'none';
-      const submitOverlordBtn = document.getElementById('submit-overlord-btn');
-      if (submitOverlordBtn) submitOverlordBtn.style.display = 'none';
       return;
     }
     
@@ -4354,7 +4007,7 @@ setTimeout(function () {
     // Wire judgment protocol button to submit via Airtable API
     const judgmentBtn = document.getElementById('judgment-btn');
     const judgmentStatus = document.getElementById('judgment-status');
-    const OVERLORD_NAME = 'elon-musk';
+    const OVERLORD_NAME = 'jeff-bezos';
 
     judgmentBtn.onclick = async () => {
       const xAccount = document.getElementById('x-account-input').value.trim();
@@ -4432,13 +4085,6 @@ setTimeout(function () {
       if (!panel.contains(e.target) && e.target !== toggle) panel.classList.remove('open');
     });
 
-    // ── SUBMIT YOURSELF button — capture PNG then show post modal ──
-    const submitOverlordBtn = document.getElementById('submit-overlord-btn');
-    submitOverlordBtn.onclick = (e) => {
-      e.stopPropagation();
-      exportPNG();
-    };
-
     // ── Format is PNG-only, duration row stays hidden ──
     fmtSel.onchange = () => {
       durRow.style.display = 'none';
@@ -4497,7 +4143,7 @@ setTimeout(function () {
           if (!blob) return;
           const form = new FormData();
           form.append('image', blob, 'export.jpg');
-          form.append('overlord', 'elon-musk');
+          form.append('overlord', 'jeff-bezos');
           try {
             const res = await fetch(GALLERY_API + '/upload', { method: 'POST', body: form });
             if (!res.ok) console.warn('Gallery upload response:', res.status);
@@ -4523,7 +4169,7 @@ setTimeout(function () {
       }
       r.domElement.toBlob((blob) => {
         if (blob) {
-          triggerDownload(blob, 'elon-musk-coldie.png');
+          triggerDownload(blob, 'jeff-bezos-coldie.png');
           saveToGallery(r.domElement);
           setStatus('PNG saved ✓ — added to gallery', 'active');
           showPostModal();
@@ -4575,7 +4221,7 @@ setTimeout(function () {
           if (nativeMp4) {
             // Browser produced a native MP4 – download directly
             const blob = new Blob(chunks, { type: 'video/mp4' });
-            triggerDownload(blob, 'elon-musk-coldie.mp4');
+            triggerDownload(blob, 'jeff-bezos-coldie.mp4');
             setStatus(`MP4 saved ✓  (${(blob.size/1024/1024).toFixed(2)} MB)`, 'active');
             showPostModal();
           } else {
@@ -4596,7 +4242,7 @@ setTimeout(function () {
             // Build a minimal but valid fragmented MP4 shell
             const mp4 = buildMP4(payload, duration, canvas.width, canvas.height);
             const blob = new Blob([mp4], { type: 'video/mp4' });
-            triggerDownload(blob, 'elon-musk-coldie.mp4');
+            triggerDownload(blob, 'jeff-bezos-coldie.mp4');
             setStatus(`MP4 saved ✓  (${(blob.size/1024/1024).toFixed(2)} MB)`, 'active');
             showPostModal();
           }
@@ -4605,7 +4251,7 @@ setTimeout(function () {
           console.error('MP4 mux error', err);
           const ext  = nativeMp4 ? 'mp4' : 'webm';
           const blob = new Blob(chunks, { type: usedMime });
-          triggerDownload(blob, `elon-musk-coldie.${ext}`);
+          triggerDownload(blob, `jeff-bezos-coldie.${ext}`);
           setStatus(`Saved as .${ext} (mux failed)`, 'active');
         }
         lockUI(false);
@@ -4765,5 +4411,6 @@ setTimeout(function () {
     setupExport();
   })();
   </script>
+
 
 </body></html>
