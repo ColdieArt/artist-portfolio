@@ -44,6 +44,84 @@
 
   // ── Helpers ──
 
+  /**
+   * Normalize composition JSON from any of the three artwork save formats
+   * into the canonical format expected by applyComposition().
+   *
+   * Format 1 (combined/studio): { version: 1, meshStates, removedAssets, effectControls, camera: { position, target } }
+   * Format 2 (elon-musk-print): { version: 'elon-musk-print-v1', pieces, removedAssets, effectControls, camera: { position, rotation } }
+   * Format 3 (alpha/v2):        { version: 2, m, rm, fx, cam: { p, t }, i }
+   */
+  function normalizeComposition(raw) {
+    if (!raw || typeof raw !== 'object') {
+      throw new Error('Invalid composition: not an object');
+    }
+
+    // Already in canonical format (combined/studio)
+    if (raw.meshStates) {
+      return raw;
+    }
+
+    // Format 2: elon-musk-print — uses "pieces" instead of "meshStates"
+    if (raw.pieces) {
+      return {
+        version: 1,
+        timestamp: raw.timestamp,
+        meshStates: raw.pieces.map(function (p) {
+          return {
+            id: p.id,
+            position: p.position,
+            rotation: p.rotation,
+            scale: p.scale,
+            visible: p.visible,
+            currentLayer: p.currentLayer,
+            userScale: p.scale ? p.scale.x : 1.0,
+            opacity: 1,
+            transparent: false,
+            isUploaded: false,
+          };
+        }),
+        removedAssets: raw.removedAssets || [],
+        effectControls: raw.effectControls || {},
+        camera: raw.camera ? {
+          position: raw.camera.position,
+          target: raw.camera.target || { x: 0, y: 0, z: 0 },
+        } : undefined,
+      };
+    }
+
+    // Format 3: alpha/v2 — compressed keys (m, rm, fx, cam)
+    if (raw.version === 2 && raw.m) {
+      return {
+        version: 1,
+        timestamp: raw.t,
+        meshStates: raw.m.map(function (s) {
+          return {
+            id: s.id,
+            position: s.p || { x: 0, y: 0, z: 0 },
+            rotation: s.r || { x: 0, y: 0, z: 0 },
+            visible: s.v !== undefined ? s.v : true,
+            userScale: s.s || 1.0,
+            currentLayer: s.l,
+            opacity: s.o !== undefined ? s.o : 1,
+            transparent: s.o !== undefined && s.o < 1,
+            isUploaded: !!s.u,
+            uploadedImageData: s.img && raw.i ? raw.i[s.img] : undefined,
+            initialScale: (s.iw && s.ih) ? { width: s.iw, height: s.ih } : undefined,
+          };
+        }),
+        removedAssets: raw.rm || [],
+        effectControls: raw.fx || {},
+        camera: raw.cam ? {
+          position: raw.cam.p,
+          target: raw.cam.t || { x: 0, y: 0, z: 0 },
+        } : undefined,
+      };
+    }
+
+    throw new Error('Unrecognized composition format — missing meshStates, pieces, or m[]');
+  }
+
   function setStatus(text, type) {
     statusEl.textContent = text;
     statusEl.className = type || '';
@@ -475,10 +553,8 @@
     const reader = new FileReader();
     reader.onload = function (evt) {
       try {
-        compositionData = JSON.parse(evt.target.result);
-        if (!compositionData.version || !compositionData.meshStates) {
-          throw new Error('Invalid composition format');
-        }
+        var raw = JSON.parse(evt.target.result);
+        compositionData = normalizeComposition(raw);
         setStatus('Composition loaded: ' + compositionData.meshStates.length + ' layers', '');
         updateRenderBtnState();
       } catch (err) {
