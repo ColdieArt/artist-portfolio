@@ -162,7 +162,14 @@ select {
   letter-spacing: 1px;
 }
 
-#render-btn {
+.button-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+#render-btn,
+#download-btn {
   background: #000;
   color: #fff;
   border: 1px solid rgba(255,255,255,0.3);
@@ -173,16 +180,18 @@ select {
   font-weight: 700;
   letter-spacing: 2px;
   cursor: pointer;
-  margin-top: 6px;
   transition: all 0.15s;
+  flex: 1;
 }
 
-#render-btn:hover:not(:disabled) {
+#render-btn:hover:not(:disabled),
+#download-btn:hover:not(:disabled) {
   background: #1a1a1a;
   border-color: rgba(255,255,255,0.5);
 }
 
-#render-btn:disabled {
+#render-btn:disabled,
+#download-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
@@ -190,6 +199,16 @@ select {
 #render-btn.rendering {
   border-color: #4CAF50;
   color: #4CAF50;
+}
+
+#download-btn:not(:disabled) {
+  border-color: rgba(76, 175, 80, 0.5);
+  color: #4CAF50;
+}
+
+#download-btn:hover:not(:disabled) {
+  border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.08);
 }
 
 .warning {

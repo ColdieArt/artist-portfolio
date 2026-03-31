@@ -31,6 +31,7 @@
   const orientationRadios = document.querySelectorAll('input[name="orientation"]');
   const resolutionText = document.getElementById('resolution-text');
   const renderBtn = document.getElementById('render-btn');
+  const downloadBtn = document.getElementById('download-btn');
   const warning = document.getElementById('warning');
   const previewContainer = document.getElementById('preview-container');
   const previewPlaceholder = document.getElementById('preview-placeholder');
@@ -41,6 +42,8 @@
   // ── State ──
   let compositionData = null;
   let compositionFilename = '';
+  let lastRenderedCanvas = null;
+  let lastRenderedFilename = '';
 
   // ── Helpers ──
 
@@ -159,6 +162,7 @@
 
   function updateRenderBtnState() {
     renderBtn.disabled = !compositionData;
+    downloadBtn.disabled = !lastRenderedCanvas;
   }
 
   function generateFilename(overlord, w, h) {
@@ -408,7 +412,7 @@
   }
 
   /**
-   * Perform the high-resolution render and export as PNG.
+   * Perform the high-resolution render and show preview.
    */
   async function performRender() {
     const overlord = overlordSelect.value;
@@ -417,6 +421,9 @@
     renderBtn.disabled = true;
     renderBtn.classList.add('rendering');
     renderBtn.textContent = 'RENDERING...';
+    lastRenderedCanvas = null;
+    lastRenderedFilename = '';
+    downloadBtn.disabled = true;
 
     try {
       // Step 1: Load artwork
@@ -473,19 +480,44 @@
         renderer.render(win.scene, camera);
       }
 
-      // Step 5: Export PNG
-      setStatus('Exporting PNG...', 'loading');
-
+      // Step 5: Show preview
       const canvas = renderer.domElement;
       const filename = generateFilename(overlord, targetW, targetH);
 
-      // Show preview
       showPreview(canvas);
 
-      // Use toBlob for better memory handling with large canvases
+      // Store for download
+      lastRenderedCanvas = canvas;
+      lastRenderedFilename = filename;
+
+      setStatus('Render complete — click Download PNG to save', 'success');
+
+    } catch (err) {
+      console.error('Render failed:', err);
+      setStatus('Error: ' + err.message, 'error');
+    } finally {
+      renderBtn.disabled = false;
+      renderBtn.classList.remove('rendering');
+      renderBtn.textContent = 'RENDER';
+      updateRenderBtnState();
+    }
+  }
+
+  /**
+   * Download the last rendered canvas as PNG.
+   */
+  async function performDownload() {
+    if (!lastRenderedCanvas) return;
+
+    downloadBtn.disabled = true;
+    downloadBtn.textContent = 'EXPORTING...';
+
+    try {
+      setStatus('Exporting PNG...', 'loading');
+
       const blob = await new Promise(function (resolve, reject) {
         try {
-          canvas.toBlob(function (b) {
+          lastRenderedCanvas.toBlob(function (b) {
             if (b) resolve(b);
             else reject(new Error('Canvas toBlob returned null — the render may have exceeded GPU memory.'));
           }, 'image/png');
@@ -498,22 +530,20 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = filename;
+      a.download = lastRenderedFilename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      setStatus('Download ready: ' + filename, 'success');
+      setStatus('Download ready: ' + lastRenderedFilename, 'success');
 
     } catch (err) {
-      console.error('Render failed:', err);
+      console.error('Download failed:', err);
       setStatus('Error: ' + err.message, 'error');
     } finally {
-      renderBtn.disabled = false;
-      renderBtn.classList.remove('rendering');
-      renderBtn.textContent = 'RENDER & DOWNLOAD PNG';
-      updateRenderBtnState();
+      downloadBtn.disabled = false;
+      downloadBtn.textContent = 'DOWNLOAD PNG';
     }
   }
 
@@ -581,6 +611,11 @@
   renderBtn.addEventListener('click', function () {
     if (!compositionData) return;
     performRender();
+  });
+
+  downloadBtn.addEventListener('click', function () {
+    if (!lastRenderedCanvas) return;
+    performDownload();
   });
 
   // ── Init ──
