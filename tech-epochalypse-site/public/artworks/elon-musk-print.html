@@ -1903,28 +1903,39 @@ const calculateDogecoinAndFiatPosition = (bgMesh, dogeMesh, dogeTexture, fiatMes
 
 // ── SAVE SCENE STATE TO JSON ──
 function saveSceneToJson() {
-    const sceneState = {
-        timestamp: new Date().toISOString(),
-        version: 'elon-musk-print-v1',
-        camera: {
-            position: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
-            rotation: { x: camera.rotation.x, y: camera.rotation.y, z: camera.rotation.z }
-        },
-        effectControls: { ...effectControls },
-        pieces: []
-    };
+    const meshStates = [];
 
     // Save all draggable objects' state
     draggableObjects.forEach(obj => {
-        sceneState.pieces.push({
+        meshStates.push({
             id: obj.userData.id || 'unknown',
             position: { x: obj.position.x, y: obj.position.y, z: obj.position.z },
             rotation: { x: obj.rotation.x, y: obj.rotation.y, z: obj.rotation.z },
-            scale: { x: obj.scale.x, y: obj.scale.y, z: obj.scale.z },
             visible: obj.visible,
-            currentLayer: obj.userData.currentLayer
+            userScale: obj.userData.userScale || 1.0,
+            currentLayer: obj.userData.currentLayer,
+            opacity: obj.material ? obj.material.opacity : 1,
+            transparent: obj.material ? obj.material.transparent : false,
+            isUploaded: false,
         });
     });
+
+    // Save removed assets
+    const removedAssets = initialAssetConfigs
+        .filter(c => c.removed)
+        .map(c => c.id);
+
+    const sceneState = {
+        version: 1,
+        timestamp: new Date().toISOString(),
+        meshStates: meshStates,
+        removedAssets: removedAssets,
+        effectControls: { ...effectControls },
+        camera: {
+            position: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+            target: { x: 0, y: 0, z: 0 },
+        },
+    };
 
     // Save background mesh if present
     if (backgroundMesh) {
@@ -1933,11 +1944,6 @@ function saveSceneToJson() {
             visible: backgroundMesh.visible
         };
     }
-
-    // Save removed assets
-    sceneState.removedAssets = initialAssetConfigs
-        .filter(c => c.removed)
-        .map(c => c.id);
 
     const json = JSON.stringify(sceneState, null, 2);
     const blob = new Blob([json], { type: 'application/json' });

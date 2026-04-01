@@ -31,6 +31,7 @@
   const orientationRadios = document.querySelectorAll('input[name="orientation"]');
   const resolutionText = document.getElementById('resolution-text');
   const renderBtn = document.getElementById('render-btn');
+  const downloadBtn = document.getElementById('download-btn');
   const warning = document.getElementById('warning');
   const previewContainer = document.getElementById('preview-container');
   const previewPlaceholder = document.getElementById('preview-placeholder');
@@ -41,8 +42,88 @@
   // ── State ──
   let compositionData = null;
   let compositionFilename = '';
+  let lastRenderedCanvas = null;
+  let lastRenderedFilename = '';
 
   // ── Helpers ──
+
+  /**
+   * Normalize composition JSON from any of the three artwork save formats
+   * into the canonical format expected by applyComposition().
+   *
+   * Format 1 (combined/studio): { version: 1, meshStates, removedAssets, effectControls, camera: { position, target } }
+   * Format 2 (elon-musk-print): { version: 'elon-musk-print-v1', pieces, removedAssets, effectControls, camera: { position, rotation } }
+   * Format 3 (alpha/v2):        { version: 2, m, rm, fx, cam: { p, t }, i }
+   */
+  function normalizeComposition(raw) {
+    if (!raw || typeof raw !== 'object') {
+      throw new Error('Invalid composition: not an object');
+    }
+
+    // Already in canonical format (combined/studio)
+    if (raw.meshStates) {
+      return raw;
+    }
+
+    // Format 2: elon-musk-print — uses "pieces" instead of "meshStates"
+    if (raw.pieces) {
+      return {
+        version: 1,
+        timestamp: raw.timestamp,
+        meshStates: raw.pieces.map(function (p) {
+          return {
+            id: p.id,
+            position: p.position,
+            rotation: p.rotation,
+            scale: p.scale,
+            visible: p.visible,
+            currentLayer: p.currentLayer,
+            userScale: p.scale ? p.scale.x : 1.0,
+            opacity: 1,
+            transparent: false,
+            isUploaded: false,
+          };
+        }),
+        removedAssets: raw.removedAssets || [],
+        effectControls: raw.effectControls || {},
+        camera: raw.camera ? {
+          position: raw.camera.position,
+          target: raw.camera.target || { x: 0, y: 0, z: 0 },
+        } : undefined,
+      };
+    }
+
+    // Format 3: alpha/v2 — compressed keys (m, rm, fx, cam)
+    if (raw.version === 2 && raw.m) {
+      return {
+        version: 1,
+        timestamp: raw.t,
+        meshStates: raw.m.map(function (s) {
+          return {
+            id: s.id,
+            position: s.p || { x: 0, y: 0, z: 0 },
+            rotation: s.r || { x: 0, y: 0, z: 0 },
+            visible: s.v !== undefined ? s.v : true,
+            userScale: s.s || 1.0,
+            currentLayer: s.l,
+            opacity: s.o !== undefined ? s.o : 1,
+            transparent: s.o !== undefined && s.o < 1,
+            isUploaded: !!s.u,
+            uploadedImageData: s.img && raw.i ? raw.i[s.img] : undefined,
+            initialScale: (s.iw && s.ih) ? { width: s.iw, height: s.ih } : undefined,
+          };
+        }),
+        removedAssets: raw.rm || [],
+        effectControls: raw.fx || {},
+        camera: raw.cam ? {
+          position: raw.cam.p,
+          target: raw.cam.t || { x: 0, y: 0, z: 0 },
+        } : undefined,
+      };
+    }
+
+    throw new Error('Unrecognized composition format — missing meshStates, pieces, or m[]');
+  }
 
   function setStatus(text, type) {
     statusEl.textContent = text;
@@ -81,6 +162,7 @@
 
   function updateRenderBtnState() {
     renderBtn.disabled = !compositionData;
+    downloadBtn.disabled = !lastRenderedCanvas;
   }
 
   function generateFilename(overlord, w, h) {
@@ -330,7 +412,7 @@
   }
 
   /**
-   * Perform the high-resolution render and export as PNG.
+   * Perform the high-resolution render and show preview.
    */
   async function performRender() {
     const overlord = overlordSelect.value;
@@ -339,6 +421,9 @@
     renderBtn.disabled = true;
     renderBtn.classList.add('rendering');
     renderBtn.textContent = 'RENDERING...';
+    lastRenderedCanvas = null;
+    lastRenderedFilename = '';
+    downloadBtn.disabled = true;
 
     try {
       // Step 1: Load artwork
@@ -355,6 +440,23 @@
       // Step 2: Apply composition
       setStatus('Applying composition...', 'loading');
       applyComposition(win, compositionData);
+
+      // Step 2b: Sync the artwork's internal effectControls and run one animation
+      // frame so that canvas-based text textures (bloodText, biometricMarquee,
+      // redactedGlitch, marquee) get drawn. The create*Texture() functions only
+      // allocate empty canvases — the actual text is rendered by update*Texture()
+      // which runs inside animate() gated on effectControls flags.
+      var ec = compositionData.effectControls || {};
+      if (win.effectControls) {
+        for (var key in ec) {
+          if (ec.hasOwnProperty(key)) {
+            win.effectControls[key] = ec[key];
+          }
+        }
+      }
+      if (typeof win.animate === 'function') {
+        win.animate(performance.now());
+      }
 
       // Step 3: Resize renderer to target resolution
       setStatus('Rendering at ' + targetW + '×' + targetH + '...', 'loading');
@@ -395,19 +497,44 @@
         renderer.render(win.scene, camera);
       }
 
-      // Step 5: Export PNG
-      setStatus('Exporting PNG...', 'loading');
-
+      // Step 5: Show preview
       const canvas = renderer.domElement;
       const filename = generateFilename(overlord, targetW, targetH);
 
-      // Show preview
       showPreview(canvas);
 
-      // Use toBlob for better memory handling with large canvases
+      // Store for download
+      lastRenderedCanvas = canvas;
+      lastRenderedFilename = filename;
+
+      setStatus('Render complete — click Download PNG to save', 'success');
+
+    } catch (err) {
+      console.error('Render failed:', err);
+      setStatus('Error: ' + err.message, 'error');
+    } finally {
+      renderBtn.disabled = false;
+      renderBtn.classList.remove('rendering');
+      renderBtn.textContent = 'RENDER';
+      updateRenderBtnState();
+    }
+  }
+
+  /**
+   * Download the last rendered canvas as PNG.
+   */
+  async function performDownload() {
+    if (!lastRenderedCanvas) return;
+
+    downloadBtn.disabled = true;
+    downloadBtn.textContent = 'EXPORTING...';
+
+    try {
+      setStatus('Exporting PNG...', 'loading');
+
       const blob = await new Promise(function (resolve, reject) {
         try {
-          canvas.toBlob(function (b) {
+          lastRenderedCanvas.toBlob(function (b) {
             if (b) resolve(b);
             else reject(new Error('Canvas toBlob returned null — the render may have exceeded GPU memory.'));
           }, 'image/png');
@@ -420,22 +547,20 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = filename;
+      a.download = lastRenderedFilename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      setStatus('Download ready: ' + filename, 'success');
+      setStatus('Download ready: ' + lastRenderedFilename, 'success');
 
     } catch (err) {
-      console.error('Render failed:', err);
+      console.error('Download failed:', err);
       setStatus('Error: ' + err.message, 'error');
     } finally {
-      renderBtn.disabled = false;
-      renderBtn.classList.remove('rendering');
-      renderBtn.textContent = 'RENDER & DOWNLOAD PNG';
-      updateRenderBtnState();
+      downloadBtn.disabled = false;
+      downloadBtn.textContent = 'DOWNLOAD PNG';
     }
   }
 
@@ -475,10 +600,8 @@
     const reader = new FileReader();
     reader.onload = function (evt) {
       try {
-        compositionData = JSON.parse(evt.target.result);
-        if (!compositionData.version || !compositionData.meshStates) {
-          throw new Error('Invalid composition format');
-        }
+        var raw = JSON.parse(evt.target.result);
+        compositionData = normalizeComposition(raw);
         setStatus('Composition loaded: ' + compositionData.meshStates.length + ' layers', '');
         updateRenderBtnState();
       } catch (err) {
@@ -505,6 +628,11 @@
   renderBtn.addEventListener('click', function () {
     if (!compositionData) return;
     performRender();
+  });
+
+  downloadBtn.addEventListener('click', function () {
+    if (!lastRenderedCanvas) return;
+    performDownload();
   });
 
   // ── Init ──
