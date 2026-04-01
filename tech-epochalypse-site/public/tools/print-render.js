@@ -441,6 +441,23 @@
       setStatus('Applying composition...', 'loading');
       applyComposition(win, compositionData);
 
+      // Step 2b: Sync the artwork's internal effectControls and run one animation
+      // frame so that canvas-based text textures (bloodText, biometricMarquee,
+      // redactedGlitch, marquee) get drawn. The create*Texture() functions only
+      // allocate empty canvases — the actual text is rendered by update*Texture()
+      // which runs inside animate() gated on effectControls flags.
+      var ec = compositionData.effectControls || {};
+      if (win.effectControls) {
+        for (var key in ec) {
+          if (ec.hasOwnProperty(key)) {
+            win.effectControls[key] = ec[key];
+          }
+        }
+      }
+      if (typeof win.animate === 'function') {
+        win.animate(performance.now());
+      }
+
       // Step 3: Resize renderer to target resolution
       setStatus('Rendering at ' + targetW + '×' + targetH + '...', 'loading');
 
