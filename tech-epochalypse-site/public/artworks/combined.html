@@ -376,6 +376,64 @@
       display: inline-block;
       background: #222;
     }
+
+    /* ─── UNLOCKED ASSETS TRAY (bottom-left) ─── */
+    #unlocked-assets-tray {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      z-index: 300;
+      background: rgba(0,0,0,0.92);
+      border: 1px solid rgba(100,255,100,0.3);
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-family: monospace;
+      color: #8f8;
+      font-size: 9px;
+      max-width: 320px;
+      display: none;
+    }
+    #unlocked-assets-tray .tray-title {
+      color: #fff;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      border-bottom: 1px solid rgba(100,255,100,0.2);
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+    }
+    #unlocked-assets-tray .tray-item {
+      display: inline-block;
+      margin: 3px;
+      cursor: grab;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: #111;
+      padding: 2px;
+      position: relative;
+    }
+    #unlocked-assets-tray .tray-item:hover {
+      border-color: rgba(100,255,100,0.6);
+    }
+    #unlocked-assets-tray .tray-item img {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
+    }
+    #unlocked-assets-tray .tray-item .tray-label {
+      font-size: 7px;
+      color: #aaa;
+      text-align: center;
+      margin-top: 2px;
+      pointer-events: none;
+    }
+    .drag-ghost {
+      position: fixed;
+      pointer-events: none;
+      z-index: 10000;
+      opacity: 0.8;
+      border: 1px solid rgba(100,255,100,0.5);
+    }
   </style>
   <title>THE COLLECTIVE - Combined Overlord | Tech Epochalypse by Coldie</title>
 </head>
@@ -5948,7 +6006,90 @@ function resolveUrl(uri) {
     return uri;
 }
 
-function loadContractGatedLayer(assetConfig) {
+// ── UNLOCKED ASSETS TRAY (bottom-left) ──
+const unlockedTray = document.createElement('div');
+unlockedTray.id = 'unlocked-assets-tray';
+unlockedTray.innerHTML = '<div class="tray-title">UNLOCKED ASSETS</div>';
+document.body.appendChild(unlockedTray);
+
+let dragGhost = null;
+let dragAssetConfig = null;
+
+function addAssetToTray(assetConfig) {
+    unlockedTray.style.display = 'block';
+
+    const item = document.createElement('div');
+    item.className = 'tray-item';
+
+    const img = document.createElement('img');
+    img.src = assetConfig.imageUrl;
+    img.alt = assetConfig.label || 'Asset';
+    img.onerror = () => { img.style.background = '#333'; };
+    item.appendChild(img);
+
+    const label = document.createElement('div');
+    label.className = 'tray-label';
+    label.textContent = assetConfig.label || 'TOKEN';
+    item.appendChild(label);
+
+    // Drag from tray onto canvas
+    item.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        dragAssetConfig = assetConfig;
+
+        dragGhost = document.createElement('img');
+        dragGhost.src = assetConfig.imageUrl;
+        dragGhost.className = 'drag-ghost';
+        dragGhost.style.width = '64px';
+        dragGhost.style.height = '64px';
+        dragGhost.style.objectFit = 'contain';
+        dragGhost.style.left = e.clientX - 32 + 'px';
+        dragGhost.style.top = e.clientY - 32 + 'px';
+        document.body.appendChild(dragGhost);
+
+        item.style.opacity = '0.4';
+
+        const onMove = (ev) => {
+            if (dragGhost) {
+                dragGhost.style.left = ev.clientX - 32 + 'px';
+                dragGhost.style.top = ev.clientY - 32 + 'px';
+            }
+        };
+
+        const onUp = (ev) => {
+            document.removeEventListener('pointermove', onMove);
+            document.removeEventListener('pointerup', onUp);
+            if (dragGhost) { dragGhost.remove(); dragGhost = null; }
+            item.style.opacity = '1';
+
+            // Check if dropped on the canvas
+            const canvas = renderer.domElement;
+            const rect = canvas.getBoundingClientRect();
+            if (ev.clientX >= rect.left && ev.clientX <= rect.right &&
+                ev.clientY >= rect.top && ev.clientY <= rect.bottom) {
+                // Convert screen position to 3D world position
+                const ndcX = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+                const ndcY = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+                const dropPos = new THREE.Vector3(ndcX, ndcY, 0).unproject(camera);
+                const dir = dropPos.sub(camera.position).normalize();
+                const targetZ = (dragAssetConfig.layer || 8 - 1) * depthStep;
+                const t = (targetZ - camera.position.z) / dir.z;
+                const worldPos = camera.position.clone().add(dir.multiplyScalar(t));
+
+                placeGatedAssetInScene(dragAssetConfig, worldPos.x, worldPos.y);
+                ethLog('Placed: ' + (dragAssetConfig.label || 'asset'), 'success');
+            }
+            dragAssetConfig = null;
+        };
+
+        document.addEventListener('pointermove', onMove);
+        document.addEventListener('pointerup', onUp);
+    });
+
+    unlockedTray.appendChild(item);
+}
+
+function placeGatedAssetInScene(assetConfig, worldX, worldY) {
     const textureLoader = new THREE.TextureLoader();
     textureLoader.setCrossOrigin('');
     const baseScale = 0.005;
@@ -5969,12 +6110,12 @@ function loadContractGatedLayer(assetConfig) {
         const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
         const mesh = new THREE.Mesh(geometry, material);
 
-        const pos = assetConfig.position || { x: 0, y: 0, z: (assetConfig.layer || 8) * depthStep };
-        mesh.position.set(pos.x, pos.y, pos.z);
-        mesh.userData.currentLayer = assetConfig.layer || 8;
+        const layer = assetConfig.layer || 8;
+        mesh.position.set(worldX, worldY, (layer - 1) * depthStep);
+        mesh.userData.currentLayer = layer;
         mesh.userData.initialPosition = mesh.position.clone();
-        mesh.userData.initialLayer = mesh.userData.currentLayer;
-        mesh.userData.id = 'gated_' + (assetConfig.contract || 'manual').slice(0, 8);
+        mesh.userData.initialLayer = layer;
+        mesh.userData.id = 'gated_' + (assetConfig.contract || 'manual').slice(0, 8) + '_' + Date.now();
         mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
         mesh.userData.contractGated = true;
 
@@ -5986,7 +6127,7 @@ function loadContractGatedLayer(assetConfig) {
 
         initialAssetConfigs.push({
             id: mesh.userData.id, type: 'image', url: assetConfig.imageUrl,
-            initialPosition: mesh.position.clone(), initialLayer: mesh.userData.currentLayer,
+            initialPosition: mesh.position.clone(), initialLayer: layer,
             baseScale, scaleFactor, removed: false, contractGated: true
         });
 
@@ -5994,7 +6135,6 @@ function loadContractGatedLayer(assetConfig) {
             if (material.opacity < 1) { material.opacity = Math.min(material.opacity + 0.05, 1); requestAnimationFrame(fadeIn); }
         };
         fadeIn();
-        ethLog('Asset loaded: ' + (assetConfig.label || assetConfig.imageUrl), 'success');
     }, undefined, (err) => {
         ethLog('Texture load failed: ' + (assetConfig.label || assetConfig.imageUrl), 'error');
     });
@@ -6019,6 +6159,11 @@ async function checkEthTokens() {
         if (camIdx !== -1) cameraAnimationTargets.splice(camIdx, 1);
     });
     contractGatedMeshes = [];
+
+    // Clear the unlocked assets tray
+    const trayItems = unlockedTray.querySelectorAll('.tray-item');
+    trayItems.forEach(item => item.remove());
+    unlockedTray.style.display = 'none';
 
     checkBtn.textContent = 'CHECKING...';
 
@@ -6054,7 +6199,7 @@ async function checkEthTokens() {
         if (matchingAssets.length > 0) {
             ethLog('UNLOCKED ' + matchingAssets.length + ' gated asset(s)', 'success');
             for (const asset of matchingAssets) {
-                loadContractGatedLayer(asset);
+                addAssetToTray(asset);
             }
         } else {
             ethLog('No gated assets configured for this contract.');
@@ -6091,14 +6236,6 @@ async function checkEthTokens() {
 
         if (tokenIds.length > 0) {
             ethLog('Found ' + tokenIds.length + ' token(s). Fetching metadata...');
-            const thumbContainer = document.createElement('div');
-            thumbContainer.style.marginTop = '8px';
-            ethPanel.appendChild(thumbContainer);
-
-            const textureLoader = new THREE.TextureLoader();
-            textureLoader.setCrossOrigin('');
-            const startX = 5.0, spacing = 3.0, tokenLayer = 8;
-            let imgIndex = 0;
 
             for (const tokenId of tokenIds) {
                 try {
@@ -6110,44 +6247,13 @@ async function checkEthTokens() {
 
                     if (imageUrl) {
                         const name = metadata.name || ('#' + tokenId.toString());
-
-                        const thumb = document.createElement('img');
-                        thumb.className = 'eth-token-thumb';
-                        thumb.src = imageUrl;
-                        thumb.title = name;
-                        thumb.onerror = () => { thumb.style.display = 'none'; };
-                        thumbContainer.appendChild(thumb);
-
-                        const idx = imgIndex++;
-                        textureLoader.load(imageUrl, (texture) => {
-                            texture.colorSpace = THREE.SRGBColorSpace;
-                            texture.minFilter = THREE.LinearFilter;
-                            texture.magFilter = THREE.LinearFilter;
-                            texture.generateMipmaps = false;
-                            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-
-                            const aspectRatio = texture.image.width / texture.image.height;
-                            const planeHeight = 2.5;
-                            const planeWidth = planeHeight * aspectRatio;
-                            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-                            const material = new THREE.MeshBasicMaterial({
-                                map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.1
-                            });
-                            const mesh = new THREE.Mesh(geometry, material);
-                            const col = idx % 4, row = Math.floor(idx / 4);
-                            mesh.position.set(startX + col * spacing, 1.0 - row * spacing, (tokenLayer - 1) * depthStep);
-                            mesh.userData.currentLayer = tokenLayer;
-                            mesh.userData.initialPosition = mesh.position.clone();
-                            mesh.userData.initialLayer = tokenLayer;
-                            mesh.userData.id = 'eth-token-' + tokenId.toString();
-                            mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
-                            mesh.userData.ethToken = true;
-                            scene.add(mesh);
-                            draggableObjects.push(mesh);
-                            cameraAnimationTargets.push(mesh);
-                            contractGatedMeshes.push(mesh);
+                        addAssetToTray({
+                            imageUrl,
+                            label: name,
+                            layer: 8,
+                            scale: 1.0,
+                            position: { x: 0, y: 0, z: (8 - 1) * depthStep }
                         });
-
                         ethLog('  ' + name, 'success');
                     } else {
                         ethLog('  No image for #' + tokenId.toString(), 'error');
