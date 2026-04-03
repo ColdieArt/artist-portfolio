@@ -6032,6 +6032,15 @@ function addAssetToTray(assetConfig) {
     label.textContent = assetConfig.label || 'TOKEN';
     item.appendChild(label);
 
+    if (assetConfig.tokenId) {
+        const idBadge = document.createElement('div');
+        idBadge.className = 'tray-label';
+        idBadge.style.fontSize = '6px';
+        idBadge.style.color = '#6af';
+        idBadge.textContent = 'TOKEN #' + assetConfig.tokenId + ' · L' + (assetConfig.layer || 8);
+        item.appendChild(idBadge);
+    }
+
     if (assetConfig.tokenImageUri) {
         const uriLabel = document.createElement('div');
         uriLabel.className = 'tray-label';
@@ -6127,7 +6136,7 @@ function placeGatedAssetInScene(assetConfig, worldX, worldY) {
         mesh.userData.currentLayer = layer;
         mesh.userData.initialPosition = mesh.position.clone();
         mesh.userData.initialLayer = layer;
-        mesh.userData.id = 'gated_' + (assetConfig.contract || 'manual').slice(0, 8) + '_' + Date.now();
+        mesh.userData.id = 'gated_' + (assetConfig.tokenId || (assetConfig.contract || 'manual').slice(0, 8)) + '_' + Date.now();
         mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
         mesh.userData.contractGated = true;
 
@@ -6249,7 +6258,23 @@ async function checkEthTokens() {
         if (tokenIds.length > 0) {
             ethLog('Found ' + tokenIds.length + ' token(s). Fetching metadata...');
 
-            for (const tokenId of tokenIds) {
+            // Assign each token a unique layer and position so they act as distinct face pieces
+            const baseLayers = [6, 7, 8, 9, 10, 11, 12, 13, 14, 5, 4, 3, 2, 1, 15];
+            const positionOffsets = [
+                { x: 0, y: 0 },
+                { x: 1.5, y: 1.5 },
+                { x: -1.5, y: 1.5 },
+                { x: 1.5, y: -1.5 },
+                { x: -1.5, y: -1.5 },
+                { x: 0, y: 3.0 },
+                { x: 0, y: -3.0 },
+                { x: 3.0, y: 0 },
+                { x: -3.0, y: 0 },
+                { x: 2.0, y: 2.0 },
+            ];
+
+            for (let i = 0; i < tokenIds.length; i++) {
+                const tokenId = tokenIds[i];
                 try {
                     let uri = await contract.tokenURI(tokenId);
                     uri = resolveUrl(uri);
@@ -6259,15 +6284,18 @@ async function checkEthTokens() {
 
                     if (imageUrl) {
                         const name = metadata.name || ('#' + tokenId.toString());
+                        const layer = baseLayers[i % baseLayers.length];
+                        const offset = positionOffsets[i % positionOffsets.length];
                         addAssetToTray({
                             imageUrl,
                             label: name,
                             tokenImageUri: imageUrl,
-                            layer: 8,
+                            tokenId: tokenId.toString(),
+                            layer: layer,
                             scale: 1.0,
-                            position: { x: 0, y: 0, z: (8 - 1) * depthStep }
+                            position: { x: offset.x, y: offset.y, z: (layer - 1) * depthStep }
                         });
-                        ethLog('  ' + name, 'success');
+                        ethLog('  ' + name + ' → layer ' + layer, 'success');
                     } else {
                         ethLog('  No image for #' + tokenId.toString(), 'error');
                     }
