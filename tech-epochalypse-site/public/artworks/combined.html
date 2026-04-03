@@ -815,16 +815,7 @@ OVERLORD_ASSETS['rocket'] = BRANDED_OPTIONS;
 // ── CONTRACT-GATED ASSETS ──
 // Each entry maps an ETH contract address to an image that unlocks when the connected wallet holds a token.
 // Add entries like: { contract: '0x...', imageUrl: 'https://...png', label: 'MY ASSET', position: {x, y, z}, scale: 1.0, layer: 8 }
-const CONTRACT_GATED_ASSETS = [
-    {
-        contract: '0x147835d1e3d84c9313e51defd172c55a3600f439',
-        imageUrl: URL_NOSE,
-        label: 'NOSE',
-        position: { x: 0, y: 0.8, z: 2.0 },
-        scale: 1.0,
-        layer: 11
-    }
-];
+const CONTRACT_GATED_ASSETS = [];
 
 // Contract-gated asset state
 let contractGatedMeshes = []; // Track meshes added by contract-gated assets
@@ -5982,7 +5973,7 @@ ethPanel.id = 'eth-status-panel';
 ethPanel.innerHTML = `
     <div class="panel-title">ETH TOKEN LOADER</div>
     <label>CONTRACT ADDRESS</label>
-    <input type="text" id="eth-contract-input" placeholder="0x..." value="${CONTRACT_GATED_ASSETS.length ? CONTRACT_GATED_ASSETS[0].contract : ''}">
+    <input type="text" id="eth-contract-input" placeholder="0x..." value="0x147835d1e3d84c9313e51defd172c55a3600f439">
     <label>WALLET ADDRESS</label>
     <input type="text" id="eth-wallet-input" placeholder="0x...">
     <button class="eth-check-btn" id="eth-check-btn">CHECK</button>
@@ -6000,10 +5991,29 @@ function ethLog(msg, cls = '') {
 
 function resolveUrl(uri) {
     if (!uri) return null;
-    if (uri.startsWith('ipfs://')) return 'https://ipfs.io/ipfs/' + uri.slice(7);
+    if (uri.startsWith('ipfs://')) return 'https://cloudflare-ipfs.com/ipfs/' + uri.slice(7);
     if (uri.startsWith('ar://')) return 'https://arweave.net/' + uri.slice(5);
     if (uri.startsWith('data:')) return uri;
     return uri;
+}
+
+function parseDataUri(uri) {
+    // Handle data:application/json;base64,... tokenURIs (on-chain metadata)
+    if (uri && uri.startsWith('data:application/json')) {
+        try {
+            if (uri.includes(';base64,')) {
+                const b64 = uri.split(';base64,')[1];
+                return JSON.parse(atob(b64));
+            } else {
+                const json = decodeURIComponent(uri.split(',')[1]);
+                return JSON.parse(json);
+            }
+        } catch (e) {
+            console.error('[ETH] Failed to parse data URI:', e);
+            return null;
+        }
+    }
+    return null;
 }
 
 // ── UNLOCKED ASSETS TRAY (bottom-left) ──
@@ -6306,10 +6316,25 @@ async function checkEthTokens() {
                 const tokenId = tokenIds[i];
                 try {
                     let uri = await contract.tokenURI(tokenId);
-                    uri = resolveUrl(uri);
-                    const resp = await fetch(uri);
-                    const metadata = await resp.json();
-                    const imageUrl = resolveUrl(metadata.image || metadata.image_url);
+                    ethLog('  Token #' + tokenId.toString() + ' URI: ' + (uri ? uri.substring(0, 80) : 'null') + '...');
+
+                    let metadata = null;
+
+                    // Try parsing as data URI first (on-chain metadata)
+                    metadata = parseDataUri(uri);
+
+                    if (!metadata) {
+                        // Fetch from resolved URL
+                        uri = resolveUrl(uri);
+                        const resp = await fetch(uri);
+                        if (!resp.ok) {
+                            ethLog('  Metadata fetch failed for #' + tokenId.toString() + ' (HTTP ' + resp.status + ')', 'error');
+                            continue;
+                        }
+                        metadata = await resp.json();
+                    }
+
+                    const imageUrl = resolveUrl(metadata.image || metadata.image_url || metadata.image_data);
 
                     if (imageUrl) {
                         const name = metadata.name || ('#' + tokenId.toString());
@@ -6326,10 +6351,12 @@ async function checkEthTokens() {
                         });
                         ethLog('  ' + name + ' → layer ' + layer, 'success');
                     } else {
-                        ethLog('  No image for #' + tokenId.toString(), 'error');
+                        ethLog('  No image found in metadata for #' + tokenId.toString(), 'error');
+                        console.log('[ETH] Metadata keys:', Object.keys(metadata));
                     }
                 } catch (e) {
                     ethLog('  Error #' + tokenId.toString() + ': ' + e.message, 'error');
+                    console.error('[ETH] Token error:', e);
                 }
             }
         }
