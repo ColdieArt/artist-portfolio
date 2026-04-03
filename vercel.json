@@ -13,7 +13,8 @@
     { "source": "/submit", "destination": "/api/submit" },
     { "source": "/gallery", "destination": "/api/gallery" },
     { "source": "/upload", "destination": "/api/upload" },
-    { "source": "/image/:path*", "destination": "/api/image?key=exports/:path*" }
+    { "source": "/image/:path*", "destination": "/api/image?key=exports/:path*" },
+    { "source": "/api/tools/print-order", "destination": "/api/tools/print-order" }
   ],
   "headers": [
     {
