@@ -2,33 +2,44 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  overflow-y: scroll;
+  scroll-behavior: smooth;
 }
 
 body {
-  background: #111;
+  background: #000;
   color: #ccc;
   font-family: 'Courier New', monospace;
-  font-size: 13px;
+  font-size: 14px;
   min-height: 100vh;
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior: none;
 }
 
 #app {
-  max-width: 720px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 32px 24px;
+  padding: 28px 20px 240px;
 }
+
+/* ── Header ── */
 
 header {
   display: flex;
   align-items: baseline;
-  gap: 12px;
+  gap: 14px;
   margin-bottom: 28px;
   border-bottom: 1px solid rgba(255,255,255,0.12);
   padding-bottom: 16px;
 }
 
 header h1 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: 3px;
   color: #fff;
@@ -36,185 +47,233 @@ header h1 {
 
 header .subtitle {
   font-size: 11px;
-  color: #666;
+  color: #555;
   letter-spacing: 1.5px;
 }
+
+/* ── Controls Layout ── */
 
 .controls {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 20px;
   margin-bottom: 24px;
 }
 
-.control-row {
+.control-section {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.control-row > label:first-child {
-  width: 100px;
-  flex-shrink: 0;
+.section-label {
   color: #888;
   font-size: 11px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 700;
 }
 
-select, input[type="number"] {
-  background: #1a1a1a;
-  color: #ddd;
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 3px;
-  padding: 7px 10px;
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
-  outline: none;
+.section-label .required {
+  color: #c55;
 }
 
-select:focus, input[type="number"]:focus {
-  border-color: rgba(255,255,255,0.4);
-}
+/* ── Button Row (option selectors) ── */
 
-select {
-  min-width: 200px;
-  cursor: pointer;
-}
-
-.file-input-wrapper {
+.button-row {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-}
-
-.file-input-wrapper input[type="file"] {
-  display: none;
-}
-
-.file-input-wrapper button {
-  background: #222;
-  color: #ccc;
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 3px;
-  padding: 6px 14px;
-  font-family: 'Courier New', monospace;
-  font-size: 11px;
-  cursor: pointer;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-}
-
-.file-input-wrapper button:hover {
-  background: #333;
-  border-color: rgba(255,255,255,0.35);
-}
-
-#json-filename {
-  color: #555;
-  font-size: 11px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 250px;
-}
-
-#json-filename.has-file {
-  color: #aaa;
-}
-
-.custom-inputs {
-  display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.custom-inputs input[type="number"] {
-  width: 80px;
-}
-
-.custom-inputs span {
-  color: #555;
-}
-
-.radio-group {
-  display: flex;
-  gap: 18px;
-}
-
-.radio-label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  cursor: pointer;
+.option-btn {
+  background: #111;
   color: #aaa;
-  font-size: 12px;
-}
-
-.radio-label input[type="radio"] {
-  accent-color: #4CAF50;
-}
-
-.resolution-display span {
-  color: #4CAF50;
-  font-size: 13px;
-  letter-spacing: 1px;
-}
-
-#render-btn {
-  background: #000;
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 3px;
-  padding: 12px 24px;
+  border: 2px solid #333;
+  border-radius: 6px;
+  padding: 14px 20px;
   font-family: 'Courier New', monospace;
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   cursor: pointer;
-  margin-top: 6px;
-  transition: all 0.15s;
+  transition: all 0.12s;
+  min-height: 52px;
+  min-width: 60px;
+  text-align: center;
 }
 
-#render-btn:hover:not(:disabled) {
+.option-btn:active {
+  transform: scale(0.96);
+}
+
+.option-btn.selected {
   background: #1a1a1a;
-  border-color: rgba(255,255,255,0.5);
+  color: #fff;
+  border-color: #4CAF50;
+  box-shadow: 0 0 12px rgba(76,175,80,0.25);
 }
 
-#render-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
+/* Overlord-specific accent colors */
+.overlord-btn[data-value="elon-musk"].selected {
+  border-color: #e44;
+  box-shadow: 0 0 12px rgba(228,68,68,0.25);
+}
+.overlord-btn[data-value="mark-zuckerberg"].selected {
+  border-color: #4488ff;
+  box-shadow: 0 0 12px rgba(68,136,255,0.25);
+}
+.overlord-btn[data-value="sam-altman"].selected {
+  border-color: #aaa;
+  box-shadow: 0 0 12px rgba(170,170,170,0.2);
+}
+.overlord-btn[data-value="jeff-bezos"].selected {
+  border-color: #f90;
+  box-shadow: 0 0 12px rgba(255,153,0,0.25);
+}
+.overlord-btn[data-value="jensen-huang"].selected {
+  border-color: #7b2;
+  box-shadow: 0 0 12px rgba(119,187,34,0.25);
 }
 
-#render-btn.rendering {
+/* ── File Button ── */
+
+.file-btn {
+  background: #111;
+  color: #888;
+  border: 2px dashed #333;
+  border-radius: 6px;
+  padding: 18px 24px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  text-align: center;
+  min-height: 56px;
+  transition: all 0.12s;
+}
+
+.file-btn:active {
+  background: #1a1a1a;
+  border-color: #555;
+}
+
+.file-btn.has-file {
+  border-style: solid;
   border-color: #4CAF50;
   color: #4CAF50;
 }
 
-.warning {
-  color: #c97;
+.file-status {
+  color: #444;
   font-size: 11px;
-  line-height: 1.5;
+  letter-spacing: 0.5px;
+}
+
+.file-status.has-file {
+  color: #888;
+}
+
+/* ── Text Inputs ── */
+
+.touch-input {
+  background: #111;
+  color: #ddd;
+  border: 2px solid #333;
+  border-radius: 6px;
+  padding: 14px 16px;
+  font-family: 'Courier New', monospace;
+  font-size: 15px;
+  width: 100%;
+  min-height: 52px;
+  outline: none;
+  caret-color: #4CAF50;
+  -webkit-user-select: text;
+  user-select: text;
+  transition: border-color 0.12s;
+}
+
+.touch-input:focus,
+.touch-input.active {
+  border-color: #4CAF50;
+  background: #0a0a0a;
+}
+
+.touch-input.error {
+  border-color: #c55;
+}
+
+.touch-input::placeholder {
+  color: #444;
+}
+
+.small-input {
+  width: 120px;
+}
+
+.custom-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.currency-prefix {
+  color: #888;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ── Resolution Display ── */
+
+.resolution-display {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   padding: 8px 0;
 }
 
+.res-label {
+  color: #555;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+}
+
+.res-value {
+  color: #4CAF50;
+  font-size: 14px;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+/* ── Warning ── */
+
+.warning {
+  color: #c97;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 10px 14px;
+  background: rgba(204,153,102,0.08);
+  border: 1px solid rgba(204,153,102,0.2);
+  border-radius: 6px;
+}
+
+/* ── Preview ── */
+
 #preview-container {
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 3px;
+  border-radius: 6px;
   background: #0a0a0a;
-  min-height: 300px;
+  min-height: 280px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   overflow: hidden;
   position: relative;
 }
 
 #preview-placeholder {
-  color: #444;
-  font-size: 12px;
+  color: #333;
+  font-size: 13px;
   text-align: center;
   padding: 40px;
   letter-spacing: 0.5px;
@@ -226,11 +285,96 @@ select {
   object-fit: contain;
 }
 
+/* ── Action Buttons ── */
+
+.action-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 18px 20px;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  min-height: 60px;
+  transition: all 0.15s;
+  border: 2px solid;
+  text-align: center;
+}
+
+.action-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.action-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.action-btn.secondary {
+  background: #111;
+  color: #ccc;
+  border-color: #444;
+}
+
+.action-btn.secondary:not(:disabled):active {
+  background: #1a1a1a;
+  border-color: #666;
+}
+
+.action-btn.primary {
+  background: #111;
+  color: #4CAF50;
+  border-color: #4CAF50;
+}
+
+.action-btn.primary:not(:disabled) {
+  box-shadow: 0 0 16px rgba(76,175,80,0.15);
+}
+
+.action-btn.primary.ready {
+  animation: pulse-glow 2s infinite;
+}
+
+.action-btn.primary.processing {
+  animation: none;
+  color: #c97;
+  border-color: #c97;
+  box-shadow: 0 0 16px rgba(204,153,102,0.2);
+}
+
+.action-btn.primary.complete {
+  animation: none;
+  color: #4CAF50;
+  border-color: #4CAF50;
+  background: rgba(76,175,80,0.08);
+}
+
+.action-btn.warning-btn {
+  background: #111;
+  color: #c97;
+  border-color: #c97;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 16px rgba(76,175,80,0.15); }
+  50% { box-shadow: 0 0 28px rgba(76,175,80,0.35); }
+}
+
+/* ── Status ── */
+
 #status {
-  color: #555;
-  font-size: 11px;
+  color: #444;
+  font-size: 12px;
   letter-spacing: 0.5px;
-  padding-top: 4px;
+  padding: 8px 0;
+  min-height: 28px;
 }
 
 #status.loading {
@@ -243,4 +387,126 @@ select {
 
 #status.error {
   color: #c55;
+}
+
+/* ── On-Screen Keyboard ── */
+
+.keyboard {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #1a1a1a;
+  border-top: 1px solid #333;
+  padding: 8px 6px 12px;
+  z-index: 1000;
+  transition: transform 0.25s ease;
+}
+
+.keyboard.hidden {
+  transform: translateY(100%);
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.key {
+  background: #2a2a2a;
+  color: #ddd;
+  border: none;
+  border-radius: 5px;
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  font-weight: 600;
+  min-width: 34px;
+  min-height: 44px;
+  padding: 8px 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  max-width: 52px;
+  transition: background 0.08s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.key:active {
+  background: #555;
+}
+
+.key.special {
+  background: #3a3a3a;
+  color: #aaa;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  max-width: 72px;
+}
+
+.key.wide {
+  max-width: none;
+  flex: 3;
+  font-size: 13px;
+}
+
+.key.done {
+  background: #4CAF50;
+  color: #000;
+  font-weight: 700;
+  max-width: 80px;
+}
+
+.key.shift-active {
+  background: #4CAF50;
+  color: #000;
+}
+
+.key.backspace {
+  max-width: 60px;
+  font-size: 18px;
+}
+
+/* ── Scrollbar ── */
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 2px;
+}
+
+/* ── Error toast ── */
+
+.error-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #c55;
+  color: #fff;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  z-index: 2000;
+  animation: toast-in 0.3s ease;
+  white-space: nowrap;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }

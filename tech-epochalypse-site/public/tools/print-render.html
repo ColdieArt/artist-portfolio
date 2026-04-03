@@ -2,98 +2,137 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Print Render — Tech Epochalypse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Print Render Station — Tech Epochalypse</title>
   <link rel="stylesheet" href="print-render.css">
 </head>
 <body>
   <div id="app">
     <header>
-      <h1>PRINT RENDER</h1>
+      <h1>PRINT RENDER STATION</h1>
       <span class="subtitle">Tech Epochalypse</span>
     </header>
 
     <div class="controls">
-      <div class="control-row">
-        <label for="overlord-select">Overlord</label>
-        <select id="overlord-select">
-          <option value="elon-musk">Elon Musk</option>
-          <option value="mark-zuckerberg">Mark Zuckerberg</option>
-          <option value="sam-altman">Sam Altman</option>
-          <option value="jeff-bezos">Jeff Bezos</option>
-          <option value="jensen-huang">Jensen Huang</option>
-          <option value="combined">The Collective</option>
-        </select>
-      </div>
 
-      <div class="control-row">
-        <label for="json-input">Composition</label>
-        <div class="file-input-wrapper">
-          <button id="json-btn" type="button">Choose File</button>
-          <input type="file" id="json-input" accept=".json" />
-          <span id="json-filename">No file selected</span>
+      <!-- Overlord Selection -->
+      <section class="control-section">
+        <label class="section-label">SELECT OVERLORD</label>
+        <div class="button-row" id="overlord-row">
+          <button type="button" class="option-btn overlord-btn" data-value="elon-musk">MUSK</button>
+          <button type="button" class="option-btn overlord-btn" data-value="mark-zuckerberg">ZUCKERBERG</button>
+          <button type="button" class="option-btn overlord-btn" data-value="sam-altman">ALTMAN</button>
+          <button type="button" class="option-btn overlord-btn" data-value="jeff-bezos">BEZOS</button>
+          <button type="button" class="option-btn overlord-btn" data-value="jensen-huang">HUANG</button>
         </div>
-      </div>
+      </section>
 
-      <div class="control-row">
-        <label for="size-select">Print Size</label>
-        <select id="size-select">
-          <option value="1500x2100">5×7 at 300 DPI</option>
-          <option value="2400x3000" selected>8×10 at 300 DPI</option>
-          <option value="3300x4200">11×14 at 300 DPI</option>
-          <option value="4800x6000">16×20 at 300 DPI</option>
-          <option value="custom">Custom</option>
-        </select>
-      </div>
+      <!-- Composition File -->
+      <section class="control-section">
+        <label class="section-label">LOAD COMPOSITION</label>
+        <button type="button" class="file-btn" id="json-btn">TAP TO SELECT FILE</button>
+        <input type="file" id="json-input" accept=".json" style="display:none;" />
+        <span id="json-filename" class="file-status">No file selected</span>
+      </section>
 
-      <div class="control-row" id="custom-size-row" style="display:none;">
-        <label>Custom Size</label>
-        <div class="custom-inputs">
-          <input type="number" id="custom-width" placeholder="Width" value="3000" min="100" max="8000" />
-          <span>×</span>
-          <input type="number" id="custom-height" placeholder="Height" value="4000" min="100" max="8000" />
-          <span>px</span>
+      <!-- Print Size -->
+      <section class="control-section">
+        <label class="section-label">PRINT SIZE</label>
+        <div class="button-row" id="size-row">
+          <button type="button" class="option-btn size-btn" data-value="1500x2100">5&times;7</button>
+          <button type="button" class="option-btn size-btn" data-value="2400x3000">8&times;10</button>
+          <button type="button" class="option-btn size-btn" data-value="3300x4200">11&times;14</button>
+          <button type="button" class="option-btn size-btn" data-value="4800x6000">16&times;20</button>
         </div>
-      </div>
+      </section>
 
-      <div class="control-row">
-        <label>Orientation</label>
-        <div class="radio-group">
-          <label class="radio-label">
-            <input type="radio" name="orientation" value="portrait" checked />
-            Portrait
-          </label>
-          <label class="radio-label">
-            <input type="radio" name="orientation" value="landscape" />
-            Landscape
-          </label>
+      <!-- Orientation -->
+      <section class="control-section">
+        <label class="section-label">ORIENTATION</label>
+        <div class="button-row" id="orientation-row">
+          <button type="button" class="option-btn orientation-btn selected" data-value="portrait">PORTRAIT</button>
+          <button type="button" class="option-btn orientation-btn" data-value="landscape">LANDSCAPE</button>
         </div>
-      </div>
+      </section>
 
-      <div class="control-row resolution-display">
-        <label>Resolution</label>
-        <span id="resolution-text">2400 × 3000 px</span>
-      </div>
+      <!-- Price -->
+      <section class="control-section">
+        <label class="section-label">PRICE</label>
+        <div class="button-row" id="price-row">
+          <button type="button" class="option-btn price-btn" data-value="65">$65</button>
+          <button type="button" class="option-btn price-btn" data-value="75">$75</button>
+          <button type="button" class="option-btn price-btn" data-value="85">$85</button>
+          <button type="button" class="option-btn price-btn" data-value="custom">CUSTOM</button>
+        </div>
+        <div id="custom-price-row" class="custom-row" style="display:none;">
+          <span class="currency-prefix">$</span>
+          <input type="text" id="custom-price" class="touch-input small-input" inputmode="none" placeholder="0" />
+        </div>
+      </section>
 
-      <button id="render-btn" type="button" disabled>RENDER &amp; DOWNLOAD PNG</button>
+      <!-- Buyer Name -->
+      <section class="control-section">
+        <label class="section-label">BUYER NAME <span class="required">*</span></label>
+        <input type="text" id="buyer-name" class="touch-input" inputmode="none" placeholder="Full name" autocomplete="off" />
+      </section>
+
+      <!-- Buyer Email -->
+      <section class="control-section">
+        <label class="section-label">BUYER EMAIL <span class="required">*</span></label>
+        <input type="text" id="buyer-email" class="touch-input" inputmode="none" placeholder="email@example.com" autocomplete="off" />
+      </section>
+
+      <!-- Notes -->
+      <section class="control-section">
+        <label class="section-label">NOTES</label>
+        <input type="text" id="notes" class="touch-input" inputmode="none" placeholder="Optional notes" autocomplete="off" />
+      </section>
+
+      <!-- Resolution Display -->
+      <div class="resolution-display">
+        <span class="res-label">RESOLUTION</span>
+        <span id="resolution-text" class="res-value">— select size —</span>
+      </div>
 
       <div id="warning" class="warning" style="display:none;">
-        Large renders may fail on some devices. If the render is blank, try a smaller resolution.
+        Large renders may fail on some devices. If the render is blank, try a smaller size.
       </div>
+
     </div>
 
+    <!-- Preview -->
     <div id="preview-container">
       <div id="preview-placeholder">
-        Upload a composition JSON and click Render to preview
+        Load a composition and tap Render Preview
       </div>
       <canvas id="preview-canvas" style="display:none;"></canvas>
     </div>
 
+    <!-- Action Buttons -->
+    <div class="action-row">
+      <button type="button" id="preview-btn" class="action-btn secondary" disabled>RENDER PREVIEW</button>
+      <button type="button" id="render-btn" class="action-btn primary" disabled>RENDER, SAVE &amp; SEND INVOICE</button>
+    </div>
+
+    <!-- Retry / New Order -->
+    <div class="action-row" id="post-actions" style="display:none;">
+      <button type="button" id="retry-btn" class="action-btn warning-btn" style="display:none;">RETRY INVOICE</button>
+      <button type="button" id="new-order-btn" class="action-btn secondary">NEW ORDER</button>
+    </div>
+
+    <!-- Status -->
     <div id="status">Ready</div>
+
   </div>
 
-  <!-- The artwork loads in this hidden iframe -->
+  <!-- Hidden iframe for artwork rendering -->
   <iframe id="artwork-frame" style="position:absolute;left:-99999px;top:0;width:1px;height:1px;border:none;"></iframe>
+
+  <!-- On-Screen Keyboard -->
+  <div id="keyboard" class="keyboard" style="display:none;">
+    <div id="keyboard-keys"></div>
+  </div>
 
   <script src="print-render.js"></script>
 </body>
