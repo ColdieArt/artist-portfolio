@@ -5178,7 +5178,7 @@ animate();
 // ═══════════════════════════════════════════════════════════════════
 (async function loadEthTokens() {
     // ── Config ──
-    const ETH_CONTRACT = '0xb4683204f6d349faf1b4a6a480e253a7c6a6af5d';
+    const ETH_CONTRACT = '0x147835d1e3d84c9313e51defd172c55a3600f439';
     const ETH_WALLET   = '0xd0c877b474cd51959931a7f70d7a6c60f50cdae7';
     const RPC_URL      = 'https://ethereum-rpc.publicnode.com';
 
@@ -5307,12 +5307,29 @@ animate();
                         imageUrl: imageUrl
                     });
 
+                    const thumbWrap = document.createElement('div');
+                    thumbWrap.style.display = 'inline-block';
+                    thumbWrap.style.verticalAlign = 'top';
+                    thumbWrap.style.margin = '2px';
+                    thumbWrap.style.maxWidth = '52px';
+
                     const thumb = document.createElement('img');
                     thumb.className = 'eth-token-thumb';
                     thumb.src = imageUrl;
                     thumb.title = name;
                     thumb.onerror = () => { thumb.style.display = 'none'; };
-                    thumbContainer.appendChild(thumb);
+                    thumbWrap.appendChild(thumb);
+
+                    const uriText = document.createElement('div');
+                    uriText.style.fontSize = '6px';
+                    uriText.style.color = '#6d6';
+                    uriText.style.wordBreak = 'break-all';
+                    uriText.style.lineHeight = '1.2';
+                    uriText.textContent = imageUrl;
+                    uriText.title = imageUrl;
+                    thumbWrap.appendChild(uriText);
+
+                    thumbContainer.appendChild(thumbWrap);
 
                     ethLog('  ' + name, 'success');
                 } else {

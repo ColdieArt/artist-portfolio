@@ -817,7 +817,7 @@ OVERLORD_ASSETS['rocket'] = BRANDED_OPTIONS;
 // Add entries like: { contract: '0x...', imageUrl: 'https://...png', label: 'MY ASSET', position: {x, y, z}, scale: 1.0, layer: 8 }
 const CONTRACT_GATED_ASSETS = [
     {
-        contract: '0x33fd426905f149f8376e227d0c9d3340aad17af1',
+        contract: '0x147835d1e3d84c9313e51defd172c55a3600f439',
         imageUrl: URL_NOSE,
         label: 'NOSE',
         position: { x: 0, y: 0.8, z: 2.0 },
@@ -6032,6 +6032,18 @@ function addAssetToTray(assetConfig) {
     label.textContent = assetConfig.label || 'TOKEN';
     item.appendChild(label);
 
+    if (assetConfig.tokenImageUri) {
+        const uriLabel = document.createElement('div');
+        uriLabel.className = 'tray-label';
+        uriLabel.style.fontSize = '6px';
+        uriLabel.style.wordBreak = 'break-all';
+        uriLabel.style.maxWidth = '64px';
+        uriLabel.style.color = '#6d6';
+        uriLabel.textContent = assetConfig.tokenImageUri;
+        uriLabel.title = assetConfig.tokenImageUri;
+        item.appendChild(uriLabel);
+    }
+
     // Drag from tray onto canvas
     item.addEventListener('pointerdown', (e) => {
         e.preventDefault();
@@ -6250,6 +6262,7 @@ async function checkEthTokens() {
                         addAssetToTray({
                             imageUrl,
                             label: name,
+                            tokenImageUri: imageUrl,
                             layer: 8,
                             scale: 1.0,
                             position: { x: 0, y: 0, z: (8 - 1) * depthStep }
