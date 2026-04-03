@@ -6255,6 +6255,39 @@ async function checkEthTokens() {
             }
         }
 
+        // Token-specific bonus artwork images
+        const TOKEN_BONUS_IMAGES = {
+            '149': {
+                imageUrl: 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0008_mouth.png',
+                label: 'Musk Mouth'
+            },
+            '546': {
+                imageUrl: 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_nose.gif',
+                label: 'Altman Nose'
+            },
+            '530': {
+                imageUrl: 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-mouth.gif',
+                label: 'Bezos Mouth'
+            }
+        };
+
+        // Add bonus images for specific verified token IDs
+        for (const tid of tokenIds) {
+            const tidStr = tid.toString();
+            const bonus = TOKEN_BONUS_IMAGES[tidStr];
+            if (bonus) {
+                addAssetToTray({
+                    imageUrl: bonus.imageUrl,
+                    label: bonus.label,
+                    tokenId: tidStr,
+                    layer: 8,
+                    scale: 1.0,
+                    position: { x: 0, y: 0, z: 7 * depthStep }
+                });
+                ethLog('  Bonus: ' + bonus.label + ' for token #' + tidStr, 'success');
+            }
+        }
+
         if (tokenIds.length > 0) {
             ethLog('Found ' + tokenIds.length + ' token(s). Fetching metadata...');
 
