@@ -815,7 +815,48 @@ OVERLORD_ASSETS['rocket'] = BRANDED_OPTIONS;
 // ── CONTRACT-GATED ASSETS ──
 // Each entry maps an ETH contract address to an image that unlocks when the connected wallet holds a token.
 // Add entries like: { contract: '0x...', imageUrl: 'https://...png', label: 'MY ASSET', position: {x, y, z}, scale: 1.0, layer: 8 }
-const CONTRACT_GATED_ASSETS = [];
+const CONTRACT_GATED_ASSETS = [
+    {
+        contract: '0x147835d1e3d84c9313e51defd172c55a3600f439',
+        imageUrl: '/images/overlords/ElonMusk-Thumbnail.png',
+        label: 'ELON MUSK',
+        position: { x: -3, y: 2, z: 6 * depthStep },
+        scale: 1.0,
+        layer: 6
+    },
+    {
+        contract: '0x147835d1e3d84c9313e51defd172c55a3600f439',
+        imageUrl: '/images/overlords/Zuckerberg-web.jpg',
+        label: 'MARK ZUCKERBERG',
+        position: { x: -1.5, y: 2, z: 7 * depthStep },
+        scale: 1.0,
+        layer: 7
+    },
+    {
+        contract: '0x147835d1e3d84c9313e51defd172c55a3600f439',
+        imageUrl: '/images/overlords/Altman-web.jpg',
+        label: 'SAM ALTMAN',
+        position: { x: 0, y: 2, z: 8 * depthStep },
+        scale: 1.0,
+        layer: 8
+    },
+    {
+        contract: '0x147835d1e3d84c9313e51defd172c55a3600f439',
+        imageUrl: '/images/overlords/Bezos-thumb.jpg',
+        label: 'JEFF BEZOS',
+        position: { x: 1.5, y: 2, z: 9 * depthStep },
+        scale: 1.0,
+        layer: 9
+    },
+    {
+        contract: '0x147835d1e3d84c9313e51defd172c55a3600f439',
+        imageUrl: '/images/overlords/Huang-web.jpg',
+        label: 'JENSEN HUANG',
+        position: { x: 3, y: 2, z: 10 * depthStep },
+        scale: 1.0,
+        layer: 10
+    }
+];
 
 // Contract-gated asset state
 let contractGatedMeshes = []; // Track meshes added by contract-gated assets
