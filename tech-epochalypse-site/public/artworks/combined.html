@@ -683,15 +683,14 @@ OVERLORD_ASSETS['rocket'] = BRANDED_OPTIONS;
 // Each entry maps an ETH contract address to an image that unlocks when the connected wallet holds a token.
 // Add entries like: { contract: '0x...', imageUrl: 'https://...png', label: 'MY ASSET', position: {x, y, z}, scale: 1.0, layer: 8 }
 const CONTRACT_GATED_ASSETS = [
-    // PLACEHOLDER — replace with real contract + image:
-    // {
-    //     contract: '0xYourContractAddressHere',
-    //     imageUrl: 'https://your-image-url-here.png',
-    //     label: 'GATED ASSET',
-    //     position: { x: 0, y: 0, z: 1.4 },  // z = layer * depthStep (0.2)
-    //     scale: 1.0,
-    //     layer: 8
-    // }
+    {
+        contract: '0xac910384afe354bdb85f008896960936e5d30790',
+        imageUrl: URL_NOSE,
+        label: 'NOSE',
+        position: { x: 0, y: 0.8, z: 2.0 },
+        scale: 1.0,
+        layer: 11
+    }
 ];
 
 // Wallet state
