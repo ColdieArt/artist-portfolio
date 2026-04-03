@@ -6032,6 +6032,7 @@ function addAssetToTray(assetConfig) {
     item.className = 'tray-item';
 
     const img = document.createElement('img');
+    img.crossOrigin = 'anonymous';
     img.src = assetConfig.imageUrl;
     img.alt = assetConfig.label || 'Asset';
     img.onerror = () => { img.style.background = '#333'; };
@@ -6265,6 +6266,11 @@ async function checkEthTokens() {
             }
         }
 
+        // Show the tray now that we know the wallet holds tokens
+        if (tokenIds.length > 0) {
+            unlockedTray.style.display = 'block';
+        }
+
         // Token-specific bonus artwork images
         const TOKEN_BONUS_IMAGES = {
             '149': {
@@ -6326,12 +6332,24 @@ async function checkEthTokens() {
                     if (!metadata) {
                         // Fetch from resolved URL
                         uri = resolveUrl(uri);
-                        const resp = await fetch(uri);
-                        if (!resp.ok) {
-                            ethLog('  Metadata fetch failed for #' + tokenId.toString() + ' (HTTP ' + resp.status + ')', 'error');
+                        try {
+                            const resp = await fetch(uri);
+                            if (!resp.ok) {
+                                ethLog('  Metadata fetch failed for #' + tokenId.toString() + ' (HTTP ' + resp.status + ')', 'error');
+                                continue;
+                            }
+                            const text = await resp.text();
+                            try {
+                                metadata = JSON.parse(text);
+                            } catch (jsonErr) {
+                                ethLog('  Invalid JSON for #' + tokenId.toString(), 'error');
+                                console.log('[ETH] Raw response:', text.substring(0, 200));
+                                continue;
+                            }
+                        } catch (fetchErr) {
+                            ethLog('  Fetch error for #' + tokenId.toString() + ': ' + fetchErr.message, 'error');
                             continue;
                         }
-                        metadata = await resp.json();
                     }
 
                     const imageUrl = resolveUrl(metadata.image || metadata.image_url || metadata.image_data);
