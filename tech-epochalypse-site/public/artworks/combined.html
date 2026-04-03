@@ -15,6 +15,8 @@
       }
     }
   </script>
+  <!-- ethers.js for wallet connection and contract checks -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
   <style>
     body {
       margin: 0;
@@ -676,6 +678,24 @@ const BRANDED_LABELS = ['SPACEX', 'TESLA', 'DRONE', 'BLUE ORIGIN', 'BLUE BILL', 
 OVERLORD_ASSETS['spacex'] = BRANDED_OPTIONS;
 OVERLORD_ASSETS['blueBill'] = BRANDED_OPTIONS;
 OVERLORD_ASSETS['rocket'] = BRANDED_OPTIONS;
+
+// ── CONTRACT-GATED ASSETS ──
+// Each entry maps an ETH contract address to an image that unlocks when the connected wallet holds a token.
+// Add entries like: { contract: '0x...', imageUrl: 'https://...png', label: 'MY ASSET', position: {x, y, z}, scale: 1.0, layer: 8 }
+const CONTRACT_GATED_ASSETS = [
+    {
+        contract: '0xac910384afe354bdb85f008896960936e5d30790',
+        imageUrl: URL_NOSE,
+        label: 'NOSE',
+        position: { x: 0, y: 0.8, z: 2.0 },
+        scale: 1.0,
+        layer: 11
+    }
+];
+
+// Wallet state
+let connectedWalletAddress = null;
+let contractGatedMeshes = []; // Track meshes added by contract-gated assets
 
 // Track which overlord index each element is currently showing
 const elementOverlordIndex = {
@@ -3506,6 +3526,35 @@ function init() {
     };
     leftUiContainer.appendChild(swapBtn);
 
+    // Create the CONNECT WALLET button for contract-gated assets
+    const walletBtn = document.createElement('button');
+    walletBtn.id = 'wallet-connect-btn';
+    walletBtn.textContent = 'CONNECT WALLET';
+    walletBtn.style.cssText = `
+        background-color: black;
+        color: white;
+        padding: 4px;
+        margin: 0;
+        border: 0.5px solid white;
+        border-radius: 0;
+        cursor: pointer;
+        font-family: monospace;
+        font-size: 7px;
+        outline: none;
+        box-sizing: border-box;
+    `;
+    walletBtn.onmouseover = () => {
+        if (!connectedWalletAddress) walletBtn.style.borderColor = '#777';
+    };
+    walletBtn.onmouseout = () => {
+        if (!connectedWalletAddress) walletBtn.style.borderColor = 'white';
+    };
+    walletBtn.onclick = (event) => {
+        event.stopPropagation();
+        connectAndCheckAssets();
+    };
+    leftUiContainer.appendChild(walletBtn);
+
     // Create the DUPLICATE button (appended after SWAP MODE)
     const duplicateBtn = document.createElement('button');
     duplicateBtn.id = 'duplicate-btn';
@@ -5809,6 +5858,172 @@ function animate(currentTime) {
     }
 
     composer.render();
+}
+
+// ── CONTRACT-GATED WALLET FUNCTIONS ──
+
+// ERC-721 minimal ABI for balanceOf
+const ERC721_BALANCE_ABI = [
+    'function balanceOf(address owner) view returns (uint256)'
+];
+
+async function connectWallet() {
+    if (!window.ethereum) {
+        alert('No Ethereum wallet detected. Please install MetaMask or another Web3 wallet.');
+        return null;
+    }
+    try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const accounts = await provider.send('eth_requestAccounts', []);
+        connectedWalletAddress = accounts[0];
+        console.log('Wallet connected:', connectedWalletAddress);
+        return provider;
+    } catch (err) {
+        console.error('Wallet connection failed:', err);
+        return null;
+    }
+}
+
+async function checkContractBalance(provider, contractAddress) {
+    try {
+        const contract = new ethers.Contract(contractAddress, ERC721_BALANCE_ABI, provider);
+        const balance = await contract.balanceOf(connectedWalletAddress);
+        return balance > 0n;
+    } catch (err) {
+        console.error('Contract balance check failed for', contractAddress, err);
+        return false;
+    }
+}
+
+function loadContractGatedLayer(assetConfig) {
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.setCrossOrigin('');
+    const baseScale = 0.005;
+
+    const loadTexture = (url, callback) => {
+        textureLoader.load(url, (texture) => {
+            texture.colorSpace = THREE.SRGBColorSpace;
+            texture.minFilter = THREE.LinearFilter;
+            texture.magFilter = THREE.LinearFilter;
+            texture.generateMipmaps = false;
+            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            callback(texture);
+        }, undefined, (error) => {
+            console.error('Error loading contract-gated texture:', url, error);
+        });
+    };
+
+    loadTexture(assetConfig.imageUrl, (texture) => {
+        const material = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            side: THREE.DoubleSide,
+            alphaTest: 0.5
+        });
+        const scaleFactor = assetConfig.scale || 1.0;
+        const planeWidth = texture.image.width * baseScale * scaleFactor;
+        const planeHeight = texture.image.height * baseScale * scaleFactor;
+        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+        const mesh = new THREE.Mesh(geometry, material);
+
+        const pos = assetConfig.position || { x: 0, y: 0, z: (assetConfig.layer || 8) * depthStep };
+        mesh.position.set(pos.x, pos.y, pos.z);
+        mesh.userData.currentLayer = assetConfig.layer || 8;
+        mesh.userData.initialPosition = mesh.position.clone();
+        mesh.userData.initialLayer = mesh.userData.currentLayer;
+        mesh.userData.id = 'gated_' + assetConfig.contract.slice(0, 8);
+        mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
+        mesh.userData.contractGated = true;
+
+        // Fade in
+        material.opacity = 0;
+        scene.add(mesh);
+        draggableObjects.push(mesh);
+        cameraAnimationTargets.push(mesh);
+        contractGatedMeshes.push(mesh);
+
+        // Store config for save/restore
+        initialAssetConfigs.push({
+            id: mesh.userData.id,
+            type: 'image',
+            url: assetConfig.imageUrl,
+            initialPosition: mesh.position.clone(),
+            initialLayer: mesh.userData.currentLayer,
+            baseScale: baseScale,
+            scaleFactor: scaleFactor,
+            removed: false,
+            contractGated: true
+        });
+
+        // Animate fade in
+        const fadeIn = () => {
+            if (material.opacity < 1) {
+                material.opacity = Math.min(material.opacity + 0.05, 1);
+                requestAnimationFrame(fadeIn);
+            }
+        };
+        fadeIn();
+
+        console.log(`Contract-gated asset loaded: ${assetConfig.label || assetConfig.imageUrl}`);
+    });
+}
+
+async function connectAndCheckAssets() {
+    const walletBtn = document.getElementById('wallet-connect-btn');
+
+    if (connectedWalletAddress) {
+        // Already connected — re-check
+        walletBtn.textContent = 'CHECKING...';
+    } else {
+        walletBtn.textContent = 'CONNECTING...';
+    }
+
+    const provider = connectedWalletAddress
+        ? new ethers.BrowserProvider(window.ethereum)
+        : await connectWallet();
+
+    if (!provider || !connectedWalletAddress) {
+        walletBtn.textContent = 'CONNECT WALLET';
+        return;
+    }
+
+    // Update button to show connected state
+    const shortAddr = connectedWalletAddress.slice(0, 6) + '...' + connectedWalletAddress.slice(-4);
+    walletBtn.textContent = shortAddr;
+    walletBtn.style.borderColor = '#4c4';
+    walletBtn.style.color = '#4c4';
+
+    if (CONTRACT_GATED_ASSETS.length === 0) {
+        console.log('No contract-gated assets configured.');
+        return;
+    }
+
+    // Remove any previously loaded contract-gated meshes (in case of re-check)
+    contractGatedMeshes.forEach(mesh => {
+        scene.remove(mesh);
+        const idx = draggableObjects.indexOf(mesh);
+        if (idx !== -1) draggableObjects.splice(idx, 1);
+        const camIdx = cameraAnimationTargets.indexOf(mesh);
+        if (camIdx !== -1) cameraAnimationTargets.splice(camIdx, 1);
+    });
+    contractGatedMeshes = [];
+
+    // Check each contract and load qualifying assets
+    let unlocked = 0;
+    for (const asset of CONTRACT_GATED_ASSETS) {
+        const holds = await checkContractBalance(provider, asset.contract);
+        if (holds) {
+            loadContractGatedLayer(asset);
+            unlocked++;
+            console.log(`UNLOCKED: ${asset.label || asset.contract}`);
+        } else {
+            console.log(`LOCKED: ${asset.label || asset.contract} — wallet does not hold tokens`);
+        }
+    }
+
+    if (unlocked > 0) {
+        walletBtn.textContent = `${shortAddr} (${unlocked} UNLOCKED)`;
+    }
 }
 
 init();
