@@ -301,6 +301,81 @@
       transition: background 0.2s;
     }
     #post-modal-btn:hover { background: #1a8cd8; }
+
+    /* ─── ETH TOKEN PANEL (top-right) ─── */
+    #eth-status-panel {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 300;
+      background: rgba(0,0,0,0.92);
+      border: 1px solid rgba(100,200,255,0.3);
+      border-radius: 4px;
+      padding: 12px 14px;
+      font-family: monospace;
+      color: #8cf;
+      font-size: 10px;
+      max-width: 320px;
+      max-height: 50vh;
+      overflow-y: auto;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    }
+    #eth-status-panel .panel-title {
+      color: #fff;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      border-bottom: 1px solid rgba(100,200,255,0.2);
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+    }
+    #eth-status-panel input[type="text"] {
+      width: 100%;
+      background: #111;
+      color: #ddd;
+      border: 1px solid rgba(100,200,255,0.3);
+      padding: 4px 6px;
+      font-family: monospace;
+      font-size: 10px;
+      box-sizing: border-box;
+      outline: none;
+      margin: 4px 0;
+    }
+    #eth-status-panel input[type="text"]:focus {
+      border-color: rgba(100,200,255,0.6);
+    }
+    #eth-status-panel label {
+      color: #adf;
+      font-size: 9px;
+      letter-spacing: 0.5px;
+    }
+    #eth-status-panel .eth-check-btn {
+      background: rgba(100,200,255,0.15);
+      color: #8cf;
+      border: 1px solid rgba(100,200,255,0.3);
+      padding: 5px 12px;
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 6px;
+    }
+    #eth-status-panel .eth-check-btn:hover { background: rgba(100,200,255,0.25); }
+    #eth-status-panel .eth-log {
+      margin: 3px 0;
+      color: #adf;
+      word-break: break-all;
+    }
+    #eth-status-panel .eth-log.error { color: #f88; }
+    #eth-status-panel .eth-log.success { color: #8f8; }
+    #eth-status-panel .eth-token-thumb {
+      width: 48px; height: 48px;
+      object-fit: cover;
+      border: 1px solid rgba(255,255,255,0.15);
+      margin: 2px;
+      display: inline-block;
+      background: #222;
+    }
   </style>
   <title>THE COLLECTIVE - Combined Overlord | Tech Epochalypse by Coldie</title>
 </head>
@@ -693,8 +768,7 @@ const CONTRACT_GATED_ASSETS = [
     }
 ];
 
-// Wallet state
-let connectedWalletAddress = null;
+// Contract-gated asset state
 let contractGatedMeshes = []; // Track meshes added by contract-gated assets
 
 // Track which overlord index each element is currently showing
@@ -3526,34 +3600,6 @@ function init() {
     };
     leftUiContainer.appendChild(swapBtn);
 
-    // Create the CONNECT WALLET button for contract-gated assets
-    const walletBtn = document.createElement('button');
-    walletBtn.id = 'wallet-connect-btn';
-    walletBtn.textContent = 'CONNECT WALLET';
-    walletBtn.style.cssText = `
-        background-color: black;
-        color: white;
-        padding: 4px;
-        margin: 0;
-        border: 0.5px solid white;
-        border-radius: 0;
-        cursor: pointer;
-        font-family: monospace;
-        font-size: 7px;
-        outline: none;
-        box-sizing: border-box;
-    `;
-    walletBtn.onmouseover = () => {
-        if (!connectedWalletAddress) walletBtn.style.borderColor = '#777';
-    };
-    walletBtn.onmouseout = () => {
-        if (!connectedWalletAddress) walletBtn.style.borderColor = 'white';
-    };
-    walletBtn.onclick = (event) => {
-        event.stopPropagation();
-        connectAndCheckAssets();
-    };
-    leftUiContainer.appendChild(walletBtn);
 
     // Create the DUPLICATE button (appended after SWAP MODE)
     const duplicateBtn = document.createElement('button');
@@ -5860,39 +5906,46 @@ function animate(currentTime) {
     composer.render();
 }
 
-// ── CONTRACT-GATED WALLET FUNCTIONS ──
+// ── ETH TOKEN CHECK (input-based, no wallet connect) ──
 
-// ERC-721 minimal ABI for balanceOf
-const ERC721_BALANCE_ABI = [
-    'function balanceOf(address owner) view returns (uint256)'
+const RPC_URL = 'https://ethereum-rpc.publicnode.com';
+
+const ERC721_ABI = [
+    'function balanceOf(address owner) view returns (uint256)',
+    'function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)',
+    'function tokenURI(uint256 tokenId) view returns (string)',
+    'function name() view returns (string)',
+    'function ownerOf(uint256 tokenId) view returns (address)'
 ];
 
-async function connectWallet() {
-    if (!window.ethereum) {
-        alert('No Ethereum wallet detected. Please install MetaMask or another Web3 wallet.');
-        return null;
-    }
-    try {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const accounts = await provider.send('eth_requestAccounts', []);
-        connectedWalletAddress = accounts[0];
-        console.log('Wallet connected:', connectedWalletAddress);
-        return provider;
-    } catch (err) {
-        console.error('Wallet connection failed:', err);
-        return null;
-    }
+// Build the ETH panel UI (top-right)
+const ethPanel = document.createElement('div');
+ethPanel.id = 'eth-status-panel';
+ethPanel.innerHTML = `
+    <div class="panel-title">ETH TOKEN LOADER</div>
+    <label>CONTRACT ADDRESS</label>
+    <input type="text" id="eth-contract-input" placeholder="0x..." value="${CONTRACT_GATED_ASSETS.length ? CONTRACT_GATED_ASSETS[0].contract : ''}">
+    <label>WALLET ADDRESS</label>
+    <input type="text" id="eth-wallet-input" placeholder="0x...">
+    <button class="eth-check-btn" id="eth-check-btn">CHECK</button>
+`;
+document.body.appendChild(ethPanel);
+
+function ethLog(msg, cls = '') {
+    const d = document.createElement('div');
+    d.className = 'eth-log' + (cls ? ' ' + cls : '');
+    d.textContent = msg;
+    ethPanel.appendChild(d);
+    ethPanel.scrollTop = ethPanel.scrollHeight;
+    console.log('[ETH]', msg);
 }
 
-async function checkContractBalance(provider, contractAddress) {
-    try {
-        const contract = new ethers.Contract(contractAddress, ERC721_BALANCE_ABI, provider);
-        const balance = await contract.balanceOf(connectedWalletAddress);
-        return balance > 0n;
-    } catch (err) {
-        console.error('Contract balance check failed for', contractAddress, err);
-        return false;
-    }
+function resolveUrl(uri) {
+    if (!uri) return null;
+    if (uri.startsWith('ipfs://')) return 'https://ipfs.io/ipfs/' + uri.slice(7);
+    if (uri.startsWith('ar://')) return 'https://arweave.net/' + uri.slice(5);
+    if (uri.startsWith('data:')) return uri;
+    return uri;
 }
 
 function loadContractGatedLayer(assetConfig) {
@@ -5900,25 +5953,15 @@ function loadContractGatedLayer(assetConfig) {
     textureLoader.setCrossOrigin('');
     const baseScale = 0.005;
 
-    const loadTexture = (url, callback) => {
-        textureLoader.load(url, (texture) => {
-            texture.colorSpace = THREE.SRGBColorSpace;
-            texture.minFilter = THREE.LinearFilter;
-            texture.magFilter = THREE.LinearFilter;
-            texture.generateMipmaps = false;
-            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-            callback(texture);
-        }, undefined, (error) => {
-            console.error('Error loading contract-gated texture:', url, error);
-        });
-    };
+    textureLoader.load(assetConfig.imageUrl, (texture) => {
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.generateMipmaps = false;
+        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
-    loadTexture(assetConfig.imageUrl, (texture) => {
         const material = new THREE.MeshBasicMaterial({
-            map: texture,
-            transparent: true,
-            side: THREE.DoubleSide,
-            alphaTest: 0.5
+            map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5
         });
         const scaleFactor = assetConfig.scale || 1.0;
         const planeWidth = texture.image.width * baseScale * scaleFactor;
@@ -5931,74 +5974,43 @@ function loadContractGatedLayer(assetConfig) {
         mesh.userData.currentLayer = assetConfig.layer || 8;
         mesh.userData.initialPosition = mesh.position.clone();
         mesh.userData.initialLayer = mesh.userData.currentLayer;
-        mesh.userData.id = 'gated_' + assetConfig.contract.slice(0, 8);
+        mesh.userData.id = 'gated_' + (assetConfig.contract || 'manual').slice(0, 8);
         mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
         mesh.userData.contractGated = true;
 
-        // Fade in
         material.opacity = 0;
         scene.add(mesh);
         draggableObjects.push(mesh);
         cameraAnimationTargets.push(mesh);
         contractGatedMeshes.push(mesh);
 
-        // Store config for save/restore
         initialAssetConfigs.push({
-            id: mesh.userData.id,
-            type: 'image',
-            url: assetConfig.imageUrl,
-            initialPosition: mesh.position.clone(),
-            initialLayer: mesh.userData.currentLayer,
-            baseScale: baseScale,
-            scaleFactor: scaleFactor,
-            removed: false,
-            contractGated: true
+            id: mesh.userData.id, type: 'image', url: assetConfig.imageUrl,
+            initialPosition: mesh.position.clone(), initialLayer: mesh.userData.currentLayer,
+            baseScale, scaleFactor, removed: false, contractGated: true
         });
 
-        // Animate fade in
         const fadeIn = () => {
-            if (material.opacity < 1) {
-                material.opacity = Math.min(material.opacity + 0.05, 1);
-                requestAnimationFrame(fadeIn);
-            }
+            if (material.opacity < 1) { material.opacity = Math.min(material.opacity + 0.05, 1); requestAnimationFrame(fadeIn); }
         };
         fadeIn();
-
-        console.log(`Contract-gated asset loaded: ${assetConfig.label || assetConfig.imageUrl}`);
+        ethLog('Asset loaded: ' + (assetConfig.label || assetConfig.imageUrl), 'success');
+    }, undefined, (err) => {
+        ethLog('Texture load failed: ' + (assetConfig.label || assetConfig.imageUrl), 'error');
     });
 }
 
-async function connectAndCheckAssets() {
-    const walletBtn = document.getElementById('wallet-connect-btn');
+async function checkEthTokens() {
+    const contractAddr = document.getElementById('eth-contract-input').value.trim();
+    const walletAddr = document.getElementById('eth-wallet-input').value.trim();
+    const checkBtn = document.getElementById('eth-check-btn');
 
-    if (connectedWalletAddress) {
-        // Already connected — re-check
-        walletBtn.textContent = 'CHECKING...';
-    } else {
-        walletBtn.textContent = 'CONNECTING...';
-    }
-
-    const provider = connectedWalletAddress
-        ? new ethers.BrowserProvider(window.ethereum)
-        : await connectWallet();
-
-    if (!provider || !connectedWalletAddress) {
-        walletBtn.textContent = 'CONNECT WALLET';
+    if (!contractAddr || !walletAddr) {
+        ethLog('Enter both contract and wallet addresses.', 'error');
         return;
     }
 
-    // Update button to show connected state
-    const shortAddr = connectedWalletAddress.slice(0, 6) + '...' + connectedWalletAddress.slice(-4);
-    walletBtn.textContent = shortAddr;
-    walletBtn.style.borderColor = '#4c4';
-    walletBtn.style.color = '#4c4';
-
-    if (CONTRACT_GATED_ASSETS.length === 0) {
-        console.log('No contract-gated assets configured.');
-        return;
-    }
-
-    // Remove any previously loaded contract-gated meshes (in case of re-check)
+    // Remove previous contract-gated meshes
     contractGatedMeshes.forEach(mesh => {
         scene.remove(mesh);
         const idx = draggableObjects.indexOf(mesh);
@@ -6008,23 +6020,153 @@ async function connectAndCheckAssets() {
     });
     contractGatedMeshes = [];
 
-    // Check each contract and load qualifying assets
-    let unlocked = 0;
-    for (const asset of CONTRACT_GATED_ASSETS) {
-        const holds = await checkContractBalance(provider, asset.contract);
-        if (holds) {
-            loadContractGatedLayer(asset);
-            unlocked++;
-            console.log(`UNLOCKED: ${asset.label || asset.contract}`);
-        } else {
-            console.log(`LOCKED: ${asset.label || asset.contract} — wallet does not hold tokens`);
+    checkBtn.textContent = 'CHECKING...';
+
+    try {
+        ethLog('Connecting to Ethereum...');
+        const provider = new ethers.JsonRpcProvider(RPC_URL);
+        const contract = new ethers.Contract(contractAddr, ERC721_ABI, provider);
+
+        let tokenName = '';
+        try {
+            tokenName = await contract.name();
+            ethLog('Contract: ' + tokenName, 'success');
+        } catch (_) {
+            ethLog('Connected (contract name not available)');
         }
+
+        const balance = await contract.balanceOf(walletAddr);
+        const count = Number(balance);
+        ethLog('Wallet holds ' + count + ' token(s)', count > 0 ? 'success' : 'error');
+
+        if (count === 0) {
+            ethLog('No tokens found — loading gated assets skipped.');
+            // Still load configured CONTRACT_GATED_ASSETS that match this contract (balance=0 means locked)
+            checkBtn.textContent = 'CHECK';
+            return;
+        }
+
+        // Wallet holds tokens — load the configured gated assets for this contract
+        const matchingAssets = CONTRACT_GATED_ASSETS.filter(
+            a => a.contract.toLowerCase() === contractAddr.toLowerCase()
+        );
+
+        if (matchingAssets.length > 0) {
+            ethLog('UNLOCKED ' + matchingAssets.length + ' gated asset(s)', 'success');
+            for (const asset of matchingAssets) {
+                loadContractGatedLayer(asset);
+            }
+        } else {
+            ethLog('No gated assets configured for this contract.');
+        }
+
+        // Also try to load token images from metadata
+        const maxTokens = Math.min(count, 20);
+        ethLog('Loading ' + maxTokens + ' token image(s)...');
+
+        const tokenIds = [];
+        let enumerable = true;
+        try {
+            const firstId = await contract.tokenOfOwnerByIndex(walletAddr, 0);
+            tokenIds.push(firstId);
+            for (let i = 1; i < maxTokens; i++) {
+                tokenIds.push(await contract.tokenOfOwnerByIndex(walletAddr, i));
+            }
+        } catch (_) { enumerable = false; }
+
+        if (!enumerable) {
+            ethLog('Scanning for owned tokens...');
+            tokenIds.length = 0;
+            const walletLower = walletAddr.toLowerCase();
+            for (let id = 0; id < 1000 && tokenIds.length < maxTokens; id++) {
+                try {
+                    const owner = await contract.ownerOf(id);
+                    if (owner.toLowerCase() === walletLower) {
+                        tokenIds.push(BigInt(id));
+                        ethLog('  Found token #' + id, 'success');
+                    }
+                } catch (_) {}
+            }
+        }
+
+        if (tokenIds.length > 0) {
+            ethLog('Found ' + tokenIds.length + ' token(s). Fetching metadata...');
+            const thumbContainer = document.createElement('div');
+            thumbContainer.style.marginTop = '8px';
+            ethPanel.appendChild(thumbContainer);
+
+            const textureLoader = new THREE.TextureLoader();
+            textureLoader.setCrossOrigin('');
+            const startX = 5.0, spacing = 3.0, tokenLayer = 8;
+            let imgIndex = 0;
+
+            for (const tokenId of tokenIds) {
+                try {
+                    let uri = await contract.tokenURI(tokenId);
+                    uri = resolveUrl(uri);
+                    const resp = await fetch(uri);
+                    const metadata = await resp.json();
+                    const imageUrl = resolveUrl(metadata.image || metadata.image_url);
+
+                    if (imageUrl) {
+                        const name = metadata.name || ('#' + tokenId.toString());
+
+                        const thumb = document.createElement('img');
+                        thumb.className = 'eth-token-thumb';
+                        thumb.src = imageUrl;
+                        thumb.title = name;
+                        thumb.onerror = () => { thumb.style.display = 'none'; };
+                        thumbContainer.appendChild(thumb);
+
+                        const idx = imgIndex++;
+                        textureLoader.load(imageUrl, (texture) => {
+                            texture.colorSpace = THREE.SRGBColorSpace;
+                            texture.minFilter = THREE.LinearFilter;
+                            texture.magFilter = THREE.LinearFilter;
+                            texture.generateMipmaps = false;
+                            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+                            const aspectRatio = texture.image.width / texture.image.height;
+                            const planeHeight = 2.5;
+                            const planeWidth = planeHeight * aspectRatio;
+                            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+                            const material = new THREE.MeshBasicMaterial({
+                                map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.1
+                            });
+                            const mesh = new THREE.Mesh(geometry, material);
+                            const col = idx % 4, row = Math.floor(idx / 4);
+                            mesh.position.set(startX + col * spacing, 1.0 - row * spacing, (tokenLayer - 1) * depthStep);
+                            mesh.userData.currentLayer = tokenLayer;
+                            mesh.userData.initialPosition = mesh.position.clone();
+                            mesh.userData.initialLayer = tokenLayer;
+                            mesh.userData.id = 'eth-token-' + tokenId.toString();
+                            mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
+                            mesh.userData.ethToken = true;
+                            scene.add(mesh);
+                            draggableObjects.push(mesh);
+                            cameraAnimationTargets.push(mesh);
+                            contractGatedMeshes.push(mesh);
+                        });
+
+                        ethLog('  ' + name, 'success');
+                    } else {
+                        ethLog('  No image for #' + tokenId.toString(), 'error');
+                    }
+                } catch (e) {
+                    ethLog('  Error #' + tokenId.toString() + ': ' + e.message, 'error');
+                }
+            }
+        }
+
+    } catch (e) {
+        ethLog('Error: ' + e.message, 'error');
+        console.error('[ETH]', e);
     }
 
-    if (unlocked > 0) {
-        walletBtn.textContent = `${shortAddr} (${unlocked} UNLOCKED)`;
-    }
+    checkBtn.textContent = 'CHECK';
 }
+
+document.getElementById('eth-check-btn').onclick = checkEthTokens;
 
 init();
 animate();
