@@ -474,7 +474,7 @@ const URL_MOUTH = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/
 const URL_LEFT_EYE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Eye-L.gif';
 const URL_NOSE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-nose.gif';
 const URL_HAIR = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Hair.gif';
-const URL_BLUE_BILL = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-FB-Phone-rev.gif';
+const URL_OPENAI = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-FB-Phone-rev.gif';
 const URL_DOGECOIN_ORIGINAL = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Meta.gif';
 const URL_TESLA_SWAP = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-FB.gif';
 const URL_SIGNATURE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/coldie-sig.gif';
@@ -2298,33 +2298,33 @@ function init() {
         faceMeshes.push(hair);
     });
 
-    // Load and add the blue bill image
+    // Load and add the OpenAI image
     initialAssetConfigs.push({
-        id: 'blueBill',
+        id: 'OpenAI',
         type: 'image',
-        url: URL_BLUE_BILL,
+        url: URL_OPENAI,
         initialPosition: new THREE.Vector3(3, -2, layerToZ(7)),
         initialLayer: 10,
         baseScale: BASE_SCALE, // FIX: Use BASE_SCALE
         scaleFactor: 1,
         removed: false // Add removed flag
     });
-    textureLoader.load(URL_BLUE_BILL, (texture) => {
+    textureLoader.load(URL_OPENAI, (texture) => {
         configureTexture(texture, renderer); // Apply texture settings
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const planeWidth = texture.image.width * BASE_SCALE; // FIX: Use BASE_SCALE
         const planeHeight = texture.image.height * BASE_SCALE; // FIX: Use BASE_SCALE
         const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        const blueBill = new THREE.Mesh(geometry, material);
-        blueBill.position.set(3, -2, layerToZ(7));
-        blueBill.userData.currentLayer = 10;
-        blueBill.userData.initialPosition = blueBill.position.clone();
-        blueBill.userData.initialLayer = 10;
-        blueBill.userData.id = 'fbphone'; // Added ID
-        blueBill.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(blueBill);
-        draggableObjects.push(blueBill);
-        cameraAnimationTargets.push(blueBill);
+        const openAI = new THREE.Mesh(geometry, material);
+        openAI.position.set(3, -2, layerToZ(7));
+        openAI.userData.currentLayer = 10;
+        openAI.userData.initialPosition = openAI.position.clone();
+        openAI.userData.initialLayer = 10;
+        openAI.userData.id = 'fbphone'; // Added ID
+        openAI.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
+        scene.add(openAI);
+        draggableObjects.push(openAI);
+        cameraAnimationTargets.push(openAI);
     });
 
     // Load Dogecoin and Tesla textures
@@ -3752,7 +3752,7 @@ function onClick(event) {
             return;
         }
 
-        // --- Handle FB Phone (Blue Bill) Layer Cycle and Image Swap ---
+        // --- Handle FB Phone (OpenAI) Layer Cycle and Image Swap ---
         if (clickedObject.userData.id === 'fbphone') {
             // 1. Cycle through depth layers (maxLayer down to minLayer)
             let currentLayer = clickedObject.userData.currentLayer || maxLayer;
@@ -3767,12 +3767,12 @@ function onClick(event) {
             clickedObject.userData.currentLayer = currentLayer;
             clickedObject.position.z = layerToZ(currentLayer);
 
-            // 2. Switch between the two images (URL_BLUE_BILL and URL_ZUCK_PHONE_2)
+            // 2. Switch between the two images (URL_OPENAI and URL_ZUCK_PHONE_2)
             let nextTextureUrl;
-            if (clickedObject.userData.currentTextureUrl === URL_BLUE_BILL) {
+            if (clickedObject.userData.currentTextureUrl === URL_OPENAI) {
                 nextTextureUrl = URL_ZUCK_PHONE_2;
             } else {
-                nextTextureUrl = URL_BLUE_BILL;
+                nextTextureUrl = URL_OPENAI;
             }
 
             // Load the new texture and apply it

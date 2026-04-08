@@ -586,7 +586,7 @@ const URL_TESLA_SWAP = URL_BRANDED_2;
 const URL_X_LOGO_SWAP = URL_BRANDED_1;
 const URL_SPACEX_ORIGINAL = URL_BRANDED_1;
 const URL_ROCKET = URL_BRANDED_4;
-const URL_BLUE_BILL = URL_BRANDED_3;
+const URL_OPENAI = URL_BRANDED_3;
 const URL_FIAT_WORTHLESS = URL_BRANDED_5;
 
 // ── ELEMENT CYCLING SYSTEM ──
@@ -661,7 +661,7 @@ const OVERLORD_ASSETS = {
     ]
 };
 
-// Branded element cycle options (SpaceX, Tesla, Drone, Blue Origin, Blue Bill)
+// Branded element cycle options (SpaceX, Tesla, Drone, Blue Origin, OpenAI)
 const BRANDED_OPTIONS = [
     'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0000_SpaceX.png',
     'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/tesla.png',
@@ -671,10 +671,10 @@ const BRANDED_OPTIONS = [
     'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-meta-headset-2.gif',
     'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/card-01.gif'
 ];
-const BRANDED_LABELS = ['SPACEX', 'TESLA', 'DRONE', 'BLUE ORIGIN', 'BLUE BILL', 'META HEADSET', 'NVIDIA CARD'];
+const BRANDED_LABELS = ['SPACEX', 'TESLA', 'DRONE', 'BLUE ORIGIN', 'OpenAI', 'META HEADSET', 'NVIDIA CARD'];
 // Add branded elements to OVERLORD_ASSETS so cycleElement can handle them
 OVERLORD_ASSETS['spacex'] = BRANDED_OPTIONS;
-OVERLORD_ASSETS['blueBill'] = BRANDED_OPTIONS;
+OVERLORD_ASSETS['OpenAI'] = BRANDED_OPTIONS;
 OVERLORD_ASSETS['rocket'] = BRANDED_OPTIONS;
 
 // Track which overlord index each element is currently showing
@@ -689,12 +689,12 @@ const elementOverlordIndex = {
     background: 0,     // Musk default
     mouthOverlay: 4,   // Tracks mouth; default is Huang (no overlay)
     spacex: 0,         // SpaceX (branded index 0)
-    blueBill: 4,       // Blue Bill/OpenAI (branded index 4)
+    openAI: 4,       // OpenAI/OpenAI (branded index 4)
     rocket: 3          // Blue Origin (branded index 3)
 };
 
 // Cyclable element IDs (matches userData.id on meshes)
-const CYCLABLE_ELEMENTS = ['rightEye', 'leftEye', 'nose', 'mouth', 'forehead', 'hair', 'ear', 'background', 'spacex', 'blueBill', 'rocket'];
+const CYCLABLE_ELEMENTS = ['rightEye', 'leftEye', 'nose', 'mouth', 'forehead', 'hair', 'ear', 'background', 'spacex', 'OpenAI', 'rocket'];
 
 // Preloaded textures: { elementId: [texture0, texture1, ...texture4] }
 let preloadedElementTextures = {};
@@ -4284,7 +4284,7 @@ function randomizeFaceElements() {
         }
     }
 
-    const isBranded = (id) => ['spacex', 'blueBill', 'rocket'].includes(id);
+    const isBranded = (id) => ['spacex', 'OpenAI', 'rocket'].includes(id);
     console.log('Elements randomized:', Object.fromEntries(
         allElements.map(id => [id, isBranded(id) ? (BRANDED_LABELS[elementOverlordIndex[id]] || elementOverlordIndex[id]) : (OVERLORD_NAMES[elementOverlordIndex[id]] || elementOverlordIndex[id])])
     ));
@@ -4720,7 +4720,7 @@ function updateElementIndicator(elementId) {
     if (indicator) {
         const idx = elementOverlordIndex[elementId];
         const label = elementId.replace(/([A-Z])/g, ' $1').toUpperCase().trim();
-        const isBranded = ['spacex', 'blueBill', 'rocket'].includes(elementId);
+        const isBranded = ['spacex', 'OpenAI', 'rocket'].includes(elementId);
 
         if (isBranded) {
             indicator.innerHTML = `<span style="color:#fff;font-size:12px;">${BRANDED_LABELS[idx] || label}</span>`;
@@ -4771,7 +4771,7 @@ function cycleElement(elementId) {
     updateElementIndicator(elementId);
 
     // Log label: use branded labels or overlord names depending on element type
-    const isBranded = ['spacex', 'blueBill', 'rocket'].includes(elementId);
+    const isBranded = ['spacex', 'OpenAI', 'rocket'].includes(elementId);
     const logLabel = isBranded ? (BRANDED_LABELS[nextIdx] || nextIdx) : `${OVERLORD_NAMES[nextIdx]} (${OVERLORD_NUMERALS[nextIdx]})`;
     console.log(`${elementId} cycled to: ${logLabel}`);
 }

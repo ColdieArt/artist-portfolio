@@ -438,7 +438,7 @@ const URL_LEFT_EYE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epo
 const URL_X_LOGO_SWAP = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/X_Logo.png';
 const URL_NOSE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0003_nose-2.png';
 const URL_HAIR = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0001_hair.png';
-const URL_BLUE_BILL = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0018_K-bluebill.png';
+const URL_OPENAI = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0018_K-bluebill.png';
 const URL_DOGECOIN_ORIGINAL = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/grok.gif';
 const URL_TESLA_SWAP = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/tesla.png';
     const URL_SIGNATURE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/coldie-sig.gif';
@@ -2294,32 +2294,32 @@ function init() {
         cameraAnimationTargets.push(hair);
     });
 
-    // Load and add the blue bill image
+    // Load and add the OpenAI image
     initialAssetConfigs.push({
-        id: 'blueBill',
+        id: 'OpenAI',
         type: 'image',
-        url: URL_BLUE_BILL,
+        url: URL_OPENAI,
         initialPosition: new THREE.Vector3(2, -2, (3 - 1) * depthStep),
         initialLayer: 10,
         baseScale: baseScale,
         scaleFactor: 1,
         removed: false // Add removed flag
     });
-    loadTexture(URL_BLUE_BILL, (texture) => {
+    loadTexture(URL_OPENAI, (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const planeWidth = texture.image.width * baseScale;
         const planeHeight = texture.image.height * baseScale;
         const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-        const blueBill = new THREE.Mesh(geometry, material);
-        blueBill.position.set(2, -2, (3 - 1) * depthStep);
-        blueBill.userData.currentLayer = 10;
-        blueBill.userData.initialPosition = blueBill.position.clone();
-        blueBill.userData.initialLayer = 10;
-        blueBill.userData.id = 'blueBill'; // Added ID
-        blueBill.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
-        scene.add(blueBill);
-        draggableObjects.push(blueBill);
-        cameraAnimationTargets.push(blueBill);
+        const openAI = new THREE.Mesh(geometry, material);
+        openAI.position.set(2, -2, (3 - 1) * depthStep);
+        openAI.userData.currentLayer = 10;
+        openAI.userData.initialPosition = openAI.position.clone();
+        openAI.userData.initialLayer = 10;
+        openAI.userData.id = 'OpenAI'; // Added ID
+        openAI.userData.initialScale = { width: planeWidth, height: planeHeight }; // Store initial scale
+        scene.add(openAI);
+        draggableObjects.push(openAI);
+        cameraAnimationTargets.push(openAI);
     });
 
     // Load and add the rocket image
