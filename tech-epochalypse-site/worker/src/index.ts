@@ -107,6 +107,8 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
     const overlord = (formData.get('overlord') as string) || 'unknown';
     const xAccount = (formData.get('xAccount') as string) || '';
     const title = (formData.get('title') as string) || '';
+    const email = (formData.get('email') as string) || '';
+    const configJson = (formData.get('configJson') as string) || '';
 
     if (!env.AIRTABLE_PAT || !env.AIRTABLE_BASE_ID || !env.AIRTABLE_TABLE_NAME) {
       return json({ error: 'Airtable not configured on server' }, 500);
@@ -153,6 +155,14 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
       'Submission Date': today,
       'X Account': xAccount || 'Anonymous',
     };
+
+    if (email) {
+      fields['Email'] = email;
+    }
+
+    if (configJson) {
+      fields['Config JSON'] = configJson;
+    }
 
     if (imageUrl) {
       fields['Image URL'] = imageUrl;

@@ -238,23 +238,105 @@
       text-align: right;
     }
 
-    /* ─── SUBMIT TO THE OVERLORD BUTTON ─── */
-    #submit-overlord-btn {
+    /* ─── PRINT BUTTON ─── */
+    #print-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 200;
       background: #000;
       color: #fff;
-      border: 0.5px solid white;
-      padding: 4px;
+      border: 2px solid #fff;
+      padding: 14px 24px;
       font-family: monospace;
-      font-size: 7px;
+      font-size: 13px;
       font-weight: bold;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       cursor: pointer;
-      white-space: nowrap;
-      box-sizing: border-box;
-      outline: none;
+      transition: background 0.2s, border-color 0.2s;
     }
-    #submit-overlord-btn:hover {
+    #print-btn:hover {
       background: #1a1a1a;
+      border-color: #ccc;
+    }
+
+    /* ─── EMAIL MODAL ─── */
+    #email-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 300;
+    }
+    #email-modal.open { display: flex; }
+
+    #email-modal-content {
+      background: #000;
+      border: 2px solid #fff;
+      padding: 30px 40px;
+      text-align: center;
+      font-family: monospace;
+      color: #fff;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    #email-modal h2 {
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+
+    #email-modal .email-subtitle {
+      margin: 0 0 20px 0;
+      font-size: 11px;
+      color: #aaa;
+      line-height: 1.4;
+    }
+
+    #email-input {
+      width: 100%;
+      box-sizing: border-box;
+      background: #111;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 12px 14px;
+      font-family: monospace;
+      font-size: 13px;
+      outline: none;
+      margin-bottom: 15px;
+    }
+    #email-input:focus { border-color: #fff; }
+
+    #email-submit-btn {
+      background: #000;
+      color: #fff;
+      border: 2px solid #fff;
+      padding: 12px 30px;
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: background 0.2s;
+      width: 100%;
+    }
+    #email-submit-btn:hover { background: #1a1a1a; }
+    #email-submit-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    #email-status {
+      margin: 12px 0 0 0;
+      font-family: monospace;
+      font-size: 11px;
+      text-align: center;
+      min-height: 16px;
+      letter-spacing: 0.5px;
     }
 
     /* ─── POST TO X MODAL ─── */
@@ -5462,7 +5544,18 @@ animate();
       <button class="export-btn" id="export-start-btn">EXPORT</button>
       <div class="status-line" id="export-status"></div>
     </div>
-    <button id="submit-overlord-btn">SUBMIT</button>
+    <button id="print-btn">PRINT</button>
+
+  <!-- ─── EMAIL COLLECTION MODAL ─── -->
+  <div id="email-modal">
+    <div id="email-modal-content">
+      <h2>PRINT REQUEST</h2>
+      <p class="email-subtitle">Enter your email to receive your print files</p>
+      <input id="email-input" type="email" placeholder="your@email.com" />
+      <button id="email-submit-btn">SUBMIT</button>
+      <div id="email-status"></div>
+    </div>
+  </div>
   </div>
 
   <!-- ─── POST TO X MODAL ─── -->
@@ -5584,11 +5677,13 @@ animate();
     const toggle    = document.getElementById('export-toggle');
     if (!toggle) { setTimeout(setupExport, 50); return; } // wait for init() to create it
     
-    // If embedded, hide RCS button and SUBMIT TO THE OVERLORD button, then exit
+    // If embedded, hide RCS button and PRINT button, then exit
     if (isEmbedded) {
       toggle.style.display = 'none';
-      const modal = document.getElementById('post-modal');
-      if (modal) modal.style.display = 'none';
+      const emailModalEmbed = document.getElementById('email-modal');
+      if (emailModalEmbed) emailModalEmbed.style.display = 'none';
+      const printBtnEmbed = document.getElementById('print-btn');
+      if (printBtnEmbed) printBtnEmbed.style.display = 'none';
       const exportWrapper = document.getElementById('export-wrapper');
       if (exportWrapper) exportWrapper.style.display = 'none';
       const eyeIndicator = document.getElementById('eye-indicator');
@@ -5608,53 +5703,40 @@ animate();
     const startBtn  = document.getElementById('export-start-btn');
     const status    = document.getElementById('export-status');
     const durRow    = document.getElementById('duration-row');
-    const modal     = document.getElementById('post-modal');
-    const modalBtn  = document.getElementById('post-modal-btn');
-
-    // ── Show POST TO X modal ──
-    function showPostModal() {
-      modal.classList.add('open');
-    }
-
-    // Wire modal button to open Twitter compose page with pre-filled text
-    modalBtn.onclick = () => {
-      const text = encodeURIComponent('Know your overlords. The Collective. #KnowYourOverlord #TheCollective\nTech Epochalypse by @Coldie');
-      window.open(`https://x.com/intent/post?text=${text}`, '_blank');
-      // Close modal
-      modal.classList.remove('open');
-    };
-
-    // Wire judgment protocol button to submit via Airtable API
-    const judgmentBtn = document.getElementById('judgment-btn');
-    const judgmentStatus = document.getElementById('judgment-status');
+    const emailModal = document.getElementById('email-modal');
+    const emailInput = document.getElementById('email-input');
+    const emailSubmitBtn = document.getElementById('email-submit-btn');
+    const emailStatus = document.getElementById('email-status');
     const OVERLORD_NAME = 'combined';
 
-    // ── Submission type toggle ──
-    let submitType = 'image'; // 'image' or 'video'
-    const submitTypeImage = document.getElementById('submit-type-image');
-    const submitTypeVideo = document.getElementById('submit-type-video');
-    const videoHint = document.getElementById('video-hint');
-
-    function setSubmitType(type) {
-      submitType = type;
-      if (type === 'image') {
-        submitTypeImage.style.background = '#fff';
-        submitTypeImage.style.color = '#000';
-        submitTypeVideo.style.background = '#111';
-        submitTypeVideo.style.color = '#666';
-        videoHint.style.display = 'none';
-        judgmentBtn.textContent = 'SUBMIT TO JUDGMENT PROTOCOL';
-      } else {
-        submitTypeVideo.style.background = '#fff';
-        submitTypeVideo.style.color = '#000';
-        submitTypeImage.style.background = '#111';
-        submitTypeImage.style.color = '#666';
-        videoHint.style.display = 'block';
-        judgmentBtn.textContent = 'RECORD & SUBMIT 11s VIDEO';
-      }
+    // ── Show email modal ──
+    function showEmailModal() {
+      emailModal.classList.add('open');
+      emailInput.value = '';
+      emailStatus.textContent = '';
+      emailSubmitBtn.disabled = false;
+      emailSubmitBtn.style.opacity = '1';
+      panel.classList.remove('open');
+      setTimeout(() => emailInput.focus(), 100);
     }
-    submitTypeImage.onclick = () => setSubmitType('image');
-    submitTypeVideo.onclick = () => setSubmitType('video');
+
+    // ── Collect scene config as JSON ──
+    function getSceneConfig() {
+      const config = { overlord: OVERLORD_NAME, timestamp: new Date().toISOString() };
+      if (window.camera) {
+        config.camera = {
+          position: { x: window.camera.position.x, y: window.camera.position.y, z: window.camera.position.z },
+          rotation: { x: window.camera.rotation.x, y: window.camera.rotation.y, z: window.camera.rotation.z }
+        };
+      }
+      if (window.renderer) {
+        const size = window.renderer.getSize(new THREE.Vector2());
+        config.canvas = { width: size.x, height: size.y };
+      }
+      return config;
+    }
+
+    let submitType = 'image';
 
     // ── Record 11-second MP4 from canvas ──
     function recordVideoBlob() {
@@ -5716,39 +5798,34 @@ animate();
       });
     }
 
-    judgmentBtn.onclick = async () => {
-      const xAccount = document.getElementById('x-account-input').value.trim();
-      const title = document.getElementById('title-input').value.trim();
-      judgmentBtn.disabled = true;
-      judgmentBtn.style.opacity = '0.5';
-      judgmentStatus.style.color = '#aaa';
+    // ── Email submit handler ──
+    emailSubmitBtn.onclick = async () => {
+      const email = emailInput.value.trim();
+      if (!email || !email.includes('@')) {
+        emailStatus.style.color = '#e66';
+        emailStatus.textContent = 'PLEASE ENTER A VALID EMAIL';
+        return;
+      }
+      emailSubmitBtn.disabled = true;
+      emailSubmitBtn.style.opacity = '0.5';
+      emailStatus.style.color = '#aaa';
+      emailStatus.textContent = 'PROCESSING...';
 
       try {
-        let blob;
+        const r = await getRenderer();
+        if (window.composer) { window.composer.render(); }
+        else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
+        const dataUrl = r.domElement.toDataURL('image/png');
+        const blob = await (await fetch(dataUrl)).blob();
+
+        const configJson = JSON.stringify(getSceneConfig());
         const WORKER_URL = window.GALLERY_API_URL || window.location.origin;
         const form = new FormData();
-
-        if (submitType === 'video') {
-          judgmentStatus.textContent = 'RECORDING 11s…';
-          blob = await recordVideoBlob();
-          form.append('video', blob, 'export.mp4');
-        } else {
-          judgmentStatus.textContent = 'SUBMITTING...';
-          // Capture canvas as PNG
-          const r = await getRenderer();
-          if (window.composer) { window.composer.render(); }
-          else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
-          const dataUrl = r.domElement.toDataURL('image/png');
-          blob = await (await fetch(dataUrl)).blob();
-          form.append('image', blob, 'export.png');
-        }
-
-        judgmentStatus.textContent = 'UPLOADING…';
-
-        // Upload + create Airtable record in one request
+        form.append('image', blob, 'export.png');
         form.append('overlord', OVERLORD_NAME);
-        form.append('xAccount', xAccount);
-        form.append('title', title);
+        form.append('email', email);
+        form.append('configJson', configJson);
+        form.append('title', OVERLORD_NAME + ' — print request');
         const res = await fetch(WORKER_URL + '/submit', { method: 'POST', body: form });
         if (!res.ok) {
           const errBody = await res.json().catch(() => ({}));
@@ -5756,43 +5833,42 @@ animate();
         }
         const data = await res.json();
 
-        if (res.ok && data.ok) {
-          judgmentStatus.style.color = '#4c4';
-          judgmentStatus.textContent = 'SUBMITTED SUCCESSFULLY';
+        if (data.ok) {
+          emailStatus.style.color = '#4c4';
+          emailStatus.textContent = 'SUBMITTED SUCCESSFULLY';
           setTimeout(() => {
-            modal.classList.remove('open');
-            judgmentStatus.textContent = '';
-            judgmentBtn.disabled = false;
-            judgmentBtn.style.opacity = '1';
-            setSubmitType('image'); // reset toggle
+            emailModal.classList.remove('open');
+            emailStatus.textContent = '';
+            emailSubmitBtn.disabled = false;
+            emailSubmitBtn.style.opacity = '1';
           }, 2000);
         } else {
-          const errMsg = data.details || data.error || `HTTP ${res.status}`;
-          judgmentStatus.style.color = '#e66';
-          judgmentStatus.textContent = 'SUBMISSION FAILED: ' + errMsg;
-          judgmentBtn.disabled = false;
-          judgmentBtn.style.opacity = '1';
+          throw new Error(data.details || data.error || 'Submission failed');
         }
       } catch (e) {
-        judgmentStatus.style.color = '#e66';
-        judgmentStatus.textContent = e.message || 'NETWORK ERROR — TRY AGAIN';
-        judgmentBtn.disabled = false;
-        judgmentBtn.style.opacity = '1';
+        emailStatus.style.color = '#e66';
+        emailStatus.textContent = e.message || 'NETWORK ERROR — TRY AGAIN';
+        emailSubmitBtn.disabled = false;
+        emailSubmitBtn.style.opacity = '1';
       }
     };
 
-    // Close modal on background click
-    modal.onclick = (e) => {
-      if (e.target === modal) modal.classList.remove('open');
+    // Close email modal on background click
+    emailModal.onclick = (e) => {
+      if (e.target === emailModal) emailModal.classList.remove('open');
     };
 
-    // ── Toggle panel from SUBMIT button ──
-    const submitOverlordBtn = document.getElementById('submit-overlord-btn');
+    // Submit on Enter key in email input
+    emailInput.onkeydown = (e) => {
+      if (e.key === 'Enter') emailSubmitBtn.click();
+    };
+
+    // ── PRINT button — open email dialog ──
+    const printBtn = document.getElementById('print-btn');
     const exportWrapper = document.getElementById('export-wrapper');
-    submitOverlordBtn.onclick = (e) => {
+    printBtn.onclick = (e) => {
       e.stopPropagation();
-      if (startBtn.classList.contains('recording')) return;
-      panel.classList.toggle('open');
+      showEmailModal();
     };
     document.addEventListener('click', (e) => {
       if (startBtn.classList.contains('recording')) return;
@@ -5873,7 +5949,7 @@ animate();
       }
       saveToGallery(r.domElement);
       setStatus('PNG saved ✓ — added to gallery', 'active');
-      showPostModal();
+      showEmailModal();
       lockUI(false);
     }
     // ── Video (MP4) export ──────────────────────────────────────────
@@ -5919,7 +5995,7 @@ animate();
             // Browser produced a native MP4 – upload to R2 only
             const blob = new Blob(chunks, { type: 'video/mp4' });
             setStatus(`MP4 saved ✓  (${(blob.size/1024/1024).toFixed(2)} MB)`, 'active');
-            showPostModal();
+            showEmailModal();
           } else {
             // Recorded WebM – wrap it inside an MP4 container
             setStatus('Muxing to MP4…', 'active');
@@ -5939,7 +6015,7 @@ animate();
             const mp4 = buildMP4(payload, duration, canvas.width, canvas.height);
             const blob = new Blob([mp4], { type: 'video/mp4' });
             setStatus(`MP4 saved ✓  (${(blob.size/1024/1024).toFixed(2)} MB)`, 'active');
-            showPostModal();
+            showEmailModal();
           }
         } catch (err) {
           console.error('MP4 mux error', err);
