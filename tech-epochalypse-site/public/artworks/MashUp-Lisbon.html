@@ -299,6 +299,30 @@
       transition: background 0.2s;
     }
     #post-modal-btn:hover { background: #1a8cd8; }
+
+    /* ─── MASHUP LISBON: Left UI 30% larger ─── */
+    #left-ui-container {
+      gap: 7px !important;
+      padding: 13px !important;
+    }
+    #left-ui-container button {
+      font-size: 9px !important;
+      padding: 5px !important;
+    }
+    #left-ui-container #mask-panel button {
+      font-size: 9px !important;
+      padding: 4px !important;
+    }
+    #left-ui-container #mask-panel span {
+      font-size: 9px !important;
+    }
+    #arrow-container {
+      width: 78px !important;
+      height: 20px !important;
+    }
+    #arrow-container span {
+      font-size: 13px !important;
+    }
   </style>
   <title>MASHUP LISBON - Combined Overlord | Tech Epochalypse by Coldie</title>
 </head>
@@ -3388,7 +3412,7 @@ function init() {
     leftUiContainer = document.createElement('div'); // Assign to global variable
     leftUiContainer.id = 'left-ui-container';
     leftUiContainer.style.position = 'fixed';
-    leftUiContainer.style.top = '-190px'; // Start mostly hidden, revealing only the arrow
+    leftUiContainer.style.top = '10px'; // Start extended (visible) on load
     leftUiContainer.style.left = '10px';
     leftUiContainer.style.backgroundColor = 'rgba(0, 0, 0, 0)';
     leftUiContainer.style.color = 'white';
@@ -3949,7 +3973,7 @@ function init() {
         color: white;
         font-size: 10px; /* Larger arrow */
     `;
-    arrowSpan.innerHTML = '&#x25BC;'; // Down-facing triangle
+    arrowSpan.innerHTML = '&#x25B2;'; // Up-facing triangle (menu starts extended)
     arrowContainer.appendChild(arrowSpan);
     document.body.appendChild(arrowContainer); // Append to body, not leftUiContainer
 
@@ -3987,17 +4011,16 @@ function init() {
         }
     };
 
-    // Initial state setup for TRASH/EXPORT/UPLOAD buttons and arrowContainer
-    // When the page loads, the left UI is hidden, so these buttons should be hidden.
-    trashButtonElement.style.display = 'none';
-    exportButtonElement.style.display = 'none';
-    uploadButtonElement.style.display = 'none';
-    duplicateBtn.style.display = 'none';
-    maskBtn.style.display = 'none';
-    saveBtn.style.display = 'none';
-    loadBtn.style.display = 'none';
-    clearSaveBtn.style.display = 'none';
-    arBtn.style.display = 'none';
+    // Initial state setup: left UI starts extended, so show all buttons
+    trashButtonElement.style.display = 'block';
+    exportButtonElement.style.display = 'none'; // RCS export always hidden
+    uploadButtonElement.style.display = 'block';
+    duplicateBtn.style.display = 'block';
+    maskBtn.style.display = 'block';
+    saveBtn.style.display = 'block';
+    loadBtn.style.display = 'block';
+    clearSaveBtn.style.display = 'block';
+    arBtn.style.display = 'block';
 
     window.addEventListener('resize', onWindowResize);
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
