@@ -70,12 +70,12 @@ module.exports = async (req, res) => {
       if (imagePart.data.length > 30 * 1024 * 1024) {
         return res.status(400).json({ error: 'Image too large (max 30MB)' });
       }
-      const imgKey = `print-orders/${id}.png`;
+      const imgKey = `print-orders/${id}.jpg`;
       await s3.send(new PutObjectCommand({
         Bucket: R2_BUCKET,
         Key: imgKey,
         Body: imagePart.data,
-        ContentType: 'image/png',
+        ContentType: 'image/jpeg',
         Metadata: { email, date: today },
       }));
       const host = req.headers['x-forwarded-host'] || req.headers.host || 'knowyouroverlord.art';

@@ -6014,7 +6014,7 @@ setTimeout(function () {
             r.render(window.scene, window.camera);
           }
 
-          const dataUrl = r.domElement.toDataURL('image/png');
+          const dataUrl = r.domElement.toDataURL('image/jpeg', 0.95);
           const imageBlob = await (await fetch(dataUrl)).blob();
 
           // Restore original size
@@ -6049,7 +6049,7 @@ setTimeout(function () {
 
           const form = new FormData();
           form.append('email', email);
-          form.append('image', imageBlob, 'print-capture.png');
+          form.append('image', imageBlob, 'print-capture.jpg');
           form.append('compositionJson', compositionJson);
 
           const API_URL = window.location.origin;
