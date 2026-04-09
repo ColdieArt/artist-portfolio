@@ -105,8 +105,8 @@ module.exports = async (req, res) => {
       'Date': today,
     };
     if (imageUrl) fields['Image URL'] = imageUrl;
-    // Send JSON as a file attachment (Airtable fetches from the R2 URL)
-    if (jsonUrl) fields['Composition JSON'] = [{ url: jsonUrl, filename: `${id}.json` }];
+    if (jsonUrl) fields['Composition JSON URL'] = jsonUrl;
+    if (compositionJson) fields['Composition JSON'] = compositionJson;
 
     const airtableRes = await fetch(
       `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}`,
