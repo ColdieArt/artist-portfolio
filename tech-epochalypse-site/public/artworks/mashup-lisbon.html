@@ -241,56 +241,84 @@
       text-align: right;
     }
 
-    /* ─── SUBMIT TO THE OVERLORD BUTTON ─── */
-    #submit-overlord-btn {
+    /* ─── PRINT BUTTON (bottom-left) ─── */
+    #print-btn {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      z-index: 250;
       background: #000;
       color: #fff;
-      border: 0.5px solid white;
-      padding: 4px;
+      border: 1px solid #fff;
+      padding: 10px 22px;
       font-family: monospace;
-      font-size: 7px;
+      font-size: 12px;
       font-weight: bold;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
       cursor: pointer;
-      white-space: nowrap;
-      box-sizing: border-box;
-      outline: none;
+      text-transform: uppercase;
+      transition: background 0.2s, border-color 0.2s;
     }
-    #submit-overlord-btn:hover {
+    #print-btn:hover {
       background: #1a1a1a;
+      border-color: #aaa;
     }
 
-    /* ─── POST TO X MODAL ─── */
-    #post-modal {
+    /* ─── PRINT ORDER MODAL ─── */
+    #print-modal-overlay {
       position: fixed;
-      bottom: 10px;
-      left: 10px;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
       display: none;
-      z-index: 300;
+      z-index: 400;
+      align-items: center;
+      justify-content: center;
     }
-    #post-modal.open { display: block; }
-
-    #post-modal-content {
-      background: rgba(0,0,0,0.92);
+    #print-modal-overlay.open {
+      display: flex;
+    }
+    #print-modal-content {
+      background: rgba(0,0,0,0.95);
       border: 1px solid rgba(255,255,255,0.25);
       border-radius: 4px;
-      padding: 20px 24px;
+      padding: 28px 32px;
       text-align: center;
       font-family: monospace;
       color: #fff;
-      max-width: 320px;
+      max-width: 380px;
+      width: 90%;
     }
-
-    #post-modal h2 {
-      margin: 0 0 20px 0;
-      font-size: 24px;
+    #print-modal-content h2 {
+      margin: 0 0 16px 0;
+      font-size: 20px;
       letter-spacing: 2px;
       font-weight: bold;
+      text-transform: uppercase;
     }
-
-    #post-modal-btn {
-      background: #1DA1F2;
+    #print-modal-content p {
+      margin: 0 0 20px 0;
+      font-size: 12px;
+      color: #aaa;
+      line-height: 1.6;
+    }
+    #print-email-input {
+      width: 100%;
+      box-sizing: border-box;
+      background: #111;
+      border: 1px solid #333;
       color: #fff;
+      padding: 12px 14px;
+      font-family: monospace;
+      font-size: 14px;
+      outline: none;
+      margin-bottom: 18px;
+    }
+    #print-email-input:focus {
+      border-color: #666;
+    }
+    #print-submit-btn {
+      background: #fff;
+      color: #000;
       border: none;
       padding: 12px 30px;
       font-family: monospace;
@@ -299,8 +327,22 @@
       cursor: pointer;
       letter-spacing: 1px;
       transition: background 0.2s;
+      width: 100%;
     }
-    #post-modal-btn:hover { background: #1a8cd8; }
+    #print-submit-btn:hover { background: #ddd; }
+    #print-submit-btn:disabled {
+      background: #333;
+      color: #666;
+      cursor: not-allowed;
+    }
+    #print-status {
+      margin: 12px 0 0 0;
+      font-family: monospace;
+      font-size: 11px;
+      text-align: center;
+      min-height: 16px;
+      letter-spacing: 0.5px;
+    }
   </style>
   <title>THE COLLECTIVE - Combined Overlord | Tech Epochalypse by Coldie</title>
 </head>
@@ -5877,114 +5919,19 @@ setTimeout(function () {
       <button class="export-btn" id="export-start-btn">EXPORT</button>
       <div class="status-line" id="export-status"></div>
     </div>
-    <button id="submit-overlord-btn">SUBMIT</button>
   </div>
 
-  <!-- ─── POST TO X MODAL ─── -->
-  <div id="post-modal">
-    <div id="post-modal-content">
-      <h2>Share your overlord</h2>
-      <p style="margin: 0 0 20px 0; font-size: 12px; color: #aaa;">Attach your downloaded file before posting</p>
-      <button id="post-modal-btn">POST TO X</button>
+  <!-- ─── PRINT BUTTON (bottom-left) ─── -->
+  <button id="print-btn">PRINT</button>
 
-      <div style="margin: 20px 0; color: #666; font-size: 11px; text-align: center;">
-        ── OR ──
-      </div>
-
-      <!-- Submission type toggle: Image or 11s Video -->
-      <div style="margin: 0 0 15px 0;">
-        <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 8px; letter-spacing: 1px;">SUBMISSION TYPE</label>
-        <div id="submit-type-toggle" style="display: flex; gap: 0; border: 1px solid #333;">
-          <button id="submit-type-image" class="submit-type-btn active" style="
-            flex: 1;
-            background: #fff;
-            color: #000;
-            border: none;
-            padding: 8px 0;
-            font-family: monospace;
-            font-size: 11px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: background 0.2s, color 0.2s;
-          ">IMAGE</button>
-          <button id="submit-type-video" class="submit-type-btn" style="
-            flex: 1;
-            background: #111;
-            color: #666;
-            border: none;
-            border-left: 1px solid #333;
-            padding: 8px 0;
-            font-family: monospace;
-            font-size: 11px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: background 0.2s, color 0.2s;
-          ">11s VIDEO</button>
-        </div>
-        <div id="video-hint" style="display: none; margin-top: 6px; font-family: monospace; font-size: 10px; color: #666; line-height: 1.4;">
-          Records an 11-second MP4 of your live artwork
-        </div>
-      </div>
-
-      <div style="margin: 0 0 15px 0;">
-        <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 6px; letter-spacing: 1px;">NAME / X ACCOUNT</label>
-        <input id="x-account-input" type="text" placeholder="@yourhandle" style="
-          width: 100%;
-          box-sizing: border-box;
-          background: #111;
-          border: 1px solid #333;
-          color: #fff;
-          padding: 10px 12px;
-          font-family: monospace;
-          font-size: 13px;
-          outline: none;
-        " />
-      </div>
-
-      <div style="margin: 0 0 15px 0;">
-        <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 6px; letter-spacing: 1px;">TITLE</label>
-        <input id="title-input" type="text" placeholder="Name your creation" style="
-          width: 100%;
-          box-sizing: border-box;
-          background: #111;
-          border: 1px solid #333;
-          color: #fff;
-          padding: 10px 12px;
-          font-family: monospace;
-          font-size: 13px;
-          outline: none;
-        " />
-      </div>
-
-      <button id="judgment-btn" style="
-        background: #000;
-        color: #fff;
-        border: 2px solid #fff;
-        padding: 12px 30px;
-        font-family: monospace;
-        font-size: 14px;
-        font-weight: bold;
-        cursor: pointer;
-        letter-spacing: 1px;
-        transition: background 0.2s;
-        width: 100%;
-      ">SUBMIT TO JUDGMENT PROTOCOL</button>
-
-      <div id="judgment-status" style="
-        margin: 12px 0 0 0;
-        font-family: monospace;
-        font-size: 11px;
-        text-align: center;
-        min-height: 16px;
-        letter-spacing: 0.5px;
-      "></div>
-
-      <p style="margin: 10px 0 0 0; font-size: 10px; color: #888; line-height: 1.4;">
-        Submit your capture for collector review.<br>
-        Top submissions will be minted as official subseries.
-      </p>
+  <!-- ─── PRINT ORDER MODAL ─── -->
+  <div id="print-modal-overlay">
+    <div id="print-modal-content">
+      <h2>Print Your Collage</h2>
+      <p>Collect your customized kinetic 3D collage by Coldie. You will be contacted by email with payment and shipping options. Thank you for touching the art and feeling something.</p>
+      <input id="print-email-input" type="email" placeholder="Email Address" />
+      <button id="print-submit-btn">SUBMIT</button>
+      <div id="print-status"></div>
     </div>
   </div>
 
@@ -5999,11 +5946,9 @@ setTimeout(function () {
     const toggle    = document.getElementById('export-toggle');
     if (!toggle) { setTimeout(setupExport, 50); return; } // wait for init() to create it
     
-    // If embedded, hide RCS button and SUBMIT TO THE OVERLORD button, then exit
+    // If embedded, hide all UI overlays then exit
     if (isEmbedded) {
       toggle.style.display = 'none';
-      const modal = document.getElementById('post-modal');
-      if (modal) modal.style.display = 'none';
       const exportWrapper = document.getElementById('export-wrapper');
       if (exportWrapper) exportWrapper.style.display = 'none';
       const eyeIndicator = document.getElementById('eye-indicator');
@@ -6014,6 +5959,8 @@ setTimeout(function () {
       if (swapModeBtnLeft) swapModeBtnLeft.style.display = 'none';
       const elementControls = document.getElementById('element-controls');
       if (elementControls) elementControls.style.display = 'none';
+      const printBtn = document.getElementById('print-btn');
+      if (printBtn) printBtn.style.display = 'none';
       return;
     }
     
@@ -6023,192 +5970,103 @@ setTimeout(function () {
     const startBtn  = document.getElementById('export-start-btn');
     const status    = document.getElementById('export-status');
     const durRow    = document.getElementById('duration-row');
-    const modal     = document.getElementById('post-modal');
-    const modalBtn  = document.getElementById('post-modal-btn');
+    const exportWrapper = document.getElementById('export-wrapper');
 
-    // ── Show POST TO X modal ──
-    function showPostModal() {
-      modal.classList.add('open');
-    }
+    // ── PRINT BUTTON + MODAL ──
+    const printBtn = document.getElementById('print-btn');
+    const printOverlay = document.getElementById('print-modal-overlay');
+    const printEmailInput = document.getElementById('print-email-input');
+    const printSubmitBtn = document.getElementById('print-submit-btn');
+    const printStatus = document.getElementById('print-status');
 
-    // Wire modal button to open Twitter compose page with pre-filled text
-    modalBtn.onclick = () => {
-      const text = encodeURIComponent('Know your overlords. The Collective. #KnowYourOverlord #TheCollective\nTech Epochalypse by @Coldie');
-      window.open(`https://x.com/intent/post?text=${text}`, '_blank');
-      // Close modal
-      modal.classList.remove('open');
+    printBtn.onclick = (e) => {
+      e.stopPropagation();
+      printOverlay.classList.add('open');
+      printEmailInput.value = '';
+      printStatus.textContent = '';
+      printSubmitBtn.disabled = false;
     };
 
-    // Wire judgment protocol button to submit via Airtable API
-    const judgmentBtn = document.getElementById('judgment-btn');
-    const judgmentStatus = document.getElementById('judgment-status');
-    const OVERLORD_NAME = 'combined';
+    // Close on overlay background click
+    printOverlay.onclick = (e) => {
+      if (e.target === printOverlay) printOverlay.classList.remove('open');
+    };
 
-    // ── Submission type toggle ──
-    let submitType = 'image'; // 'image' or 'video'
-    const submitTypeImage = document.getElementById('submit-type-image');
-    const submitTypeVideo = document.getElementById('submit-type-video');
-    const videoHint = document.getElementById('video-hint');
-
-    function setSubmitType(type) {
-      submitType = type;
-      if (type === 'image') {
-        submitTypeImage.style.background = '#fff';
-        submitTypeImage.style.color = '#000';
-        submitTypeVideo.style.background = '#111';
-        submitTypeVideo.style.color = '#666';
-        videoHint.style.display = 'none';
-        judgmentBtn.textContent = 'SUBMIT TO JUDGMENT PROTOCOL';
-      } else {
-        submitTypeVideo.style.background = '#fff';
-        submitTypeVideo.style.color = '#000';
-        submitTypeImage.style.background = '#111';
-        submitTypeImage.style.color = '#666';
-        videoHint.style.display = 'block';
-        judgmentBtn.textContent = 'RECORD & SUBMIT 11s VIDEO';
+    // ── PRINT SUBMIT — capture canvas + composition JSON, send to Airtable ──
+    printSubmitBtn.onclick = async () => {
+      const email = printEmailInput.value.trim();
+      if (!email || !email.includes('@')) {
+        printStatus.style.color = '#e66';
+        printStatus.textContent = 'Please enter a valid email address';
+        return;
       }
-    }
-    submitTypeImage.onclick = () => setSubmitType('image');
-    submitTypeVideo.onclick = () => setSubmitType('video');
 
-    // ── Record 11-second MP4 from canvas ──
-    function recordVideoBlob() {
-      return new Promise(async (resolve, reject) => {
-        const r = await getRenderer();
-        const canvas = r.domElement;
-        const stream = canvas.captureStream(30);
-
-        const candidates = [
-          'video/mp4;codecs=avc1.42E01E',
-          'video/mp4;codecs=avc1.640028',
-          'video/mp4',
-          'video/webm;codecs=vp9',
-          'video/webm;codecs=vp8',
-          'video/webm'
-        ];
-        let usedMime = '';
-        for (const m of candidates) {
-          if (MediaRecorder.isTypeSupported(m)) { usedMime = m; break; }
-        }
-        if (!usedMime) { reject(new Error('No supported video codec')); return; }
-
-        const nativeMp4 = usedMime.startsWith('video/mp4');
-        const chunks = [];
-        const mr = new MediaRecorder(stream, { mimeType: usedMime, videoBitsPerSecond: 2500000 });
-
-        mr.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
-
-        mr.onstop = async () => {
-          try {
-            stream.getTracks().forEach(t => t.stop());
-            if (nativeMp4) {
-              resolve(new Blob(chunks, { type: 'video/mp4' }));
-            } else {
-              // Re-mux WebM into MP4 container
-              const arrays = [];
-              for (const c of chunks) {
-                const buf = await c.arrayBuffer();
-                arrays.push(new Uint8Array(buf));
-              }
-              let totalLen = 0;
-              for (const a of arrays) totalLen += a.length;
-              const payload = new Uint8Array(totalLen);
-              let off = 0;
-              for (const a of arrays) { payload.set(a, off); off += a.length; }
-              const mp4 = buildMP4(payload, 11000, canvas.width, canvas.height);
-              resolve(new Blob([mp4], { type: 'video/mp4' }));
-            }
-          } catch (err) {
-            // Fallback: return raw recording
-            resolve(new Blob(chunks, { type: usedMime }));
-          }
-        };
-
-        mr.onerror = () => reject(new Error('Recording failed'));
-
-        mr.start(100);
-        setTimeout(() => { mr.stop(); }, 11000);
-      });
-    }
-
-    judgmentBtn.onclick = async () => {
-      const xAccount = document.getElementById('x-account-input').value.trim();
-      const title = document.getElementById('title-input').value.trim();
-      judgmentBtn.disabled = true;
-      judgmentBtn.style.opacity = '0.5';
-      judgmentStatus.style.color = '#aaa';
+      printSubmitBtn.disabled = true;
+      printStatus.style.color = '#aaa';
+      printStatus.textContent = 'CAPTURING...';
 
       try {
-        let blob;
-        const WORKER_URL = window.GALLERY_API_URL || window.location.origin;
-        const form = new FormData();
+        // 1. Capture high-res PNG of current canvas
+        const r = await getRenderer();
+        if (window.composer) { window.composer.render(); }
+        else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
+        const dataUrl = r.domElement.toDataURL('image/png');
+        const imageBlob = await (await fetch(dataUrl)).blob();
 
-        if (submitType === 'video') {
-          judgmentStatus.textContent = 'RECORDING 11s…';
-          blob = await recordVideoBlob();
-          form.append('video', blob, 'export.mp4');
-        } else {
-          judgmentStatus.textContent = 'SUBMITTING...';
-          // Capture canvas as PNG
-          const r = await getRenderer();
-          if (window.composer) { window.composer.render(); }
-          else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
-          const dataUrl = r.domElement.toDataURL('image/png');
-          blob = await (await fetch(dataUrl)).blob();
-          form.append('image', blob, 'export.png');
+        // 2. Build composition JSON
+        const meshStates = [];
+        if (window.scene) {
+          window.scene.children.forEach(child => {
+            if (child.userData && child.userData.id) {
+              meshStates.push({
+                id: child.userData.id,
+                position: { x: child.position.x, y: child.position.y, z: child.position.z },
+                rotation: { x: child.rotation.x, y: child.rotation.y, z: child.rotation.z },
+                scale: { x: child.scale.x, y: child.scale.y, z: child.scale.z },
+                visible: child.visible,
+                userScale: child.userData.userScale || 1.0,
+              });
+            }
+          });
         }
+        const compositionJson = JSON.stringify({ meshes: meshStates, timestamp: new Date().toISOString() });
 
-        judgmentStatus.textContent = 'UPLOADING…';
+        printStatus.textContent = 'UPLOADING...';
 
-        // Upload + create Airtable record in one request
-        form.append('overlord', OVERLORD_NAME);
-        form.append('xAccount', xAccount);
-        form.append('title', title);
-        const res = await fetch(WORKER_URL + '/submit', { method: 'POST', body: form });
+        // 3. Send to print-order API
+        const form = new FormData();
+        form.append('email', email);
+        form.append('image', imageBlob, 'print-capture.png');
+        form.append('compositionJson', compositionJson);
+
+        const API_URL = window.location.origin;
+        const res = await fetch(API_URL + '/api/print-order', { method: 'POST', body: form });
+
         if (!res.ok) {
           const errBody = await res.json().catch(() => ({}));
           throw new Error(errBody.error || 'Submission failed');
         }
         const data = await res.json();
 
-        if (res.ok && data.ok) {
-          judgmentStatus.style.color = '#4c4';
-          judgmentStatus.textContent = 'SUBMITTED SUCCESSFULLY';
+        if (data.ok) {
+          printStatus.style.color = '#4c4';
+          printStatus.textContent = 'SUBMITTED — CHECK YOUR EMAIL';
           setTimeout(() => {
-            modal.classList.remove('open');
-            judgmentStatus.textContent = '';
-            judgmentBtn.disabled = false;
-            judgmentBtn.style.opacity = '1';
-            setSubmitType('image'); // reset toggle
-          }, 2000);
+            printOverlay.classList.remove('open');
+            printStatus.textContent = '';
+            printSubmitBtn.disabled = false;
+          }, 3000);
         } else {
-          const errMsg = data.details || data.error || `HTTP ${res.status}`;
-          judgmentStatus.style.color = '#e66';
-          judgmentStatus.textContent = 'SUBMISSION FAILED: ' + errMsg;
-          judgmentBtn.disabled = false;
-          judgmentBtn.style.opacity = '1';
+          throw new Error(data.error || 'Unknown error');
         }
       } catch (e) {
-        judgmentStatus.style.color = '#e66';
-        judgmentStatus.textContent = e.message || 'NETWORK ERROR — TRY AGAIN';
-        judgmentBtn.disabled = false;
-        judgmentBtn.style.opacity = '1';
+        printStatus.style.color = '#e66';
+        printStatus.textContent = e.message || 'NETWORK ERROR — TRY AGAIN';
+        printSubmitBtn.disabled = false;
       }
     };
 
-    // Close modal on background click
-    modal.onclick = (e) => {
-      if (e.target === modal) modal.classList.remove('open');
-    };
-
-    // ── Toggle panel from SUBMIT button ──
-    const submitOverlordBtn = document.getElementById('submit-overlord-btn');
-    const exportWrapper = document.getElementById('export-wrapper');
-    submitOverlordBtn.onclick = (e) => {
-      e.stopPropagation();
-      if (startBtn.classList.contains('recording')) return;
-      panel.classList.toggle('open');
-    };
+    // ── Close export panel on outside click ──
     document.addEventListener('click', (e) => {
       if (startBtn.classList.contains('recording')) return;
       if (!exportWrapper.contains(e.target)) panel.classList.remove('open');
@@ -6301,7 +6159,7 @@ setTimeout(function () {
           triggerDownload(blob, 'combined-coldie.png');
           saveToGallery(r.domElement);
           setStatus('PNG saved ✓ — added to gallery', 'active');
-          showPostModal();
+          // Post-export modal removed
         } else {
           setStatus('Capture failed', 'error');
         }
@@ -6352,7 +6210,7 @@ setTimeout(function () {
             const blob = new Blob(chunks, { type: 'video/mp4' });
             triggerDownload(blob, 'combined-coldie.mp4');
             setStatus(`MP4 saved ✓  (${(blob.size/1024/1024).toFixed(2)} MB)`, 'active');
-            showPostModal();
+            // Post-export modal removed
           } else {
             // Recorded WebM – wrap it inside an MP4 container
             setStatus('Muxing to MP4…', 'active');
@@ -6373,7 +6231,7 @@ setTimeout(function () {
             const blob = new Blob([mp4], { type: 'video/mp4' });
             triggerDownload(blob, 'combined-coldie.mp4');
             setStatus(`MP4 saved ✓  (${(blob.size/1024/1024).toFixed(2)} MB)`, 'active');
-            showPostModal();
+            // Post-export modal removed
           }
         } catch (err) {
           // Ultimate fallback: save raw recording as-is
