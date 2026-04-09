@@ -1,7 +1,16 @@
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 import ScrollReveal from '@/components/ScrollReveal'
-import UserExports from '@/components/UserExports'
 import overlords from '@/data/overlords.json'
+
+const UserExports = dynamic(() => import('@/components/UserExports'), {
+  ssr: false,
+  loading: () => (
+    <div className="text-center py-12">
+      <p className="font-mono text-xs text-white/40 uppercase tracking-wider">Loading community exports…</p>
+    </div>
+  ),
+})
 
 export const metadata: Metadata = {
   title: 'The Mainframe - Tech Epochalypse',

@@ -7,12 +7,8 @@ interface Particle {
   y: number
   vx: number
   vy: number
-  z: number
   size: number
   opacity: number
-  isPixelBlock: boolean
-  blockW: number
-  blockH: number
 }
 
 export default function ParticleNetwork() {
@@ -27,13 +23,12 @@ export default function ParticleNetwork() {
 
     let animationId: number
     let particles: Particle[] = []
-    const PARTICLE_COUNT = 45
-    const CONNECTION_DISTANCE_SQ = 120 * 120 // Squared to avoid sqrt
-    const MOUSE_DISTANCE_SQ = 180 * 180
+    const PARTICLE_COUNT = 25
+    const CONNECTION_DISTANCE_SQ = 100 * 100
+    const MOUSE_DISTANCE_SQ = 150 * 150
     const MOUSE = { x: -1000, y: -1000 }
-    let time = 0
     let lastFrameTime = 0
-    const FRAME_INTERVAL = 1000 / 20 // Cap at 20fps for background effect
+    const FRAME_INTERVAL = 1000 / 15 // 15fps — light background effect
     let isVisible = true
 
     const resize = () => {
@@ -44,27 +39,21 @@ export default function ParticleNetwork() {
     const createParticles = () => {
       particles = []
       for (let i = 0; i < PARTICLE_COUNT; i++) {
-        const isPixelBlock = Math.random() > 0.6
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 0.25,
-          vy: (Math.random() - 0.5) * 0.25,
-          z: Math.random() * 100 - 50,
-          size: isPixelBlock ? 0 : Math.random() * 1.5 + 0.3,
-          opacity: Math.random() * 0.4 + 0.1,
-          isPixelBlock,
-          blockW: Math.random() * 30 + 6,
-          blockH: Math.random() * 12 + 3,
+          vx: (Math.random() - 0.5) * 0.2,
+          vy: (Math.random() - 0.5) * 0.2,
+          size: Math.random() * 1.5 + 0.3,
+          opacity: Math.random() * 0.35 + 0.08,
         })
       }
     }
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      time += 0.005
 
-      // Draw connections - use squared distance to avoid sqrt
+      // Draw connections
       ctx.lineWidth = 0.5
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
@@ -73,7 +62,7 @@ export default function ParticleNetwork() {
           const distSq = dx * dx + dy * dy
 
           if (distSq < CONNECTION_DISTANCE_SQ) {
-            const alpha = (1 - Math.sqrt(distSq) / 120) * 0.06
+            const alpha = (1 - Math.sqrt(distSq) / 100) * 0.06
             ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`
             ctx.beginPath()
             ctx.moveTo(particles[i].x, particles[i].y)
@@ -87,7 +76,7 @@ export default function ParticleNetwork() {
         const mdy = particles[i].y - MOUSE.y
         const mDistSq = mdx * mdx + mdy * mdy
         if (mDistSq < MOUSE_DISTANCE_SQ) {
-          const alpha = (1 - Math.sqrt(mDistSq) / 180) * 0.15
+          const alpha = (1 - Math.sqrt(mDistSq) / 150) * 0.12
           ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`
           ctx.beginPath()
           ctx.moveTo(particles[i].x, particles[i].y)
@@ -96,36 +85,12 @@ export default function ParticleNetwork() {
         }
       }
 
-      // Draw particles
+      // Draw particles — simple circles only
       for (const p of particles) {
-        const parallaxX = Math.sin(time + p.z * 0.02) * (p.z * 0.15)
-        const parallaxY = Math.cos(time * 0.7 + p.z * 0.03) * (p.z * 0.1)
-        const drawX = p.x + parallaxX
-        const drawY = p.y + parallaxY
-
-        if (p.isPixelBlock) {
-          const flicker = Math.sin(time * 3 + p.z) > 0.7 ? 0.15 : p.opacity * 0.6
-          ctx.fillStyle = `rgba(255, 255, 255, ${flicker})`
-          ctx.fillRect(
-            Math.round(drawX / 4) * 4,
-            Math.round(drawY / 4) * 4,
-            p.blockW,
-            p.blockH
-          )
-        } else {
-          ctx.beginPath()
-          ctx.arc(drawX, drawY, p.size, 0, Math.PI * 2)
-          ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`
-          ctx.fill()
-        }
-      }
-
-      // Occasional horizontal glitch bar
-      if (Math.random() > 0.985) {
-        const barY = Math.random() * canvas.height
-        const barH = Math.random() * 3 + 1
-        ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.04 + 0.01})`
-        ctx.fillRect(0, barY, canvas.width, barH)
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`
+        ctx.fill()
       }
     }
 
@@ -134,8 +99,8 @@ export default function ParticleNetwork() {
         p.x += p.vx
         p.y += p.vy
 
-        if (p.x < -20 || p.x > canvas.width + 20) p.vx *= -1
-        if (p.y < -20 || p.y > canvas.height + 20) p.vy *= -1
+        if (p.x < -10 || p.x > canvas.width + 10) p.vx *= -1
+        if (p.y < -10 || p.y > canvas.height + 10) p.vy *= -1
       }
     }
 
@@ -143,7 +108,6 @@ export default function ParticleNetwork() {
       if (!isVisible) return
       animationId = requestAnimationFrame(loop)
 
-      // Throttle to 20fps
       if (timestamp - lastFrameTime < FRAME_INTERVAL) return
       lastFrameTime = timestamp
 
@@ -174,7 +138,7 @@ export default function ParticleNetwork() {
     animationId = requestAnimationFrame(loop)
 
     window.addEventListener('resize', handleResize)
-    window.addEventListener('mousemove', handleMouse)
+    window.addEventListener('mousemove', handleMouse, { passive: true })
     document.addEventListener('visibilitychange', handleVisibility)
 
     return () => {
