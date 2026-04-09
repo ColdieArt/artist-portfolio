@@ -1,7 +1,16 @@
 import Link from 'next/link'
-import ParticleNetwork from '@/components/ParticleNetwork'
-import BioCoder from '@/components/BioCoder'
+import dynamic from 'next/dynamic'
 import ScrollReveal from '@/components/ScrollReveal'
+
+// Lazy-load heavy canvas animations so nav becomes interactive immediately
+const ParticleNetwork = dynamic(() => import('@/components/ParticleNetwork'), {
+  ssr: false,
+  loading: () => null,
+})
+const BioCoder = dynamic(() => import('@/components/BioCoder'), {
+  ssr: false,
+  loading: () => null,
+})
 
 export default function HomePage() {
   return (
