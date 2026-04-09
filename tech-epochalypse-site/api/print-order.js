@@ -122,9 +122,17 @@ module.exports = async (req, res) => {
     if (!airtableRes.ok) {
       const errBody = await airtableRes.text();
       console.error('Airtable create error:', airtableRes.status, errBody);
+      // Parse Airtable error for a human-readable message
+      let detail = errBody;
+      try {
+        const parsed = JSON.parse(errBody);
+        if (parsed.error) {
+          detail = parsed.error.message || parsed.error.type || errBody;
+        }
+      } catch (_) {}
       return res.status(airtableRes.status).json({
         error: 'Airtable submission failed',
-        details: errBody,
+        details: detail,
       });
     }
 

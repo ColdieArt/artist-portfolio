@@ -6026,13 +6026,9 @@ setTimeout(function () {
           const API_URL = window.location.origin;
           const res = await fetch(API_URL + '/api/print-order', { method: 'POST', body: form });
 
-          if (!res.ok) {
-            const errBody = await res.json().catch(() => ({}));
-            throw new Error(errBody.error || 'Submission failed');
-          }
-          const data = await res.json();
+          const data = await res.json().catch(() => ({}));
 
-          if (data.ok) {
+          if (res.ok && data.ok) {
             printStatus.style.color = '#4c4';
             printStatus.textContent = 'SUBMITTED — CHECK YOUR EMAIL';
             setTimeout(() => {
@@ -6041,7 +6037,10 @@ setTimeout(function () {
               printSubmitBtn.disabled = false;
             }, 3000);
           } else {
-            throw new Error(data.error || 'Unknown error');
+            // Show the full error details from server/Airtable
+            const detail = data.details || data.error || ('HTTP ' + res.status);
+            console.error('Print order error:', data);
+            throw new Error(detail);
           }
         } catch (e) {
           printStatus.style.color = '#e66';
