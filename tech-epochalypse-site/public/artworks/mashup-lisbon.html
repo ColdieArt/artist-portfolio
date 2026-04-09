@@ -3527,35 +3527,6 @@ function init() {
     };
     leftUiContainer.appendChild(swapBtn);
 
-    // Create the CONNECT WALLET button for contract-gated assets
-    const walletBtn = document.createElement('button');
-    walletBtn.id = 'wallet-connect-btn';
-    walletBtn.textContent = 'CONNECT WALLET';
-    walletBtn.style.cssText = `
-        background-color: black;
-        color: white;
-        padding: 4px;
-        margin: 0;
-        border: 0.5px solid white;
-        border-radius: 0;
-        cursor: pointer;
-        font-family: monospace;
-        font-size: 7px;
-        outline: none;
-        box-sizing: border-box;
-    `;
-    walletBtn.onmouseover = () => {
-        if (!connectedWalletAddress) walletBtn.style.borderColor = '#777';
-    };
-    walletBtn.onmouseout = () => {
-        if (!connectedWalletAddress) walletBtn.style.borderColor = 'white';
-    };
-    walletBtn.onclick = (event) => {
-        event.stopPropagation();
-        connectAndCheckAssets();
-    };
-    leftUiContainer.appendChild(walletBtn);
-
     // Create the DUPLICATE button (appended after SWAP MODE)
     const duplicateBtn = document.createElement('button');
     duplicateBtn.id = 'duplicate-btn';
@@ -3619,115 +3590,6 @@ function init() {
     };
     leftUiContainer.appendChild(duplicateBtn);
 
-    // ── MASK UI ── (appended after DUPLICATE)
-    const maskBtn = document.createElement('button');
-    maskBtn.id = 'mask-btn';
-    maskBtn.textContent = 'MASK';
-    maskBtn.style.cssText = `
-        background-color: black; color: white; padding: 4px; margin-top: 10px;
-        border: 0.5px solid white; border-radius: 0; cursor: pointer;
-        font-family: monospace; font-size: 7px; outline: none;
-        white-space: nowrap; box-sizing: border-box;
-    `;
-    leftUiContainer.appendChild(maskBtn);
-
-    // Mask sub-panel (hidden until MASK is clicked)
-    const maskPanel = document.createElement('div');
-    maskPanel.id = 'mask-panel';
-    maskPanel.style.cssText = `
-        display: none; flex-direction: column; gap: 4px; padding: 4px 0 0 0;
-    `;
-
-    // Shape buttons row
-    const shapeRow = document.createElement('div');
-    shapeRow.style.cssText = 'display: flex; gap: 3px; flex-wrap: wrap;';
-    const shapes = ['square', 'circle', 'triangle', 'star', 'draw'];
-    const shapeLabels = { square: '■', circle: '●', triangle: '▲', star: '★', draw: '✎' };
-    const shapeBtns = {};
-    shapes.forEach(s => {
-        const b = document.createElement('button');
-        b.textContent = shapeLabels[s];
-        b.title = s;
-        b.style.cssText = `
-            flex: 1; background: black; color: white; border: 0.5px solid ${s === maskShape ? '#4CAF50' : 'white'};
-            padding: 3px; font-family: monospace; font-size: 9px; cursor: pointer;
-            outline: none; box-sizing: border-box;
-        `;
-        b.onclick = (e) => {
-            e.stopPropagation();
-            maskShape = s;
-            shapes.forEach(ss => {
-                shapeBtns[ss].style.borderColor = ss === s ? '#4CAF50' : 'white';
-            });
-            // Update SIZE label for draw mode (brush size) vs shape mode (shape size)
-            scaleLabel.textContent = s === 'draw' ? 'BRUSH' : 'SIZE';
-            if (maskMode && maskTargetMesh) {
-                if (s === 'draw') initMaskDrawCanvas();
-                updateMaskOverlay();
-            }
-        };
-        shapeBtns[s] = b;
-        shapeRow.appendChild(b);
-    });
-    maskPanel.appendChild(shapeRow);
-
-    // Scale row
-    const scaleRow = document.createElement('div');
-    scaleRow.style.cssText = 'display: flex; align-items: center; gap: 4px;';
-    const scaleLabel = document.createElement('span');
-    scaleLabel.textContent = 'SIZE';
-    scaleLabel.style.cssText = 'color: #aaa; font-family: monospace; font-size: 7px;';
-    const maskScaleSlider = document.createElement('input');
-    maskScaleSlider.type = 'range';
-    maskScaleSlider.min = '10';
-    maskScaleSlider.max = '200';
-    maskScaleSlider.value = '100';
-    maskScaleSlider.style.cssText = 'flex: 1; height: 8px; cursor: pointer;';
-    const maskScaleVal = document.createElement('span');
-    maskScaleVal.textContent = '100%';
-    maskScaleVal.style.cssText = 'color: white; font-family: monospace; font-size: 7px; min-width: 28px; text-align: right;';
-    maskScaleSlider.oninput = (e) => {
-        e.stopPropagation();
-        maskScale = parseInt(maskScaleSlider.value) / 100;
-        maskScaleVal.textContent = maskScaleSlider.value + '%';
-        if (maskMode && maskTargetMesh) updateMaskOverlay();
-    };
-    maskScaleSlider.onmousedown = (e) => e.stopPropagation();
-    maskScaleSlider.ontouchstart = (e) => e.stopPropagation();
-    scaleRow.appendChild(scaleLabel);
-    scaleRow.appendChild(maskScaleSlider);
-    scaleRow.appendChild(maskScaleVal);
-    maskPanel.appendChild(scaleRow);
-
-    // APPLY button
-    const applyMaskBtn = document.createElement('button');
-    applyMaskBtn.textContent = 'APPLY';
-    applyMaskBtn.style.cssText = `
-        background: black; color: white; border: 0.5px solid #4CAF50;
-        padding: 4px; font-family: monospace; font-size: 7px; cursor: pointer;
-        outline: none; box-sizing: border-box; letter-spacing: 1px;
-    `;
-    applyMaskBtn.onclick = (e) => {
-        e.stopPropagation();
-        if (maskMode && maskTargetMesh) applyMask();
-    };
-    maskPanel.appendChild(applyMaskBtn);
-
-    // CANCEL button
-    const cancelMaskBtn = document.createElement('button');
-    cancelMaskBtn.textContent = 'CANCEL';
-    cancelMaskBtn.style.cssText = `
-        background: black; color: #888; border: 0.5px solid #555;
-        padding: 4px; font-family: monospace; font-size: 7px; cursor: pointer;
-        outline: none; box-sizing: border-box;
-    `;
-    cancelMaskBtn.onclick = (e) => {
-        e.stopPropagation();
-        exitMaskMode();
-    };
-    maskPanel.appendChild(cancelMaskBtn);
-    leftUiContainer.appendChild(maskPanel);
-
     // Add the RESET button to both UI containers
     const createResetButton = () => {
         const button = document.createElement('button');
@@ -3781,20 +3643,6 @@ function init() {
     trashButtonElement = createTrashButton(); // Store reference to the button element
     leftUiContainer.appendChild(trashButtonElement);
 
-    // Create and append the EXPORT button below TRASH
-    const createExportButton = () => {
-        const button = document.createElement('button');
-        button.id = 'export-toggle';
-        button.innerHTML = 'RCS';
-        button.style.cssText = `
-            display: none !important;
-        `;
-        return button;
-    };
-    exportButtonElement = createExportButton();
-    exportButtonElement.style.display = 'none';
-    leftUiContainer.appendChild(exportButtonElement);
-
     // Create hidden file input for image uploads
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
@@ -3828,96 +3676,6 @@ function init() {
         };
         return button;
     };
-    uploadButtonElement = createUploadButton();
-    leftUiContainer.appendChild(uploadButtonElement);
-
-    // ── SAVE / LOAD buttons ──
-    const saveBtn = document.createElement('button');
-    saveBtn.id = 'save-btn';
-    saveBtn.textContent = 'SAVE';
-    saveBtn.style.cssText = `
-        background-color: black; color: white; padding: 4px; margin-top: 10px;
-        border: 0.5px solid #4CAF50; border-radius: 0; cursor: pointer;
-        font-family: monospace; font-size: 7px; outline: none;
-        white-space: nowrap; box-sizing: border-box;
-    `;
-    saveBtn.onclick = (e) => {
-        e.stopPropagation();
-        downloadComposition();
-        saveBtn.textContent = 'SAVED';
-        saveBtn.style.borderColor = '#4CAF50';
-        setTimeout(() => { saveBtn.textContent = 'SAVE'; saveBtn.style.borderColor = '#4CAF50'; }, 1500);
-    };
-    leftUiContainer.appendChild(saveBtn);
-
-    const loadBtn = document.createElement('button');
-    loadBtn.id = 'load-btn';
-    loadBtn.textContent = 'LOAD';
-    loadBtn.style.cssText = `
-        background-color: black; color: white; padding: 4px;
-        border: 0.5px solid #2196F3; border-radius: 0; cursor: pointer;
-        font-family: monospace; font-size: 7px; outline: none;
-        white-space: nowrap; box-sizing: border-box;
-    `;
-    loadBtn.onclick = (e) => {
-        e.stopPropagation();
-        loadCompositionFromFile();
-    };
-    leftUiContainer.appendChild(loadBtn);
-
-    const clearSaveBtn = document.createElement('button');
-    clearSaveBtn.id = 'clear-save-btn';
-    clearSaveBtn.textContent = 'CLEAR SAVE';
-    clearSaveBtn.style.cssText = `
-        background-color: black; color: #888; padding: 4px;
-        border: 0.5px solid #555; border-radius: 0; cursor: pointer;
-        font-family: monospace; font-size: 7px; outline: none;
-        white-space: nowrap; box-sizing: border-box;
-    `;
-    clearSaveBtn.onclick = (e) => {
-        e.stopPropagation();
-        localStorage.removeItem(COMPOSITION_STORAGE_KEY);
-        clearSaveBtn.textContent = 'CLEARED';
-        setTimeout(() => { clearSaveBtn.textContent = 'CLEAR SAVE'; }, 1500);
-    };
-    leftUiContainer.appendChild(clearSaveBtn);
-
-    // ── AR button ──
-    const arBtn = document.createElement('button');
-    arBtn.id = 'ar-btn';
-    arBtn.textContent = 'AR';
-    arBtn.style.cssText = `
-        background-color: black; color: white; padding: 4px; margin-top: 10px;
-        border: 0.5px solid #9C27B0; border-radius: 0; cursor: pointer;
-        font-family: monospace; font-size: 7px; outline: none;
-        white-space: nowrap; box-sizing: border-box;
-    `;
-    arBtn.onclick = (e) => {
-        e.stopPropagation();
-        launchAR(arBtn);
-    };
-    leftUiContainer.appendChild(arBtn);
-
-    // MASK button click — enter/exit mask mode
-    maskBtn.onclick = (e) => {
-        e.stopPropagation();
-        if (maskMode) {
-            exitMaskMode();
-            return;
-        }
-        // Need a selected uploaded image — flash red border if none
-        if (!selectedScaleElement || !selectedScaleElement.userData.isUploaded) {
-            maskBtn.style.borderColor = '#e33';
-            maskBtn.textContent = 'SELECT IMG';
-            setTimeout(() => {
-                maskBtn.style.borderColor = 'white';
-                maskBtn.textContent = 'MASK';
-            }, 1200);
-            return;
-        }
-        enterMaskMode(selectedScaleElement);
-    };
-
     // Handle file selection: load image as texture and add as draggable piece
     fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
@@ -4013,15 +3771,7 @@ function init() {
         if (leftUiContainer.style.top === '10px') {
             leftUiContainer.style.top = '-190px'; // Hide it, revealing only the arrow
             trashButtonElement.style.display = 'none'; // Hide TRASH button
-            exportButtonElement.style.display = 'none'; // Hide EXPORT button
-            uploadButtonElement.style.display = 'none'; // Hide UPLOAD button
             duplicateBtn.style.display = 'none'; // Hide DUPLICATE button
-            maskBtn.style.display = 'none'; // Hide MASK button
-            saveBtn.style.display = 'none'; // Hide SAVE button
-            loadBtn.style.display = 'none'; // Hide LOAD button
-            clearSaveBtn.style.display = 'none'; // Hide CLEAR SAVE button
-            arBtn.style.display = 'none'; // Hide AR button
-            if (maskMode) exitMaskMode();
             const panel = document.getElementById('export-panel');
             if (panel) panel.classList.remove('open'); // Close export panel
             arrowContainer.style.top = '0px'; // Keep arrow at the top
@@ -4032,13 +3782,7 @@ function init() {
         } else {
             leftUiContainer.style.top = '10px'; // Show it
             trashButtonElement.style.display = 'block'; // Show TRASH button
-            uploadButtonElement.style.display = 'block'; // Show UPLOAD button
             duplicateBtn.style.display = 'block'; // Show DUPLICATE button
-            maskBtn.style.display = 'block'; // Show MASK button
-            saveBtn.style.display = 'block'; // Show SAVE button
-            loadBtn.style.display = 'block'; // Show LOAD button
-            clearSaveBtn.style.display = 'block'; // Show CLEAR SAVE button
-            arBtn.style.display = 'block'; // Show AR button
             arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; // Move arrow below the UI
             arrowSpan.innerHTML = '&#x25B2'; // Change to up arrow
             // Reposition element-controls to the right of left UI with 20px padding
@@ -4051,14 +3795,7 @@ function init() {
 
     // Initial state setup — left UI starts expanded, so show all buttons
     trashButtonElement.style.display = 'block';
-    exportButtonElement.style.display = 'block';
-    uploadButtonElement.style.display = 'block';
     duplicateBtn.style.display = 'block';
-    maskBtn.style.display = 'block';
-    saveBtn.style.display = 'block';
-    loadBtn.style.display = 'block';
-    clearSaveBtn.style.display = 'block';
-    arBtn.style.display = 'block';
 
     window.addEventListener('resize', onWindowResize);
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
