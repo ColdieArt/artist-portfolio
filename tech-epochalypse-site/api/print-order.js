@@ -67,8 +67,8 @@ module.exports = async (req, res) => {
     let imageUrl = '';
     const imagePart = parts.find(p => p.name === 'image' && p.filename);
     if (imagePart && imagePart.data.length > 0) {
-      if (imagePart.data.length > 15 * 1024 * 1024) {
-        return res.status(400).json({ error: 'Image too large (max 15MB)' });
+      if (imagePart.data.length > 30 * 1024 * 1024) {
+        return res.status(400).json({ error: 'Image too large (max 30MB)' });
       }
       const imgKey = `print-orders/${id}.png`;
       await s3.send(new PutObjectCommand({

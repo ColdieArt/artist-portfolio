@@ -5991,12 +5991,41 @@ setTimeout(function () {
         printStatus.textContent = 'CAPTURING...';
 
         try {
-          // Wait for renderer to be available
+          // Render at print resolution: 3508x4961 px (300 DPI vertical A3)
+          const PRINT_W = 3508;
+          const PRINT_H = 4961;
           const r = await waitForRenderer();
-          if (window.composer) { window.composer.render(); }
-          else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
+
+          // Save original size
+          const origW = r.domElement.width;
+          const origH = r.domElement.height;
+          const origAspect = window.camera ? window.camera.aspect : 1;
+
+          // Resize renderer + camera to print dimensions
+          r.setSize(PRINT_W, PRINT_H);
+          if (window.camera) {
+            window.camera.aspect = PRINT_W / PRINT_H;
+            window.camera.updateProjectionMatrix();
+          }
+          if (window.composer) {
+            window.composer.setSize(PRINT_W, PRINT_H);
+            window.composer.render();
+          } else if (window.scene && window.camera) {
+            r.render(window.scene, window.camera);
+          }
+
           const dataUrl = r.domElement.toDataURL('image/png');
           const imageBlob = await (await fetch(dataUrl)).blob();
+
+          // Restore original size
+          r.setSize(origW, origH);
+          if (window.camera) {
+            window.camera.aspect = origAspect;
+            window.camera.updateProjectionMatrix();
+          }
+          if (window.composer) {
+            window.composer.setSize(origW, origH);
+          }
 
           // Build composition JSON
           const meshStates = [];
