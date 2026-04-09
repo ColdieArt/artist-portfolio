@@ -1212,7 +1212,7 @@ let exportButtonElement = null; // Global reference for the export button UI ele
 let uploadButtonElement = null; // Global reference for the upload button UI element
 let uploadedImageCounter = 0; // Counter for unique IDs on uploaded images
 let leftUiContainer = null; // Global reference for the left UI container
-let arrowContainer = null; // Global reference for the arrow container
+// Arrow container removed — left UI is always visible
 
 // ── Mask mode state ──
 let maskMode = false;
@@ -3797,67 +3797,7 @@ function init() {
         fileInput.value = '';
     });
 
-    // Add the thin black rectangle with a down-facing arrow below the TRASH button
-    arrowContainer = document.createElement('div'); // Assign to global variable
-    arrowContainer.id = 'arrow-container'; // Add ID for better targeting
-    arrowContainer.style.cssText = `
-        position: fixed; /* Position relative to the viewport */
-        top: 0px; /* Initially at the top, peeking out */
-        left: 20px;
-        background-color: black;
-        width: 60px; /* Fixed width for the arrow tab */
-        height: 15px; /* Height of the arrow tab */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        z-index: 101; /* Higher z-index than leftUiContainer to be clickable */
-        border-bottom-left-radius: 5px; /* Rounded corners for the tab */
-        border-bottom-right-radius: 5px;
-        transition: top 0.5s ease-in-out; /* Smooth transition for top property */
-        box-sizing: border-box; /* Include padding and border in the element's total width and height */
-    `;
-    const arrowSpan = document.createElement('span');
-    arrowSpan.style.cssText = `
-        color: white;
-        font-size: 10px; /* Larger arrow */
-    `;
-    arrowSpan.innerHTML = '&#x25B2;'; // Up-facing triangle (UI starts expanded)
-    arrowContainer.appendChild(arrowSpan);
-    document.body.appendChild(arrowContainer); // Append to body, not leftUiContainer
-    // Position arrow below the expanded left UI on load
-    requestAnimationFrame(() => {
-        arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
-    });
-
-    // Add click listener for the arrow container to toggle left UI visibility
-    arrowContainer.onclick = (event) => {
-        event.stopPropagation(); // Prevent clicks from interacting with 3D scene
-        if (leftUiContainer.style.top === '10px') {
-            leftUiContainer.style.top = '-190px'; // Hide it, revealing only the arrow
-            trashButtonElement.style.display = 'none'; // Hide TRASH button
-            duplicateBtn.style.display = 'none'; // Hide DUPLICATE button
-            const panel = document.getElementById('export-panel');
-            if (panel) panel.classList.remove('open'); // Close export panel
-            arrowContainer.style.top = '0px'; // Keep arrow at the top
-            arrowSpan.innerHTML = '&#x25BC;'; // Change to down arrow
-            // Reposition element-controls to top-left when UI is hidden
-            const ecHide = document.getElementById('element-controls');
-            if (ecHide) { ecHide.style.left = '10px'; ecHide.style.top = '10px'; }
-        } else {
-            leftUiContainer.style.top = '10px'; // Show it
-            trashButtonElement.style.display = 'block'; // Show TRASH button
-            duplicateBtn.style.display = 'block'; // Show DUPLICATE button
-            arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; // Move arrow below the UI
-            arrowSpan.innerHTML = '&#x25B2'; // Change to up arrow
-            // Reposition element-controls below left UI with 20px padding
-            const ecShow = document.getElementById('element-controls');
-            if (ecShow && ecShow.classList.contains('visible')) {
-                ecShow.style.left = leftUiContainer.offsetLeft + 'px';
-                ecShow.style.top = (leftUiContainer.offsetTop + leftUiContainer.offsetHeight + 20) + 'px';
-            }
-        }
-    };
+    // Left UI is always expanded — no collapse arrow
 
     // Initial state setup — left UI starts expanded, so show all buttons
     trashButtonElement.style.display = 'block';
@@ -4324,10 +4264,8 @@ function onWindowResize() {
         cctvFeedPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
     }
 
-    // Adjust arrow container position on resize if UI is open
-    if (leftUiContainer.style.top === '10px') {
-        arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
-        // Keep element-controls positioned below left UI
+    // Keep element-controls positioned below left UI on resize
+    {
         const ecResize = document.getElementById('element-controls');
         if (ecResize && ecResize.classList.contains('visible')) {
             ecResize.style.left = leftUiContainer.offsetLeft + 'px';
@@ -4680,13 +4618,6 @@ function enterMaskMode(mesh) {
     // Initialize draw canvas if in draw mode
     if (maskShape === 'draw') initMaskDrawCanvas();
 
-    // Recalculate arrow position since panel grew
-    if (leftUiContainer.style.top === '10px' && arrowContainer) {
-        setTimeout(() => {
-            arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
-        }, 10);
-    }
-
     updateMaskOverlay();
 }
 
@@ -4715,12 +4646,6 @@ function exitMaskMode() {
         maskOverlayMesh = null;
     }
 
-    // Recalculate arrow position
-    if (leftUiContainer.style.top === '10px' && arrowContainer) {
-        setTimeout(() => {
-            arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
-        }, 10);
-    }
 }
 
 function updateMaskOverlay() {
