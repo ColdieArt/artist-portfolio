@@ -149,12 +149,12 @@
       display: none;
       flex-direction: column;
       align-items: stretch;
-      gap: 6px;
+      gap: 7.5px; /* 25% increase */
       background: #000;
       border: 1px solid #555;
-      padding: 10px 14px;
+      padding: 12px 17px; /* 25% increase */
       font-family: monospace;
-      font-size: 9px;
+      font-size: 11px; /* 25% increase from 9px */
       font-weight: bold;
       color: #fff;
       letter-spacing: 1.5px;
@@ -170,24 +170,24 @@
     }
     #element-controls .ctrl-label {
       color: #fff;
-      font-size: 9px;
+      font-size: 11px; /* 25% increase */
       letter-spacing: 1.5px;
       text-transform: uppercase;
       white-space: nowrap;
       border-bottom: 1px solid #333;
-      padding-bottom: 6px;
+      padding-bottom: 7px;
       margin-bottom: 2px;
       text-align: right;
     }
     #element-controls .ctrl-section {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px; /* 25% increase */
       margin-bottom: 0;
     }
     #element-controls .ctrl-section-title {
       color: #888;
-      font-size: 8px;
+      font-size: 10px; /* 25% increase */
       letter-spacing: 1.5px;
       text-transform: uppercase;
       margin-bottom: 0;
@@ -198,18 +198,18 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      gap: 5px;
+      gap: 6px; /* 25% increase */
       margin-bottom: 0;
     }
     #element-controls .ctrl-row label {
       width: auto;
       color: #666;
-      font-size: 8px;
+      font-size: 10px; /* 25% increase */
       text-align: right;
     }
     #element-controls input[type="range"] {
-      width: 90px;
-      height: 3px;
+      width: 112px; /* 25% increase from 90px */
+      height: 4px; /* 25% increase */
       -webkit-appearance: none;
       appearance: none;
       background: #333;
@@ -219,16 +219,16 @@
     }
     #element-controls input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 14px;
-      height: 14px;
+      width: 17px; /* 25% increase */
+      height: 17px;
       border-radius: 0;
       background: #808080;
       cursor: pointer;
       border: none;
     }
     #element-controls input[type="range"]::-moz-range-thumb {
-      width: 14px;
-      height: 14px;
+      width: 17px; /* 25% increase */
+      height: 17px;
       border-radius: 0;
       background: #808080;
       cursor: pointer;
@@ -236,8 +236,8 @@
     }
     #element-controls .ctrl-value {
       color: #888;
-      font-size: 8px;
-      min-width: 30px;
+      font-size: 10px; /* 25% increase */
+      min-width: 38px;
       text-align: right;
     }
 
@@ -3412,15 +3412,15 @@ function init() {
     leftUiContainer.style.left = '10px';
     leftUiContainer.style.backgroundColor = 'rgba(0, 0, 0, 0)';
     leftUiContainer.style.color = 'white';
-    leftUiContainer.style.padding = '13px'; /* 30% larger padding */
+    leftUiContainer.style.padding = '17px'; /* 30% increase */
     leftUiContainer.style.borderRadius = '5px';
     leftUiContainer.style.fontFamily = 'monospace';
-    leftUiContainer.style.fontSize = '130%'; /* 30% larger text */
+    leftUiContainer.style.fontSize = '170%'; /* 30% increase */
     leftUiContainer.style.zIndex = '100';
     leftUiContainer.style.display = 'flex';
-    leftUiContainer.style.flexDirection = 'column'; /* Changed to column for vertical layout */
-    leftUiContainer.style.flexWrap = 'nowrap'; /* Not needed for single column */
-    leftUiContainer.style.gap = '6.5px'; /* 30% larger gap */
+    leftUiContainer.style.flexDirection = 'column';
+    leftUiContainer.style.flexWrap = 'nowrap';
+    leftUiContainer.style.gap = '8.5px'; /* 30% increase */
     leftUiContainer.style.transition = 'top 0.5s ease-in-out'; // Smooth transition for top property
     document.body.appendChild(leftUiContainer);
 
@@ -3797,6 +3797,15 @@ function init() {
     trashButtonElement.style.display = 'block';
     duplicateBtn.style.display = 'block';
 
+    // Show scale/rotate menu on load, positioned to the right of left UI + 20px
+    requestAnimationFrame(() => {
+        const ecPanel = document.getElementById('element-controls');
+        if (ecPanel) {
+            ecPanel.classList.add('visible');
+            ecPanel.style.left = (leftUiContainer.offsetLeft + leftUiContainer.offsetWidth + 20) + 'px';
+        }
+    });
+
     window.addEventListener('resize', onWindowResize);
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
     renderer.domElement.addEventListener('pointermove', onPointerMove);
@@ -3861,6 +3870,9 @@ function updateEarPosition(earMesh, earConfig) {
 // ── Save / Restore Composition ──
 
 const COMPOSITION_STORAGE_KEY = 'combined_composition_v1';
+
+// Clear any previously saved state so every load starts fresh
+try { localStorage.removeItem(COMPOSITION_STORAGE_KEY); } catch (e) { /* ignore */ }
 
 function saveComposition() {
     const meshStates = [];
@@ -4065,8 +4077,7 @@ function downloadComposition() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    // Also save to localStorage as auto-save
-    try { localStorage.setItem(COMPOSITION_STORAGE_KEY, json); } catch (e) { /* quota exceeded */ }
+    // Auto-save disabled — always start fresh on load
 }
 
 function loadCompositionFromFile() {
@@ -4082,10 +4093,7 @@ function loadCompositionFromFile() {
             try {
                 const data = JSON.parse(evt.target.result);
                 const ok = restoreComposition(data);
-                if (ok) {
-                    // Save to localStorage so it auto-restores next time
-                    try { localStorage.setItem(COMPOSITION_STORAGE_KEY, evt.target.result); } catch (e) { /* quota exceeded */ }
-                }
+                // Auto-save disabled — always start fresh on load
             } catch (err) {
                 console.error('Failed to load composition:', err);
             }
@@ -4252,6 +4260,11 @@ function onWindowResize() {
     // Adjust arrow container position on resize if UI is open
     if (leftUiContainer.style.top === '10px') {
         arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
+        // Keep element-controls positioned to the right of left UI
+        const ecResize = document.getElementById('element-controls');
+        if (ecResize && ecResize.classList.contains('visible')) {
+            ecResize.style.left = (leftUiContainer.offsetLeft + leftUiContainer.offsetWidth + 20) + 'px';
+        }
     }
 
     // --- Dynamic Repositioning of Ear and Marquee Text ---
@@ -5786,8 +5799,8 @@ async function connectAndCheckAssets() {
 init();
 animate();
 
-// Auto-restore saved composition after scene is ready
-setTimeout(() => { autoRestoreComposition(); }, 1500);
+// Auto-restore disabled — always start fresh
+// setTimeout(() => { autoRestoreComposition(); }, 1500);
 
 // Expose for dae hooks
 setTimeout(function () {
