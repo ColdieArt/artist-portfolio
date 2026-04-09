@@ -67,15 +67,15 @@ module.exports = async (req, res) => {
     let imageUrl = '';
     const imagePart = parts.find(p => p.name === 'image' && p.filename);
     if (imagePart && imagePart.data.length > 0) {
-      if (imagePart.data.length > 15 * 1024 * 1024) {
-        return res.status(400).json({ error: 'Image too large (max 15MB)' });
+      if (imagePart.data.length > 30 * 1024 * 1024) {
+        return res.status(400).json({ error: 'Image too large (max 30MB)' });
       }
-      const imgKey = `print-orders/${id}.png`;
+      const imgKey = `print-orders/${id}.jpg`;
       await s3.send(new PutObjectCommand({
         Bucket: R2_BUCKET,
         Key: imgKey,
         Body: imagePart.data,
-        ContentType: 'image/png',
+        ContentType: 'image/jpeg',
         Metadata: { email, date: today },
       }));
       const host = req.headers['x-forwarded-host'] || req.headers.host || 'knowyouroverlord.art';
@@ -105,7 +105,7 @@ module.exports = async (req, res) => {
       'Date': today,
     };
     if (imageUrl) fields['Image URL'] = imageUrl;
-    if (compositionJson) fields['Composition JSON'] = compositionJson;
+    if (jsonUrl) fields['Composition JSON'] = jsonUrl;
 
     const airtableRes = await fetch(
       `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}`,
