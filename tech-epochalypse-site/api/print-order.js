@@ -105,7 +105,6 @@ module.exports = async (req, res) => {
       'Date': today,
     };
     if (imageUrl) fields['Image URL'] = imageUrl;
-    if (jsonUrl) fields['Composition JSON URL'] = jsonUrl;
     if (compositionJson) fields['Composition JSON'] = compositionJson;
 
     const airtableRes = await fetch(
