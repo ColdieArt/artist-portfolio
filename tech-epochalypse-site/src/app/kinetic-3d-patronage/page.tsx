@@ -40,8 +40,6 @@ export default function Kinetic3DPatronagePage() {
           {/* Left: Benefits */}
           <div className="flex-1">
 
-        <div className="line-accent mb-16" />
-
             <div className="line-accent mb-16" />
 
             {/* Network Effect */}
@@ -367,80 +365,6 @@ export default function Kinetic3DPatronagePage() {
             </ScrollReveal>
           </div>
         </div>
-
-          </div>{/* End left column */}
-
-          {/* Right: Collection Sidebar */}
-          <div className="lg:w-96 shrink-0">
-            <div className="lg:sticky lg:top-36">
-              <div className="bg-charcoal/30 border border-white/5 p-6">
-                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-6 border-b border-white/10 pb-3">
-                  Collection Overview
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">Overlords</span>
-                    <span className="font-display text-lg text-white">5</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">Editions / Overlord</span>
-                    <span className="font-display text-lg text-white">10</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Full Sets */}
-              <div className="bg-charcoal/30 border border-white/5 p-6 mt-4">
-                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-4 border-b border-white/10 pb-3">
-                  Full Sets
-                </h3>
-                <div className="flex justify-between items-baseline mb-1">
-                  <span className="font-mono text-sm text-white">5 Total</span>
-                  <span className="font-mono text-sm text-white">2 Available</span>
-                </div>
-                <p className="font-mono text-[10px] text-white/40 mb-3">
-                  Set of 5 Overlords
-                </p>
-                <p className="font-mono text-[10px] text-white/40 mb-5">
-                  Full sets include matching series numbers and offer buyer&apos;s consideration discount for the bulk purchase.
-                </p>
-              </div>
-
-              {/* Individual Tokens */}
-              <div className="bg-charcoal/30 border border-white/5 p-6 mt-4">
-                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-4 border-b border-white/10 pb-3">
-                  Individual Tokens
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-mono text-sm text-white">Elon Musk</span>
-                    <span className="font-mono text-[11px] text-white/60">5 ed. - <span className="text-white">1 avail</span></span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-mono text-sm text-white">Mark Zuckerberg</span>
-                    <span className="font-mono text-[11px] text-white/60">5 ed. - <span className="text-white">3 avail</span></span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-mono text-sm text-white">Sam Altman</span>
-                    <span className="font-mono text-[11px] text-white/60">5 ed. - <span className="text-white">4 avail</span></span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-mono text-sm text-white">Jensen Huang</span>
-                    <span className="font-mono text-[11px] text-white/60">5 ed. - <span className="text-white">4 avail</span></span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Collectors */}
-              <Link
-                href="/collectors"
-                className="block w-full text-center font-mono text-xs uppercase tracking-[0.15em] text-black bg-white px-4 py-3 mt-4 hover:bg-white/90 transition-colors"
-              >
-                View Collectors
-              </Link>
-            </div>
-          </div>
-        </div>{/* End two-column layout */}
 
         {/* Back to Series CTA */}
         <ScrollReveal>
