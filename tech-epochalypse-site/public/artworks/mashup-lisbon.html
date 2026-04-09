@@ -739,21 +739,39 @@ const CONTRACT_GATED_ASSETS = [
 let connectedWalletAddress = null;
 let contractGatedMeshes = []; // Track meshes added by contract-gated assets
 
-// Track which overlord index each element is currently showing
+// Pick a random valid index for an element (skip empty-string URLs)
+function pickRandomOverlordIndex(elementId) {
+    const urls = OVERLORD_ASSETS[elementId];
+    if (!urls) return 0;
+    const valid = [];
+    for (let i = 0; i < urls.length; i++) { if (urls[i]) valid.push(i); }
+    return valid.length ? valid[Math.floor(Math.random() * valid.length)] : 0;
+}
+
+// Track which overlord index each element is currently showing — randomized once at load
 const elementOverlordIndex = {
-    rightEye: 0,   // Musk default
-    leftEye: 0,    // Musk default
-    nose: 3,       // Bezos default
-    mouth: 4,      // Huang default
-    forehead: 1,   // Zuckerberg default
-    hair: 2,       // Altman default
-    ear: 2,            // Altman default
-    background: 0,     // Musk default
-    mouthOverlay: 4,   // Tracks mouth; default is Huang (no overlay)
-    spacex: 0,         // SpaceX (branded index 0)
-    blueBill: 4,       // Blue Bill/OpenAI (branded index 4)
-    rocket: 3          // Blue Origin (branded index 3)
+    rightEye:     pickRandomOverlordIndex('rightEye'),
+    leftEye:      pickRandomOverlordIndex('leftEye'),
+    nose:         pickRandomOverlordIndex('nose'),
+    mouth:        pickRandomOverlordIndex('mouth'),
+    forehead:     pickRandomOverlordIndex('forehead'),
+    hair:         pickRandomOverlordIndex('hair'),
+    ear:          pickRandomOverlordIndex('ear'),
+    background:   0,     // Always Musk background (only one available)
+    mouthOverlay: 0,     // Will be synced with mouth below
+    spacex:       pickRandomOverlordIndex('spacex'),
+    blueBill:     pickRandomOverlordIndex('blueBill'),
+    rocket:       pickRandomOverlordIndex('rocket')
 };
+// Sync mouthOverlay with mouth choice
+elementOverlordIndex.mouthOverlay = elementOverlordIndex.mouth;
+
+// Helper: get the initial URL for any face element based on its randomized index
+function getInitialURL(elementId) {
+    const urls = OVERLORD_ASSETS[elementId];
+    if (!urls) return '';
+    return urls[elementOverlordIndex[elementId]] || urls[0] || '';
+}
 
 // Cyclable element IDs (matches userData.id on meshes)
 const CYCLABLE_ELEMENTS = ['rightEye', 'leftEye', 'nose', 'mouth', 'forehead', 'hair', 'ear', 'background', 'spacex', 'blueBill', 'rocket'];
@@ -2285,7 +2303,7 @@ function init() {
         scaleFactor: 1.0,
         removed: false // Add removed flag
     });
-    loadTexture(URL_FOREHEAD, (texture) => {
+    loadTexture(getInitialURL('forehead'), (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const scaleFactor = 1.0;
         const planeWidth = texture.image.width * baseScale * scaleFactor;
@@ -2314,7 +2332,7 @@ function init() {
         scaleFactor: 1.0,
         removed: false // Add removed flag
     });
-    loadTexture(URL_RIGHT_EYE, (texture) => {
+    loadTexture(getInitialURL('rightEye'), (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const planeWidth = texture.image.width * baseScale;
         const planeHeight = texture.image.height * baseScale;
@@ -2358,7 +2376,7 @@ function init() {
         scaleFactor: 1.0,
         removed: false // Add removed flag
     });
-    loadTexture(URL_MOUTH, (texture) => {
+    loadTexture(getInitialURL('mouth'), (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const planeWidth = texture.image.width * baseScale;
         const planeHeight = texture.image.height * baseScale;
@@ -2392,7 +2410,7 @@ function init() {
         scaleFactor: 1.0,
         removed: false // Add removed flag
     });
-    loadTexture(URL_EAR, (texture) => {
+    loadTexture(getInitialURL('ear'), (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const planeWidth = texture.image.width * baseScale;
         const planeHeight = texture.image.height * baseScale;
@@ -2430,7 +2448,7 @@ function init() {
         scaleFactor: 1.0,
         removed: false // Add removed flag
     });
-    loadTexture(URL_LEFT_EYE, (texture) => {
+    loadTexture(getInitialURL('leftEye'), (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const planeWidth = texture.image.width * baseScale;
         const planeHeight = texture.image.height * baseScale;
@@ -2476,7 +2494,7 @@ function init() {
         scaleFactor: 1.0, // This will be calculated from texture.image.width / height later
         removed: false // Add removed flag
     });
-    loadTexture(URL_SPACEX_ORIGINAL, (spacexTex) => {
+    loadTexture(getInitialURL('spacex'), (spacexTex) => {
         spacexOriginalTexture = spacexTex;
 
         loadTexture(URL_X_LOGO_SWAP, (xTex) => {
@@ -2516,7 +2534,7 @@ function init() {
         scaleFactor: 1.0,
         removed: false // Add removed flag
     });
-    loadTexture(URL_NOSE, (texture) => {
+    loadTexture(getInitialURL('nose'), (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const scaleFactor = 1.0;
         const planeWidth = texture.image.width * baseScale * scaleFactor;
@@ -2545,7 +2563,7 @@ function init() {
         scaleFactor: 1.0,
         removed: false // Add removed flag
     });
-    loadTexture(URL_HAIR, (texture) => {
+    loadTexture(getInitialURL('hair'), (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const scaleFactor = 1.0;
         const planeWidth = texture.image.width * baseScale * scaleFactor;
@@ -2574,7 +2592,7 @@ function init() {
         scaleFactor: 1,
         removed: false // Add removed flag
     });
-    loadTexture(URL_BLUE_BILL, (texture) => {
+    loadTexture(getInitialURL('blueBill'), (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const planeWidth = texture.image.width * baseScale;
         const planeHeight = texture.image.height * baseScale;
@@ -2606,7 +2624,7 @@ function init() {
         removed: false // Add removed flag
     });
     let rocketRef = null; // Local reference to the rocket mesh
-    loadTexture(URL_ROCKET, (texture) => {
+    loadTexture(getInitialURL('rocket'), (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const rocketScaleFactor = 1.0;
         const planeWidth = texture.image.width * baseScale * rocketScaleFactor;
@@ -4416,9 +4434,10 @@ function preloadEyeTextures() {
         });
     }
 
-    // After all textures are preloaded, randomize face elements
+    // All textures preloaded — initial random assignment was already applied at load,
+    // so no reshuffle is needed here.
     Promise.all(preloadPromises).then(() => {
-        randomizeFaceElements();
+        console.log('All element textures preloaded (no reshuffle).');
     });
 }
 
