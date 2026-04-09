@@ -2152,9 +2152,9 @@ function init() {
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 10; // Zoomed out to see the full canvas
-    // Shift artwork down 100px: move camera & target up by equivalent world units
+    // Shift artwork down 50px: move camera & target up by equivalent world units
     const worldHeight = 2 * 10 * Math.tan(THREE.MathUtils.degToRad(75 / 2));
-    const yOffset = (100 / window.innerHeight) * worldHeight;
+    const yOffset = (50 / window.innerHeight) * worldHeight;
     camera.position.y = yOffset;
     camera.userData.yRotationAngle = 0; // Initialize angle for Y-axis camera rotation
 
