@@ -88,6 +88,10 @@ export default function BioCoder() {
     let glitchDuration = 0
     let nextGlitchTime = 2000 + Math.random() * 4000
 
+    // Throttle to 20fps to reduce CPU load
+    let lastFrameTime = 0
+    const FRAME_INTERVAL = 1000 / 20
+
     const allPhrases = [...DATA_COLLECTION_PHRASES, ...SECURITY_PHRASES]
 
     const initRedactionMap = () => {
@@ -139,6 +143,12 @@ export default function BioCoder() {
     }
 
     const draw = (time: number) => {
+      animationId = requestAnimationFrame(draw)
+
+      // Throttle to 20fps
+      if (time - lastFrameTime < FRAME_INTERVAL) return
+      lastFrameTime = time
+
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       // ── Glitch state management ──
@@ -399,8 +409,6 @@ export default function BioCoder() {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.075)'
         ctx.fillRect(0, scanY, canvas.width, 3)
       }
-
-      animationId = requestAnimationFrame(draw)
     }
 
     resize()

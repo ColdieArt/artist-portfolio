@@ -35,13 +35,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.transientlabs.xyz" />
-        <link
-          rel="stylesheet"
-          crossOrigin="anonymous"
-          href="https://cdn.transientlabs.xyz/embeds/v1.7.0/index.css"
-        />
+        <link rel="preconnect" href="https://cdn.transientlabs.xyz" crossOrigin="anonymous" />
       </head>
       <body className="bg-black text-bone">
+        <Script id="tl-css" strategy="afterInteractive">
+          {`var l=document.createElement('link');l.rel='stylesheet';l.crossOrigin='anonymous';l.href='https://cdn.transientlabs.xyz/embeds/v1.7.0/index.css';document.head.appendChild(l);`}
+        </Script>
         <Script id="tl-config" strategy="afterInteractive">
           {`window.tlConfig = {
             mode: "dark",
