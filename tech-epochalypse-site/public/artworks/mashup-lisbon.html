@@ -144,7 +144,7 @@
     #element-controls {
       position: fixed;
       top: 10px;
-      left: 10px; /* Will be repositioned dynamically by JS to avoid left UI overlap */
+      left: 10px; /* Will be repositioned dynamically by JS below left UI */
       z-index: 200;
       display: none;
       flex-direction: column;
@@ -3836,19 +3836,20 @@ function init() {
             if (panel) panel.classList.remove('open'); // Close export panel
             arrowContainer.style.top = '0px'; // Keep arrow at the top
             arrowSpan.innerHTML = '&#x25BC;'; // Change to down arrow
-            // Reposition element-controls to far left when UI is hidden
+            // Reposition element-controls to top-left when UI is hidden
             const ecHide = document.getElementById('element-controls');
-            if (ecHide) ecHide.style.left = '10px';
+            if (ecHide) { ecHide.style.left = '10px'; ecHide.style.top = '10px'; }
         } else {
             leftUiContainer.style.top = '10px'; // Show it
             trashButtonElement.style.display = 'block'; // Show TRASH button
             duplicateBtn.style.display = 'block'; // Show DUPLICATE button
             arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; // Move arrow below the UI
             arrowSpan.innerHTML = '&#x25B2'; // Change to up arrow
-            // Reposition element-controls to the right of left UI with 20px padding
+            // Reposition element-controls below left UI with 20px padding
             const ecShow = document.getElementById('element-controls');
             if (ecShow && ecShow.classList.contains('visible')) {
-                ecShow.style.left = (leftUiContainer.offsetLeft + leftUiContainer.offsetWidth + 20) + 'px';
+                ecShow.style.left = leftUiContainer.offsetLeft + 'px';
+                ecShow.style.top = (leftUiContainer.offsetTop + leftUiContainer.offsetHeight + 20) + 'px';
             }
         }
     };
@@ -3857,12 +3858,13 @@ function init() {
     trashButtonElement.style.display = 'block';
     duplicateBtn.style.display = 'block';
 
-    // Show scale/rotate menu on load, positioned to the right of left UI + 20px
+    // Show scale/rotate menu on load, positioned below left UI + 20px padding
     requestAnimationFrame(() => {
         const ecPanel = document.getElementById('element-controls');
         if (ecPanel) {
             ecPanel.classList.add('visible');
-            ecPanel.style.left = (leftUiContainer.offsetLeft + leftUiContainer.offsetWidth + 20) + 'px';
+            ecPanel.style.left = leftUiContainer.offsetLeft + 'px';
+            ecPanel.style.top = (leftUiContainer.offsetTop + leftUiContainer.offsetHeight + 20) + 'px';
         }
     });
 
@@ -4320,10 +4322,11 @@ function onWindowResize() {
     // Adjust arrow container position on resize if UI is open
     if (leftUiContainer.style.top === '10px') {
         arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
-        // Keep element-controls positioned to the right of left UI
+        // Keep element-controls positioned below left UI
         const ecResize = document.getElementById('element-controls');
         if (ecResize && ecResize.classList.contains('visible')) {
-            ecResize.style.left = (leftUiContainer.offsetLeft + leftUiContainer.offsetWidth + 20) + 'px';
+            ecResize.style.left = leftUiContainer.offsetLeft + 'px';
+            ecResize.style.top = (leftUiContainer.offsetTop + leftUiContainer.offsetHeight + 20) + 'px';
         }
     }
 
@@ -4886,12 +4889,14 @@ function selectElementForControls(mesh) {
     if (!panel) return;
     panel.classList.add('visible');
 
-    // Position element-controls to the right of the left UI with 20px padding
+    // Position element-controls below the left UI with 20px padding
     const leftUI = document.getElementById('left-ui-container');
     if (leftUI && leftUI.style.top === '10px') {
-        panel.style.left = (leftUI.offsetLeft + leftUI.offsetWidth + 20) + 'px';
+        panel.style.left = leftUI.offsetLeft + 'px';
+        panel.style.top = (leftUI.offsetTop + leftUI.offsetHeight + 20) + 'px';
     } else {
         panel.style.left = '10px';
+        panel.style.top = '10px';
     }
 
     // Update element name
