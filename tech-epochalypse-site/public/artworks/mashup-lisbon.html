@@ -5938,17 +5938,19 @@ setTimeout(function () {
   <!-- ─── EXPORT ENGINE ─── -->
   <script>
   (function(){
-    function setupExport() {
     // ── Detect if embedded in iframe ──
     const isEmbedded = (window.self !== window.top);
-    
-    // ── DOM refs ──
-    const toggle    = document.getElementById('export-toggle');
-    if (!toggle) { setTimeout(setupExport, 50); return; } // wait for init() to create it
-    
-    // If embedded, hide all UI overlays then exit
+
+    // ── PRINT BUTTON + MODAL (wired immediately, no dependency on export toggle) ──
+    const printBtn = document.getElementById('print-btn');
+    const printOverlay = document.getElementById('print-modal-overlay');
+    const printEmailInput = document.getElementById('print-email-input');
+    const printSubmitBtn = document.getElementById('print-submit-btn');
+    const printStatus = document.getElementById('print-status');
+
     if (isEmbedded) {
-      toggle.style.display = 'none';
+      // Hide everything when embedded in an iframe
+      if (printBtn) printBtn.style.display = 'none';
       const exportWrapper = document.getElementById('export-wrapper');
       if (exportWrapper) exportWrapper.style.display = 'none';
       const eyeIndicator = document.getElementById('eye-indicator');
@@ -5959,12 +5961,112 @@ setTimeout(function () {
       if (swapModeBtnLeft) swapModeBtnLeft.style.display = 'none';
       const elementControls = document.getElementById('element-controls');
       if (elementControls) elementControls.style.display = 'none';
-      const printBtn = document.getElementById('print-btn');
-      if (printBtn) printBtn.style.display = 'none';
-      return;
     }
-    
-    const panel     = document.getElementById('export-panel');
+
+    if (printBtn && printOverlay && !isEmbedded) {
+      printBtn.onclick = (e) => {
+        e.stopPropagation();
+        printOverlay.classList.add('open');
+        printEmailInput.value = '';
+        printStatus.textContent = '';
+        printSubmitBtn.disabled = false;
+      };
+
+      // Close on overlay background click
+      printOverlay.onclick = (e) => {
+        if (e.target === printOverlay) printOverlay.classList.remove('open');
+      };
+
+      // ── PRINT SUBMIT — capture canvas + composition JSON, send to Airtable ──
+      printSubmitBtn.onclick = async () => {
+        const email = printEmailInput.value.trim();
+        if (!email || !email.includes('@')) {
+          printStatus.style.color = '#e66';
+          printStatus.textContent = 'Please enter a valid email address';
+          return;
+        }
+
+        printSubmitBtn.disabled = true;
+        printStatus.style.color = '#aaa';
+        printStatus.textContent = 'CAPTURING...';
+
+        try {
+          // Wait for renderer to be available
+          const r = await waitForRenderer();
+          if (window.composer) { window.composer.render(); }
+          else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
+          const dataUrl = r.domElement.toDataURL('image/png');
+          const imageBlob = await (await fetch(dataUrl)).blob();
+
+          // Build composition JSON
+          const meshStates = [];
+          if (window.scene) {
+            window.scene.children.forEach(child => {
+              if (child.userData && child.userData.id) {
+                meshStates.push({
+                  id: child.userData.id,
+                  position: { x: child.position.x, y: child.position.y, z: child.position.z },
+                  rotation: { x: child.rotation.x, y: child.rotation.y, z: child.rotation.z },
+                  scale: { x: child.scale.x, y: child.scale.y, z: child.scale.z },
+                  visible: child.visible,
+                  userScale: child.userData.userScale || 1.0,
+                });
+              }
+            });
+          }
+          const compositionJson = JSON.stringify({ meshes: meshStates, timestamp: new Date().toISOString() });
+
+          printStatus.textContent = 'UPLOADING...';
+
+          const form = new FormData();
+          form.append('email', email);
+          form.append('image', imageBlob, 'print-capture.png');
+          form.append('compositionJson', compositionJson);
+
+          const API_URL = window.location.origin;
+          const res = await fetch(API_URL + '/api/print-order', { method: 'POST', body: form });
+
+          if (!res.ok) {
+            const errBody = await res.json().catch(() => ({}));
+            throw new Error(errBody.error || 'Submission failed');
+          }
+          const data = await res.json();
+
+          if (data.ok) {
+            printStatus.style.color = '#4c4';
+            printStatus.textContent = 'SUBMITTED — CHECK YOUR EMAIL';
+            setTimeout(() => {
+              printOverlay.classList.remove('open');
+              printStatus.textContent = '';
+              printSubmitBtn.disabled = false;
+            }, 3000);
+          } else {
+            throw new Error(data.error || 'Unknown error');
+          }
+        } catch (e) {
+          printStatus.style.color = '#e66';
+          printStatus.textContent = e.message || 'NETWORK ERROR — TRY AGAIN';
+          printSubmitBtn.disabled = false;
+        }
+      };
+    } // end print button setup
+
+    // Helper: wait for window.renderer
+    function waitForRenderer() {
+      return new Promise((resolve) => {
+        const check = () => {
+          if (window.renderer && window.renderer.domElement) resolve(window.renderer);
+          else setTimeout(check, 100);
+        };
+        check();
+      });
+    }
+
+    // ── EXPORT PANEL SETUP (waits for export-panel to exist) ──
+    function setupExport() {
+    const panel = document.getElementById('export-panel');
+    if (!panel) { setTimeout(setupExport, 50); return; }
+
     const fmtSel    = document.getElementById('export-format');
     const durInput  = document.getElementById('export-duration');
     const startBtn  = document.getElementById('export-start-btn');
@@ -5972,101 +6074,7 @@ setTimeout(function () {
     const durRow    = document.getElementById('duration-row');
     const exportWrapper = document.getElementById('export-wrapper');
 
-    // ── PRINT BUTTON + MODAL ──
-    const printBtn = document.getElementById('print-btn');
-    const printOverlay = document.getElementById('print-modal-overlay');
-    const printEmailInput = document.getElementById('print-email-input');
-    const printSubmitBtn = document.getElementById('print-submit-btn');
-    const printStatus = document.getElementById('print-status');
-
-    printBtn.onclick = (e) => {
-      e.stopPropagation();
-      printOverlay.classList.add('open');
-      printEmailInput.value = '';
-      printStatus.textContent = '';
-      printSubmitBtn.disabled = false;
-    };
-
-    // Close on overlay background click
-    printOverlay.onclick = (e) => {
-      if (e.target === printOverlay) printOverlay.classList.remove('open');
-    };
-
-    // ── PRINT SUBMIT — capture canvas + composition JSON, send to Airtable ──
-    printSubmitBtn.onclick = async () => {
-      const email = printEmailInput.value.trim();
-      if (!email || !email.includes('@')) {
-        printStatus.style.color = '#e66';
-        printStatus.textContent = 'Please enter a valid email address';
-        return;
-      }
-
-      printSubmitBtn.disabled = true;
-      printStatus.style.color = '#aaa';
-      printStatus.textContent = 'CAPTURING...';
-
-      try {
-        // 1. Capture high-res PNG of current canvas
-        const r = await getRenderer();
-        if (window.composer) { window.composer.render(); }
-        else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
-        const dataUrl = r.domElement.toDataURL('image/png');
-        const imageBlob = await (await fetch(dataUrl)).blob();
-
-        // 2. Build composition JSON
-        const meshStates = [];
-        if (window.scene) {
-          window.scene.children.forEach(child => {
-            if (child.userData && child.userData.id) {
-              meshStates.push({
-                id: child.userData.id,
-                position: { x: child.position.x, y: child.position.y, z: child.position.z },
-                rotation: { x: child.rotation.x, y: child.rotation.y, z: child.rotation.z },
-                scale: { x: child.scale.x, y: child.scale.y, z: child.scale.z },
-                visible: child.visible,
-                userScale: child.userData.userScale || 1.0,
-              });
-            }
-          });
-        }
-        const compositionJson = JSON.stringify({ meshes: meshStates, timestamp: new Date().toISOString() });
-
-        printStatus.textContent = 'UPLOADING...';
-
-        // 3. Send to print-order API
-        const form = new FormData();
-        form.append('email', email);
-        form.append('image', imageBlob, 'print-capture.png');
-        form.append('compositionJson', compositionJson);
-
-        const API_URL = window.location.origin;
-        const res = await fetch(API_URL + '/api/print-order', { method: 'POST', body: form });
-
-        if (!res.ok) {
-          const errBody = await res.json().catch(() => ({}));
-          throw new Error(errBody.error || 'Submission failed');
-        }
-        const data = await res.json();
-
-        if (data.ok) {
-          printStatus.style.color = '#4c4';
-          printStatus.textContent = 'SUBMITTED — CHECK YOUR EMAIL';
-          setTimeout(() => {
-            printOverlay.classList.remove('open');
-            printStatus.textContent = '';
-            printSubmitBtn.disabled = false;
-          }, 3000);
-        } else {
-          throw new Error(data.error || 'Unknown error');
-        }
-      } catch (e) {
-        printStatus.style.color = '#e66';
-        printStatus.textContent = e.message || 'NETWORK ERROR — TRY AGAIN';
-        printSubmitBtn.disabled = false;
-      }
-    };
-
-    // ── Close export panel on outside click ──
+    // Close export panel on outside click
     document.addEventListener('click', (e) => {
       if (startBtn.classList.contains('recording')) return;
       if (!exportWrapper.contains(e.target)) panel.classList.remove('open');
