@@ -607,7 +607,7 @@ let redactedGlitchPhraseData = []; // Array of objects {text: string, redactedWo
 // ── HYBRID FACE COMPOSITION ──
 // Forehead from Zuckerberg, Hair from Altman, Nose from Bezos, Mouth from Huang, Ear from Altman
 // Eyes default to Musk (cyclable via right-click through all 5 overlords)
-const URL_BACKGROUND = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/K-Dallas-Region-BG.jpg';
+const URL_BACKGROUND = './assets/lisbon/Euro50-BG.jpg';
 const URL_FOREHEAD = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Forehead.gif';
 const URL_MOUTH = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-mouth.gif';
 const URL_LEFT_EYE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0009_Eye-L.png';
@@ -690,7 +690,7 @@ const OVERLORD_ASSETS = {
         ''
     ],
     background: [
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/K-Dallas-Region-BG.jpg',
+        './assets/lisbon/Euro50-BG.jpg',
         '',
         '',
         '',
@@ -705,17 +705,24 @@ const OVERLORD_ASSETS = {
     ]
 };
 
-// Branded element cycle options (SpaceX, Tesla, Drone, Blue Origin, Blue Bill)
+// Branded element cycle options (SpaceX, Tesla, Drone, Blue Origin, OpenAI, NVIDIA, Rocket, Blue Bill, Grok, Fiat Worthless, X Logo)
 const BRANDED_OPTIONS = [
     'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0000_SpaceX.png',
     'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/tesla.png',
     'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/drone-color.gif',
     'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/blue-origin.gif',
     'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_OpenAI.gif',
-    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-meta-headset-2.gif',
-    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/card-01.gif'
+    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/card-01.gif',
+    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0016_rocket.png',
+    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0018_K-bluebill.png',
+    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/grok.gif',
+    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0005_Fiat-is-worthless-so-yes.png',
+    'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/X_Logo.png'
 ];
-const BRANDED_LABELS = ['SPACEX', 'TESLA', 'DRONE', 'BLUE ORIGIN', 'BLUE BILL', 'META HEADSET', 'NVIDIA CARD'];
+const BRANDED_LABELS = ['SPACEX', 'TESLA', 'DRONE', 'BLUE ORIGIN', 'OPENAI', 'NVIDIA CARD', 'ROCKET', 'BLUE BILL', 'GROK', 'FIAT WORTHLESS', 'X LOGO'];
+
+// Standalone headset asset URL
+const URL_HEADSET = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-meta-headset-2.gif';
 // Add branded elements to OVERLORD_ASSETS so cycleElement can handle them
 OVERLORD_ASSETS['spacex'] = BRANDED_OPTIONS;
 OVERLORD_ASSETS['blueBill'] = BRANDED_OPTIONS;
@@ -2651,6 +2658,38 @@ function init() {
         
         // After rocket is loaded, load dogecoin/tesla and calculate its position relative to the rocket/background
         loadDogecoinAndFiat();
+    });
+
+    // ── HEADSET — standalone asset, loads at 1:1 full size every time ──
+    const headsetLayer = 2;
+    const headsetZ = (headsetLayer - 1) * depthStep;
+    const headsetInitialX = 2.5;
+    const headsetInitialY = 1.5;
+    initialAssetConfigs.push({
+        id: 'headset',
+        type: 'image',
+        url: URL_HEADSET,
+        initialPosition: new THREE.Vector3(headsetInitialX, headsetInitialY, headsetZ),
+        initialLayer: headsetLayer,
+        baseScale: baseScale,
+        scaleFactor: 1.0,
+        removed: false
+    });
+    loadTexture(URL_HEADSET, (texture) => {
+        const planeWidth = texture.image.width * baseScale;
+        const planeHeight = texture.image.height * baseScale;
+        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+        const headset = new THREE.Mesh(geometry, material);
+        headset.position.set(headsetInitialX, headsetInitialY, headsetZ);
+        headset.userData.currentLayer = headsetLayer;
+        headset.userData.initialPosition = headset.position.clone();
+        headset.userData.initialLayer = headsetLayer;
+        headset.userData.id = 'headset';
+        headset.userData.initialScale = { width: planeWidth, height: planeHeight };
+        scene.add(headset);
+        draggableObjects.push(headset);
+        cameraAnimationTargets.push(headset);
     });
 
     // Function to load signature after rocket is ready
