@@ -2606,11 +2606,16 @@ function init() {
     });
     loadTexture(getInitialURL('blueBill'), (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const planeWidth = texture.image.width * baseScale;
-        const planeHeight = texture.image.height * baseScale;
+        const planeWidth = texture.image.width * baseScale * 2;  // 100% size increase
+        const planeHeight = texture.image.height * baseScale * 2; // 100% size increase
         const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
         const blueBill = new THREE.Mesh(geometry, material);
-        blueBill.position.set(2, -2, (3 - 1) * depthStep);
+        // Move right 75px (convert px to world units at this z depth)
+        const bbZ = (3 - 1) * depthStep;
+        const bbDist = camera.position.z - bbZ;
+        const bbWorldH = 2 * bbDist * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+        const bbPxToUnit = (bbWorldH * camera.aspect) / window.innerWidth;
+        blueBill.position.set(2 + 75 * bbPxToUnit, -2, bbZ);
         blueBill.userData.currentLayer = 10;
         blueBill.userData.initialPosition = blueBill.position.clone();
         blueBill.userData.initialLayer = 10;
@@ -4423,6 +4428,10 @@ function preloadEyeTextures() {
     // so no reshuffle is needed here.
     Promise.all(preloadPromises).then(() => {
         console.log('All element textures preloaded (no reshuffle).');
+        // If mouth was randomly assigned to Altman (index 2), create the overlay now
+        if (elementOverlordIndex.mouth === 2) {
+            cycleMouthOverlay(2);
+        }
     });
 }
 
