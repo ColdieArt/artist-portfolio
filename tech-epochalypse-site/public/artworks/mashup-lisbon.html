@@ -6016,7 +6016,7 @@ setTimeout(function () {
             r.render(window.scene, window.camera);
           }
 
-          const dataUrl = r.domElement.toDataURL('image/jpeg', 0.95);
+          const dataUrl = r.domElement.toDataURL('image/jpeg', 0.80);
           const imageBlob = await (await fetch(dataUrl)).blob();
 
           // Restore original size
