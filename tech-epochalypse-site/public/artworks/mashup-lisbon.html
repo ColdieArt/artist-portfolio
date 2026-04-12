@@ -2418,6 +2418,8 @@ function init() {
         removed: false // Add removed flag
     });
     loadTexture(getInitialURL('forehead'), (texture) => {
+        // Huang forehead (index 4) → greyscale
+        if (elementOverlordIndex.forehead === 4) desaturateTexture(texture);
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const scaleFactor = 1.0;
         const planeWidth = texture.image.width * baseScale * scaleFactor;
@@ -4493,6 +4495,27 @@ function onWindowResize() {
 // Right-click any face element to cycle through all 5 overlords' versions
 // ══════════════════════════════════════════════════════════════
 
+// Desaturate a Three.js texture to greyscale (modifies in place, returns same texture)
+function desaturateTexture(texture) {
+    if (!texture || !texture.image) return texture;
+    const img = texture.image;
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+        const grey = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        d[i] = d[i + 1] = d[i + 2] = grey;
+    }
+    ctx.putImageData(imageData, 0, 0);
+    texture.image = canvas;
+    texture.needsUpdate = true;
+    return texture;
+}
+
 function preloadEyeTextures() {
     // Actually preloads ALL element textures (name kept for backward compat with init calls)
     const textureLoader = new THREE.TextureLoader();
@@ -4521,6 +4544,8 @@ function preloadEyeTextures() {
         preloadedElementTextures[elementId] = new Array(urls.length).fill(null);
         urls.forEach((url, index) => {
             const p = loadTex(url).then((tex) => {
+                // Huang forehead (index 4) → greyscale
+                if (elementId === 'forehead' && index === 4 && tex) desaturateTexture(tex);
                 preloadedElementTextures[elementId][index] = tex;
             });
             preloadPromises.push(p);
