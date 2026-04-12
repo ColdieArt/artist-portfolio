@@ -196,6 +196,108 @@
       transition: background 0.2s;
     }
     #post-modal-btn:hover { background: #1a8cd8; }
+
+    /* ─── PRINT BUTTON (bottom-left) ─── */
+    #print-btn {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      z-index: 250;
+      background: #000;
+      color: #fff;
+      border: 1px solid #fff;
+      padding: 10px 22px;
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    #print-btn:hover {
+      background: #1a1a1a;
+      border-color: #aaa;
+    }
+
+    /* ─── PRINT ORDER MODAL ─── */
+    #print-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: none;
+      z-index: 400;
+      align-items: center;
+      justify-content: center;
+    }
+    #print-modal-overlay.open {
+      display: flex;
+    }
+    #print-modal-content {
+      background: rgba(0,0,0,0.95);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 4px;
+      padding: 28px 32px;
+      text-align: center;
+      font-family: monospace;
+      color: #fff;
+      max-width: 380px;
+      width: 90%;
+    }
+    #print-modal-content h2 {
+      margin: 0 0 16px 0;
+      font-size: 16px;
+      letter-spacing: 2px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    #print-modal-content p {
+      margin: 0 0 20px 0;
+      font-size: 10px;
+      color: #aaa;
+      line-height: 1.6;
+    }
+    #print-email-input {
+      width: 100%;
+      box-sizing: border-box;
+      background: #111;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 12px 14px;
+      font-family: monospace;
+      font-size: 11px;
+      outline: none;
+      margin-bottom: 18px;
+    }
+    #print-email-input:focus {
+      border-color: #666;
+    }
+    #print-submit-btn {
+      background: #fff;
+      color: #000;
+      border: none;
+      padding: 12px 30px;
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: background 0.2s;
+      width: 100%;
+    }
+    #print-submit-btn:hover { background: #ddd; }
+    #print-submit-btn:disabled {
+      background: #333;
+      color: #666;
+      cursor: not-allowed;
+    }
+    #print-status {
+      margin: 12px 0 0 0;
+      font-family: monospace;
+      font-size: 11px;
+      text-align: center;
+      min-height: 16px;
+    }
   </style>
   <title>ELON-MUSK-LISBON-VARIANT | Made on juno.transient.xyz</title>
 </head>
@@ -4308,13 +4410,157 @@ setTimeout(function () {
     </div>
   </div>
 
+  <!-- ─── PRINT BUTTON (bottom-left) ─── -->
+  <button id="print-btn">PRINT</button>
+
+  <!-- ─── PRINT ORDER MODAL ─── -->
+  <div id="print-modal-overlay">
+    <div id="print-modal-content">
+      <h2>Print Your 3D Kinetic Collage</h2>
+      <p>Collect your customized kinetic 3D collage by Coldie. You will be contacted by email with payment and shipping options. Thank you for touching the art and feeling something.</p>
+      <input id="print-email-input" type="email" placeholder="Email Address" />
+      <button id="print-submit-btn">SUBMIT</button>
+      <div id="print-status"></div>
+    </div>
+  </div>
+
   <!-- ─── EXPORT ENGINE ─── -->
   <script>
   (function(){
-    function setupExport() {
     // ── Detect if embedded in iframe ──
     const isEmbedded = (window.self !== window.top);
-    
+
+    // ── PRINT BUTTON + MODAL ──
+    const printBtn = document.getElementById('print-btn');
+    const printOverlay = document.getElementById('print-modal-overlay');
+    const printEmailInput = document.getElementById('print-email-input');
+    const printSubmitBtn = document.getElementById('print-submit-btn');
+    const printStatus = document.getElementById('print-status');
+
+    if (isEmbedded) {
+      if (printBtn) printBtn.style.display = 'none';
+      const exportWrapper = document.getElementById('export-wrapper');
+      if (exportWrapper) exportWrapper.style.display = 'none';
+    }
+
+    if (printBtn && printOverlay && !isEmbedded) {
+      printBtn.onclick = (e) => {
+        e.stopPropagation();
+        printOverlay.classList.add('open');
+        printEmailInput.value = '';
+        printStatus.textContent = '';
+        printSubmitBtn.disabled = false;
+      };
+
+      printOverlay.onclick = (e) => {
+        if (e.target === printOverlay) printOverlay.classList.remove('open');
+      };
+
+      printSubmitBtn.onclick = async () => {
+        const email = printEmailInput.value.trim();
+        if (!email || !email.includes('@')) {
+          printStatus.style.color = '#e66';
+          printStatus.textContent = 'Please enter a valid email address';
+          return;
+        }
+
+        printSubmitBtn.disabled = true;
+        printStatus.style.color = '#aaa';
+        printStatus.textContent = 'CAPTURING...';
+
+        try {
+          const PRINT_W = 3508;
+          const PRINT_H = 4961;
+          const r = await waitForRenderer();
+
+          const origW = r.domElement.width;
+          const origH = r.domElement.height;
+          const origAspect = window.camera ? window.camera.aspect : 1;
+
+          r.setSize(PRINT_W, PRINT_H);
+          if (window.camera) {
+            window.camera.aspect = PRINT_W / PRINT_H;
+            window.camera.updateProjectionMatrix();
+          }
+          if (window.composer) {
+            window.composer.setSize(PRINT_W, PRINT_H);
+            window.composer.render();
+          } else if (window.scene && window.camera) {
+            r.render(window.scene, window.camera);
+          }
+
+          const dataUrl = r.domElement.toDataURL('image/jpeg', 0.80);
+          const imageBlob = await (await fetch(dataUrl)).blob();
+
+          r.setSize(origW, origH);
+          if (window.camera) {
+            window.camera.aspect = origAspect;
+            window.camera.updateProjectionMatrix();
+          }
+          if (window.composer) {
+            window.composer.setSize(origW, origH);
+          }
+
+          const meshStates = [];
+          if (window.scene) {
+            window.scene.children.forEach(child => {
+              if (child.userData && child.userData.id) {
+                meshStates.push({
+                  id: child.userData.id,
+                  position: { x: child.position.x, y: child.position.y, z: child.position.z },
+                  rotation: { x: child.rotation.x, y: child.rotation.y, z: child.rotation.z },
+                  scale: { x: child.scale.x, y: child.scale.y, z: child.scale.z },
+                  visible: child.visible,
+                  userScale: child.userData.userScale || 1.0,
+                });
+              }
+            });
+          }
+          const compositionJson = JSON.stringify({ meshes: meshStates, timestamp: new Date().toISOString() });
+
+          printStatus.textContent = 'UPLOADING...';
+
+          const form = new FormData();
+          form.append('email', email);
+          form.append('image', imageBlob, 'print-capture.jpg');
+          form.append('compositionJson', compositionJson);
+
+          const API_URL = window.location.origin;
+          const res = await fetch(API_URL + '/api/print-order', { method: 'POST', body: form });
+          const data = await res.json().catch(() => ({}));
+
+          if (res.ok && data.ok) {
+            printStatus.style.color = '#4c4';
+            printStatus.textContent = 'Successful submission. Stay tuned by email to complete order.';
+            setTimeout(() => {
+              printOverlay.classList.remove('open');
+              printStatus.textContent = '';
+              printSubmitBtn.disabled = false;
+            }, 3000);
+          } else {
+            const detail = data.details || data.error || ('HTTP ' + res.status);
+            console.error('Print order error:', data);
+            throw new Error(detail);
+          }
+        } catch (e) {
+          printStatus.style.color = '#e66';
+          printStatus.textContent = e.message || 'NETWORK ERROR — TRY AGAIN';
+          printSubmitBtn.disabled = false;
+        }
+      };
+    }
+
+    function waitForRenderer() {
+      return new Promise((resolve) => {
+        const check = () => {
+          if (window.renderer && window.renderer.domElement) resolve(window.renderer);
+          else setTimeout(check, 100);
+        };
+        check();
+      });
+    }
+
+    function setupExport() {
     // ── DOM refs ──
     const toggle    = document.getElementById('export-toggle');
     if (!toggle) { setTimeout(setupExport, 50); return; } // wait for init() to create it
