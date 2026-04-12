@@ -6010,7 +6010,7 @@ setTimeout(function () {
     <div id="print-modal-content">
       <h2>Print Your 3D Kinetic Collage</h2>
       <p>Collect your customized kinetic 3D collage by Coldie. You will be contacted by email with payment and shipping options. Thank you for touching the art and feeling something.</p>
-      <input id="print-email-input" type="email" placeholder="Email Address" />
+      <input id="print-email-input" type="email" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" placeholder="Email Address" />
       <button id="print-submit-btn">SUBMIT</button>
       <div id="print-status"></div>
     </div>
@@ -6045,12 +6045,19 @@ setTimeout(function () {
     }
 
     if (printBtn && printOverlay && !isEmbedded) {
+      // Stop all touch/pointer events from reaching the canvas when modal is open
+      ['touchstart','touchmove','touchend','pointerdown','pointermove','pointerup'].forEach(evt => {
+        printOverlay.addEventListener(evt, (e) => { e.stopPropagation(); }, { passive: false });
+      });
+
       printBtn.onclick = (e) => {
         e.stopPropagation();
         printOverlay.classList.add('open');
         printEmailInput.value = '';
         printStatus.textContent = '';
         printSubmitBtn.disabled = false;
+        // Focus the input after a short delay to trigger mobile keyboard
+        setTimeout(() => { printEmailInput.focus(); }, 300);
       };
 
       // Close on overlay background click
