@@ -301,28 +301,78 @@
       color: #aaa;
       line-height: 1.6;
     }
+    #print-modal-content {
+      max-width: 560px;
+    }
     #print-email-input {
       width: 100%;
       box-sizing: border-box;
       background: #111;
       border: 1px solid #333;
       color: #fff;
-      padding: 12px 14px;
+      padding: 14px 16px;
       font-family: monospace;
-      font-size: 11px;
+      font-size: 16px;
       outline: none;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
+      letter-spacing: 1px;
+      caret-color: #fff;
     }
     #print-email-input:focus {
       border-color: #666;
+    }
+    /* ─── ON-SCREEN KEYBOARD ─── */
+    #virtual-keyboard {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #virtual-keyboard .kb-row {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+    }
+    #virtual-keyboard .kb-key {
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 14px;
+      min-width: 32px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.1s;
+      padding: 0 8px;
+      flex-shrink: 0;
+    }
+    #virtual-keyboard .kb-key:active,
+    #virtual-keyboard .kb-key.pressed {
+      background: #555;
+      border-color: #888;
+    }
+    #virtual-keyboard .kb-key.wide {
+      min-width: 60px;
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+    #virtual-keyboard .kb-key.space {
+      flex: 1;
+      max-width: 200px;
     }
     #print-submit-btn {
       background: #fff;
       color: #000;
       border: none;
-      padding: 12px 30px;
+      padding: 14px 30px;
       font-family: monospace;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: bold;
       cursor: pointer;
       letter-spacing: 1px;
@@ -6012,7 +6062,63 @@ setTimeout(function () {
     <div id="print-modal-content">
       <h2>Print Your 3D Kinetic Collage</h2>
       <p>Collect your customized kinetic 3D collage by Coldie. You will be contacted by email with payment and shipping options. Thank you for touching the art and feeling something.</p>
-      <input id="print-email-input" type="email" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" placeholder="Email Address" />
+      <input id="print-email-input" type="text" readonly placeholder="Tap keys to enter email" />
+      <div id="virtual-keyboard">
+        <div class="kb-row">
+          <div class="kb-key" data-key="1">1</div>
+          <div class="kb-key" data-key="2">2</div>
+          <div class="kb-key" data-key="3">3</div>
+          <div class="kb-key" data-key="4">4</div>
+          <div class="kb-key" data-key="5">5</div>
+          <div class="kb-key" data-key="6">6</div>
+          <div class="kb-key" data-key="7">7</div>
+          <div class="kb-key" data-key="8">8</div>
+          <div class="kb-key" data-key="9">9</div>
+          <div class="kb-key" data-key="0">0</div>
+        </div>
+        <div class="kb-row">
+          <div class="kb-key" data-key="q">q</div>
+          <div class="kb-key" data-key="w">w</div>
+          <div class="kb-key" data-key="e">e</div>
+          <div class="kb-key" data-key="r">r</div>
+          <div class="kb-key" data-key="t">t</div>
+          <div class="kb-key" data-key="y">y</div>
+          <div class="kb-key" data-key="u">u</div>
+          <div class="kb-key" data-key="i">i</div>
+          <div class="kb-key" data-key="o">o</div>
+          <div class="kb-key" data-key="p">p</div>
+        </div>
+        <div class="kb-row">
+          <div class="kb-key" data-key="a">a</div>
+          <div class="kb-key" data-key="s">s</div>
+          <div class="kb-key" data-key="d">d</div>
+          <div class="kb-key" data-key="f">f</div>
+          <div class="kb-key" data-key="g">g</div>
+          <div class="kb-key" data-key="h">h</div>
+          <div class="kb-key" data-key="j">j</div>
+          <div class="kb-key" data-key="k">k</div>
+          <div class="kb-key" data-key="l">l</div>
+        </div>
+        <div class="kb-row">
+          <div class="kb-key" data-key="z">z</div>
+          <div class="kb-key" data-key="x">x</div>
+          <div class="kb-key" data-key="c">c</div>
+          <div class="kb-key" data-key="v">v</div>
+          <div class="kb-key" data-key="b">b</div>
+          <div class="kb-key" data-key="n">n</div>
+          <div class="kb-key" data-key="m">m</div>
+          <div class="kb-key wide" data-key="backspace">DEL</div>
+        </div>
+        <div class="kb-row">
+          <div class="kb-key" data-key="@">@</div>
+          <div class="kb-key" data-key=".">.</div>
+          <div class="kb-key" data-key="-">-</div>
+          <div class="kb-key" data-key="_">_</div>
+          <div class="kb-key wide" data-key=".com">.com</div>
+          <div class="kb-key wide" data-key=".net">.net</div>
+          <div class="kb-key wide" data-key="@gmail.com">@gmail</div>
+        </div>
+      </div>
       <button id="print-submit-btn">SUBMIT</button>
       <div id="print-status"></div>
     </div>
@@ -6030,6 +6136,30 @@ setTimeout(function () {
     const printEmailInput = document.getElementById('print-email-input');
     const printSubmitBtn = document.getElementById('print-submit-btn');
     const printStatus = document.getElementById('print-status');
+
+    // ── VIRTUAL KEYBOARD LOGIC ──
+    const vkb = document.getElementById('virtual-keyboard');
+    if (vkb && printEmailInput) {
+      vkb.addEventListener('pointerdown', (e) => {
+        const key = e.target.closest('.kb-key');
+        if (!key) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const val = key.dataset.key;
+        if (val === 'backspace') {
+          printEmailInput.value = printEmailInput.value.slice(0, -1);
+        } else {
+          printEmailInput.value += val;
+        }
+        // Visual feedback
+        key.classList.add('pressed');
+        setTimeout(() => key.classList.remove('pressed'), 120);
+      });
+      // Block all events from reaching canvas
+      ['touchstart','touchmove','touchend','pointerdown','pointermove','pointerup','mousedown','click'].forEach(evt => {
+        vkb.addEventListener(evt, (e) => { e.stopPropagation(); }, { passive: false });
+      });
+    }
 
     if (isEmbedded) {
       // Hide everything when embedded in an iframe
@@ -6054,15 +6184,6 @@ setTimeout(function () {
         document.getElementById('print-modal-content').addEventListener(evt, (e) => { e.stopPropagation(); }, { passive: false });
       });
 
-      // Ensure tapping email input doesn't get swallowed
-      printEmailInput.addEventListener('touchstart', (e) => {
-        e.stopPropagation();
-      }, { passive: false });
-      printEmailInput.addEventListener('click', (e) => {
-        e.stopPropagation();
-        printEmailInput.focus();
-      });
-
       function openPrintModal() {
         printOverlay.classList.add('open');
         printEmailInput.value = '';
@@ -6072,11 +6193,6 @@ setTimeout(function () {
         if (window.controls) window.controls.enabled = false;
         const canvas = document.querySelector('canvas');
         if (canvas) canvas.style.pointerEvents = 'none';
-        // Focus input to trigger touchscreen keyboard
-        setTimeout(() => {
-          printEmailInput.focus();
-          printEmailInput.click();
-        }, 350);
       }
 
       function closePrintModal() {
