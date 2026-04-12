@@ -2681,8 +2681,9 @@ function init() {
         removed: false
     });
     loadTexture(URL_HEADSET, (texture) => {
-        const planeWidth = texture.image.width * baseScale;
-        const planeHeight = texture.image.height * baseScale;
+        const headsetScale = 1.45; // 145%
+        const planeWidth = texture.image.width * baseScale * headsetScale;
+        const planeHeight = texture.image.height * baseScale * headsetScale;
         const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const headset = new THREE.Mesh(geometry, material);
