@@ -5907,6 +5907,7 @@ setTimeout(function () {
     window.scene = typeof scene != "undefined" ? scene : undefined;
     window.composer = typeof composer != "undefined" ? composer : undefined;
     window.effectControls = typeof effectControls != "undefined" ? effectControls : undefined;
+    window.controls = typeof controls != "undefined" ? controls : undefined;
 }, 1000)
 
     // Expose for dae hooks
@@ -5917,6 +5918,7 @@ setTimeout(function () {
       window.scene = typeof scene != "undefined" ? scene : undefined;
       window.composer = typeof composer != "undefined" ? composer : undefined;
       window.effectControls = typeof effectControls != "undefined" ? effectControls : undefined;
+      window.controls = typeof controls != "undefined" ? controls : undefined;
     }, 1000)
   </script>
 
@@ -6045,24 +6047,56 @@ setTimeout(function () {
     }
 
     if (printBtn && printOverlay && !isEmbedded) {
-      // Stop all touch/pointer events from reaching the canvas when modal is open
-      ['touchstart','touchmove','touchend','pointerdown','pointermove','pointerup'].forEach(evt => {
+      // Stop ALL touch/pointer events from reaching the canvas when modal is open
+      ['touchstart','touchmove','touchend','pointerdown','pointermove','pointerup','mousedown','mousemove','mouseup','click'].forEach(evt => {
         printOverlay.addEventListener(evt, (e) => { e.stopPropagation(); }, { passive: false });
+        // Also block on the modal content itself
+        document.getElementById('print-modal-content').addEventListener(evt, (e) => { e.stopPropagation(); }, { passive: false });
       });
 
-      printBtn.onclick = (e) => {
+      // Ensure tapping email input doesn't get swallowed
+      printEmailInput.addEventListener('touchstart', (e) => {
         e.stopPropagation();
+      }, { passive: false });
+      printEmailInput.addEventListener('click', (e) => {
+        e.stopPropagation();
+        printEmailInput.focus();
+      });
+
+      function openPrintModal() {
         printOverlay.classList.add('open');
         printEmailInput.value = '';
         printStatus.textContent = '';
         printSubmitBtn.disabled = false;
-        // Focus the input after a short delay to trigger mobile keyboard
-        setTimeout(() => { printEmailInput.focus(); }, 300);
+        // Disable OrbitControls and canvas pointer events while modal is open
+        if (window.controls) window.controls.enabled = false;
+        const canvas = document.querySelector('canvas');
+        if (canvas) canvas.style.pointerEvents = 'none';
+        // Focus input to trigger touchscreen keyboard
+        setTimeout(() => {
+          printEmailInput.focus();
+          printEmailInput.click();
+        }, 350);
+      }
+
+      function closePrintModal() {
+        printOverlay.classList.remove('open');
+        // Re-enable OrbitControls and canvas pointer events
+        if (window.controls) window.controls.enabled = true;
+        const canvas = document.querySelector('canvas');
+        if (canvas) canvas.style.pointerEvents = '';
+        // Blur input to dismiss keyboard
+        printEmailInput.blur();
+      }
+
+      printBtn.onclick = (e) => {
+        e.stopPropagation();
+        openPrintModal();
       };
 
       // Close on overlay background click
       printOverlay.onclick = (e) => {
-        if (e.target === printOverlay) printOverlay.classList.remove('open');
+        if (e.target === printOverlay) closePrintModal();
       };
 
       // ── PRINT SUBMIT — capture canvas + composition JSON, send to Airtable ──
@@ -6149,7 +6183,7 @@ setTimeout(function () {
             printStatus.style.color = '#4c4';
             printStatus.textContent = 'Successful submission. Stay tuned by email to complete order.';
             setTimeout(() => {
-              printOverlay.classList.remove('open');
+              closePrintModal();
               printStatus.textContent = '';
               printSubmitBtn.disabled = false;
             }, 3000);
