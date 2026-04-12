@@ -343,6 +343,58 @@
       min-height: 16px;
       letter-spacing: 0.5px;
     }
+
+    /* ─── INSTRUCTIONS POPUP ─── */
+    #instructions-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 500;
+      background: rgba(0,0,0,0.92);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px;
+      padding: 32px 36px;
+      font-family: monospace;
+      color: #fff;
+      max-width: 440px;
+      width: 90%;
+      opacity: 1;
+      transition: opacity 0.6s ease;
+    }
+    #instructions-popup.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #instructions-popup h3 {
+      margin: 0 0 18px 0;
+      font-size: 13px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #fff;
+    }
+    #instructions-popup ul {
+      margin: 0 0 20px 0;
+      padding: 0 0 0 18px;
+      list-style: disc;
+    }
+    #instructions-popup li {
+      font-size: 11px;
+      line-height: 1.8;
+      color: #ccc;
+      letter-spacing: 0.5px;
+    }
+    #instructions-popup li strong {
+      color: #fff;
+    }
+    #instructions-popup .instructions-footer {
+      font-size: 10px;
+      color: #888;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 14px;
+      margin: 0;
+      line-height: 1.6;
+    }
   </style>
   <title>THE COLLECTIVE - Combined Overlord | Tech Epochalypse by Coldie</title>
 </head>
@@ -5923,6 +5975,32 @@ setTimeout(function () {
       <div class="status-line" id="export-status"></div>
     </div>
   </div>
+
+  <!-- ─── INSTRUCTIONS POPUP ─── -->
+  <div id="instructions-popup">
+    <h3>How to control this artwork:</h3>
+    <ul>
+      <li>Touch to drag pieces of the portrait on X and Y axis</li>
+      <li>Tap each piece to move 3D Z axis</li>
+      <li><strong>SWAP MODE:</strong> Activate to change the options for each piece</li>
+      <li>Drag pieces to <strong>TRASH</strong> to delete</li>
+      <li>Select <strong>Control Layer</strong> to give added effect</li>
+    </ul>
+    <p class="instructions-footer">When finished, click PRINT to save layout and collect print</p>
+  </div>
+  <script>
+  (function(){
+    const popup = document.getElementById('instructions-popup');
+    if (popup) {
+      setTimeout(() => { popup.classList.add('fade-out'); }, 7000);
+      setTimeout(() => { popup.remove(); }, 7600);
+      popup.addEventListener('click', () => {
+        popup.classList.add('fade-out');
+        setTimeout(() => { popup.remove(); }, 600);
+      });
+    }
+  })();
+  </script>
 
   <!-- ─── PRINT BUTTON (bottom-left) ─── -->
   <button id="print-btn">PRINT</button>
