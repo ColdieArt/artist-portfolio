@@ -4763,17 +4763,44 @@ setTimeout(function () {
       setStatus('Capturing…', 'active');
       lockUI(true);
       const r = await getRenderer();
-      // Force a fresh render so the buffer has the current frame
+
+      // 300 DPI at 297×420 mm (A3)
+      const EXPORT_W = 3508;
+      const EXPORT_H = 4961;
+
+      // Save original size
+      const origW = r.domElement.width;
+      const origH = r.domElement.height;
+      const origAspect = window.camera ? window.camera.aspect : 1;
+
+      // Resize to print resolution
+      r.setSize(EXPORT_W, EXPORT_H);
+      if (window.camera) {
+        window.camera.aspect = EXPORT_W / EXPORT_H;
+        window.camera.updateProjectionMatrix();
+      }
       if (window.composer) {
+        window.composer.setSize(EXPORT_W, EXPORT_H);
         window.composer.render();
       } else if (window.scene && window.camera) {
         r.render(window.scene, window.camera);
       }
+
       r.domElement.toBlob((blob) => {
+        // Restore original size
+        r.setSize(origW, origH);
+        if (window.camera) {
+          window.camera.aspect = origAspect;
+          window.camera.updateProjectionMatrix();
+        }
+        if (window.composer) {
+          window.composer.setSize(origW, origH);
+        }
+
         if (blob) {
           triggerDownload(blob, 'elon-musk-lisbon-coldie.png');
           saveToGallery(r.domElement);
-          setStatus('PNG saved ✓ — added to gallery', 'active');
+          setStatus('PNG saved ✓ (3508×4961 @ 300 DPI) — added to gallery', 'active');
           showPostModal();
         } else {
           setStatus('Capture failed', 'error');
