@@ -6459,20 +6459,39 @@ setTimeout(function () {
       });
 
       function openPrintModal() {
-        // Capture a preview of the current canvas before opening modal
+        // Capture a vertical preview matching print orientation (3508x4961 = ~0.707 aspect)
         const previewImg = document.getElementById('print-preview-img');
         try {
-          const r = document.querySelector('canvas');
-          if (r && previewImg) {
-            // Force a render to ensure canvas has current frame
+          const r = window.renderer;
+          if (r && previewImg && window.camera) {
+            const PREV_W = 350;
+            const PREV_H = 496;
+            const origW = r.domElement.width;
+            const origH = r.domElement.height;
+            const origAspect = window.camera.aspect;
+
+            // Temporarily resize to vertical print proportions
+            r.setSize(PREV_W, PREV_H);
+            window.camera.aspect = PREV_W / PREV_H;
+            window.camera.updateProjectionMatrix();
             if (window.composer) {
+              window.composer.setSize(PREV_W, PREV_H);
               window.composer.render();
-            } else if (window.scene && window.camera && window.renderer) {
-              window.renderer.render(window.scene, window.camera);
+            } else if (window.scene) {
+              r.render(window.scene, window.camera);
             }
-            const previewUrl = r.toDataURL('image/jpeg', 0.7);
+
+            const previewUrl = r.domElement.toDataURL('image/jpeg', 0.8);
             previewImg.src = previewUrl;
             previewImg.style.display = 'block';
+
+            // Restore original size
+            r.setSize(origW, origH);
+            window.camera.aspect = origAspect;
+            window.camera.updateProjectionMatrix();
+            if (window.composer) {
+              window.composer.setSize(origW, origH);
+            }
           }
         } catch(e) {
           console.log('Preview capture failed:', e);
