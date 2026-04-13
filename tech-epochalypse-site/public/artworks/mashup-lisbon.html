@@ -394,56 +394,104 @@
       letter-spacing: 0.5px;
     }
 
-    /* ─── INSTRUCTIONS POPUP ─── */
-    #instructions-popup {
+    /* ─── WELCOME SCREEN ─── */
+    #welcome-screen {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      inset: 0;
       z-index: 500;
-      background: rgba(0,0,0,0.92);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 4px;
-      padding: 32px 36px;
+      background: rgba(0,0,0,0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       font-family: monospace;
       color: #fff;
-      max-width: 440px;
-      width: 90%;
       opacity: 1;
-      transition: opacity 0.6s ease;
+      transition: opacity 0.8s ease;
+      padding: 40px 20px;
+      overflow-y: auto;
     }
-    #instructions-popup.fade-out {
+    #welcome-screen.fade-out {
       opacity: 0;
       pointer-events: none;
     }
-    #instructions-popup h3 {
-      margin: 0 0 18px 0;
-      font-size: 13px;
-      letter-spacing: 2px;
+    #welcome-screen .welcome-header {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      text-align: center;
+      margin: 0 0 12px 0;
+      color: #fff;
+    }
+    #welcome-screen .welcome-sub {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #666;
+      margin: 0 0 40px 0;
+      text-align: center;
+    }
+    #welcome-screen .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto 50px auto;
+    }
+    #welcome-screen .module-box {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 20px 16px;
+      text-align: center;
+      transition: border-color 0.3s ease, background 0.3s ease;
+    }
+    #welcome-screen .module-box:hover {
+      border-color: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.08);
+    }
+    #welcome-screen .module-icon {
+      font-size: 28px;
+      margin-bottom: 10px;
+      display: block;
+      opacity: 0.9;
+    }
+    #welcome-screen .module-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
       color: #fff;
+      margin-bottom: 6px;
     }
-    #instructions-popup ul {
-      margin: 0 0 20px 0;
-      padding: 0 0 0 18px;
-      list-style: disc;
-    }
-    #instructions-popup li {
-      font-size: 11px;
-      line-height: 1.8;
-      color: #ccc;
-      letter-spacing: 0.5px;
-    }
-    #instructions-popup li strong {
-      color: #fff;
-    }
-    #instructions-popup .instructions-footer {
+    #welcome-screen .module-desc {
       font-size: 10px;
       color: #888;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      padding-top: 14px;
+      line-height: 1.5;
+      letter-spacing: 0.3px;
+    }
+    #welcome-screen .touch-cta {
+      font-size: 48px;
+      font-weight: 900;
+      letter-spacing: 8px;
+      text-transform: uppercase;
+      color: #fff;
       margin: 0;
-      line-height: 1.6;
+      cursor: pointer;
+      text-align: center;
+      transition: opacity 0.3s ease;
+    }
+    #welcome-screen .touch-cta:hover {
+      opacity: 0.7;
+    }
+    @media (max-width: 500px) {
+      #welcome-screen .welcome-header { font-size: 20px; letter-spacing: 4px; }
+      #welcome-screen .modules-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      #welcome-screen .module-box { padding: 14px 10px; }
+      #welcome-screen .module-icon { font-size: 22px; }
+      #welcome-screen .touch-cta { font-size: 32px; letter-spacing: 5px; }
     }
   </style>
   <title>THE COLLECTIVE - Combined Overlord | Tech Epochalypse by Coldie</title>
@@ -6053,28 +6101,57 @@ setTimeout(function () {
     </div>
   </div>
 
-  <!-- ─── INSTRUCTIONS POPUP ─── -->
-  <div id="instructions-popup">
-    <h3>How to control this artwork:</h3>
-    <ul>
-      <li>Touch to drag pieces of the portrait on X and Y axis</li>
-      <li>Tap each piece to move 3D Z axis</li>
-      <li><strong>SWAP MODE:</strong> Activate to change the options for each piece</li>
-      <li>Drag pieces to <strong>TRASH</strong> to delete</li>
-      <li>Select <strong>Control Layer</strong> to give added effect</li>
-    </ul>
-    <p class="instructions-footer">When finished, click PRINT to save layout and collect print</p>
+  <!-- ─── WELCOME SCREEN ─── -->
+  <div id="welcome-screen">
+    <h1 class="welcome-header">Welcome to Tech Epochalypse</h1>
+    <p class="welcome-sub">Interactive 3D Kinetic Collage by Coldie</p>
+
+    <div class="modules-grid">
+      <div class="module-box">
+        <span class="module-icon">&#9995;</span>
+        <div class="module-title">Drag</div>
+        <div class="module-desc">Touch and drag pieces on X and Y axis</div>
+      </div>
+      <div class="module-box">
+        <span class="module-icon">&#11044;</span>
+        <div class="module-title">Depth</div>
+        <div class="module-desc">Tap each piece to move on 3D Z axis</div>
+      </div>
+      <div class="module-box">
+        <span class="module-icon">&#8644;</span>
+        <div class="module-title">Swap Mode</div>
+        <div class="module-desc">Activate to change options for each piece</div>
+      </div>
+      <div class="module-box">
+        <span class="module-icon">&#128465;</span>
+        <div class="module-title">Trash</div>
+        <div class="module-desc">Drag pieces to trash to delete them</div>
+      </div>
+      <div class="module-box">
+        <span class="module-icon">&#127912;</span>
+        <div class="module-title">Control Layer</div>
+        <div class="module-desc">Select to add visual effects to your collage</div>
+      </div>
+      <div class="module-box">
+        <span class="module-icon">&#128424;</span>
+        <div class="module-title">Print</div>
+        <div class="module-desc">Save your layout and collect your print</div>
+      </div>
+    </div>
+
+    <p class="touch-cta" id="welcome-enter">TOUCH THE ART.</p>
   </div>
   <script>
   (function(){
-    const popup = document.getElementById('instructions-popup');
-    if (popup) {
-      setTimeout(() => { popup.classList.add('fade-out'); }, 7000);
-      setTimeout(() => { popup.remove(); }, 7600);
-      popup.addEventListener('click', () => {
-        popup.classList.add('fade-out');
-        setTimeout(() => { popup.remove(); }, 600);
-      });
+    const screen = document.getElementById('welcome-screen');
+    const enter = document.getElementById('welcome-enter');
+    if (screen) {
+      function closeWelcome() {
+        screen.classList.add('fade-out');
+        setTimeout(() => { screen.remove(); }, 800);
+      }
+      enter.addEventListener('click', closeWelcome);
+      enter.addEventListener('touchend', function(e) { e.preventDefault(); closeWelcome(); });
     }
   })();
   </script>
