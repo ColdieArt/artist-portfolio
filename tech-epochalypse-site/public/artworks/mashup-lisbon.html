@@ -472,6 +472,19 @@
       line-height: 1.5;
       letter-spacing: 0.3px;
     }
+    #welcome-screen .touch-cta-container {
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: 12px;
+      padding: 28px 48px;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.3s ease, background 0.3s ease;
+      background: rgba(255,255,255,0.03);
+    }
+    #welcome-screen .touch-cta-container:hover {
+      border-color: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.08);
+    }
     #welcome-screen .touch-cta {
       font-size: 48px;
       font-weight: 900;
@@ -479,12 +492,14 @@
       text-transform: uppercase;
       color: #fff;
       margin: 0;
-      cursor: pointer;
       text-align: center;
-      transition: opacity 0.3s ease;
     }
-    #welcome-screen .touch-cta:hover {
-      opacity: 0.7;
+    #welcome-screen .touch-cta-sub {
+      font-size: 12px;
+      color: #888;
+      letter-spacing: 1px;
+      margin: 12px 0 0 0;
+      text-align: center;
     }
     @media (max-width: 500px) {
       #welcome-screen .welcome-header { font-size: 20px; letter-spacing: 4px; }
@@ -492,6 +507,7 @@
       #welcome-screen .module-box { padding: 14px 10px; }
       #welcome-screen .module-icon { font-size: 22px; }
       #welcome-screen .touch-cta { font-size: 32px; letter-spacing: 5px; }
+      #welcome-screen .touch-cta-container { padding: 20px 28px; }
     }
   </style>
   <title>THE COLLECTIVE - Combined Overlord | Tech Epochalypse by Coldie</title>
@@ -6130,19 +6146,19 @@ setTimeout(function () {
 
     <div class="modules-grid">
       <div class="module-box">
-        <span class="module-icon">&#9995;</span>
-        <div class="module-title">Drag</div>
+        <span class="module-icon">&#9758;</span>
+        <div class="module-title">X/Y/Z Positioning</div>
         <div class="module-desc">Touch and drag pieces on X and Y axis</div>
       </div>
       <div class="module-box">
-        <span class="module-icon">&#11044;</span>
-        <div class="module-title">Depth</div>
-        <div class="module-desc">Tap each piece to move on 3D Z axis</div>
+        <span class="module-icon">&#128444;</span>
+        <div class="module-title">3D Canvas</div>
+        <div class="module-desc">Pinch/Expand to customize zoom. Drag on background to revolve the 3D canvas</div>
       </div>
       <div class="module-box">
         <span class="module-icon">&#8644;</span>
         <div class="module-title">Swap Mode</div>
-        <div class="module-desc">Activate to change options for each piece</div>
+        <div class="module-desc">Activate to choose face pieces for all 5 Overlords to create a new decentralized portrait</div>
       </div>
       <div class="module-box">
         <span class="module-icon">&#128465;</span>
@@ -6161,7 +6177,10 @@ setTimeout(function () {
       </div>
     </div>
 
-    <p class="touch-cta" id="welcome-enter">TOUCH THE ART.</p>
+    <div class="touch-cta-container" id="welcome-enter">
+      <p class="touch-cta">TOUCH THE ART.</p>
+      <p class="touch-cta-sub">Click here to experience the interactive 3D kinetic art experience</p>
+    </div>
   </div>
   <script>
   (function(){
