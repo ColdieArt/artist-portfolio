@@ -3674,15 +3674,15 @@ function init() {
     leftUiContainer.style.left = '10px';
     leftUiContainer.style.backgroundColor = 'rgba(0, 0, 0, 0)';
     leftUiContainer.style.color = 'white';
-    leftUiContainer.style.padding = '17px'; /* 30% increase */
+    leftUiContainer.style.padding = '34px'; /* doubled */
     leftUiContainer.style.borderRadius = '5px';
     leftUiContainer.style.fontFamily = 'monospace';
-    leftUiContainer.style.fontSize = '170%'; /* 30% increase */
+    leftUiContainer.style.fontSize = '340%'; /* doubled */
     leftUiContainer.style.zIndex = '100';
     leftUiContainer.style.display = 'flex';
     leftUiContainer.style.flexDirection = 'column';
     leftUiContainer.style.flexWrap = 'nowrap';
-    leftUiContainer.style.gap = '8.5px'; /* 30% increase */
+    leftUiContainer.style.gap = '17px'; /* doubled */
     leftUiContainer.style.transition = 'top 0.5s ease-in-out'; // Smooth transition for top property
     document.body.appendChild(leftUiContainer);
 
@@ -3875,14 +3875,36 @@ function init() {
         button.onclick = (event) => { event.stopPropagation(); resetPiecesToOriginalPositions(); };
         return button;
     };
-    leftUiContainer.appendChild(createResetButton());
+    // RESET button placed above PRINT as a fixed bottom-left button (not in left UI)
+    const resetBtnFixed = createResetButton();
+    resetBtnFixed.id = 'reset-btn-fixed';
+    resetBtnFixed.style.cssText = `
+        position: fixed;
+        bottom: 60px;
+        left: 16px;
+        z-index: 250;
+        background: #000;
+        color: #fff;
+        border: 1px solid #fff;
+        padding: 10px 22px;
+        font-family: monospace;
+        font-size: 12px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: background 0.2s, border-color 0.2s;
+    `;
+    resetBtnFixed.onmouseover = () => { resetBtnFixed.style.background = '#1a1a1a'; resetBtnFixed.style.borderColor = '#aaa'; };
+    resetBtnFixed.onmouseout = () => { resetBtnFixed.style.background = '#000'; resetBtnFixed.style.borderColor = '#fff'; };
+    document.body.appendChild(resetBtnFixed);
     rightUiContainer.appendChild(createResetButton());
 
     // Create and append the TRASH button to the left UI container
     const createTrashButton = () => {
         const button = document.createElement('button');
         button.id = 'trash-button'; // Unique ID for easy targeting
-        button.innerHTML = 'TRASH'; // Text with trashcan icon
+        button.innerHTML = '&#128465; TRASH'; // Trashcan icon + text
         button.style.cssText = `
             background-color: black; /* Changed from #CC0000 to black */
             color: white;
