@@ -6332,6 +6332,9 @@ setTimeout(function () {
   <div id="print-modal-overlay">
     <div id="print-modal-content">
       <h2>Print Your Tech Epochalypse Kinetic Collage</h2>
+      <div id="print-preview-container" style="margin:0 0 16px 0;text-align:center;">
+        <img id="print-preview-img" style="max-width:100%;max-height:240px;border:1px solid rgba(255,255,255,0.15);border-radius:4px;display:none;" alt="Your collage preview">
+      </div>
       <p>Collect your customized kinetic 3D collage by Coldie. You will be contacted by email with payment and shipping options. Thank you for touching the art and feeling something.</p>
       <input id="print-email-input" type="text" readonly placeholder="Tap keys to enter email" />
       <div id="virtual-keyboard">
@@ -6456,6 +6459,26 @@ setTimeout(function () {
       });
 
       function openPrintModal() {
+        // Capture a preview of the current canvas before opening modal
+        const previewImg = document.getElementById('print-preview-img');
+        try {
+          const r = document.querySelector('canvas');
+          if (r && previewImg) {
+            // Force a render to ensure canvas has current frame
+            if (window.composer) {
+              window.composer.render();
+            } else if (window.scene && window.camera && window.renderer) {
+              window.renderer.render(window.scene, window.camera);
+            }
+            const previewUrl = r.toDataURL('image/jpeg', 0.7);
+            previewImg.src = previewUrl;
+            previewImg.style.display = 'block';
+          }
+        } catch(e) {
+          console.log('Preview capture failed:', e);
+          if (previewImg) previewImg.style.display = 'none';
+        }
+
         printOverlay.classList.add('open');
         printEmailInput.value = '';
         printStatus.textContent = '';
