@@ -298,6 +298,150 @@
       text-align: center;
       min-height: 16px;
     }
+
+    /* ─── ORBITAL TRANSFORM UI ─── */
+    #orbital-transform-ui {
+      position: fixed;
+      z-index: 600;
+      background: rgba(0,0,0,0.93);
+      border: 1px solid rgba(255,255,255,0.28);
+      padding: 10px 12px 9px;
+      font-family: monospace;
+      color: #fff;
+      min-width: 204px;
+      pointer-events: all;
+      display: none;
+      transform: translate(-50%, calc(-100% - 16px));
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 10px 40px rgba(0,0,0,0.85);
+    }
+    #orbital-transform-ui.open { display: block; }
+    /* down-arrow connector to mesh */
+    #orbital-transform-ui::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid rgba(255,255,255,0.28);
+    }
+    #orbital-transform-ui .orb-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 0.5px solid rgba(255,255,255,0.12);
+      padding-bottom: 7px;
+      margin-bottom: 8px;
+    }
+    #orbital-transform-ui .orb-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    #orbital-transform-ui .orb-icon {
+      font-size: 12px;
+      opacity: 0.4;
+      line-height: 1;
+    }
+    #orbital-transform-ui .orb-asset-name {
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #aaa;
+    }
+    #orbital-transform-ui .orb-close {
+      cursor: pointer;
+      color: #555;
+      font-size: 11px;
+      line-height: 1;
+      padding: 1px 3px;
+      transition: color 0.15s;
+    }
+    #orbital-transform-ui .orb-close:hover { color: #fff; }
+    #orbital-transform-ui .orb-section-label {
+      font-size: 8px;
+      letter-spacing: 2px;
+      color: #444;
+      text-transform: uppercase;
+      margin: 0 0 5px;
+    }
+    #orbital-transform-ui .orb-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 5px;
+    }
+    #orbital-transform-ui .orb-label {
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      width: 16px;
+      flex-shrink: 0;
+      font-weight: bold;
+    }
+    #orbital-transform-ui .orb-label.rx { color: #e55; }
+    #orbital-transform-ui .orb-label.ry { color: #5b5; }
+    #orbital-transform-ui .orb-label.rz { color: #56f; }
+    #orbital-transform-ui .orb-label.sc { color: #a96; }
+    #orbital-transform-ui input[type="range"] {
+      flex: 1;
+      height: 3px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #2e2e2e;
+      border-radius: 1px;
+      outline: none;
+      cursor: pointer;
+    }
+    #orbital-transform-ui input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 10px;
+      height: 10px;
+      border-radius: 0;
+      background: #888;
+      cursor: pointer;
+      border: none;
+    }
+    #orbital-transform-ui input[type="range"]::-moz-range-thumb {
+      width: 10px;
+      height: 10px;
+      border-radius: 0;
+      background: #888;
+      cursor: pointer;
+      border: none;
+    }
+    #orbital-transform-ui .orb-val {
+      font-size: 9px;
+      color: #666;
+      min-width: 34px;
+      text-align: right;
+      letter-spacing: 0.5px;
+    }
+    #orbital-transform-ui .orb-divider {
+      height: 0.5px;
+      background: rgba(255,255,255,0.07);
+      margin: 6px 0;
+    }
+    #orbital-transform-ui .orb-reset-btn {
+      width: 100%;
+      margin-top: 8px;
+      background: transparent;
+      border: 0.5px solid rgba(255,255,255,0.15);
+      color: #555;
+      font-family: monospace;
+      font-size: 8px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 0;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    #orbital-transform-ui .orb-reset-btn:hover {
+      border-color: rgba(255,255,255,0.45);
+      color: #ccc;
+    }
+
   </style>
   <title>ELON-MUSK-LISBON-VARIANT | Made on juno.transient.xyz</title>
 </head>
@@ -327,6 +471,13 @@ const zeroParallaxDepth = (5 - 1) * depthStep; // Z-position for level 5
 let isDragging = false; // Flag to indicate if a drag operation is in progress
 let pointerDownPosition = new THREE.Vector2(); // To store the initial pointer down position
 const DRAG_THRESHOLD = 5; // Pixels threshold to consider a move as a drag
+
+// ─── ORBITAL TRANSFORM UI STATE ───
+let orbitalTarget          = null;   // Mesh currently bound to the orbital UI
+let orbitalDoubleTapTime   = 0;      // Timestamp (ms) of the previous tap
+let orbitalDoubleTapObject = null;   // Object hit on the previous tap
+let orbitalUIJustOpened    = false;  // Prevents onClick depth-cycle after a double-tap
+const ORBITAL_DOUBLE_TAP_MS = 350;  // Max gap between two taps to count as a double-tap
 
 let backgroundMesh = null; // To store the background mesh for positioning calculations
 
@@ -3623,7 +3774,8 @@ function init() {
     renderer.domElement.addEventListener('pointermove', onPointerMove);
     renderer.domElement.addEventListener('pointerup', onPointerUp);
     renderer.domElement.addEventListener('click', onClick);
-    
+    setupOrbitalUI();
+
     // Call onWindowResize once after init to ensure initial positions are calculated correctly
     // NOTE: This is called after the main assets are loaded in loadDogecoinAndFiat to ensure
     // responsive elements are placed correctly *after* the initial fixed elements are positioned.
@@ -3776,7 +3928,7 @@ function onPointerDown(event) {
     pointerDownPosition.set(event.clientX, event.clientY);
 
     // Check if the click is on a UI element
-    if (event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) {
+    if (event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#orbital-transform-ui')) {
         selectedObject = null;
         controls.enabled = true;
         return;
@@ -3821,6 +3973,22 @@ function onPointerDown(event) {
             offset.copy(intersect.point).sub(selectedObject.position);
             break; // Found a draggable opaque part, stop searching
         }
+    }
+
+    // ─── DOUBLE-TAP: open orbital transform UI ───
+    if (selectedObject) {
+        const now = performance.now();
+        if (selectedObject === orbitalDoubleTapObject && now - orbitalDoubleTapTime < ORBITAL_DOUBLE_TAP_MS) {
+            openOrbitalUI(selectedObject);
+            selectedObject = null;
+            controls.enabled = true;
+            orbitalDoubleTapTime   = 0;
+            orbitalDoubleTapObject = null;
+            orbitalUIJustOpened    = true;
+            return;
+        }
+        orbitalDoubleTapTime   = now;
+        orbitalDoubleTapObject = selectedObject;
     }
 }
 
@@ -3950,7 +4118,8 @@ function onPointerUp(event) {
 function onClick(event) {
     
     // Only process click if no dragging occurred and not clicking on UI
-    if (isDragging || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) {
+    if (isDragging || orbitalUIJustOpened || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#orbital-transform-ui')) {
+        orbitalUIJustOpened = false;
         return;
     }
 
@@ -4059,6 +4228,118 @@ function onClick(event) {
 
         console.log(`Object moved to layer: ${currentLayer}, Z-position: ${clickedObject.position.z}`);
     }
+}
+
+// ─── ORBITAL TRANSFORM UI ────────────────────────────────────────────────────
+
+/** Convert mesh world position → CSS pixel coords */
+function getOrbitalScreenPos(mesh) {
+    const v = new THREE.Vector3();
+    v.setFromMatrixPosition(mesh.matrixWorld);
+    v.project(camera);
+    return {
+        x: ( v.x * 0.5 + 0.5) * window.innerWidth,
+        y: (-v.y * 0.5 + 0.5) * window.innerHeight
+    };
+}
+
+/** Reposition the floating panel to sit above the target mesh */
+function updateOrbitalUIPosition() {
+    if (!orbitalTarget) return;
+    const ui  = document.getElementById('orbital-transform-ui');
+    const pos = getOrbitalScreenPos(orbitalTarget);
+    ui.style.left = pos.x + 'px';
+    ui.style.top  = pos.y + 'px';
+}
+
+/** Populate sliders from mesh transform and show the panel */
+function openOrbitalUI(mesh) {
+    orbitalTarget = mesh;
+
+    const rxDeg = THREE.MathUtils.radToDeg(mesh.rotation.x);
+    const ryDeg = THREE.MathUtils.radToDeg(mesh.rotation.y);
+    const rzDeg = THREE.MathUtils.radToDeg(mesh.rotation.z);
+    const sc    = mesh.scale.x; // uniform scale
+
+    document.getElementById('orb-rx').value    = rxDeg;
+    document.getElementById('orb-ry').value    = ryDeg;
+    document.getElementById('orb-rz').value    = rzDeg;
+    document.getElementById('orb-scale').value = sc;
+
+    document.getElementById('orb-rx-val').textContent    = Math.round(rxDeg) + '°';
+    document.getElementById('orb-ry-val').textContent    = Math.round(ryDeg) + '°';
+    document.getElementById('orb-rz-val').textContent    = Math.round(rzDeg) + '°';
+    document.getElementById('orb-scale-val').textContent = sc.toFixed(2) + '×';
+
+    const label = (mesh.userData.id || 'asset').toUpperCase();
+    document.getElementById('orb-asset-name').textContent = label;
+
+    updateOrbitalUIPosition();
+    document.getElementById('orbital-transform-ui').classList.add('open');
+}
+
+function closeOrbitalUI() {
+    orbitalTarget = null;
+    document.getElementById('orbital-transform-ui').classList.remove('open');
+}
+
+/** Wire up all orbital-UI controls. Called once from init(). */
+function setupOrbitalUI() {
+    // Rotate X
+    document.getElementById('orb-rx').addEventListener('input', function () {
+        if (!orbitalTarget) return;
+        orbitalTarget.rotation.x = THREE.MathUtils.degToRad(parseFloat(this.value));
+        document.getElementById('orb-rx-val').textContent = Math.round(this.value) + '°';
+    });
+    // Rotate Y
+    document.getElementById('orb-ry').addEventListener('input', function () {
+        if (!orbitalTarget) return;
+        orbitalTarget.rotation.y = THREE.MathUtils.degToRad(parseFloat(this.value));
+        document.getElementById('orb-ry-val').textContent = Math.round(this.value) + '°';
+    });
+    // Rotate Z
+    document.getElementById('orb-rz').addEventListener('input', function () {
+        if (!orbitalTarget) return;
+        orbitalTarget.rotation.z = THREE.MathUtils.degToRad(parseFloat(this.value));
+        document.getElementById('orb-rz-val').textContent = Math.round(this.value) + '°';
+    });
+    // Uniform scale
+    document.getElementById('orb-scale').addEventListener('input', function () {
+        if (!orbitalTarget) return;
+        const s = parseFloat(this.value);
+        orbitalTarget.scale.set(s, s, s);
+        document.getElementById('orb-scale-val').textContent = s.toFixed(2) + '×';
+    });
+    // Reset transform
+    document.getElementById('orb-reset-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!orbitalTarget) return;
+        orbitalTarget.rotation.set(0, 0, 0);
+        orbitalTarget.scale.set(1, 1, 1);
+        document.getElementById('orb-rx').value = 0;
+        document.getElementById('orb-ry').value = 0;
+        document.getElementById('orb-rz').value = 0;
+        document.getElementById('orb-scale').value = 1;
+        document.getElementById('orb-rx-val').textContent    = '0°';
+        document.getElementById('orb-ry-val').textContent    = '0°';
+        document.getElementById('orb-rz-val').textContent    = '0°';
+        document.getElementById('orb-scale-val').textContent = '1.00×';
+    });
+    // Close button
+    document.getElementById('orb-close').addEventListener('click', function (e) {
+        e.stopPropagation();
+        closeOrbitalUI();
+    });
+    // ESC key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeOrbitalUI();
+    });
+    // Tap on canvas (not on orbital UI) closes the panel
+    renderer.domElement.addEventListener('pointerdown', function (e) {
+        if (orbitalTarget && !e.target.closest('#orbital-transform-ui')) {
+            closeOrbitalUI();
+        }
+    });
 }
 
 // Ease-in-out function
@@ -4288,6 +4569,9 @@ function animate(currentTime) {
         }
         updateRedactedGlitchTexture();
     }
+
+    // Keep orbital UI anchored to its target mesh every frame
+    if (orbitalTarget) updateOrbitalUIPosition();
 
     composer.render();
 }
@@ -5040,5 +5324,45 @@ setTimeout(function () {
     setupExport();
   })();
   </script>
+
+  <!-- ─── ORBITAL TRANSFORM UI ─── -->
+  <div id="orbital-transform-ui">
+    <div class="orb-header">
+      <div class="orb-title-wrap">
+        <span class="orb-icon">◎</span>
+        <span class="orb-asset-name" id="orb-asset-name">ASSET</span>
+      </div>
+      <span class="orb-close" id="orb-close">✕</span>
+    </div>
+
+    <div class="orb-section-label">ROTATION</div>
+
+    <div class="orb-row">
+      <span class="orb-label rx">RX</span>
+      <input type="range" id="orb-rx" min="-180" max="180" step="1" value="0">
+      <span class="orb-val" id="orb-rx-val">0°</span>
+    </div>
+    <div class="orb-row">
+      <span class="orb-label ry">RY</span>
+      <input type="range" id="orb-ry" min="-180" max="180" step="1" value="0">
+      <span class="orb-val" id="orb-ry-val">0°</span>
+    </div>
+    <div class="orb-row">
+      <span class="orb-label rz">RZ</span>
+      <input type="range" id="orb-rz" min="-180" max="180" step="1" value="0">
+      <span class="orb-val" id="orb-rz-val">0°</span>
+    </div>
+
+    <div class="orb-divider"></div>
+
+    <div class="orb-section-label">SCALE</div>
+    <div class="orb-row">
+      <span class="orb-label sc">SC</span>
+      <input type="range" id="orb-scale" min="0.1" max="3" step="0.01" value="1">
+      <span class="orb-val" id="orb-scale-val">1.00×</span>
+    </div>
+
+    <button class="orb-reset-btn" id="orb-reset-btn">↺ RESET TRANSFORM</button>
+  </div>
 
 </body></html>
