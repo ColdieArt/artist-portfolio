@@ -36,6 +36,10 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.transientlabs.xyz" />
         <link rel="preconnect" href="https://cdn.transientlabs.xyz" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Special+Elite&family=Black+Ops+One&display=swap"
+        />
       </head>
       <body className="bg-black text-bone">
         <Script id="tl-css" strategy="afterInteractive">
@@ -49,11 +53,9 @@ export default function RootLayout({
             rpcUrls: { ethereum: "" }
           }`}
         </Script>
-        <Script
-          id="tl-embeds"
-          src="https://cdn.transientlabs.xyz/embeds/v1.7.0/index.js"
-          strategy="lazyOnload"
-        />
+        <Script id="tl-embeds" strategy="lazyOnload">
+          {`var s=document.createElement('script');s.type='module';s.src='https://cdn.transientlabs.xyz/embeds/v1.7.0/index.js';document.body.appendChild(s);`}
+        </Script>
         <div className="grain-overlay" />
         <div className="scanline" />
         <Navigation />

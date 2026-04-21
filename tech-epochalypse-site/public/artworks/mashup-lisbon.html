@@ -297,9 +297,12 @@
     }
     #print-modal-content p {
       margin: 0 0 20px 0;
-      font-size: 10px;
+      font-size: 13px;
       color: #aaa;
       line-height: 1.6;
+    }
+    #print-modal-content {
+      max-width: 560px;
     }
     #print-email-input {
       width: 100%;
@@ -307,22 +310,69 @@
       background: #111;
       border: 1px solid #333;
       color: #fff;
-      padding: 12px 14px;
+      padding: 14px 16px;
       font-family: monospace;
-      font-size: 11px;
+      font-size: 16px;
       outline: none;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
+      letter-spacing: 1px;
+      caret-color: #fff;
     }
     #print-email-input:focus {
       border-color: #666;
+    }
+    /* ─── ON-SCREEN KEYBOARD ─── */
+    #virtual-keyboard {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #virtual-keyboard .kb-row {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+    }
+    #virtual-keyboard .kb-key {
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 14px;
+      min-width: 32px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.1s;
+      padding: 0 8px;
+      flex-shrink: 0;
+    }
+    #virtual-keyboard .kb-key:active,
+    #virtual-keyboard .kb-key.pressed {
+      background: #555;
+      border-color: #888;
+    }
+    #virtual-keyboard .kb-key.wide {
+      min-width: 60px;
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+    #virtual-keyboard .kb-key.space {
+      flex: 1;
+      max-width: 200px;
     }
     #print-submit-btn {
       background: #fff;
       color: #000;
       border: none;
-      padding: 12px 30px;
+      padding: 14px 30px;
       font-family: monospace;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: bold;
       cursor: pointer;
       letter-spacing: 1px;
@@ -342,6 +392,198 @@
       text-align: center;
       min-height: 16px;
       letter-spacing: 0.5px;
+    }
+
+    /* ─── WELCOME SCREEN ─── */
+    #welcome-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(0,0,0,0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: monospace;
+      color: #fff;
+      opacity: 1;
+      transition: opacity 0.8s ease;
+      padding: 40px 20px 40px 20px;
+      padding-top: 80px;
+      overflow-y: auto;
+    }
+    #welcome-screen.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #welcome-screen .welcome-header {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      text-align: center;
+      margin: 0 0 12px 0;
+      color: #fff;
+    }
+    #welcome-screen .welcome-sub {
+      font-size: 15px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #fff;
+      margin: 0 0 36px 0;
+      text-align: center;
+    }
+    #welcome-screen .overlord-row {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 0 0 36px 0;
+      width: 100%;
+      max-width: 600px;
+    }
+    #welcome-screen .overlord-thumb {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      max-width: 100px;
+    }
+    #welcome-screen .overlord-thumb img {
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05);
+    }
+    #welcome-screen .overlord-name {
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #888;
+      margin-top: 8px;
+    }
+    #welcome-screen .overlord-thumb { cursor: pointer; }
+    #welcome-screen .overlord-thumb:hover img {
+      border-color: rgba(255,255,255,0.6);
+      transform: scale(1.08);
+    }
+    #welcome-screen .overlord-thumb img {
+      transition: border-color 0.3s ease, transform 0.3s ease;
+    }
+    #overlord-popup {
+      position: fixed;
+      inset: 0;
+      z-index: 600;
+      background: rgba(0,0,0,0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      cursor: pointer;
+    }
+    #overlord-popup.visible { opacity: 1; }
+    #overlord-popup img {
+      max-width: 80vw;
+      max-height: 70vh;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+    #overlord-popup .popup-name {
+      font-family: monospace;
+      font-size: 14px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #fff;
+      margin-top: 16px;
+    }
+    #overlord-popup .popup-close {
+      font-family: monospace;
+      font-size: 10px;
+      color: #666;
+      margin-top: 12px;
+      letter-spacing: 1px;
+    }
+    #welcome-screen .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto 50px auto;
+    }
+    #welcome-screen .module-box {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 20px 16px;
+      text-align: center;
+      transition: border-color 0.3s ease, background 0.3s ease;
+    }
+    #welcome-screen .module-box:hover {
+      border-color: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.08);
+    }
+    #welcome-screen .module-icon {
+      font-size: 28px;
+      margin-bottom: 10px;
+      display: block;
+      opacity: 0.9;
+    }
+    #welcome-screen .module-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    #welcome-screen .module-desc {
+      font-size: 13px;
+      color: #fff;
+      line-height: 1.5;
+      letter-spacing: 0.3px;
+    }
+    #welcome-screen .touch-cta-container {
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: 12px;
+      padding: 28px 48px;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.3s ease, background 0.3s ease;
+      background: rgba(255,255,255,0.03);
+    }
+    #welcome-screen .touch-cta-container:hover {
+      border-color: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.08);
+    }
+    #welcome-screen .touch-cta {
+      font-size: 48px;
+      font-weight: 900;
+      letter-spacing: 8px;
+      text-transform: uppercase;
+      color: #fff;
+      margin: 0;
+      text-align: center;
+    }
+    #welcome-screen .touch-cta-sub {
+      font-size: 12px;
+      color: #888;
+      letter-spacing: 1px;
+      margin: 12px 0 0 0;
+      text-align: center;
+    }
+    @media (max-width: 500px) {
+      #welcome-screen .welcome-header { font-size: 20px; letter-spacing: 4px; }
+      #welcome-screen .modules-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      #welcome-screen .module-box { padding: 14px 10px; }
+      #welcome-screen .overlord-thumb img { width: 52px; height: 52px; }
+      #welcome-screen .overlord-row { gap: 12px; }
+      #welcome-screen .module-icon { font-size: 22px; }
+      #welcome-screen .touch-cta { font-size: 32px; letter-spacing: 5px; }
+      #welcome-screen .touch-cta-container { padding: 20px 28px; }
     }
   </style>
   <title>THE COLLECTIVE - Combined Overlord | Tech Epochalypse by Coldie</title>
@@ -641,35 +883,35 @@ const OVERLORD_NUMERALS = ['I', 'II', 'III', 'IV', 'V'];
 // Asset URLs per element per overlord (index 0=Musk, 1=Zuckerberg, 2=Altman, 3=Bezos, 4=Huang)
 const OVERLORD_ASSETS = {
     rightEye: [
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0007_Eye-R.png',
+        './assets/lisbon/eye-right-lisbon.png',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Eye-R.gif',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_Eye-R.gif',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-Eye-R.gif',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-eyes.gif'
     ],
     leftEye: [
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0009_Eye-L.png',
+        './assets/lisbon/eye-left-lisbon.png',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Eye-L.gif',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_Eye-L.gif',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-Eye-L.gif',
         ''
     ],
     nose: [
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0003_nose-2.png',
+        './assets/lisbon/nose-lisbon.png',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-nose.gif',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_nose.gif',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-nose.gif',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-nose.gif'
     ],
     mouth: [
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0008_mouth.png',
+        './assets/lisbon/mouth-lisbon.png',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Mouth.gif',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_mouth-color.gif',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-mouth.gif',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/Jensen-Huang-mouth.gif'
     ],
     forehead: [
-        'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0010_forehead.png',
+        './assets/lisbon/forehead-lisbon.png',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/zuckerberg/Mark-Zuckerberg-Forehead.gif',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/altman/Sam-Altman-01_forehead-2.gif',
         'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-Forehead.gif',
@@ -2316,6 +2558,8 @@ function init() {
         removed: false // Add removed flag
     });
     loadTexture(getInitialURL('forehead'), (texture) => {
+        // Huang forehead (index 4) → greyscale
+        if (elementOverlordIndex.forehead === 4) desaturateTexture(texture);
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const scaleFactor = 1.0;
         const planeWidth = texture.image.width * baseScale * scaleFactor;
@@ -2606,11 +2850,16 @@ function init() {
     });
     loadTexture(getInitialURL('blueBill'), (texture) => {
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-        const planeWidth = texture.image.width * baseScale;
-        const planeHeight = texture.image.height * baseScale;
+        const planeWidth = texture.image.width * baseScale * 2;  // 100% size increase
+        const planeHeight = texture.image.height * baseScale * 2; // 100% size increase
         const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
         const blueBill = new THREE.Mesh(geometry, material);
-        blueBill.position.set(2, -2, (3 - 1) * depthStep);
+        // Move right 75px (convert px to world units at this z depth)
+        const bbZ = (3 - 1) * depthStep;
+        const bbDist = camera.position.z - bbZ;
+        const bbWorldH = 2 * bbDist * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+        const bbPxToUnit = (bbWorldH * camera.aspect) / window.innerWidth;
+        blueBill.position.set(2 + 75 * bbPxToUnit, -2, bbZ);
         blueBill.userData.currentLayer = 10;
         blueBill.userData.initialPosition = blueBill.position.clone();
         blueBill.userData.initialLayer = 10;
@@ -2676,8 +2925,9 @@ function init() {
         removed: false
     });
     loadTexture(URL_HEADSET, (texture) => {
-        const planeWidth = texture.image.width * baseScale;
-        const planeHeight = texture.image.height * baseScale;
+        const headsetScale = 1.45; // 145%
+        const planeWidth = texture.image.width * baseScale * headsetScale;
+        const planeHeight = texture.image.height * baseScale * headsetScale;
         const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
         const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
         const headset = new THREE.Mesh(geometry, material);
@@ -3516,15 +3766,15 @@ function init() {
     leftUiContainer.style.left = '10px';
     leftUiContainer.style.backgroundColor = 'rgba(0, 0, 0, 0)';
     leftUiContainer.style.color = 'white';
-    leftUiContainer.style.padding = '17px'; /* 30% increase */
+    leftUiContainer.style.padding = '34px'; /* doubled */
     leftUiContainer.style.borderRadius = '5px';
     leftUiContainer.style.fontFamily = 'monospace';
-    leftUiContainer.style.fontSize = '170%'; /* 30% increase */
+    leftUiContainer.style.fontSize = '340%'; /* doubled */
     leftUiContainer.style.zIndex = '100';
     leftUiContainer.style.display = 'flex';
     leftUiContainer.style.flexDirection = 'column';
     leftUiContainer.style.flexWrap = 'nowrap';
-    leftUiContainer.style.gap = '8.5px'; /* 30% increase */
+    leftUiContainer.style.gap = '17px'; /* doubled */
     leftUiContainer.style.transition = 'top 0.5s ease-in-out'; // Smooth transition for top property
     document.body.appendChild(leftUiContainer);
 
@@ -3717,14 +3967,36 @@ function init() {
         button.onclick = (event) => { event.stopPropagation(); resetPiecesToOriginalPositions(); };
         return button;
     };
-    leftUiContainer.appendChild(createResetButton());
+    // RESET button placed above PRINT as a fixed bottom-left button (not in left UI)
+    const resetBtnFixed = createResetButton();
+    resetBtnFixed.id = 'reset-btn-fixed';
+    resetBtnFixed.style.cssText = `
+        position: fixed;
+        bottom: 60px;
+        left: 16px;
+        z-index: 250;
+        background: #000;
+        color: #fff;
+        border: 1px solid #fff;
+        padding: 10px 22px;
+        font-family: monospace;
+        font-size: 12px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: background 0.2s, border-color 0.2s;
+    `;
+    resetBtnFixed.onmouseover = () => { resetBtnFixed.style.background = '#1a1a1a'; resetBtnFixed.style.borderColor = '#aaa'; };
+    resetBtnFixed.onmouseout = () => { resetBtnFixed.style.background = '#000'; resetBtnFixed.style.borderColor = '#fff'; };
+    document.body.appendChild(resetBtnFixed);
     rightUiContainer.appendChild(createResetButton());
 
     // Create and append the TRASH button to the left UI container
     const createTrashButton = () => {
         const button = document.createElement('button');
         button.id = 'trash-button'; // Unique ID for easy targeting
-        button.innerHTML = 'TRASH'; // Text with trashcan icon
+        button.innerHTML = '&#128465; TRASH'; // Trashcan icon + text
         button.style.cssText = `
             background-color: black; /* Changed from #CC0000 to black */
             color: white;
@@ -4385,6 +4657,27 @@ function onWindowResize() {
 // Right-click any face element to cycle through all 5 overlords' versions
 // ══════════════════════════════════════════════════════════════
 
+// Desaturate a Three.js texture to greyscale (modifies in place, returns same texture)
+function desaturateTexture(texture) {
+    if (!texture || !texture.image) return texture;
+    const img = texture.image;
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+        const grey = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        d[i] = d[i + 1] = d[i + 2] = grey;
+    }
+    ctx.putImageData(imageData, 0, 0);
+    texture.image = canvas;
+    texture.needsUpdate = true;
+    return texture;
+}
+
 function preloadEyeTextures() {
     // Actually preloads ALL element textures (name kept for backward compat with init calls)
     const textureLoader = new THREE.TextureLoader();
@@ -4413,6 +4706,8 @@ function preloadEyeTextures() {
         preloadedElementTextures[elementId] = new Array(urls.length).fill(null);
         urls.forEach((url, index) => {
             const p = loadTex(url).then((tex) => {
+                // Huang forehead (index 4) → greyscale
+                if (elementId === 'forehead' && index === 4 && tex) desaturateTexture(tex);
                 preloadedElementTextures[elementId][index] = tex;
             });
             preloadPromises.push(p);
@@ -4423,6 +4718,10 @@ function preloadEyeTextures() {
     // so no reshuffle is needed here.
     Promise.all(preloadPromises).then(() => {
         console.log('All element textures preloaded (no reshuffle).');
+        // If mouth was randomly assigned to Altman (index 2), create the overlay now
+        if (elementOverlordIndex.mouth === 2) {
+            cycleMouthOverlay(2);
+        }
     });
 }
 
@@ -5845,6 +6144,7 @@ setTimeout(function () {
     window.scene = typeof scene != "undefined" ? scene : undefined;
     window.composer = typeof composer != "undefined" ? composer : undefined;
     window.effectControls = typeof effectControls != "undefined" ? effectControls : undefined;
+    window.controls = typeof controls != "undefined" ? controls : undefined;
 }, 1000)
 
     // Expose for dae hooks
@@ -5855,6 +6155,7 @@ setTimeout(function () {
       window.scene = typeof scene != "undefined" ? scene : undefined;
       window.composer = typeof composer != "undefined" ? composer : undefined;
       window.effectControls = typeof effectControls != "undefined" ? effectControls : undefined;
+      window.controls = typeof controls != "undefined" ? controls : undefined;
     }, 1000)
   </script>
 
@@ -5914,15 +6215,185 @@ setTimeout(function () {
     </div>
   </div>
 
+  <!-- ─── WELCOME SCREEN ─── -->
+  <div id="welcome-screen">
+    <h1 class="welcome-header">TECH EPOCHALYPSE</h1>
+    <p class="welcome-sub">Interactive 3D Kinetic Collage by Coldie</p>
+
+    <div class="overlord-row">
+      <div class="overlord-thumb" data-full="/images/overlords/ElonMusk-Thumbnail.png" data-name="Elon Musk">
+        <img src="/images/overlords/ElonMusk-Thumbnail.png" alt="Musk">
+        <span class="overlord-name">Musk</span>
+      </div>
+      <div class="overlord-thumb" data-full="/images/overlords/Zuckerberg-web.jpg" data-name="Mark Zuckerberg">
+        <img src="/images/overlords/Zuckerberg-web.jpg" alt="Zuckerberg">
+        <span class="overlord-name">Zuckerberg</span>
+      </div>
+      <div class="overlord-thumb" data-full="/images/overlords/Altman-web.jpg" data-name="Sam Altman">
+        <img src="/images/overlords/Altman-web.jpg" alt="Altman">
+        <span class="overlord-name">Altman</span>
+      </div>
+      <div class="overlord-thumb" data-full="/images/overlords/Bezos-thumb.jpg" data-name="Jeff Bezos">
+        <img src="/images/overlords/Bezos-thumb.jpg" alt="Bezos">
+        <span class="overlord-name">Bezos</span>
+      </div>
+      <div class="overlord-thumb" data-full="/images/overlords/Huang-web.jpg" data-name="Jensen Huang">
+        <img src="/images/overlords/Huang-web.jpg" alt="Huang">
+        <span class="overlord-name">Huang</span>
+      </div>
+    </div>
+
+    <div class="modules-grid">
+      <div class="module-box">
+        <span class="module-icon">&#9758;</span>
+        <div class="module-title">X/Y/Z Positioning</div>
+        <div class="module-desc">Touch and drag pieces on X and Y axis</div>
+      </div>
+      <div class="module-box">
+        <span class="module-icon">&#128444;</span>
+        <div class="module-title">3D Canvas</div>
+        <div class="module-desc">Pinch/Expand to customize zoom. Drag on background to revolve the 3D canvas</div>
+      </div>
+      <div class="module-box">
+        <span class="module-icon">&#8644;</span>
+        <div class="module-title">Swap Mode</div>
+        <div class="module-desc">Activate to choose face pieces for all 5 Overlords to create a new decentralized portrait</div>
+      </div>
+      <div class="module-box">
+        <span class="module-icon">&#128465;</span>
+        <div class="module-title">Trash</div>
+        <div class="module-desc">Drag pieces to trash to delete them</div>
+      </div>
+      <div class="module-box">
+        <span class="module-icon">&#127912;</span>
+        <div class="module-title">Control Layer</div>
+        <div class="module-desc">Select to add visual effects to your collage</div>
+      </div>
+      <div class="module-box">
+        <span class="module-icon">&#128424;</span>
+        <div class="module-title">Print</div>
+        <div class="module-desc">Save your layout and collect your print</div>
+      </div>
+    </div>
+
+    <div class="touch-cta-container" id="welcome-enter">
+      <p class="touch-cta">TOUCH THE ART.</p>
+      <p class="touch-cta-sub">Click here to experience the interactive 3D kinetic art experience</p>
+    </div>
+  </div>
+  <div id="overlord-popup">
+    <img src="" alt="">
+    <div class="popup-name"></div>
+    <div class="popup-close">tap anywhere to close</div>
+  </div>
+  <script>
+  (function(){
+    const screen = document.getElementById('welcome-screen');
+    const enter = document.getElementById('welcome-enter');
+    const popup = document.getElementById('overlord-popup');
+    const popupImg = popup.querySelector('img');
+    const popupName = popup.querySelector('.popup-name');
+
+    if (screen) {
+      function closeWelcome() {
+        screen.classList.add('fade-out');
+        setTimeout(() => { screen.remove(); popup.remove(); }, 800);
+      }
+      enter.addEventListener('click', closeWelcome);
+      enter.addEventListener('touchend', function(e) { e.preventDefault(); closeWelcome(); });
+    }
+
+    // Overlord thumbnail popup
+    document.querySelectorAll('.overlord-thumb').forEach(thumb => {
+      thumb.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const fullSrc = this.dataset.full;
+        const name = this.dataset.name;
+        if (fullSrc) {
+          popupImg.src = fullSrc;
+          popupName.textContent = name;
+          popup.style.display = 'flex';
+          requestAnimationFrame(() => { popup.classList.add('visible'); });
+        }
+      });
+    });
+
+    popup.style.display = 'none';
+    popup.addEventListener('click', function() {
+      popup.classList.remove('visible');
+      setTimeout(() => { popup.style.display = 'none'; }, 300);
+    });
+  })();
+  </script>
+
   <!-- ─── PRINT BUTTON (bottom-left) ─── -->
   <button id="print-btn">PRINT</button>
 
   <!-- ─── PRINT ORDER MODAL ─── -->
   <div id="print-modal-overlay">
     <div id="print-modal-content">
-      <h2>Print Your 3D Kinetic Collage</h2>
+      <h2>Print Your Tech Epochalypse Kinetic Collage</h2>
+      <div id="print-preview-container" style="margin:0 0 16px 0;display:flex;justify-content:center;align-items:center;">
+        <img id="print-preview-img" style="max-width:100%;max-height:240px;border:1px solid rgba(255,255,255,0.15);border-radius:4px;display:none;margin:0 auto;" alt="Your collage preview">
+      </div>
       <p>Collect your customized kinetic 3D collage by Coldie. You will be contacted by email with payment and shipping options. Thank you for touching the art and feeling something.</p>
-      <input id="print-email-input" type="email" placeholder="Email Address" />
+      <input id="print-email-input" type="text" readonly placeholder="Tap keys to enter email" />
+      <div id="virtual-keyboard">
+        <div class="kb-row">
+          <div class="kb-key" data-key="1">1</div>
+          <div class="kb-key" data-key="2">2</div>
+          <div class="kb-key" data-key="3">3</div>
+          <div class="kb-key" data-key="4">4</div>
+          <div class="kb-key" data-key="5">5</div>
+          <div class="kb-key" data-key="6">6</div>
+          <div class="kb-key" data-key="7">7</div>
+          <div class="kb-key" data-key="8">8</div>
+          <div class="kb-key" data-key="9">9</div>
+          <div class="kb-key" data-key="0">0</div>
+        </div>
+        <div class="kb-row">
+          <div class="kb-key" data-key="q">q</div>
+          <div class="kb-key" data-key="w">w</div>
+          <div class="kb-key" data-key="e">e</div>
+          <div class="kb-key" data-key="r">r</div>
+          <div class="kb-key" data-key="t">t</div>
+          <div class="kb-key" data-key="y">y</div>
+          <div class="kb-key" data-key="u">u</div>
+          <div class="kb-key" data-key="i">i</div>
+          <div class="kb-key" data-key="o">o</div>
+          <div class="kb-key" data-key="p">p</div>
+        </div>
+        <div class="kb-row">
+          <div class="kb-key" data-key="a">a</div>
+          <div class="kb-key" data-key="s">s</div>
+          <div class="kb-key" data-key="d">d</div>
+          <div class="kb-key" data-key="f">f</div>
+          <div class="kb-key" data-key="g">g</div>
+          <div class="kb-key" data-key="h">h</div>
+          <div class="kb-key" data-key="j">j</div>
+          <div class="kb-key" data-key="k">k</div>
+          <div class="kb-key" data-key="l">l</div>
+        </div>
+        <div class="kb-row">
+          <div class="kb-key" data-key="z">z</div>
+          <div class="kb-key" data-key="x">x</div>
+          <div class="kb-key" data-key="c">c</div>
+          <div class="kb-key" data-key="v">v</div>
+          <div class="kb-key" data-key="b">b</div>
+          <div class="kb-key" data-key="n">n</div>
+          <div class="kb-key" data-key="m">m</div>
+          <div class="kb-key wide" data-key="backspace">DEL</div>
+        </div>
+        <div class="kb-row">
+          <div class="kb-key" data-key="@">@</div>
+          <div class="kb-key" data-key=".">.</div>
+          <div class="kb-key" data-key="-">-</div>
+          <div class="kb-key" data-key="_">_</div>
+          <div class="kb-key wide" data-key=".com">.com</div>
+          <div class="kb-key wide" data-key=".net">.net</div>
+          <div class="kb-key wide" data-key="@gmail.com">@gmail</div>
+        </div>
+      </div>
       <button id="print-submit-btn">SUBMIT</button>
       <div id="print-status"></div>
     </div>
@@ -5941,6 +6412,30 @@ setTimeout(function () {
     const printSubmitBtn = document.getElementById('print-submit-btn');
     const printStatus = document.getElementById('print-status');
 
+    // ── VIRTUAL KEYBOARD LOGIC ──
+    const vkb = document.getElementById('virtual-keyboard');
+    if (vkb && printEmailInput) {
+      vkb.addEventListener('pointerdown', (e) => {
+        const key = e.target.closest('.kb-key');
+        if (!key) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const val = key.dataset.key;
+        if (val === 'backspace') {
+          printEmailInput.value = printEmailInput.value.slice(0, -1);
+        } else {
+          printEmailInput.value += val;
+        }
+        // Visual feedback
+        key.classList.add('pressed');
+        setTimeout(() => key.classList.remove('pressed'), 120);
+      });
+      // Block all events from reaching canvas
+      ['touchstart','touchmove','touchend','pointerdown','pointermove','pointerup','mousedown','click'].forEach(evt => {
+        vkb.addEventListener(evt, (e) => { e.stopPropagation(); }, { passive: false });
+      });
+    }
+
     if (isEmbedded) {
       // Hide everything when embedded in an iframe
       if (printBtn) printBtn.style.display = 'none';
@@ -5957,17 +6452,81 @@ setTimeout(function () {
     }
 
     if (printBtn && printOverlay && !isEmbedded) {
-      printBtn.onclick = (e) => {
-        e.stopPropagation();
+      // Stop ALL touch/pointer events from reaching the canvas when modal is open
+      ['touchstart','touchmove','touchend','pointerdown','pointermove','pointerup','mousedown','mousemove','mouseup','click'].forEach(evt => {
+        printOverlay.addEventListener(evt, (e) => { e.stopPropagation(); }, { passive: false });
+        // Also block on the modal content itself
+        document.getElementById('print-modal-content').addEventListener(evt, (e) => { e.stopPropagation(); }, { passive: false });
+      });
+
+      function openPrintModal() {
+        // Capture a vertical preview matching print orientation (3508x4961 = ~0.707 aspect)
+        const previewImg = document.getElementById('print-preview-img');
+        try {
+          const r = window.renderer;
+          if (r && previewImg && window.camera) {
+            const PREV_W = 350;
+            const PREV_H = 496;
+            const origW = r.domElement.width;
+            const origH = r.domElement.height;
+            const origAspect = window.camera.aspect;
+
+            // Temporarily resize to vertical print proportions
+            r.setSize(PREV_W, PREV_H);
+            window.camera.aspect = PREV_W / PREV_H;
+            window.camera.updateProjectionMatrix();
+            if (window.composer) {
+              window.composer.setSize(PREV_W, PREV_H);
+              window.composer.render();
+            } else if (window.scene) {
+              r.render(window.scene, window.camera);
+            }
+
+            const previewUrl = r.domElement.toDataURL('image/jpeg', 0.8);
+            previewImg.src = previewUrl;
+            previewImg.style.display = 'block';
+
+            // Restore original size
+            r.setSize(origW, origH);
+            window.camera.aspect = origAspect;
+            window.camera.updateProjectionMatrix();
+            if (window.composer) {
+              window.composer.setSize(origW, origH);
+            }
+          }
+        } catch(e) {
+          console.log('Preview capture failed:', e);
+          if (previewImg) previewImg.style.display = 'none';
+        }
+
         printOverlay.classList.add('open');
         printEmailInput.value = '';
         printStatus.textContent = '';
         printSubmitBtn.disabled = false;
+        // Disable OrbitControls and canvas pointer events while modal is open
+        if (window.controls) window.controls.enabled = false;
+        const canvas = document.querySelector('canvas');
+        if (canvas) canvas.style.pointerEvents = 'none';
+      }
+
+      function closePrintModal() {
+        printOverlay.classList.remove('open');
+        // Re-enable OrbitControls and canvas pointer events
+        if (window.controls) window.controls.enabled = true;
+        const canvas = document.querySelector('canvas');
+        if (canvas) canvas.style.pointerEvents = '';
+        // Blur input to dismiss keyboard
+        printEmailInput.blur();
+      }
+
+      printBtn.onclick = (e) => {
+        e.stopPropagation();
+        openPrintModal();
       };
 
       // Close on overlay background click
       printOverlay.onclick = (e) => {
-        if (e.target === printOverlay) printOverlay.classList.remove('open');
+        if (e.target === printOverlay) closePrintModal();
       };
 
       // ── PRINT SUBMIT — capture canvas + composition JSON, send to Airtable ──
@@ -6007,7 +6566,7 @@ setTimeout(function () {
             r.render(window.scene, window.camera);
           }
 
-          const dataUrl = r.domElement.toDataURL('image/jpeg', 0.95);
+          const dataUrl = r.domElement.toDataURL('image/jpeg', 0.80);
           const imageBlob = await (await fetch(dataUrl)).blob();
 
           // Restore original size
@@ -6054,7 +6613,7 @@ setTimeout(function () {
             printStatus.style.color = '#4c4';
             printStatus.textContent = 'Successful submission. Stay tuned by email to complete order.';
             setTimeout(() => {
-              printOverlay.classList.remove('open');
+              closePrintModal();
               printStatus.textContent = '';
               printSubmitBtn.disabled = false;
             }, 3000);
