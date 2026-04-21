@@ -359,70 +359,75 @@
       transition: color 0.15s;
     }
     #orbital-transform-ui .orb-close:hover { color: #fff; }
-    #orbital-transform-ui .orb-section-label {
+    /* Mode switcher row */
+    #orbital-transform-ui .orb-modes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+    #orbital-transform-ui .orb-mode-btn {
+      background: #0a0a0a;
+      color: #888;
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 8px 4px 6px;
+      font-family: monospace;
       font-size: 8px;
-      letter-spacing: 2px;
-      color: #444;
+      letter-spacing: 1.2px;
       text-transform: uppercase;
-      margin: 0 0 5px;
-    }
-    #orbital-transform-ui .orb-row {
+      cursor: pointer;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 5px;
+      gap: 3px;
+      line-height: 1;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
     }
-    #orbital-transform-ui .orb-label {
-      font-size: 9px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      width: 16px;
-      flex-shrink: 0;
-      font-weight: bold;
+    #orbital-transform-ui .orb-mode-btn:hover {
+      border-color: rgba(255,255,255,0.4);
+      color: #ddd;
     }
-    #orbital-transform-ui .orb-label.rx { color: #e55; }
-    #orbital-transform-ui .orb-label.ry { color: #5b5; }
-    #orbital-transform-ui .orb-label.rz { color: #56f; }
-    #orbital-transform-ui .orb-label.sc { color: #a96; }
-    #orbital-transform-ui input[type="range"] {
-      flex: 1;
-      height: 3px;
-      -webkit-appearance: none;
-      appearance: none;
-      background: #2e2e2e;
-      border-radius: 1px;
-      outline: none;
-      cursor: pointer;
+    #orbital-transform-ui .orb-mode-btn.active {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
     }
-    #orbital-transform-ui input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 10px;
-      height: 10px;
-      border-radius: 0;
-      background: #888;
-      cursor: pointer;
-      border: none;
+    #orbital-transform-ui .orb-mode-icon {
+      font-size: 14px;
+      line-height: 1;
     }
-    #orbital-transform-ui input[type="range"]::-moz-range-thumb {
-      width: 10px;
-      height: 10px;
-      border-radius: 0;
-      background: #888;
-      cursor: pointer;
-      border: none;
+    #orbital-transform-ui .orb-mode-label {
+      font-size: 8px;
+      letter-spacing: 1.2px;
     }
-    #orbital-transform-ui .orb-val {
-      font-size: 9px;
-      color: #666;
-      min-width: 34px;
-      text-align: right;
+    #orbital-transform-ui .orb-mode-hotkey {
+      font-size: 7px;
+      opacity: 0.5;
       letter-spacing: 0.5px;
     }
-    #orbital-transform-ui .orb-divider {
-      height: 0.5px;
-      background: rgba(255,255,255,0.07);
-      margin: 6px 0;
+    /* Legend with axis colors */
+    #orbital-transform-ui .orb-legend {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 8px;
+      font-size: 8px;
+      letter-spacing: 1px;
     }
+    #orbital-transform-ui .orb-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    #orbital-transform-ui .orb-legend-dot {
+      width: 6px;
+      height: 6px;
+      display: inline-block;
+    }
+    #orbital-transform-ui .orb-legend-dot.x { background: #e55; }
+    #orbital-transform-ui .orb-legend-dot.y { background: #5b5; }
+    #orbital-transform-ui .orb-legend-dot.z { background: #56f; }
+    #orbital-transform-ui .orb-legend-label { color: #666; }
+    /* Reset button */
     #orbital-transform-ui .orb-reset-btn {
       width: 100%;
       margin-top: 8px;
@@ -451,6 +456,7 @@
   <script type="module">
     import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
@@ -473,11 +479,9 @@ let pointerDownPosition = new THREE.Vector2(); // To store the initial pointer d
 const DRAG_THRESHOLD = 5; // Pixels threshold to consider a move as a drag
 
 // ─── ORBITAL TRANSFORM UI STATE ───
-let orbitalTarget          = null;   // Mesh currently bound to the orbital UI
-let orbitalDoubleTapTime   = 0;      // Timestamp (ms) of the previous tap
-let orbitalDoubleTapObject = null;   // Object hit on the previous tap
-let orbitalUIJustOpened    = false;  // Prevents onClick depth-cycle after a double-tap
-const ORBITAL_DOUBLE_TAP_MS = 350;  // Max gap between two taps to count as a double-tap
+let orbitalTarget       = null;         // Mesh currently bound to the orbital gizmo
+let transformControls   = null;         // Three.js TransformControls instance (Blender/AE-style gizmo)
+let currentGizmoMode    = 'translate';  // 'translate' | 'rotate' | 'scale'
 
 let backgroundMesh = null; // To store the background mesh for positioning calculations
 
@@ -2163,6 +2167,26 @@ function init() {
     controls.addEventListener('change', () => {
         stopCameraAnimationAndReset(); // Stop animation on camera control interaction
     });
+
+    // ─── TRANSFORM CONTROLS (Blender/AE-style gizmo) ───
+    transformControls = new TransformControls(camera, renderer.domElement);
+    transformControls.setSize(0.9);
+    transformControls.setSpace('local');
+    // Suspend OrbitControls while dragging a gizmo handle so the camera doesn't pan
+    transformControls.addEventListener('dragging-changed', (e) => {
+        if (e.value) {
+            // Drag started → always disable the orbit camera
+            controls.enabled = false;
+        } else if (!cameraAnimationActive && !effectControls.yRotation) {
+            // Drag ended → re-enable unless something else owns the camera
+            controls.enabled = true;
+        }
+    });
+    // Keep gizmo in the scene (its visible gizmo is added via getHelper() in r165+)
+    const _transformHelper = transformControls.getHelper ? transformControls.getHelper() : transformControls;
+    scene.add(_transformHelper);
+    _transformHelper.visible = false;
+    transformControls.enabled = false;
 
     // Store initial global camera position and look-at target
     initialGlobalCameraPos.copy(camera.position);
@@ -3934,6 +3958,12 @@ function onPointerDown(event) {
         return;
     }
 
+    // If pointer is over a TransformControls gizmo handle, let the gizmo own the event
+    if (transformControls && transformControls.axis) {
+        selectedObject = null;
+        return;
+    }
+
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -4102,8 +4132,12 @@ function onPointerUp(event) {
 function onClick(event) {
     
     // Only process click if no dragging occurred and not clicking on UI
-    if (isDragging || orbitalUIJustOpened || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#orbital-transform-ui')) {
-        orbitalUIJustOpened = false;
+    if (isDragging || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#orbital-transform-ui')) {
+        return;
+    }
+
+    // If the user just finished dragging a gizmo handle, suppress this click
+    if (transformControls && transformControls.dragging) {
         return;
     }
 
@@ -4191,12 +4225,15 @@ function onClick(event) {
 
         // Single-tap → open orbital transform UI on this asset
         openOrbitalUI(clickedObject);
+    } else if (orbitalTarget) {
+        // Click on empty canvas while gizmo is open → close it
+        closeOrbitalUI();
     }
 }
 
-// ─── ORBITAL TRANSFORM UI ────────────────────────────────────────────────────
+// ─── ORBITAL TRANSFORM UI (Blender/AE-style gizmo) ──────────────────────────
 
-/** Convert mesh world position → CSS pixel coords */
+/** Convert mesh world position → CSS pixel coords (used for floating toolbar) */
 function getOrbitalScreenPos(mesh) {
     const v = new THREE.Vector3();
     v.setFromMatrixPosition(mesh.matrixWorld);
@@ -4207,7 +4244,7 @@ function getOrbitalScreenPos(mesh) {
     };
 }
 
-/** Reposition the floating panel to sit above the target mesh */
+/** Reposition the floating toolbar to sit above the target mesh */
 function updateOrbitalUIPosition() {
     if (!orbitalTarget) return;
     const ui  = document.getElementById('orbital-transform-ui');
@@ -4216,93 +4253,83 @@ function updateOrbitalUIPosition() {
     ui.style.top  = pos.y + 'px';
 }
 
-/** Populate sliders from mesh transform and show the panel */
+/** Update the active-mode button highlight */
+function setGizmoMode(mode) {
+    if (!transformControls) return;
+    currentGizmoMode = mode;
+    transformControls.setMode(mode);
+    document.querySelectorAll('#orbital-transform-ui .orb-mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+}
+
+/** Attach the gizmo to a mesh and show the floating toolbar */
 function openOrbitalUI(mesh) {
     orbitalTarget = mesh;
 
-    const rxDeg = THREE.MathUtils.radToDeg(mesh.rotation.x);
-    const ryDeg = THREE.MathUtils.radToDeg(mesh.rotation.y);
-    const rzDeg = THREE.MathUtils.radToDeg(mesh.rotation.z);
-    const sc    = mesh.scale.x; // uniform scale
+    // Attach Blender/AE-style gizmo
+    if (transformControls) {
+        transformControls.attach(mesh);
+        transformControls.enabled = true;
+        const helper = transformControls.getHelper ? transformControls.getHelper() : transformControls;
+        helper.visible = true;
+        setGizmoMode(currentGizmoMode);
+    }
 
-    document.getElementById('orb-rx').value    = rxDeg;
-    document.getElementById('orb-ry').value    = ryDeg;
-    document.getElementById('orb-rz').value    = rzDeg;
-    document.getElementById('orb-scale').value = sc;
-
-    document.getElementById('orb-rx-val').textContent    = Math.round(rxDeg) + '°';
-    document.getElementById('orb-ry-val').textContent    = Math.round(ryDeg) + '°';
-    document.getElementById('orb-rz-val').textContent    = Math.round(rzDeg) + '°';
-    document.getElementById('orb-scale-val').textContent = sc.toFixed(2) + '×';
-
+    // Floating toolbar label + position
     const label = (mesh.userData.id || 'asset').toUpperCase();
     document.getElementById('orb-asset-name').textContent = label;
-
     updateOrbitalUIPosition();
     document.getElementById('orbital-transform-ui').classList.add('open');
 }
 
+/** Detach the gizmo and hide the floating toolbar */
 function closeOrbitalUI() {
+    if (transformControls) {
+        transformControls.detach();
+        transformControls.enabled = false;
+        const helper = transformControls.getHelper ? transformControls.getHelper() : transformControls;
+        helper.visible = false;
+    }
     orbitalTarget = null;
     document.getElementById('orbital-transform-ui').classList.remove('open');
 }
 
 /** Wire up all orbital-UI controls. Called once from init(). */
 function setupOrbitalUI() {
-    // Rotate X
-    document.getElementById('orb-rx').addEventListener('input', function () {
-        if (!orbitalTarget) return;
-        orbitalTarget.rotation.x = THREE.MathUtils.degToRad(parseFloat(this.value));
-        document.getElementById('orb-rx-val').textContent = Math.round(this.value) + '°';
+    // Mode buttons: MOVE / ROTATE / SCALE
+    document.querySelectorAll('#orbital-transform-ui .orb-mode-btn').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            setGizmoMode(this.dataset.mode);
+        });
     });
-    // Rotate Y
-    document.getElementById('orb-ry').addEventListener('input', function () {
-        if (!orbitalTarget) return;
-        orbitalTarget.rotation.y = THREE.MathUtils.degToRad(parseFloat(this.value));
-        document.getElementById('orb-ry-val').textContent = Math.round(this.value) + '°';
-    });
-    // Rotate Z
-    document.getElementById('orb-rz').addEventListener('input', function () {
-        if (!orbitalTarget) return;
-        orbitalTarget.rotation.z = THREE.MathUtils.degToRad(parseFloat(this.value));
-        document.getElementById('orb-rz-val').textContent = Math.round(this.value) + '°';
-    });
-    // Uniform scale
-    document.getElementById('orb-scale').addEventListener('input', function () {
-        if (!orbitalTarget) return;
-        const s = parseFloat(this.value);
-        orbitalTarget.scale.set(s, s, s);
-        document.getElementById('orb-scale-val').textContent = s.toFixed(2) + '×';
-    });
-    // Reset transform
+
+    // Reset transform (clears rotation + scale, leaves position)
     document.getElementById('orb-reset-btn').addEventListener('click', function (e) {
         e.stopPropagation();
         if (!orbitalTarget) return;
         orbitalTarget.rotation.set(0, 0, 0);
         orbitalTarget.scale.set(1, 1, 1);
-        document.getElementById('orb-rx').value = 0;
-        document.getElementById('orb-ry').value = 0;
-        document.getElementById('orb-rz').value = 0;
-        document.getElementById('orb-scale').value = 1;
-        document.getElementById('orb-rx-val').textContent    = '0°';
-        document.getElementById('orb-ry-val').textContent    = '0°';
-        document.getElementById('orb-rz-val').textContent    = '0°';
-        document.getElementById('orb-scale-val').textContent = '1.00×';
     });
+
     // Close button
     document.getElementById('orb-close').addEventListener('click', function (e) {
         e.stopPropagation();
         closeOrbitalUI();
     });
-    // ESC key
+
+    // Keyboard shortcuts: G/R/S switch mode, ESC closes
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closeOrbitalUI();
-    });
-    // Tap on canvas (not on orbital UI) closes the panel
-    renderer.domElement.addEventListener('pointerdown', function (e) {
-        if (orbitalTarget && !e.target.closest('#orbital-transform-ui')) {
-            closeOrbitalUI();
-        }
+        // Ignore keys while typing in an input (email input, name input, etc.)
+        const tag = (document.activeElement && document.activeElement.tagName) || '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+        if (e.key === 'Escape') { closeOrbitalUI(); return; }
+        if (!orbitalTarget) return;
+        if (e.key === 'g' || e.key === 'G') setGizmoMode('translate');
+        else if (e.key === 'r' || e.key === 'R') setGizmoMode('rotate');
+        else if (e.key === 's' || e.key === 'S') setGizmoMode('scale');
     });
 }
 
@@ -5289,41 +5316,38 @@ setTimeout(function () {
   })();
   </script>
 
-  <!-- ─── ORBITAL TRANSFORM UI ─── -->
+  <!-- ─── ORBITAL TRANSFORM UI (Blender/AE-style gizmo toolbar) ─── -->
   <div id="orbital-transform-ui">
     <div class="orb-header">
       <div class="orb-title-wrap">
         <span class="orb-icon">◎</span>
         <span class="orb-asset-name" id="orb-asset-name">ASSET</span>
       </div>
-      <span class="orb-close" id="orb-close">✕</span>
+      <span class="orb-close" id="orb-close" title="Close (Esc)">✕</span>
     </div>
 
-    <div class="orb-section-label">ROTATION</div>
-
-    <div class="orb-row">
-      <span class="orb-label rx">RX</span>
-      <input type="range" id="orb-rx" min="-180" max="180" step="1" value="0">
-      <span class="orb-val" id="orb-rx-val">0°</span>
+    <div class="orb-modes">
+      <button class="orb-mode-btn active" id="orb-mode-translate" data-mode="translate" title="Move (G)">
+        <span class="orb-mode-icon">⇔</span>
+        <span class="orb-mode-label">MOVE</span>
+        <span class="orb-mode-hotkey">G</span>
+      </button>
+      <button class="orb-mode-btn" id="orb-mode-rotate" data-mode="rotate" title="Rotate (R)">
+        <span class="orb-mode-icon">⟳</span>
+        <span class="orb-mode-label">ROTATE</span>
+        <span class="orb-mode-hotkey">R</span>
+      </button>
+      <button class="orb-mode-btn" id="orb-mode-scale" data-mode="scale" title="Scale (S)">
+        <span class="orb-mode-icon">⤢</span>
+        <span class="orb-mode-label">SCALE</span>
+        <span class="orb-mode-hotkey">S</span>
+      </button>
     </div>
-    <div class="orb-row">
-      <span class="orb-label ry">RY</span>
-      <input type="range" id="orb-ry" min="-180" max="180" step="1" value="0">
-      <span class="orb-val" id="orb-ry-val">0°</span>
-    </div>
-    <div class="orb-row">
-      <span class="orb-label rz">RZ</span>
-      <input type="range" id="orb-rz" min="-180" max="180" step="1" value="0">
-      <span class="orb-val" id="orb-rz-val">0°</span>
-    </div>
 
-    <div class="orb-divider"></div>
-
-    <div class="orb-section-label">SCALE</div>
-    <div class="orb-row">
-      <span class="orb-label sc">SC</span>
-      <input type="range" id="orb-scale" min="0.1" max="3" step="0.01" value="1">
-      <span class="orb-val" id="orb-scale-val">1.00×</span>
+    <div class="orb-legend">
+      <span class="orb-legend-item"><span class="orb-legend-dot x"></span><span class="orb-legend-label">X</span></span>
+      <span class="orb-legend-item"><span class="orb-legend-dot y"></span><span class="orb-legend-label">Y</span></span>
+      <span class="orb-legend-item"><span class="orb-legend-dot z"></span><span class="orb-legend-label">Z</span></span>
     </div>
 
     <button class="orb-reset-btn" id="orb-reset-btn">↺ RESET TRANSFORM</button>
