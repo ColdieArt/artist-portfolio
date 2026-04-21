@@ -311,11 +311,16 @@
       min-width: 204px;
       pointer-events: all;
       display: none;
-      transform: translate(-50%, calc(-100% - 16px));
+      /* Default: anchor (left, top) is the bottom-center of the UI → UI floats above asset */
+      transform: translate(-50%, -100%);
       box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 10px 40px rgba(0,0,0,0.85);
     }
     #orbital-transform-ui.open { display: block; }
-    /* down-arrow connector to mesh */
+    /* When flipped below the asset, anchor becomes the top-center */
+    #orbital-transform-ui.below {
+      transform: translate(-50%, 0);
+    }
+    /* Down-pointing arrow: default placement (UI above asset) */
     #orbital-transform-ui::after {
       content: '';
       position: absolute;
@@ -325,6 +330,13 @@
       border-left: 6px solid transparent;
       border-right: 6px solid transparent;
       border-top: 8px solid rgba(255,255,255,0.28);
+    }
+    /* Flipped arrow when UI sits below the asset */
+    #orbital-transform-ui.below::after {
+      bottom: auto;
+      top: -8px;
+      border-top: none;
+      border-bottom: 8px solid rgba(255,255,255,0.28);
     }
     #orbital-transform-ui .orb-header {
       display: flex;
@@ -4233,24 +4245,62 @@ function onClick(event) {
 
 // ─── ORBITAL TRANSFORM UI (Blender/AE-style gizmo) ──────────────────────────
 
-/** Convert mesh world position → CSS pixel coords (used for floating toolbar) */
-function getOrbitalScreenPos(mesh) {
-    const v = new THREE.Vector3();
-    v.setFromMatrixPosition(mesh.matrixWorld);
-    v.project(camera);
-    return {
-        x: ( v.x * 0.5 + 0.5) * window.innerWidth,
-        y: (-v.y * 0.5 + 0.5) * window.innerHeight
-    };
+/** Project the mesh's 3D bounding box to screen space and return its 2D extents */
+function getOrbitalScreenBounds(mesh) {
+    const box = new THREE.Box3().setFromObject(mesh);
+    const corners = [
+        new THREE.Vector3(box.min.x, box.min.y, box.min.z),
+        new THREE.Vector3(box.min.x, box.min.y, box.max.z),
+        new THREE.Vector3(box.min.x, box.max.y, box.min.z),
+        new THREE.Vector3(box.min.x, box.max.y, box.max.z),
+        new THREE.Vector3(box.max.x, box.min.y, box.min.z),
+        new THREE.Vector3(box.max.x, box.min.y, box.max.z),
+        new THREE.Vector3(box.max.x, box.max.y, box.min.z),
+        new THREE.Vector3(box.max.x, box.max.y, box.max.z)
+    ];
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const c of corners) {
+        c.project(camera);
+        const sx = ( c.x * 0.5 + 0.5) * window.innerWidth;
+        const sy = (-c.y * 0.5 + 0.5) * window.innerHeight;
+        if (sx < minX) minX = sx;
+        if (sx > maxX) maxX = sx;
+        if (sy < minY) minY = sy;
+        if (sy > maxY) maxY = sy;
+    }
+    return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
 }
 
-/** Reposition the floating toolbar to sit above the target mesh */
+/** Reposition the floating toolbar so it floats above the asset with a 20% offset
+ *  (20% of the asset's on-screen height), and never overlaps it. Auto-flips to
+ *  below the asset when there isn't room above in the viewport. */
 function updateOrbitalUIPosition() {
     if (!orbitalTarget) return;
-    const ui  = document.getElementById('orbital-transform-ui');
-    const pos = getOrbitalScreenPos(orbitalTarget);
-    ui.style.left = pos.x + 'px';
-    ui.style.top  = pos.y + 'px';
+    const ui = document.getElementById('orbital-transform-ui');
+
+    const b = getOrbitalScreenBounds(orbitalTarget);
+    const centerX = (b.minX + b.maxX) * 0.5;
+
+    // 20% of asset screen height, with a sensible minimum so tiny assets still get clearance
+    const offset = Math.max(b.height * 0.20, 24);
+
+    // Measure the UI so we know if it fits above
+    const uiHeight = ui.offsetHeight || 140; // fallback if not yet rendered
+    const spaceAbove = b.minY;
+
+    let anchorY;
+    if (spaceAbove - offset - uiHeight >= 8) {
+        // Place above the asset: UI's bottom edge sits `offset` pixels above asset top
+        anchorY = b.minY - offset;
+        ui.classList.remove('below');
+    } else {
+        // Not enough room above → flip below
+        anchorY = b.maxY + offset;
+        ui.classList.add('below');
+    }
+
+    ui.style.left = centerX + 'px';
+    ui.style.top  = anchorY + 'px';
 }
 
 /** Update the active-mode button highlight */
