@@ -311,32 +311,32 @@
       min-width: 204px;
       pointer-events: all;
       display: none;
-      /* Default: anchor (left, top) is the bottom-center of the UI → UI floats above asset */
-      transform: translate(-50%, -100%);
+      /* Default: anchor (left, top) is the right-center of the UI → UI floats to left of asset */
+      transform: translate(-100%, -50%);
       box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 10px 40px rgba(0,0,0,0.85);
     }
     #orbital-transform-ui.open { display: block; }
-    /* When flipped below the asset, anchor becomes the top-center */
-    #orbital-transform-ui.below {
-      transform: translate(-50%, 0);
+    /* Flipped: UI anchors left-center → sits to the right of the asset */
+    #orbital-transform-ui.right-side {
+      transform: translate(0, -50%);
     }
-    /* Down-pointing arrow: default placement (UI above asset) */
+    /* Right-pointing arrow connector: default placement (UI left of asset) */
     #orbital-transform-ui::after {
       content: '';
       position: absolute;
-      bottom: -8px;
-      left: 50%;
-      transform: translateX(-50%);
-      border-left: 6px solid transparent;
-      border-right: 6px solid transparent;
-      border-top: 8px solid rgba(255,255,255,0.28);
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 8px solid rgba(255,255,255,0.28);
     }
-    /* Flipped arrow when UI sits below the asset */
-    #orbital-transform-ui.below::after {
-      bottom: auto;
-      top: -8px;
-      border-top: none;
-      border-bottom: 8px solid rgba(255,255,255,0.28);
+    /* Flipped arrow when UI sits right of asset */
+    #orbital-transform-ui.right-side::after {
+      right: auto;
+      left: -8px;
+      border-left: none;
+      border-right: 8px solid rgba(255,255,255,0.28);
     }
     #orbital-transform-ui .orb-header {
       display: flex;
@@ -4271,36 +4271,34 @@ function getOrbitalScreenBounds(mesh) {
     return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
 }
 
-/** Reposition the floating toolbar so it floats above the asset with a 20% offset
- *  (20% of the asset's on-screen height), and never overlaps it. Auto-flips to
- *  below the asset when there isn't room above in the viewport. */
+/** Float the toolbar independently to the LEFT of the selected asset, with a
+ *  fixed 120px gap (independent of asset scale). Auto-flips to the right side
+ *  if there isn't room on the left in the viewport. Vertically centered. */
+const ORBITAL_UI_HORIZONTAL_PADDING = 120; // px
+
 function updateOrbitalUIPosition() {
     if (!orbitalTarget) return;
     const ui = document.getElementById('orbital-transform-ui');
 
     const b = getOrbitalScreenBounds(orbitalTarget);
-    const centerX = (b.minX + b.maxX) * 0.5;
+    const centerY = (b.minY + b.maxY) * 0.5;
 
-    // 20% of asset screen height, with a sensible minimum so tiny assets still get clearance
-    const offset = Math.max(b.height * 0.20, 24);
+    // Measure UI so we can test whether it fits on the left
+    const uiWidth = ui.offsetWidth || 220; // fallback before first render
 
-    // Measure the UI so we know if it fits above
-    const uiHeight = ui.offsetHeight || 140; // fallback if not yet rendered
-    const spaceAbove = b.minY;
-
-    let anchorY;
-    if (spaceAbove - offset - uiHeight >= 8) {
-        // Place above the asset: UI's bottom edge sits `offset` pixels above asset top
-        anchorY = b.minY - offset;
-        ui.classList.remove('below');
+    let anchorX;
+    if (b.minX - ORBITAL_UI_HORIZONTAL_PADDING - uiWidth >= 8) {
+        // Place to the LEFT: UI's right edge sits 120px left of asset's left edge
+        anchorX = b.minX - ORBITAL_UI_HORIZONTAL_PADDING;
+        ui.classList.remove('right-side');
     } else {
-        // Not enough room above → flip below
-        anchorY = b.maxY + offset;
-        ui.classList.add('below');
+        // Not enough room left → flip to RIGHT side
+        anchorX = b.maxX + ORBITAL_UI_HORIZONTAL_PADDING;
+        ui.classList.add('right-side');
     }
 
-    ui.style.left = centerX + 'px';
-    ui.style.top  = anchorY + 'px';
+    ui.style.left = anchorX + 'px';
+    ui.style.top  = centerY + 'px';
 }
 
 /** Update the active-mode button highlight */
