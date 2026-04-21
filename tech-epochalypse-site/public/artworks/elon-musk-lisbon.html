@@ -3974,22 +3974,6 @@ function onPointerDown(event) {
             break; // Found a draggable opaque part, stop searching
         }
     }
-
-    // ─── DOUBLE-TAP: open orbital transform UI ───
-    if (selectedObject) {
-        const now = performance.now();
-        if (selectedObject === orbitalDoubleTapObject && now - orbitalDoubleTapTime < ORBITAL_DOUBLE_TAP_MS) {
-            openOrbitalUI(selectedObject);
-            selectedObject = null;
-            controls.enabled = true;
-            orbitalDoubleTapTime   = 0;
-            orbitalDoubleTapObject = null;
-            orbitalUIJustOpened    = true;
-            return;
-        }
-        orbitalDoubleTapTime   = now;
-        orbitalDoubleTapObject = selectedObject;
-    }
 }
 
 function onPointerMove(event) {
@@ -4200,33 +4184,13 @@ function onClick(event) {
             spacexRef.material.needsUpdate = true;
         }
 
-        // Skip depth cycling for non-draggable elements or those with special handling
-        if (clickedObject === backgroundMesh || clickedObject === rightEyeRedactionRect || clickedObject === leftEyeRedactionRect || clickedObject === marqueeTextMesh || clickedObject === biometricMarqueeTextMesh || clickedObject === bloodTextMesh || clickedObject === redactedGlitchTextMesh) { // Added redactedGlitchTextMesh
+        // Skip orbital UI for non-transformable elements (background, text overlays, redaction rects)
+        if (clickedObject === backgroundMesh || clickedObject === rightEyeRedactionRect || clickedObject === leftEyeRedactionRect || clickedObject === marqueeTextMesh || clickedObject === biometricMarqueeTextMesh || clickedObject === bloodTextMesh || clickedObject === redactedGlitchTextMesh) {
             return;
         }
 
-        // Cycle through depth levels
-        let currentLayer = clickedObject.userData.currentLayer || 1;
-        currentLayer--; // Move backward one level
-        if (currentLayer < 1) { // If it goes below 1
-            currentLayer = totalDepthLayers; // Wrap around to the highest layer
-        }
-        clickedObject.userData.currentLayer = currentLayer;
-        clickedObject.position.z = (currentLayer - 1) * depthStep;
-
-        // Update redaction rectangle Z position if the clicked object is an eye
-        if (clickedObject === rightEyeMesh) {
-            if (rightEyeRedactionRect) {
-                rightEyeRedactionRect.position.z = clickedObject.position.z + (1.5 * depthStep);
-            }
-        }
-        else if (clickedObject === leftEyeMesh) {
-            if (leftEyeRedactionRect) {
-                leftEyeRedactionRect.position.z = clickedObject.position.z + (1.5 * depthStep);
-            }
-        }
-
-        console.log(`Object moved to layer: ${currentLayer}, Z-position: ${clickedObject.position.z}`);
+        // Single-tap → open orbital transform UI on this asset
+        openOrbitalUI(clickedObject);
     }
 }
 
