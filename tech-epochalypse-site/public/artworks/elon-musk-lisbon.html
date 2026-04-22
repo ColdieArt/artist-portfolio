@@ -4283,8 +4283,12 @@ function openOrbitalUI(mesh) {
         setGizmoMode(currentGizmoMode);
     }
 
-    // Floating toolbar label + position
-    const label = (mesh.userData.id || 'asset').toUpperCase();
+    // Floating toolbar label + position (map internal ids to display labels)
+    const ORBITAL_LABEL_OVERRIDES = {
+        dogecoin: 'LOGO SWAP'
+    };
+    const id = mesh.userData.id || 'asset';
+    const label = ORBITAL_LABEL_OVERRIDES[id] || id.toUpperCase();
     document.getElementById('orb-asset-name').textContent = label;
     updateOrbitalUIPosition();
     document.getElementById('orbital-transform-ui').classList.add('open');
