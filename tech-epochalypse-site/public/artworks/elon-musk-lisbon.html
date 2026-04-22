@@ -3636,8 +3636,8 @@ function init() {
     leftUiContainer = document.createElement('div'); // Assign to global variable
     leftUiContainer.id = 'left-ui-container';
     leftUiContainer.style.position = 'fixed';
-    leftUiContainer.style.top = '10px'; // Always visible on load
-    leftUiContainer.style.left = '10px';
+    leftUiContainer.style.top = '16px'; // Align with PRINT button's 16px edge
+    leftUiContainer.style.left = '16px';
     leftUiContainer.style.backgroundColor = 'rgba(0, 0, 0, 0)';
     leftUiContainer.style.color = 'white';
     leftUiContainer.style.padding = '34px'; /* Match mashup-lisbon scale */
@@ -4253,9 +4253,9 @@ const ORBITAL_UI_HORIZONTAL_PADDING = 120; // px
 function updateOrbitalUIPosition() {
     const ui = document.getElementById('orbital-transform-ui');
     if (!ui || !leftUiContainer) return;
-    // Lock below the left UI container, flush to the same left edge
+    // Lock below the left UI container, flush to the same 16px left edge (matching PRINT)
     const lcRect = leftUiContainer.getBoundingClientRect();
-    ui.style.left = '10px';
+    ui.style.left = '16px';
     ui.style.top  = (lcRect.bottom + 8) + 'px';
     ui.style.transform = '';
 }
