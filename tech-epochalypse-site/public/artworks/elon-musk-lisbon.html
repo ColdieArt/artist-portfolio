@@ -3598,23 +3598,24 @@ function init() {
         { label: 'GREYSCALE', property: 'greyscale', pass: greyscalePass }
     ];
 
-    // Create and append the left UI container
+    // Create and append the left UI container — always visible, matching mashup-lisbon scale
     leftUiContainer = document.createElement('div'); // Assign to global variable
     leftUiContainer.id = 'left-ui-container';
-    leftUiContainer.style.position = 'absolute';
-    leftUiContainer.style.top = '-190px'; // Start mostly hidden, revealing only the arrow
+    leftUiContainer.style.position = 'fixed';
+    leftUiContainer.style.top = '10px'; // Always visible on load
     leftUiContainer.style.left = '10px';
     leftUiContainer.style.backgroundColor = 'rgba(0, 0, 0, 0)';
     leftUiContainer.style.color = 'white';
-    leftUiContainer.style.padding = '10px'; /* Reduced padding for more compact layout */
+    leftUiContainer.style.padding = '34px'; /* Match mashup-lisbon scale */
     leftUiContainer.style.borderRadius = '5px';
     leftUiContainer.style.fontFamily = 'monospace';
+    leftUiContainer.style.fontSize = '340%'; /* Match mashup-lisbon button scale */
     leftUiContainer.style.zIndex = '100';
     leftUiContainer.style.display = 'flex';
-    leftUiContainer.style.flexDirection = 'column'; /* Changed to column for vertical layout */
-    leftUiContainer.style.flexWrap = 'nowrap'; /* Not needed for single column */
-    leftUiContainer.style.gap = '5px'; /* Adjusted gap for vertical layout */
-    leftUiContainer.style.transition = 'top 0.5s ease-in-out'; // Smooth transition for top property
+    leftUiContainer.style.flexDirection = 'column';
+    leftUiContainer.style.flexWrap = 'nowrap';
+    leftUiContainer.style.gap = '17px'; /* Match mashup-lisbon gap */
+    leftUiContainer.style.transition = 'top 0.5s ease-in-out';
     document.body.appendChild(leftUiContainer);
 
     // Create and append the right UI container
@@ -3758,6 +3759,7 @@ function init() {
     arrowSpan.innerHTML = '&#x25BC;'; // Down-facing triangle
     arrowContainer.appendChild(arrowSpan);
     document.body.appendChild(arrowContainer); // Append to body, not leftUiContainer
+    arrowContainer.style.display = 'none'; // Always-visible layout: arrow toggle not needed
 
     // Add click listener for the arrow container to toggle left UI visibility
     arrowContainer.onclick = (event) => {
@@ -3778,9 +3780,8 @@ function init() {
         }
     };
 
-    // Initial state setup for TRASH/EXPORT buttons and arrowContainer
-    // When the page loads, the left UI is hidden, so these buttons should be hidden.
-    trashButtonElement.style.display = 'none';
+    // Always-visible layout: trash button shown on load
+    trashButtonElement.style.display = 'block';
     exportButtonElement.style.display = 'none';
 
     window.addEventListener('resize', onWindowResize);
@@ -3863,10 +3864,7 @@ function onWindowResize() {
         cctvFeedPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
     }
 
-    // Adjust arrow container position on resize if UI is open
-    if (leftUiContainer.style.top === '10px') {
-        arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
-    }
+    // Arrow container hidden in always-visible layout — no resize adjustment needed
 
     // --- Dynamic Repositioning of Ear and Marquee Text ---
     const earConfig = initialAssetConfigs.find(c => c.id === 'ear');
