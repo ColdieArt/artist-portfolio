@@ -198,6 +198,29 @@
       border-color: #aaa;
     }
 
+    /* ─── RESET BUTTON (bottom-left, above PRINT) ─── */
+    #reset-btn {
+      position: fixed;
+      bottom: 72px; /* 16px PRINT bottom + ~40px PRINT height + 16px gap */
+      left: 16px;
+      z-index: 250;
+      background: #000;
+      color: #fff;
+      border: 1px solid #fff;
+      padding: 10px 22px;
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    #reset-btn:hover {
+      background: #1a1a1a;
+      border-color: #aaa;
+    }
+
     /* ─── PRINT ORDER MODAL ─── */
     #print-modal-overlay {
       position: fixed;
@@ -3675,31 +3698,11 @@ function init() {
         }
     });
 
-    // Add the RESET button to both UI containers
-    const createResetButton = () => {
-        const button = document.createElement('button');
-        button.textContent = 'RESET';
-        button.style.cssText = `
-            background-color: black;
-            color: white;
-            padding: 4px;
-            margin-top: 10px;
-            border: 0.5px solid rgba(0, 0, 0, 0.8);
-            border-radius: 0;
-            cursor: pointer;
-            font-family: monospace;
-            font-size: 7px;
-            outline: none;
-            white-space: nowrap;
-            box-sizing: border-box;
-        `;
-        button.onmouseover = () => { button.style.borderColor = 'rgba(0, 0, 0, 1.0)'; };
-        button.onmouseout = () => { button.style.borderColor = 'rgba(0, 0, 0, 0.8)'; };
-        button.onclick = (event) => { event.stopPropagation(); resetPiecesToOriginalPositions(); };
-        return button;
-    };
-    leftUiContainer.appendChild(createResetButton());
-    rightUiContainer.appendChild(createResetButton());
+    // RESET button: standalone bottom-left, above PRINT (wired to the existing #reset-btn in HTML)
+    const resetBtn = document.getElementById('reset-btn');
+    if (resetBtn) {
+        resetBtn.onclick = (event) => { event.stopPropagation(); resetPiecesToOriginalPositions(); };
+    }
 
     // Create and append the TRASH button to the left UI container
     const createTrashButton = () => {
@@ -4749,6 +4752,9 @@ setTimeout(function () {
       </p>
     </div>
   </div>
+
+  <!-- ─── RESET BUTTON (bottom-left, above PRINT) ─── -->
+  <button id="reset-btn">RESET</button>
 
   <!-- ─── PRINT BUTTON (bottom-left) ─── -->
   <button id="print-btn">PRINT</button>
