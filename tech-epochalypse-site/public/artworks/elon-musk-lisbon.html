@@ -130,28 +130,6 @@
     #export-panel .status-line.active { color: #4c4; }
     #export-panel .status-line.error   { color: #e66; }
 
-    /* ─── SUBMIT TO THE OVERLORD BUTTON ─── */
-    #submit-overlord-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 200;
-      background: #000;
-      color: #fff;
-      border: 2px solid #fff;
-      padding: 14px 24px;
-      font-family: monospace;
-      font-size: 13px;
-      font-weight: bold;
-      letter-spacing: 1.5px;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    #submit-overlord-btn:hover {
-      background: #1a1a1a;
-      border-color: #ccc;
-    }
-
     /* ─── POST TO X MODAL ─── */
     #post-modal {
       position: fixed;
@@ -311,33 +289,10 @@
       min-width: 204px;
       pointer-events: all;
       display: none;
-      /* Default: anchor (left, top) is the right-center of the UI → UI floats to left of asset */
-      transform: translate(-100%, -50%);
+      /* Locked to left side below left UI — no floating transform */
       box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 10px 40px rgba(0,0,0,0.85);
     }
     #orbital-transform-ui.open { display: block; }
-    /* Flipped: UI anchors left-center → sits to the right of the asset */
-    #orbital-transform-ui.right-side {
-      transform: translate(0, -50%);
-    }
-    /* Right-pointing arrow connector: default placement (UI left of asset) */
-    #orbital-transform-ui::after {
-      content: '';
-      position: absolute;
-      right: -8px;
-      top: 50%;
-      transform: translateY(-50%);
-      border-top: 6px solid transparent;
-      border-bottom: 6px solid transparent;
-      border-left: 8px solid rgba(255,255,255,0.28);
-    }
-    /* Flipped arrow when UI sits right of asset */
-    #orbital-transform-ui.right-side::after {
-      right: auto;
-      left: -8px;
-      border-left: none;
-      border-right: 8px solid rgba(255,255,255,0.28);
-    }
     #orbital-transform-ui .orb-header {
       display: flex;
       align-items: center;
@@ -457,6 +412,40 @@
     #orbital-transform-ui .orb-reset-btn:hover {
       border-color: rgba(255,255,255,0.45);
       color: #ccc;
+    }
+    /* Duplicate / Trash action row */
+    #orbital-transform-ui .orb-action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    #orbital-transform-ui .orb-duplicate-btn,
+    #orbital-transform-ui .orb-trash-btn {
+      background: transparent;
+      font-family: monospace;
+      font-size: 8px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 5px 0;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    #orbital-transform-ui .orb-duplicate-btn {
+      border: 0.5px solid rgba(255,255,255,0.15);
+      color: #555;
+    }
+    #orbital-transform-ui .orb-duplicate-btn:hover {
+      border-color: rgba(255,255,255,0.45);
+      color: #ccc;
+    }
+    #orbital-transform-ui .orb-trash-btn {
+      border: 0.5px solid rgba(180,40,40,0.45);
+      color: #833;
+    }
+    #orbital-transform-ui .orb-trash-btn:hover {
+      border-color: rgba(220,60,60,0.9);
+      color: #e55;
     }
 
   </style>
@@ -3620,23 +3609,24 @@ function init() {
         { label: 'GREYSCALE', property: 'greyscale', pass: greyscalePass }
     ];
 
-    // Create and append the left UI container
+    // Create and append the left UI container — always visible, matching mashup-lisbon scale
     leftUiContainer = document.createElement('div'); // Assign to global variable
     leftUiContainer.id = 'left-ui-container';
-    leftUiContainer.style.position = 'absolute';
-    leftUiContainer.style.top = '-190px'; // Start mostly hidden, revealing only the arrow
+    leftUiContainer.style.position = 'fixed';
+    leftUiContainer.style.top = '10px'; // Always visible on load
     leftUiContainer.style.left = '10px';
     leftUiContainer.style.backgroundColor = 'rgba(0, 0, 0, 0)';
     leftUiContainer.style.color = 'white';
-    leftUiContainer.style.padding = '10px'; /* Reduced padding for more compact layout */
+    leftUiContainer.style.padding = '34px'; /* Match mashup-lisbon scale */
     leftUiContainer.style.borderRadius = '5px';
     leftUiContainer.style.fontFamily = 'monospace';
+    leftUiContainer.style.fontSize = '340%'; /* Match mashup-lisbon button scale */
     leftUiContainer.style.zIndex = '100';
     leftUiContainer.style.display = 'flex';
-    leftUiContainer.style.flexDirection = 'column'; /* Changed to column for vertical layout */
-    leftUiContainer.style.flexWrap = 'nowrap'; /* Not needed for single column */
-    leftUiContainer.style.gap = '5px'; /* Adjusted gap for vertical layout */
-    leftUiContainer.style.transition = 'top 0.5s ease-in-out'; // Smooth transition for top property
+    leftUiContainer.style.flexDirection = 'column';
+    leftUiContainer.style.flexWrap = 'nowrap';
+    leftUiContainer.style.gap = '17px'; /* Match mashup-lisbon gap */
+    leftUiContainer.style.transition = 'top 0.5s ease-in-out';
     document.body.appendChild(leftUiContainer);
 
     // Create and append the right UI container
@@ -3735,8 +3725,8 @@ function init() {
         // The actual removal logic will be in onPointerUp, triggered by dropping onto this button
         return button;
     };
-    trashButtonElement = createTrashButton(); // Store reference to the button element
-    leftUiContainer.appendChild(trashButtonElement);
+    // Trash button moved to orbital transform UI — not added to left UI
+    // trashButtonElement stays null; drag-to-trash in onPointerUp is guarded by null check
 
     // Create and append the EXPORT button below TRASH
     const createExportButton = () => {
@@ -3780,29 +3770,13 @@ function init() {
     arrowSpan.innerHTML = '&#x25BC;'; // Down-facing triangle
     arrowContainer.appendChild(arrowSpan);
     document.body.appendChild(arrowContainer); // Append to body, not leftUiContainer
+    arrowContainer.style.display = 'none'; // Always-visible layout: arrow toggle not needed
 
     // Add click listener for the arrow container to toggle left UI visibility
-    arrowContainer.onclick = (event) => {
-        event.stopPropagation(); // Prevent clicks from interacting with 3D scene
-        if (leftUiContainer.style.top === '10px') {
-            leftUiContainer.style.top = '-190px'; // Hide it, revealing only the arrow
-            trashButtonElement.style.display = 'none'; // Hide TRASH button
-            exportButtonElement.style.display = 'none'; // Hide EXPORT button
-            const panel = document.getElementById('export-panel');
-            if (panel) panel.classList.remove('open'); // Close export panel
-            arrowContainer.style.top = '0px'; // Keep arrow at the top
-            arrowSpan.innerHTML = '&#x25BC;'; // Change to down arrow
-        } else {
-            leftUiContainer.style.top = '10px'; // Show it
-            trashButtonElement.style.display = 'block'; // Show TRASH button
-            arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; // Move arrow below the UI
-            arrowSpan.innerHTML = '&#x25B2'; // Change to up arrow
-        }
-    };
+    // Arrow toggle disabled (always-visible layout) — onclick is a no-op
+    arrowContainer.onclick = (event) => { event.stopPropagation(); };
 
-    // Initial state setup for TRASH/EXPORT buttons and arrowContainer
-    // When the page loads, the left UI is hidden, so these buttons should be hidden.
-    trashButtonElement.style.display = 'none';
+    // Trash moved to orbital UI; export button hidden (no toggle needed)
     exportButtonElement.style.display = 'none';
 
     window.addEventListener('resize', onWindowResize);
@@ -3885,10 +3859,7 @@ function onWindowResize() {
         cctvFeedPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
     }
 
-    // Adjust arrow container position on resize if UI is open
-    if (leftUiContainer.style.top === '10px') {
-        arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
-    }
+    // Arrow container hidden in always-visible layout — no resize adjustment needed
 
     // --- Dynamic Repositioning of Ear and Marquee Text ---
     const earConfig = initialAssetConfigs.find(c => c.id === 'ear');
@@ -4277,28 +4248,13 @@ function getOrbitalScreenBounds(mesh) {
 const ORBITAL_UI_HORIZONTAL_PADDING = 120; // px
 
 function updateOrbitalUIPosition() {
-    if (!orbitalTarget) return;
     const ui = document.getElementById('orbital-transform-ui');
-
-    const b = getOrbitalScreenBounds(orbitalTarget);
-    const centerY = (b.minY + b.maxY) * 0.5;
-
-    // Measure UI so we can test whether it fits on the left
-    const uiWidth = ui.offsetWidth || 220; // fallback before first render
-
-    let anchorX;
-    if (b.minX - ORBITAL_UI_HORIZONTAL_PADDING - uiWidth >= 8) {
-        // Place to the LEFT: UI's right edge sits 120px left of asset's left edge
-        anchorX = b.minX - ORBITAL_UI_HORIZONTAL_PADDING;
-        ui.classList.remove('right-side');
-    } else {
-        // Not enough room left → flip to RIGHT side
-        anchorX = b.maxX + ORBITAL_UI_HORIZONTAL_PADDING;
-        ui.classList.add('right-side');
-    }
-
-    ui.style.left = anchorX + 'px';
-    ui.style.top  = centerY + 'px';
+    if (!ui || !leftUiContainer) return;
+    // Lock below the left UI container, flush to the same left edge
+    const lcRect = leftUiContainer.getBoundingClientRect();
+    ui.style.left = '10px';
+    ui.style.top  = (lcRect.bottom + 8) + 'px';
+    ui.style.transform = '';
 }
 
 /** Update the active-mode button highlight */
@@ -4365,6 +4321,68 @@ function setupOrbitalUI() {
     document.getElementById('orb-close').addEventListener('click', function (e) {
         e.stopPropagation();
         closeOrbitalUI();
+    });
+
+    // Duplicate: clone orbitalTarget, offset slightly, add to scene
+    document.getElementById('orb-duplicate-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!orbitalTarget) return;
+        const src = orbitalTarget;
+        const newGeo = src.geometry.clone();
+        const newMat = src.material.clone();
+        if (src.material.map) newMat.map = src.material.map;
+        const clone = new THREE.Mesh(newGeo, newMat);
+        const xOffset = (src.userData.initialScale ? src.userData.initialScale.width : 1) * 0.1;
+        clone.position.set(src.position.x + xOffset, src.position.y, src.position.z + 2 * depthStep);
+        clone.rotation.copy(src.rotation);
+        clone.scale.copy(src.scale);
+        clone.visible = src.visible;
+        clone.userData.id = 'dup_' + src.userData.id + '_' + Date.now();
+        clone.userData.currentLayer = (src.userData.currentLayer || 0) + 2;
+        clone.userData.initialPosition = clone.position.clone();
+        clone.userData.initialLayer = clone.userData.currentLayer;
+        clone.userData.initialScale = src.userData.initialScale
+            ? { width: src.userData.initialScale.width, height: src.userData.initialScale.height }
+            : undefined;
+        clone.userData.userScale = src.userData.userScale || 1.0;
+        if (src.userData.isUploaded) clone.userData.isUploaded = true;
+        scene.add(clone);
+        draggableObjects.push(clone);
+        cameraAnimationTargets.push(clone);
+        // Switch orbital UI to the clone
+        openOrbitalUI(clone);
+    });
+
+    // Trash: remove orbitalTarget from scene and close
+    document.getElementById('orb-trash-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!orbitalTarget) return;
+        const target = orbitalTarget;
+        closeOrbitalUI();
+        // Mark removed in config
+        const configIndex = initialAssetConfigs.findIndex(c => c.id === target.userData.id);
+        if (configIndex !== -1) initialAssetConfigs[configIndex].removed = true;
+        // Remove from scene and arrays
+        scene.remove(target);
+        draggableObjects = draggableObjects.filter(o => o !== target);
+        cameraAnimationTargets = cameraAnimationTargets.filter(o => o !== target);
+        // Handle special tracked refs
+        if (target.userData.id === 'dogecoin') dogecoinRef = null;
+        if (target.userData.id === 'spacex') spacexRef = null;
+        if (target.userData.id === 'rightEye') {
+            if (rightEyeRedactionRect) { scene.remove(rightEyeRedactionRect); rightEyeRedactionRect.geometry.dispose(); rightEyeRedactionRect.material.dispose(); }
+            rightEyeMesh = null; rightEyeRedactionRect = null;
+        }
+        if (target.userData.id === 'leftEye') {
+            if (leftEyeRedactionRect) { scene.remove(leftEyeRedactionRect); leftEyeRedactionRect.geometry.dispose(); leftEyeRedactionRect.material.dispose(); }
+            leftEyeMesh = null; leftEyeRedactionRect = null;
+        }
+        // Dispose resources
+        if (target.geometry) target.geometry.dispose();
+        if (target.material) {
+            if (Array.isArray(target.material)) target.material.forEach(m => m.dispose());
+            else target.material.dispose();
+        }
     });
 
     // Keyboard shortcuts: G/R/S switch mode, ESC closes
@@ -4640,7 +4658,6 @@ setTimeout(function () {
   </script>
 
   <!-- ─── EXPORT PANEL HTML ─── -->
-  <button id="submit-overlord-btn">SUBMIT</button>
 
   <div id="export-panel">
     <div class="panel-title">EXPORT</div>
@@ -4893,8 +4910,6 @@ setTimeout(function () {
       toggle.style.display = 'none';
       const modal = document.getElementById('post-modal');
       if (modal) modal.style.display = 'none';
-      const submitOverlordBtn = document.getElementById('submit-overlord-btn');
-      if (submitOverlordBtn) submitOverlordBtn.style.display = 'none';
       return;
     }
     
@@ -5002,13 +5017,6 @@ setTimeout(function () {
     document.addEventListener('click', (e) => {
       if (!panel.contains(e.target) && e.target !== toggle) panel.classList.remove('open');
     });
-
-    // ── SUBMIT YOURSELF button — capture PNG then show post modal ──
-    const submitOverlordBtn = document.getElementById('submit-overlord-btn');
-    submitOverlordBtn.onclick = (e) => {
-      e.stopPropagation();
-      exportPNG();
-    };
 
     // ── Format is PNG-only, duration row stays hidden ──
     fmtSel.onchange = () => {
@@ -5399,6 +5407,11 @@ setTimeout(function () {
     </div>
 
     <button class="orb-reset-btn" id="orb-reset-btn">↺ RESET TRANSFORM</button>
+
+    <div class="orb-action-row">
+      <button class="orb-duplicate-btn" id="orb-duplicate-btn">⧉ DUPE</button>
+      <button class="orb-trash-btn" id="orb-trash-btn">✕ DELETE</button>
+    </div>
   </div>
 
 </body></html>
