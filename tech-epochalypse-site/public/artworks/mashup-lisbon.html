@@ -2030,28 +2030,7 @@ function resetPiecesToOriginalPositions() {
             return; // Wait for all textures
         }
         
-        // --- 3.1. Load and Position Signature (Using FIXED initialPosition) ---
-        const signatureConfig = initialAssetConfigs.find(c => c.id === 'signature');
-        if (signatureConfig && !signatureConfig.removed) {
-            loadTexture(signatureConfig.url, (texture) => {
-                const signatureMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-                const signatureAspectRatio = texture.image.width / texture.image.height;
-                const signatureHeight = 1.0; // Fixed height
-                const signatureWidth = signatureHeight * signatureAspectRatio;
-                const signatureGeometry = new THREE.PlaneGeometry(signatureWidth, signatureHeight);
-                const signature = new THREE.Mesh(signatureGeometry, signatureMaterial);
-
-                // Set position using the FIXED initialPosition stored in the config
-                signature.position.copy(signatureConfig.initialPosition);
-
-                signature.userData.currentLayer = signatureConfig.initialLayer;
-                signature.userData.id = 'signature';
-                signature.userData.initialScale = { width: signatureWidth, height: signatureHeight };
-                signature.userData.initialPosition = signatureConfig.initialPosition.clone(); // Ensure initialPosition is stored
-                signature.userData.initialLayer = signatureConfig.initialLayer;
-                scene.add(signature);
-            });
-        }
+        // Signature removed per request - intentionally skipped on reload too
         
         // 4. Reset camera and controls
         resetCameraToGlobalStart(); // Use the dedicated hard reset function
@@ -2942,43 +2921,11 @@ function init() {
         cameraAnimationTargets.push(headset);
     });
 
-    // Function to load signature after rocket is ready
+    // Signature removed per request - no texture fetch, no mesh, no red-box risk
+    // We still need to call onWindowResize() here because it's the final step in
+    // the asset-load chain that positions the ear and text overlays correctly.
     function loadDogecoinAndFiat() {
-        loadTexture(URL_SIGNATURE, (signatureTex) => {
-            const signatureHeight = 1.0;
-            const signatureAspectRatio = signatureTex.image.width / signatureTex.image.height;
-            const signatureWidth = signatureHeight * signatureAspectRatio;
-            const signatureNewLayer = 0;
-            const signatureNewZ = (signatureNewLayer - 1) * depthStep;
-            const signatureNewX = -2.0;
-            const signatureNewY = -4.7;
-            const signatureInitialPos = new THREE.Vector3(signatureNewX, signatureNewY, signatureNewZ);
-
-            if (!initialAssetConfigs.find(c => c.id === 'signature')) {
-                initialAssetConfigs.push({
-                    id: 'signature',
-                    type: 'image',
-                    url: URL_SIGNATURE,
-                    initialPosition: signatureInitialPos.clone(),
-                    initialLayer: signatureNewLayer,
-                    baseScale: baseScale,
-                    scaleFactor: 1.0,
-                    removed: false
-                });
-            }
-
-            const signatureMaterial = new THREE.MeshBasicMaterial({ map: signatureTex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-            const signature = new THREE.Mesh(new THREE.PlaneGeometry(signatureWidth, signatureHeight), signatureMaterial);
-            signature.position.copy(signatureInitialPos);
-            signature.userData.currentLayer = signatureNewLayer;
-            signature.userData.id = 'signature';
-            signature.userData.initialScale = { width: signatureWidth, height: signatureHeight };
-            signature.userData.initialPosition = signatureInitialPos.clone();
-            signature.userData.initialLayer = signatureNewLayer;
-            scene.add(signature);
-
-            onWindowResize();
-        });
+        onWindowResize();
     }
 
     // Initialize the Marquee Text (for XRAY effect)
