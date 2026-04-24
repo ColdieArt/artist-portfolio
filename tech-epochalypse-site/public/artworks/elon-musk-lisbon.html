@@ -1819,10 +1819,11 @@ function resetPiecesToOriginalPositions() {
                 signature.userData.initialScale = { width: signatureWidth, height: signatureHeight };
                 signature.userData.initialPosition = signatureConfig.initialPosition.clone(); // Ensure initialPosition is stored
                 signature.userData.initialLayer = signatureConfig.initialLayer;
+                signature.visible = false; // Hide signature for Lisbon variant
                 scene.add(signature);
             });
         }
-        
+
         // 4. Reset camera and controls
         resetCameraToGlobalStart(); // Use the dedicated hard reset function
 
@@ -2855,8 +2856,9 @@ function init() {
                         signature.userData.initialScale = { width: signatureWidth, height: signatureHeight };
                         signature.userData.initialPosition = signatureInitialPos.clone();
                         signature.userData.initialLayer = signatureNewLayer;
+                        signature.visible = false; // Hide signature for Lisbon variant
                         scene.add(signature);
-                        
+
                         // Call onWindowResize only to handle ear and text positions, not dogecoin/fiat/signature
                         onWindowResize();
                     });
