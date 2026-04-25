@@ -4309,19 +4309,12 @@ function init() {
 
     // Left UI is always expanded — no collapse arrow
 
-    // Initial state setup — left UI starts expanded, so show all buttons
-    trashButtonElement.style.display = 'block';
-    duplicateBtn.style.display = 'block';
+    // Initial state setup - guarded against nulls (TRASH and DUPLICATE moved to orbital UI)
+    if (trashButtonElement) trashButtonElement.style.display = 'block';
+    if (duplicateBtn)       duplicateBtn.style.display       = 'block';
 
-    // Show scale/rotate menu on load, positioned below left UI + 20px padding
-    requestAnimationFrame(() => {
-        const ecPanel = document.getElementById('element-controls');
-        if (ecPanel) {
-            ecPanel.classList.add('visible');
-            ecPanel.style.left = leftUiContainer.offsetLeft + 'px';
-            ecPanel.style.top = (leftUiContainer.offsetTop + leftUiContainer.offsetHeight + 20) + 'px';
-        }
-    });
+    // Old element-controls panel is force-hidden via CSS (orbital UI replaces it).
+    // Skip the legacy show-on-load block so we don't try to position a hidden node.
 
     window.addEventListener('resize', onWindowResize);
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
