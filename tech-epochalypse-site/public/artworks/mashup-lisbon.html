@@ -4162,7 +4162,12 @@ function init() {
         `;
         button.onmouseover = () => { button.style.borderColor = 'rgba(0, 0, 0, 1.0)'; };
         button.onmouseout = () => { button.style.borderColor = 'rgba(0, 0, 0, 0.8)'; };
-        button.onclick = (event) => { event.stopPropagation(); resetPiecesToOriginalPositions(); };
+        button.onclick = (event) => {
+            event.stopPropagation();
+            resetPiecesToOriginalPositions();
+            // Re-roll a fresh random face composition on every RESET press
+            randomizeFaceElements();
+        };
         return button;
     };
     // RESET button placed above PRINT as a fixed bottom-left button (not in left UI)
