@@ -585,6 +585,178 @@
       #welcome-screen .touch-cta { font-size: 32px; letter-spacing: 5px; }
       #welcome-screen .touch-cta-container { padding: 20px 28px; }
     }
+
+    /* ─── ELEMENT CONTROLS (scale/rotate) — DEPRECATED, replaced by orbital UI ─── */
+    #element-controls,
+    #element-controls.visible {
+      display: none !important; /* Forced off — orbital transform UI is the sole asset modifier */
+    }
+
+    /* ─── ORBITAL TRANSFORM UI ─── */
+    #orbital-transform-ui {
+      position: fixed;
+      z-index: 600;
+      background: rgba(0,0,0,0.93);
+      border: 1px solid rgba(255,255,255,0.28);
+      padding: 10px 12px 9px;
+      font-family: monospace;
+      color: #fff;
+      min-width: 204px;
+      pointer-events: all;
+      display: none;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 10px 40px rgba(0,0,0,0.85);
+    }
+    #orbital-transform-ui.open { display: block; }
+    #orbital-transform-ui .orb-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 0.5px solid rgba(255,255,255,0.12);
+      padding-bottom: 7px;
+      margin-bottom: 8px;
+    }
+    #orbital-transform-ui .orb-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    #orbital-transform-ui .orb-icon {
+      font-size: 12px;
+      opacity: 0.4;
+      line-height: 1;
+    }
+    #orbital-transform-ui .orb-asset-name {
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #aaa;
+    }
+    #orbital-transform-ui .orb-close {
+      cursor: pointer;
+      color: #555;
+      font-size: 11px;
+      line-height: 1;
+      padding: 1px 3px;
+      transition: color 0.15s;
+    }
+    #orbital-transform-ui .orb-close:hover { color: #fff; }
+    #orbital-transform-ui .orb-modes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+    #orbital-transform-ui .orb-mode-btn {
+      background: #0a0a0a;
+      color: #888;
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 8px 4px 6px;
+      font-family: monospace;
+      font-size: 8px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      line-height: 1;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    #orbital-transform-ui .orb-mode-btn:hover {
+      border-color: rgba(255,255,255,0.4);
+      color: #ddd;
+    }
+    #orbital-transform-ui .orb-mode-btn.active {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+    }
+    #orbital-transform-ui .orb-mode-icon {
+      font-size: 14px;
+      line-height: 1;
+    }
+    #orbital-transform-ui .orb-mode-label {
+      font-size: 8px;
+      letter-spacing: 1.2px;
+    }
+    #orbital-transform-ui .orb-mode-hotkey {
+      font-size: 7px;
+      opacity: 0.5;
+      letter-spacing: 0.5px;
+    }
+    #orbital-transform-ui .orb-legend {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 8px;
+      font-size: 8px;
+      letter-spacing: 1px;
+    }
+    #orbital-transform-ui .orb-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    #orbital-transform-ui .orb-legend-dot {
+      width: 6px;
+      height: 6px;
+      display: inline-block;
+    }
+    #orbital-transform-ui .orb-legend-dot.x { background: #e55; }
+    #orbital-transform-ui .orb-legend-dot.y { background: #5b5; }
+    #orbital-transform-ui .orb-legend-dot.z { background: #56f; }
+    #orbital-transform-ui .orb-legend-label { color: #666; }
+    #orbital-transform-ui .orb-reset-btn {
+      width: 100%;
+      margin-top: 8px;
+      background: transparent;
+      border: 0.5px solid rgba(255,255,255,0.15);
+      color: #555;
+      font-family: monospace;
+      font-size: 8px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 0;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    #orbital-transform-ui .orb-reset-btn:hover {
+      border-color: rgba(255,255,255,0.45);
+      color: #ccc;
+    }
+    #orbital-transform-ui .orb-action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    #orbital-transform-ui .orb-duplicate-btn,
+    #orbital-transform-ui .orb-trash-btn {
+      background: transparent;
+      font-family: monospace;
+      font-size: 8px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 5px 0;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    #orbital-transform-ui .orb-duplicate-btn {
+      border: 0.5px solid rgba(255,255,255,0.15);
+      color: #555;
+    }
+    #orbital-transform-ui .orb-duplicate-btn:hover {
+      border-color: rgba(255,255,255,0.45);
+      color: #ccc;
+    }
+    #orbital-transform-ui .orb-trash-btn {
+      border: 0.5px solid rgba(180,40,40,0.45);
+      color: #833;
+    }
+    #orbital-transform-ui .orb-trash-btn:hover {
+      border-color: rgba(220,60,60,0.9);
+      color: #e55;
+    }
   </style>
   <title>THE COLLECTIVE - Combined Overlord | Tech Epochalypse by Coldie</title>
 </head>
@@ -594,6 +766,7 @@
   <script type="module">
     import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
@@ -615,6 +788,11 @@ const zeroParallaxDepth = (5 - 1) * depthStep; // Z-position for level 5
 let isDragging = false; // Flag to indicate if a drag operation is in progress
 let pointerDownPosition = new THREE.Vector2(); // To store the initial pointer down position
 const DRAG_THRESHOLD = 5; // Pixels threshold to consider a move as a drag
+
+// ─── ORBITAL TRANSFORM UI STATE ───
+let orbitalTarget       = null;         // Mesh currently bound to the orbital gizmo
+let transformControls   = null;         // Three.js TransformControls instance (Blender/AE-style gizmo)
+let currentGizmoMode    = 'translate';  // 'translate' | 'rotate' | 'scale'
 
 let backgroundMesh = null; // To store the background mesh for positioning calculations
 
@@ -2428,6 +2606,22 @@ function init() {
         stopCameraAnimationAndReset(); // Stop animation on camera control interaction
     });
 
+    // ─── TRANSFORM CONTROLS (Blender/AE-style gizmo) ───
+    transformControls = new TransformControls(camera, renderer.domElement);
+    transformControls.setSize(0.9);
+    transformControls.setSpace('local');
+    transformControls.addEventListener('dragging-changed', (e) => {
+        if (e.value) {
+            controls.enabled = false;
+        } else if (!cameraAnimationActive && !effectControls.yRotation) {
+            controls.enabled = true;
+        }
+    });
+    const _transformHelper = transformControls.getHelper ? transformControls.getHelper() : transformControls;
+    scene.add(_transformHelper);
+    _transformHelper.visible = false;
+    transformControls.enabled = false;
+
     // Store initial global camera position and look-at target
     initialGlobalCameraPos.copy(camera.position);
     initialGlobalCameraLookAt.copy(controls.target);
@@ -3097,6 +3291,7 @@ function init() {
     renderer.domElement.addEventListener('pointermove', onPointerMove);
     renderer.domElement.addEventListener('pointerup', onPointerUp);
     renderer.domElement.addEventListener('click', onClick);
+    setupOrbitalUI();
 
     // ── Preload all element textures for swap mode ──
     preloadEyeTextures();
@@ -3944,7 +4139,8 @@ function init() {
         duplicateBtn.style.borderColor = '#4CAF50';
         setTimeout(() => { duplicateBtn.textContent = 'DUPLICATE'; duplicateBtn.style.borderColor = '#888'; }, 1200);
     };
-    leftUiContainer.appendChild(duplicateBtn);
+    // DUPLICATE moved to orbital transform UI - left UI no longer shows this button
+    // leftUiContainer.appendChild(duplicateBtn);
 
     // Add the RESET button to both UI containers
     const createResetButton = () => {
@@ -4018,8 +4214,9 @@ function init() {
         // The actual removal logic will be in onPointerUp, triggered by dropping onto this button
         return button;
     };
-    trashButtonElement = createTrashButton(); // Store reference to the button element
-    leftUiContainer.appendChild(trashButtonElement);
+    // TRASH moved to orbital transform UI - drag-to-trash on left UI disabled
+    // trashButtonElement = createTrashButton();
+    // leftUiContainer.appendChild(trashButtonElement);
 
     // Create hidden file input for image uploads
     const fileInput = document.createElement('input');
@@ -4131,6 +4328,7 @@ function init() {
     renderer.domElement.addEventListener('pointermove', onPointerMove);
     renderer.domElement.addEventListener('pointerup', onPointerUp);
     renderer.domElement.addEventListener('click', onClick);
+    setupOrbitalUI();
 
     // Call onWindowResize once after init to ensure initial positions are calculated correctly
     // NOTE: This is called after the main assets are loaded in loadDogecoinAndFiat to ensure
@@ -5405,10 +5603,16 @@ function onPointerDown(event) {
     isDragging = false;
     pointerDownPosition.set(event.clientX, event.clientY);
 
-    // Check if the click is on a UI element
-    if (event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#element-controls')) {
+    // Check if the click is on a UI element (orbital UI included)
+    if (event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#element-controls') || event.target.closest('#orbital-transform-ui')) {
         selectedObject = null;
         controls.enabled = true;
+        return;
+    }
+
+    // If pointer is over a TransformControls gizmo handle, let the gizmo own the event
+    if (transformControls && transformControls.axis) {
+        selectedObject = null;
         return;
     }
 
@@ -5648,8 +5852,13 @@ function onPointerUp(event) {
 
 function onClick(event) {
 
-    // Only process click if no dragging occurred and not clicking on UI
-    if (isDragging || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#element-controls')) {
+    // Only process click if no dragging occurred and not clicking on UI (orbital UI included)
+    if (isDragging || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#element-controls') || event.target.closest('#orbital-transform-ui')) {
+        return;
+    }
+
+    // If the user just finished dragging a gizmo handle, suppress this click
+    if (transformControls && transformControls.dragging) {
         return;
     }
 
@@ -5692,47 +5901,202 @@ function onClick(event) {
     }
 
     if (clickedObject) {
-        // ── Select element for scale slider ──
-        selectElementForControls(clickedObject);
+        // Old scale/rotate panel disabled - the orbital transform UI is now the only asset modifier
+        // selectElementForControls(clickedObject);
 
-        // ── SWAP MODE: cycle overlord element instead of Z-depth ──
+        // ── SWAP MODE: cycle overlord element (mashup-only feature, preserved) ──
         if (swapMode) {
             const id = clickedObject.userData.id;
             if (CYCLABLE_ELEMENTS.includes(id)) {
                 cycleElement(id);
-                return; // Don't fall through to Z-depth cycling
+                return; // Don't fall through to orbital UI
             }
-            // If not a cyclable element, fall through to normal Z-depth behavior
+            // If not a cyclable element, fall through to orbital UI behavior
         }
 
-        // Skip depth cycling for non-draggable elements or those with special handling
-        if (clickedObject === backgroundMesh || clickedObject === rightEyeRedactionRect || clickedObject === leftEyeRedactionRect || clickedObject === marqueeTextMesh || clickedObject === biometricMarqueeTextMesh || clickedObject === bloodTextMesh || clickedObject === redactedGlitchTextMesh) { // Added redactedGlitchTextMesh
+        // Skip orbital UI for non-transformable elements (background, redaction rects, text overlays)
+        if (clickedObject === backgroundMesh || clickedObject === rightEyeRedactionRect || clickedObject === leftEyeRedactionRect || clickedObject === marqueeTextMesh || clickedObject === biometricMarqueeTextMesh || clickedObject === bloodTextMesh || clickedObject === redactedGlitchTextMesh) {
             return;
         }
 
-        // Cycle through depth levels
-        let currentLayer = clickedObject.userData.currentLayer || 1;
-        currentLayer--; // Move backward one level
-        if (currentLayer < 1) { // If it goes below 1
-            currentLayer = totalDepthLayers; // Wrap around to the highest layer
-        }
-        clickedObject.userData.currentLayer = currentLayer;
-        clickedObject.position.z = (currentLayer - 1) * depthStep;
-
-        // Update redaction rectangle Z position if the clicked object is an eye
-        if (clickedObject === rightEyeMesh) {
-            if (rightEyeRedactionRect) {
-                rightEyeRedactionRect.position.z = clickedObject.position.z + (1.5 * depthStep);
-            }
-        }
-        else if (clickedObject === leftEyeMesh) {
-            if (leftEyeRedactionRect) {
-                leftEyeRedactionRect.position.z = clickedObject.position.z + (1.5 * depthStep);
-            }
-        }
-
-        console.log(`Object moved to layer: ${currentLayer}, Z-position: ${clickedObject.position.z}`);
+        // Single-tap → open orbital transform UI on this asset (replaces Z-depth cycling)
+        openOrbitalUI(clickedObject);
+    } else if (orbitalTarget) {
+        // Click on empty canvas while gizmo is open → close it
+        closeOrbitalUI();
     }
+}
+
+// ─── ORBITAL TRANSFORM UI (Blender/AE-style gizmo) ──────────────────────────
+
+/** Project the mesh's 3D bounding box to screen space and return its 2D extents */
+function getOrbitalScreenBounds(mesh) {
+    const box = new THREE.Box3().setFromObject(mesh);
+    const corners = [
+        new THREE.Vector3(box.min.x, box.min.y, box.min.z),
+        new THREE.Vector3(box.min.x, box.min.y, box.max.z),
+        new THREE.Vector3(box.min.x, box.max.y, box.min.z),
+        new THREE.Vector3(box.min.x, box.max.y, box.max.z),
+        new THREE.Vector3(box.max.x, box.min.y, box.min.z),
+        new THREE.Vector3(box.max.x, box.min.y, box.max.z),
+        new THREE.Vector3(box.max.x, box.max.y, box.min.z),
+        new THREE.Vector3(box.max.x, box.max.y, box.max.z)
+    ];
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const c of corners) {
+        c.project(camera);
+        const sx = ( c.x * 0.5 + 0.5) * window.innerWidth;
+        const sy = (-c.y * 0.5 + 0.5) * window.innerHeight;
+        if (sx < minX) minX = sx;
+        if (sx > maxX) maxX = sx;
+        if (sy < minY) minY = sy;
+        if (sy > maxY) maxY = sy;
+    }
+    return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
+}
+
+/** Lock the orbital toolbar below the left UI container, flush 16px from left edge */
+function updateOrbitalUIPosition() {
+    const ui = document.getElementById('orbital-transform-ui');
+    if (!ui || !leftUiContainer) return;
+    const lcRect = leftUiContainer.getBoundingClientRect();
+    ui.style.left = '16px';
+    ui.style.top  = (lcRect.bottom + 8) + 'px';
+    ui.style.transform = '';
+}
+
+/** Update the active-mode button highlight */
+function setGizmoMode(mode) {
+    if (!transformControls) return;
+    currentGizmoMode = mode;
+    transformControls.setMode(mode);
+    document.querySelectorAll('#orbital-transform-ui .orb-mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+}
+
+/** Attach the gizmo to a mesh and show the floating toolbar */
+function openOrbitalUI(mesh) {
+    orbitalTarget = mesh;
+    if (transformControls) {
+        transformControls.attach(mesh);
+        transformControls.enabled = true;
+        const helper = transformControls.getHelper ? transformControls.getHelper() : transformControls;
+        helper.visible = true;
+        setGizmoMode(currentGizmoMode);
+    }
+    const ORBITAL_LABEL_OVERRIDES = {
+        dogecoin: 'LOGO SWAP'
+    };
+    const id = mesh.userData.id || 'asset';
+    const label = ORBITAL_LABEL_OVERRIDES[id] || id.toUpperCase();
+    const nameEl = document.getElementById('orb-asset-name');
+    if (nameEl) nameEl.textContent = label;
+    updateOrbitalUIPosition();
+    document.getElementById('orbital-transform-ui').classList.add('open');
+}
+
+/** Detach the gizmo and hide the toolbar */
+function closeOrbitalUI() {
+    if (transformControls) {
+        transformControls.detach();
+        transformControls.enabled = false;
+        const helper = transformControls.getHelper ? transformControls.getHelper() : transformControls;
+        helper.visible = false;
+    }
+    orbitalTarget = null;
+    document.getElementById('orbital-transform-ui').classList.remove('open');
+}
+
+/** Wire up all orbital-UI controls. Called once from init(). */
+function setupOrbitalUI() {
+    document.querySelectorAll('#orbital-transform-ui .orb-mode-btn').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            setGizmoMode(this.dataset.mode);
+        });
+    });
+
+    const resetBtn = document.getElementById('orb-reset-btn');
+    if (resetBtn) resetBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!orbitalTarget) return;
+        orbitalTarget.rotation.set(0, 0, 0);
+        orbitalTarget.scale.set(1, 1, 1);
+    });
+
+    const closeBtn = document.getElementById('orb-close');
+    if (closeBtn) closeBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        closeOrbitalUI();
+    });
+
+    const dupBtn = document.getElementById('orb-duplicate-btn');
+    if (dupBtn) dupBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!orbitalTarget) return;
+        const src = orbitalTarget;
+        const newGeo = src.geometry.clone();
+        const newMat = src.material.clone();
+        if (src.material.map) newMat.map = src.material.map;
+        const clone = new THREE.Mesh(newGeo, newMat);
+        const xOffset = (src.userData.initialScale ? src.userData.initialScale.width : 1) * 0.1;
+        clone.position.set(src.position.x + xOffset, src.position.y, src.position.z + 2 * depthStep);
+        clone.rotation.copy(src.rotation);
+        clone.scale.copy(src.scale);
+        clone.visible = src.visible;
+        clone.userData.id = 'dup_' + src.userData.id + '_' + Date.now();
+        clone.userData.currentLayer = (src.userData.currentLayer || 0) + 2;
+        clone.userData.initialPosition = clone.position.clone();
+        clone.userData.initialLayer = clone.userData.currentLayer;
+        clone.userData.initialScale = src.userData.initialScale
+            ? { width: src.userData.initialScale.width, height: src.userData.initialScale.height }
+            : undefined;
+        clone.userData.userScale = src.userData.userScale || 1.0;
+        if (src.userData.isUploaded) clone.userData.isUploaded = true;
+        scene.add(clone);
+        draggableObjects.push(clone);
+        cameraAnimationTargets.push(clone);
+        openOrbitalUI(clone);
+    });
+
+    const trashBtn = document.getElementById('orb-trash-btn');
+    if (trashBtn) trashBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!orbitalTarget) return;
+        const target = orbitalTarget;
+        closeOrbitalUI();
+        const configIndex = initialAssetConfigs.findIndex(c => c.id === target.userData.id);
+        if (configIndex !== -1) initialAssetConfigs[configIndex].removed = true;
+        scene.remove(target);
+        draggableObjects = draggableObjects.filter(o => o !== target);
+        cameraAnimationTargets = cameraAnimationTargets.filter(o => o !== target);
+        if (target.userData.id === 'dogecoin') dogecoinRef = null;
+        if (target.userData.id === 'spacex') spacexRef = null;
+        if (target.userData.id === 'rightEye') {
+            if (rightEyeRedactionRect) { scene.remove(rightEyeRedactionRect); rightEyeRedactionRect.geometry.dispose(); rightEyeRedactionRect.material.dispose(); }
+            rightEyeMesh = null; rightEyeRedactionRect = null;
+        }
+        if (target.userData.id === 'leftEye') {
+            if (leftEyeRedactionRect) { scene.remove(leftEyeRedactionRect); leftEyeRedactionRect.geometry.dispose(); leftEyeRedactionRect.material.dispose(); }
+            leftEyeMesh = null; leftEyeRedactionRect = null;
+        }
+        if (target.geometry) target.geometry.dispose();
+        if (target.material) {
+            if (Array.isArray(target.material)) target.material.forEach(m => m.dispose());
+            else target.material.dispose();
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        const tag = (document.activeElement && document.activeElement.tagName) || '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        if (e.key === 'Escape') { closeOrbitalUI(); return; }
+        if (!orbitalTarget) return;
+        if (e.key === 'g' || e.key === 'G') setGizmoMode('translate');
+        else if (e.key === 'r' || e.key === 'R') setGizmoMode('rotate');
+        else if (e.key === 's' || e.key === 'S') setGizmoMode('scale');
+    });
 }
 
 // Ease-in-out function
@@ -6988,5 +7352,47 @@ setTimeout(function () {
     setupExport();
   })();
   </script>
+
+  <!-- ─── ORBITAL TRANSFORM UI (Blender/AE-style gizmo toolbar) ─── -->
+  <div id="orbital-transform-ui">
+    <div class="orb-header">
+      <div class="orb-title-wrap">
+        <span class="orb-icon">◎</span>
+        <span class="orb-asset-name" id="orb-asset-name">ASSET</span>
+      </div>
+      <span class="orb-close" id="orb-close" title="Close (Esc)">✕</span>
+    </div>
+
+    <div class="orb-modes">
+      <button class="orb-mode-btn active" id="orb-mode-translate" data-mode="translate" title="Move (G)">
+        <span class="orb-mode-icon">⇔</span>
+        <span class="orb-mode-label">MOVE</span>
+        <span class="orb-mode-hotkey">G</span>
+      </button>
+      <button class="orb-mode-btn" id="orb-mode-rotate" data-mode="rotate" title="Rotate (R)">
+        <span class="orb-mode-icon">⟳</span>
+        <span class="orb-mode-label">ROTATE</span>
+        <span class="orb-mode-hotkey">R</span>
+      </button>
+      <button class="orb-mode-btn" id="orb-mode-scale" data-mode="scale" title="Scale (S)">
+        <span class="orb-mode-icon">⤢</span>
+        <span class="orb-mode-label">SCALE</span>
+        <span class="orb-mode-hotkey">S</span>
+      </button>
+    </div>
+
+    <div class="orb-legend">
+      <span class="orb-legend-item"><span class="orb-legend-dot x"></span><span class="orb-legend-label">X</span></span>
+      <span class="orb-legend-item"><span class="orb-legend-dot y"></span><span class="orb-legend-label">Y</span></span>
+      <span class="orb-legend-item"><span class="orb-legend-dot z"></span><span class="orb-legend-label">Z</span></span>
+    </div>
+
+    <button class="orb-reset-btn" id="orb-reset-btn">↺ RESET TRANSFORM</button>
+
+    <div class="orb-action-row">
+      <button class="orb-duplicate-btn" id="orb-duplicate-btn">⧉ DUPLICATE</button>
+      <button class="orb-trash-btn" id="orb-trash-btn">✕ DELETE</button>
+    </div>
+  </div>
 
 </body></html>
