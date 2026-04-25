@@ -2049,6 +2049,7 @@ function resetPiecesToOriginalPositions() {
                 signature.userData.initialScale = { width: signatureWidth, height: signatureHeight };
                 signature.userData.initialPosition = signatureConfig.initialPosition.clone(); // Ensure initialPosition is stored
                 signature.userData.initialLayer = signatureConfig.initialLayer;
+                signature.visible = false; // SIGNATURE HIDDEN - flip to true to show again
                 scene.add(signature);
             });
         }
@@ -2975,6 +2976,7 @@ function init() {
             signature.userData.initialScale = { width: signatureWidth, height: signatureHeight };
             signature.userData.initialPosition = signatureInitialPos.clone();
             signature.userData.initialLayer = signatureNewLayer;
+            signature.visible = false; // SIGNATURE HIDDEN - flip to true to show again
             scene.add(signature);
 
             onWindowResize();
