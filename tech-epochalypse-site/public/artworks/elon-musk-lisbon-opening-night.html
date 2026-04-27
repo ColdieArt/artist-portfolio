@@ -4819,8 +4819,8 @@ setTimeout(function () {
     <div id="print-modal-content">
       <div id="print-form">
         <h2>Print Your 3D Kinetic Collage</h2>
-        <p>Enter your email to register your custom layout. You will receive a confirmation email with your print number and a thumbnail of your composition. Visit the print team on opening night to collect your signed print.</p>
-        <input id="print-email-input" type="email" placeholder="Email Address" />
+        <p>Enter your name to register your custom layout. Save your print number — staff will use it to verify your name when you pick up your signed art print on opening night.</p>
+        <input id="print-name-input" type="text" placeholder="Customer Name" autocomplete="name" />
         <button id="print-submit-btn">SUBMIT</button>
         <div id="print-status"></div>
       </div>
@@ -4828,7 +4828,7 @@ setTimeout(function () {
         <h2>Touched the Art</h2>
         <div class="print-number" id="print-success-number">#0000</div>
         <img id="print-success-thumb" class="print-thumb" alt="Your custom layout" />
-        <p class="print-message">Thank you for 'touching the art' with Coldie's Tech Epochalypse kinetic 3D collage. Your print number is <strong id="print-success-number-inline">#0000</strong> — check your email for confirmation and image to confirm your layout.</p>
+        <p class="print-message">Thank you for 'touching the art' with Coldie's Tech Epochalypse kinetic 3D collage of Elon Musk. Your print number is <strong id="print-success-number-inline">#0000</strong>. Save this number and verify with staff your name when picking up your art print.</p>
         <div id="print-success-warning" class="print-warning" style="display:none;"></div>
         <button id="print-close-btn">DONE</button>
       </div>
@@ -4847,7 +4847,7 @@ setTimeout(function () {
     const printContent = document.getElementById('print-modal-content');
     const printFormView = document.getElementById('print-form');
     const printSuccessView = document.getElementById('print-success');
-    const printEmailInput = document.getElementById('print-email-input');
+    const printNameInput = document.getElementById('print-name-input');
     const printSubmitBtn = document.getElementById('print-submit-btn');
     const printStatus = document.getElementById('print-status');
     const printCloseBtn = document.getElementById('print-close-btn');
@@ -4943,7 +4943,7 @@ setTimeout(function () {
 
     function showFormView() {
       printContent.classList.remove('success-view');
-      printEmailInput.value = '';
+      printNameInput.value = '';
       printStatus.textContent = '';
       printSubmitBtn.disabled = false;
       printSuccessWarning.style.display = 'none';
@@ -4985,10 +4985,10 @@ setTimeout(function () {
       }
 
       printSubmitBtn.onclick = async () => {
-        const email = printEmailInput.value.trim();
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        const customerName = printNameInput.value.trim();
+        if (!customerName || customerName.length < 2) {
           printStatus.style.color = '#e66';
-          printStatus.textContent = 'Please enter a valid email address';
+          printStatus.textContent = 'Please enter your name';
           return;
         }
 
@@ -5064,7 +5064,7 @@ setTimeout(function () {
           const localRef = formatPrintNumber(localNum).replace('#', 'LOCAL-');
           const ts = new Date();
           const tsStr = ts.toISOString().replace(/[:.]/g, '-').slice(0, 19);
-          const baseName = `${String(localNum).padStart(4,'0')}_${tsStr}_${safeFilenamePart(email)}`;
+          const baseName = `${String(localNum).padStart(4,'0')}_${tsStr}_${safeFilenamePart(customerName)}`;
 
           // ── STEP 1: write to local export folder (offline-safe redundancy) ──
           printStatus.textContent = 'SAVING LOCAL...';
@@ -5074,7 +5074,7 @@ setTimeout(function () {
             if (folder) {
               await fsaWriteFile(folder, baseName + '.jpg', imageBlob);
               await fsaWriteFile(folder, baseName + '.json', new Blob([JSON.stringify({
-                localRef, email, submittedAt: ts.toISOString(), composition: JSON.parse(compositionJson),
+                localRef, customerName, submittedAt: ts.toISOString(), composition: JSON.parse(compositionJson),
               }, null, 2)], { type: 'application/json' }));
               localSaved = true;
             }
@@ -5085,7 +5085,7 @@ setTimeout(function () {
           // ── STEP 2: upload + Airtable + email ──
           printStatus.textContent = 'UPLOADING...';
           const form = new FormData();
-          form.append('email', email);
+          form.append('customerName', customerName);
           form.append('image', imageBlob, baseName + '.jpg');
           form.append('compositionJson', compositionJson);
           form.append('localRef', localRef);
@@ -5111,13 +5111,11 @@ setTimeout(function () {
 
           if (res.ok && data.ok) {
             const numStr = data.printNumberStr || localRef;
-            const warning = data.emailSent ? '' :
-              (data.emailError ? `Email could not be sent (${data.emailError}). Show this print number to gallery staff.` : '');
             showSuccessView({
               printNumberStr: numStr,
               thumbDataUrl,
               isLocal: false,
-              warningText: warning,
+              warningText: '',
             });
           } else {
             const detail = data.details || data.error || ('HTTP ' + res.status);

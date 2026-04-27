@@ -1,10 +1,8 @@
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
-const { Resend } = require('resend');
 
 const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || '8cd572b8af641d3f03353b7cd96a1a78';
 const R2_BUCKET = process.env.R2_BUCKET_NAME || 'te-gallery';
 const AIRTABLE_TABLE = 'OPENING NIGHT';
-const FROM_EMAIL = 'Coldie <coldie@knowyouroverlord.art>';
 
 function getS3Client() {
   return new S3Client({
@@ -21,16 +19,6 @@ function formatPrintNumber(n) {
   return '#' + String(n).padStart(4, '0');
 }
 
-function buildEmailHtml(printNumberStr, imageUrl) {
-  return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#111;">
-  <p style="font-size:16px;line-height:1.5;">Thank you for 'touching the art' with Coldie's Tech Epochalypse kinetic 3D collage. Your print number is <strong>${printNumberStr}</strong>. See thumbnail to confirm your customized layout. Visit print team to collect your print and have it signed by Coldie on opening night.</p>
-  <div style="margin-top:24px;text-align:center;">
-    <img src="${imageUrl}" alt="Your custom layout ${printNumberStr}" style="max-width:600px;width:100%;height:auto;border:1px solid #ddd;" />
-  </div>
-  <p style="margin-top:24px;font-size:13px;color:#666;">Print number: ${printNumberStr}<br/>If your number does not match the layout, please show this email to gallery staff.</p>
-</div>`;
-}
-
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -41,16 +29,12 @@ module.exports = async (req, res) => {
 
   const AIRTABLE_PAT = process.env.AIRTABLE_PAT || process.env.AIRTABLE_TOKEN;
   const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
-  const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
   if (!AIRTABLE_PAT || !AIRTABLE_BASE_ID) {
     return res.status(500).json({ error: 'Airtable not configured on server' });
   }
   if (!process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY) {
     return res.status(500).json({ error: 'R2 credentials not configured on server' });
-  }
-  if (!RESEND_API_KEY) {
-    return res.status(500).json({ error: 'Resend not configured on server' });
   }
 
   try {
@@ -70,15 +54,12 @@ module.exports = async (req, res) => {
     const boundary = boundaryMatch[1] || boundaryMatch[2];
 
     const parts = parseMultipart(body, boundary);
-    const email = (getFieldValue(parts, 'email') || '').trim();
+    const customerName = (getFieldValue(parts, 'customerName') || getFieldValue(parts, 'email') || '').trim();
     const compositionJson = getFieldValue(parts, 'compositionJson') || '';
     const localRef = (getFieldValue(parts, 'localRef') || '').trim();
 
-    if (!email) {
-      return res.status(400).json({ error: 'Email address is required' });
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ error: 'Invalid email address' });
+    if (!customerName) {
+      return res.status(400).json({ error: 'Customer name is required' });
     }
 
     const id = `opening-night-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -101,7 +82,7 @@ module.exports = async (req, res) => {
       Key: imgKey,
       Body: imagePart.data,
       ContentType: 'image/jpeg',
-      Metadata: { email, date: today },
+      Metadata: { name: customerName.slice(0, 80), date: today },
     }));
     const imageUrl = `${proto}://${host}/api/image?key=${encodeURIComponent(imgKey)}`;
 
@@ -113,13 +94,15 @@ module.exports = async (req, res) => {
         Key: jsonKey,
         Body: Buffer.from(compositionJson, 'utf-8'),
         ContentType: 'application/json',
-        Metadata: { email, date: today },
+        Metadata: { name: customerName.slice(0, 80), date: today },
       }));
       jsonUrl = `${proto}://${host}/api/image?key=${encodeURIComponent(jsonKey)}`;
     }
 
+    // Customer name is written to the existing "Email" column (per user request to
+    // reuse the same Airtable field). Rename the column header in Airtable as desired.
     const fields = {
-      'Email': email,
+      'Email': customerName,
       'JPEG': imageUrl,
       'Status': 'pending',
     };
@@ -157,26 +140,6 @@ module.exports = async (req, res) => {
     const printNumberRaw = record.fields && record.fields['Print #'];
     const printNumberStr = printNumberRaw != null ? formatPrintNumber(printNumberRaw) : '#????';
 
-    let emailSent = false;
-    let emailError = null;
-    try {
-      const resend = new Resend(RESEND_API_KEY);
-      const sendRes = await resend.emails.send({
-        from: FROM_EMAIL,
-        to: email,
-        subject: `Your Tech Epochalypse print ${printNumberStr}`,
-        html: buildEmailHtml(printNumberStr, imageUrl),
-      });
-      if (sendRes && sendRes.error) {
-        emailError = sendRes.error.message || String(sendRes.error);
-      } else {
-        emailSent = true;
-      }
-    } catch (e) {
-      emailError = e.message || String(e);
-      console.error('Resend send error:', e);
-    }
-
     return res.status(200).json({
       ok: true,
       printNumber: printNumberRaw,
@@ -184,8 +147,6 @@ module.exports = async (req, res) => {
       record: { id: record.id },
       imageUrl,
       jsonUrl,
-      emailSent,
-      emailError,
     });
   } catch (e) {
     console.error('Print opening-night error:', e);
