@@ -273,6 +273,51 @@
     #print-email-input:focus {
       border-color: #666;
     }
+    /* ─── ON-SCREEN KEYBOARD (80% scale of mashup-lisbon) ─── */
+    #virtual-keyboard {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 14px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #virtual-keyboard .kb-row {
+      display: flex;
+      justify-content: center;
+      gap: 3px;
+    }
+    #virtual-keyboard .kb-key {
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      min-width: 26px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.1s;
+      padding: 0 6px;
+      flex-shrink: 0;
+    }
+    #virtual-keyboard .kb-key:active,
+    #virtual-keyboard .kb-key.pressed {
+      background: #555;
+      border-color: #888;
+    }
+    #virtual-keyboard .kb-key.wide {
+      min-width: 48px;
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+    #virtual-keyboard .kb-key.space {
+      flex: 1;
+      max-width: 200px;
+    }
     #print-submit-btn {
       background: #fff;
       color: #000;
@@ -4820,7 +4865,48 @@ setTimeout(function () {
       <div id="print-form">
         <h2>Print Your 3D Kinetic Collage</h2>
         <p>Enter your name to register your custom layout. Save your print number — staff will use it to verify your name when you pick up your signed art print on opening night.</p>
-        <input id="print-name-input" type="text" placeholder="Customer Name" autocomplete="name" />
+        <input id="print-name-input" type="text" readonly placeholder="Tap keys to enter name" autocomplete="off" />
+        <div id="virtual-keyboard">
+          <div class="kb-row">
+            <div class="kb-key" data-key="q">q</div>
+            <div class="kb-key" data-key="w">w</div>
+            <div class="kb-key" data-key="e">e</div>
+            <div class="kb-key" data-key="r">r</div>
+            <div class="kb-key" data-key="t">t</div>
+            <div class="kb-key" data-key="y">y</div>
+            <div class="kb-key" data-key="u">u</div>
+            <div class="kb-key" data-key="i">i</div>
+            <div class="kb-key" data-key="o">o</div>
+            <div class="kb-key" data-key="p">p</div>
+          </div>
+          <div class="kb-row">
+            <div class="kb-key" data-key="a">a</div>
+            <div class="kb-key" data-key="s">s</div>
+            <div class="kb-key" data-key="d">d</div>
+            <div class="kb-key" data-key="f">f</div>
+            <div class="kb-key" data-key="g">g</div>
+            <div class="kb-key" data-key="h">h</div>
+            <div class="kb-key" data-key="j">j</div>
+            <div class="kb-key" data-key="k">k</div>
+            <div class="kb-key" data-key="l">l</div>
+          </div>
+          <div class="kb-row">
+            <div class="kb-key" data-key="z">z</div>
+            <div class="kb-key" data-key="x">x</div>
+            <div class="kb-key" data-key="c">c</div>
+            <div class="kb-key" data-key="v">v</div>
+            <div class="kb-key" data-key="b">b</div>
+            <div class="kb-key" data-key="n">n</div>
+            <div class="kb-key" data-key="m">m</div>
+            <div class="kb-key wide" data-key="backspace">DEL</div>
+          </div>
+          <div class="kb-row">
+            <div class="kb-key" data-key="-">-</div>
+            <div class="kb-key" data-key="'">'</div>
+            <div class="kb-key space" data-key=" ">SPACE</div>
+            <div class="kb-key wide" data-key="clear">CLEAR</div>
+          </div>
+        </div>
         <button id="print-submit-btn">SUBMIT</button>
         <div id="print-status"></div>
       </div>
@@ -4849,6 +4935,30 @@ setTimeout(function () {
     const printSuccessView = document.getElementById('print-success');
     const printNameInput = document.getElementById('print-name-input');
     const printSubmitBtn = document.getElementById('print-submit-btn');
+    const virtualKeyboard = document.getElementById('virtual-keyboard');
+
+    // ── VIRTUAL KEYBOARD ──
+    if (virtualKeyboard && printNameInput) {
+      virtualKeyboard.addEventListener('pointerdown', (e) => {
+        const key = e.target.closest('.kb-key');
+        if (!key) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const val = key.dataset.key;
+        if (val === 'backspace') {
+          printNameInput.value = printNameInput.value.slice(0, -1);
+        } else if (val === 'clear') {
+          printNameInput.value = '';
+        } else {
+          if (printNameInput.value.length < 60) printNameInput.value += val;
+        }
+        key.classList.add('pressed');
+        setTimeout(() => key.classList.remove('pressed'), 120);
+      });
+      ['touchstart','touchmove','touchend','pointerdown','pointermove','pointerup','mousedown','click'].forEach(evt => {
+        virtualKeyboard.addEventListener(evt, (e) => { e.stopPropagation(); }, { passive: false });
+      });
+    }
     const printStatus = document.getElementById('print-status');
     const printCloseBtn = document.getElementById('print-close-btn');
     const printSuccessNumber = document.getElementById('print-success-number');
