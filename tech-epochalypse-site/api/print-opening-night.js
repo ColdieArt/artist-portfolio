@@ -122,6 +122,7 @@ module.exports = async (req, res) => {
       'Email': email,
       'JPEG': imageUrl,
       'Status': 'pending',
+      'Date': today,
     };
     if (jsonUrl) fields['Composition JSON'] = jsonUrl;
     if (localRef) fields['Notes'] = `Local ref: ${localRef}`;
