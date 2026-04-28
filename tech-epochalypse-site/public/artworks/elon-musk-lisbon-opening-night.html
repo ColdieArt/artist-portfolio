@@ -5200,7 +5200,13 @@ setTimeout(function () {
           form.append('compositionJson', compositionJson);
           form.append('localRef', localRef);
 
-          const API_URL = window.location.origin;
+          // When running from kiosk (localhost) or file://, route submits to
+          // production. Override at runtime via `window.PRINT_API_URL` if needed.
+          const _origin = window.location.origin || '';
+          const API_URL = window.PRINT_API_URL ||
+            (/^(file:|http:\/\/(localhost|127\.|\[::1\]))/.test(_origin)
+              ? 'https://knowyouroverlord.art'
+              : _origin);
           let res, data;
           try {
             res = await fetch(API_URL + '/api/print-opening-night', { method: 'POST', body: form });
