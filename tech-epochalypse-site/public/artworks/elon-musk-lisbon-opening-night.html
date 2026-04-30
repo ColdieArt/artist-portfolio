@@ -5091,6 +5091,9 @@ setTimeout(function () {
         printCloseBtn.onclick = () => {
           printOverlay.classList.remove('open');
           showFormView();
+          // Reset artwork to original positions + re-randomize face for next visitor
+          try { if (typeof resetPiecesToOriginalPositions === 'function') resetPiecesToOriginalPositions(); }
+          catch (e) { console.warn('Reset on DONE failed:', e); }
         };
       }
 
