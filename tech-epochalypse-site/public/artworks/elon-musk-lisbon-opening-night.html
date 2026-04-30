@@ -258,7 +258,8 @@
       color: #aaa;
       line-height: 1.6;
     }
-    #print-email-input {
+    #print-email-input,
+    .print-input {
       width: 100%;
       box-sizing: border-box;
       background: #111;
@@ -268,9 +269,22 @@
       font-family: monospace;
       font-size: 11px;
       outline: none;
-      margin-bottom: 18px;
+      margin: 0;
+      cursor: pointer;
     }
-    #print-email-input:focus {
+    .print-input + .print-input { margin-top: 12px; }
+    .print-input.active {
+      border-color: #fff;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.4);
+    }
+    #print-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-bottom: 24px;
+    }
+    #print-email-input:focus,
+    .print-input:focus {
       border-color: #666;
     }
     /* ─── ON-SCREEN KEYBOARD (80% scale of mashup-lisbon) ─── */
@@ -4865,8 +4879,23 @@ setTimeout(function () {
       <div id="print-form">
         <h2>Print Your 3D Kinetic Collage</h2>
         <p>Enter your name to register your custom layout. Save your print number — staff will use it to verify your name when you pick up your signed art print on opening night.</p>
-        <input id="print-name-input" type="text" readonly placeholder="Tap keys to enter name" autocomplete="off" />
+        <div id="print-fields">
+          <input id="print-name-input" class="print-input active" type="text" readonly placeholder="Customer Name" autocomplete="off" />
+          <input id="print-email-input-2" class="print-input" type="text" readonly placeholder="Email Address" autocomplete="off" />
+        </div>
         <div id="virtual-keyboard">
+          <div class="kb-row">
+            <div class="kb-key" data-key="1">1</div>
+            <div class="kb-key" data-key="2">2</div>
+            <div class="kb-key" data-key="3">3</div>
+            <div class="kb-key" data-key="4">4</div>
+            <div class="kb-key" data-key="5">5</div>
+            <div class="kb-key" data-key="6">6</div>
+            <div class="kb-key" data-key="7">7</div>
+            <div class="kb-key" data-key="8">8</div>
+            <div class="kb-key" data-key="9">9</div>
+            <div class="kb-key" data-key="0">0</div>
+          </div>
           <div class="kb-row">
             <div class="kb-key" data-key="q">q</div>
             <div class="kb-key" data-key="w">w</div>
@@ -4901,7 +4930,10 @@ setTimeout(function () {
             <div class="kb-key wide" data-key="backspace">DEL</div>
           </div>
           <div class="kb-row">
+            <div class="kb-key" data-key="@">@</div>
+            <div class="kb-key" data-key=".">.</div>
             <div class="kb-key" data-key="-">-</div>
+            <div class="kb-key" data-key="_">_</div>
             <div class="kb-key" data-key="'">'</div>
             <div class="kb-key space" data-key=" ">SPACE</div>
             <div class="kb-key wide" data-key="clear">CLEAR</div>
@@ -4934,8 +4966,31 @@ setTimeout(function () {
     const printFormView = document.getElementById('print-form');
     const printSuccessView = document.getElementById('print-success');
     const printNameInput = document.getElementById('print-name-input');
+    const printEmailInput2 = document.getElementById('print-email-input-2');
     const printSubmitBtn = document.getElementById('print-submit-btn');
     const virtualKeyboard = document.getElementById('virtual-keyboard');
+
+    // ── ACTIVE FIELD TRACKING (which input the keyboard types into) ──
+    let activeInput = printNameInput;
+    function setActiveInput(el) {
+      activeInput = el;
+      [printNameInput, printEmailInput2].forEach(i => {
+        if (!i) return;
+        i.classList.toggle('active', i === el);
+      });
+    }
+    if (printNameInput) {
+      printNameInput.addEventListener('pointerdown', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        setActiveInput(printNameInput);
+      });
+    }
+    if (printEmailInput2) {
+      printEmailInput2.addEventListener('pointerdown', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        setActiveInput(printEmailInput2);
+      });
+    }
 
     // ── VIRTUAL KEYBOARD ──
     if (virtualKeyboard && printNameInput) {
@@ -4945,12 +5000,13 @@ setTimeout(function () {
         e.preventDefault();
         e.stopPropagation();
         const val = key.dataset.key;
+        const target = activeInput || printNameInput;
         if (val === 'backspace') {
-          printNameInput.value = printNameInput.value.slice(0, -1);
+          target.value = target.value.slice(0, -1);
         } else if (val === 'clear') {
-          printNameInput.value = '';
+          target.value = '';
         } else {
-          if (printNameInput.value.length < 60) printNameInput.value += val;
+          if (target.value.length < 80) target.value += val;
         }
         key.classList.add('pressed');
         setTimeout(() => key.classList.remove('pressed'), 120);
@@ -5054,10 +5110,12 @@ setTimeout(function () {
     function showFormView() {
       printContent.classList.remove('success-view');
       printNameInput.value = '';
+      if (printEmailInput2) printEmailInput2.value = '';
       printStatus.textContent = '';
       printSubmitBtn.disabled = false;
       printSuccessWarning.style.display = 'none';
       printSuccessWarning.textContent = '';
+      setActiveInput(printNameInput);
     }
     function showSuccessView({ printNumberStr, thumbDataUrl, isLocal, warningText }) {
       printSuccessNumber.textContent = printNumberStr;
@@ -5099,9 +5157,17 @@ setTimeout(function () {
 
       printSubmitBtn.onclick = async () => {
         const customerName = printNameInput.value.trim();
+        const customerEmail = printEmailInput2 ? printEmailInput2.value.trim() : '';
         if (!customerName || customerName.length < 2) {
           printStatus.style.color = '#e66';
           printStatus.textContent = 'Please enter your name';
+          setActiveInput(printNameInput);
+          return;
+        }
+        if (!customerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
+          printStatus.style.color = '#e66';
+          printStatus.textContent = 'Please enter a valid email address';
+          setActiveInput(printEmailInput2);
           return;
         }
 
@@ -5177,7 +5243,7 @@ setTimeout(function () {
           const localRef = formatPrintNumber(localNum).replace('#', 'LOCAL-');
           const ts = new Date();
           const tsStr = ts.toISOString().replace(/[:.]/g, '-').slice(0, 19);
-          const baseName = `${String(localNum).padStart(4,'0')}_${tsStr}_${safeFilenamePart(customerName)}`;
+          const baseName = `${String(localNum).padStart(4,'0')}_${tsStr}_${safeFilenamePart(customerName)}_${safeFilenamePart(customerEmail)}`;
 
           // ── STEP 1: write to local export folder (offline-safe redundancy) ──
           printStatus.textContent = 'SAVING LOCAL...';
@@ -5187,7 +5253,7 @@ setTimeout(function () {
             if (folder) {
               await fsaWriteFile(folder, baseName + '.jpg', imageBlob);
               await fsaWriteFile(folder, baseName + '.json', new Blob([JSON.stringify({
-                localRef, customerName, submittedAt: ts.toISOString(), composition: JSON.parse(compositionJson),
+                localRef, customerName, customerEmail, submittedAt: ts.toISOString(), composition: JSON.parse(compositionJson),
               }, null, 2)], { type: 'application/json' }));
               localSaved = true;
             }
@@ -5199,6 +5265,7 @@ setTimeout(function () {
           printStatus.textContent = 'UPLOADING...';
           const form = new FormData();
           form.append('customerName', customerName);
+          form.append('email', customerEmail);
           form.append('image', imageBlob, baseName + '.jpg');
           form.append('compositionJson', compositionJson);
           form.append('localRef', localRef);

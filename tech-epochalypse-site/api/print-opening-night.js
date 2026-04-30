@@ -54,12 +54,16 @@ module.exports = async (req, res) => {
     const boundary = boundaryMatch[1] || boundaryMatch[2];
 
     const parts = parseMultipart(body, boundary);
-    const customerName = (getFieldValue(parts, 'customerName') || getFieldValue(parts, 'email') || '').trim();
+    const customerName = (getFieldValue(parts, 'customerName') || '').trim();
+    const customerEmail = (getFieldValue(parts, 'email') || '').trim();
     const compositionJson = getFieldValue(parts, 'compositionJson') || '';
     const localRef = (getFieldValue(parts, 'localRef') || '').trim();
 
     if (!customerName) {
       return res.status(400).json({ error: 'Customer name is required' });
+    }
+    if (customerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
+      return res.status(400).json({ error: 'Invalid email address' });
     }
 
     const id = `opening-night-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -99,13 +103,15 @@ module.exports = async (req, res) => {
       jsonUrl = `${proto}://${host}/api/image?key=${encodeURIComponent(jsonKey)}`;
     }
 
-    // Customer name is written to the existing "Email" column (per user request to
-    // reuse the same Airtable field). Rename the column header in Airtable as desired.
+    // Writes both the customer name and a separate email address. Airtable
+    // schema must have a column "Customer Name" (single-line text) AND
+    // a column "Email" (email type).
     const fields = {
-      'Email': customerName,
+      'Customer Name': customerName,
       'JPEG': imageUrl,
       'Status': 'pending',
     };
+    if (customerEmail) fields['Email'] = customerEmail;
     if (jsonUrl) fields['Composition JSON'] = jsonUrl;
     if (localRef) fields['Notes'] = `Local ref: ${localRef}`;
 
