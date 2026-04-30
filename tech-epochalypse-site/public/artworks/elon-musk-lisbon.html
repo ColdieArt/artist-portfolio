@@ -258,7 +258,8 @@
       color: #aaa;
       line-height: 1.6;
     }
-    #print-email-input {
+    #print-email-input,
+    .print-input {
       width: 100%;
       box-sizing: border-box;
       background: #111;
@@ -268,10 +269,75 @@
       font-family: monospace;
       font-size: 11px;
       outline: none;
-      margin-bottom: 18px;
+      margin: 0;
+      cursor: pointer;
     }
-    #print-email-input:focus {
+    .print-input + .print-input { margin-top: 12px; }
+    .print-input.active {
+      border-color: #fff;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.4);
+    }
+    #print-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-bottom: 24px;
+    }
+    #print-email-input:focus,
+    .print-input:focus {
       border-color: #666;
+    }
+    /* ─── ON-SCREEN KEYBOARD (80% scale of mashup-lisbon) ─── */
+    #virtual-keyboard {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 14px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #virtual-keyboard .kb-row {
+      display: flex;
+      justify-content: center;
+      gap: 3px;
+    }
+    #virtual-keyboard .kb-key {
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      min-width: 26px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.1s;
+      padding: 0 6px;
+      flex-shrink: 0;
+    }
+    #virtual-keyboard .kb-key:active,
+    #virtual-keyboard .kb-key.pressed {
+      background: #555;
+      border-color: #888;
+    }
+    #virtual-keyboard .kb-key.wide {
+      min-width: 48px;
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+    #virtual-keyboard .kb-key.space {
+      flex: 1;
+      max-width: 200px;
+    }
+    #virtual-keyboard .kb-domains .kb-key {
+      flex: 1;
+      min-width: 0;
+      font-size: 9px;
+      padding: 0 4px;
+      letter-spacing: 0;
     }
     #print-submit-btn {
       background: #fff;
@@ -299,6 +365,57 @@
       text-align: center;
       min-height: 16px;
     }
+    /* ─── PRINT SUCCESS VIEW (overrides max-width when shown) ─── */
+    #print-modal-content.success-view { max-width: 480px; }
+    #print-success { display: none; }
+    #print-modal-content.success-view #print-form { display: none; }
+    #print-modal-content.success-view #print-success { display: block; }
+    #print-success .print-number {
+      font-size: 36px;
+      font-weight: bold;
+      letter-spacing: 4px;
+      color: #fff;
+      margin: 8px 0 14px;
+      font-family: monospace;
+    }
+    #print-success .print-number.local { color: #ffb84d; }
+    #print-success .print-thumb {
+      max-width: 100%;
+      max-height: 320px;
+      border: 1px solid rgba(255,255,255,0.18);
+      margin: 8px 0 16px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #print-success .print-message {
+      font-size: 11px;
+      color: #ccc;
+      line-height: 1.6;
+      margin: 0 0 18px;
+    }
+    #print-success .print-warning {
+      font-size: 10px;
+      color: #ffb84d;
+      line-height: 1.5;
+      margin: 8px 0 14px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,184,77,0.4);
+      background: rgba(255,184,77,0.08);
+    }
+    #print-close-btn {
+      background: #fff;
+      color: #000;
+      border: none;
+      padding: 10px 26px;
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      letter-spacing: 1px;
+      width: 100%;
+    }
+    #print-close-btn:hover { background: #ddd; }
 
     /* ─── ORBITAL TRANSFORM UI ─── */
     #orbital-transform-ui {
@@ -3611,7 +3728,8 @@ function init() {
     const buttonsConfig = [
         { label: '3D', property: 'yRotation', pass: null },
         { label: 'FLY', property: 'cameraAnimation', pass: null },
-        { label: 'SHADOW', property: 'shadow', pass: darkPass },
+        // SHADOW button hidden for opening-night kiosk (left UI clutter reduction)
+        // { label: 'SHADOW', property: 'shadow', pass: darkPass },
         { label: 'ASCII', property: 'ascii', pass: asciiPass },
         { label: 'HEATMAP', property: 'heatmap', pass: heatmapPass },
         { label: 'BLOOD', property: 'blood', pass: bloodPass },
@@ -4766,11 +4884,87 @@ setTimeout(function () {
   <!-- ─── PRINT ORDER MODAL ─── -->
   <div id="print-modal-overlay">
     <div id="print-modal-content">
-      <h2>Print Your 3D Kinetic Collage</h2>
-      <p>Collect your customized kinetic 3D collage by Coldie. You will be contacted by email with payment and shipping options. Thank you for touching the art and feeling something.</p>
-      <input id="print-email-input" type="email" placeholder="Email Address" />
-      <button id="print-submit-btn">SUBMIT</button>
-      <div id="print-status"></div>
+      <div id="print-form">
+        <h2>Print Your 3D Kinetic Collage</h2>
+        <p>Enter your name to register your custom layout. Save your print number — staff will use it to verify your name when you pick up your signed art print on opening night.</p>
+        <div id="print-fields">
+          <input id="print-name-input" class="print-input active" type="text" readonly placeholder="Customer Name" autocomplete="off" />
+          <input id="print-email-input-2" class="print-input" type="text" readonly placeholder="Email Address" autocomplete="off" />
+        </div>
+        <div id="virtual-keyboard">
+          <div class="kb-row">
+            <div class="kb-key" data-key="1">1</div>
+            <div class="kb-key" data-key="2">2</div>
+            <div class="kb-key" data-key="3">3</div>
+            <div class="kb-key" data-key="4">4</div>
+            <div class="kb-key" data-key="5">5</div>
+            <div class="kb-key" data-key="6">6</div>
+            <div class="kb-key" data-key="7">7</div>
+            <div class="kb-key" data-key="8">8</div>
+            <div class="kb-key" data-key="9">9</div>
+            <div class="kb-key" data-key="0">0</div>
+          </div>
+          <div class="kb-row">
+            <div class="kb-key" data-key="q">q</div>
+            <div class="kb-key" data-key="w">w</div>
+            <div class="kb-key" data-key="e">e</div>
+            <div class="kb-key" data-key="r">r</div>
+            <div class="kb-key" data-key="t">t</div>
+            <div class="kb-key" data-key="y">y</div>
+            <div class="kb-key" data-key="u">u</div>
+            <div class="kb-key" data-key="i">i</div>
+            <div class="kb-key" data-key="o">o</div>
+            <div class="kb-key" data-key="p">p</div>
+          </div>
+          <div class="kb-row">
+            <div class="kb-key" data-key="a">a</div>
+            <div class="kb-key" data-key="s">s</div>
+            <div class="kb-key" data-key="d">d</div>
+            <div class="kb-key" data-key="f">f</div>
+            <div class="kb-key" data-key="g">g</div>
+            <div class="kb-key" data-key="h">h</div>
+            <div class="kb-key" data-key="j">j</div>
+            <div class="kb-key" data-key="k">k</div>
+            <div class="kb-key" data-key="l">l</div>
+          </div>
+          <div class="kb-row">
+            <div class="kb-key" data-key="z">z</div>
+            <div class="kb-key" data-key="x">x</div>
+            <div class="kb-key" data-key="c">c</div>
+            <div class="kb-key" data-key="v">v</div>
+            <div class="kb-key" data-key="b">b</div>
+            <div class="kb-key" data-key="n">n</div>
+            <div class="kb-key" data-key="m">m</div>
+            <div class="kb-key wide" data-key="backspace">DEL</div>
+          </div>
+          <div class="kb-row">
+            <div class="kb-key" data-key="@">@</div>
+            <div class="kb-key" data-key=".">.</div>
+            <div class="kb-key" data-key="-">-</div>
+            <div class="kb-key" data-key="_">_</div>
+            <div class="kb-key" data-key="'">'</div>
+            <div class="kb-key space" data-key=" ">SPACE</div>
+            <div class="kb-key wide" data-key="clear">CLEAR</div>
+          </div>
+          <div class="kb-row kb-domains">
+            <div class="kb-key wide" data-key="@gmail.com">@gmail.com</div>
+            <div class="kb-key wide" data-key="@yahoo.com">@yahoo.com</div>
+            <div class="kb-key wide" data-key="@hotmail.com">@hotmail.com</div>
+            <div class="kb-key wide" data-key="@outlook.com">@outlook.com</div>
+            <div class="kb-key wide" data-key="@icloud.com">@icloud.com</div>
+          </div>
+        </div>
+        <button id="print-submit-btn">SUBMIT</button>
+        <div id="print-status"></div>
+      </div>
+      <div id="print-success">
+        <h2>Touched the Art</h2>
+        <div class="print-number" id="print-success-number">#0000</div>
+        <img id="print-success-thumb" class="print-thumb" alt="Your custom layout" />
+        <p class="print-message">Thank you for 'touching the art' with Coldie's Tech Epochalypse kinetic 3D collage of Elon Musk. Your print number is <strong id="print-success-number-inline">#0000</strong>. Save this number and verify with staff your name when picking up your art print.</p>
+        <div id="print-success-warning" class="print-warning" style="display:none;"></div>
+        <button id="print-close-btn">DONE</button>
+      </div>
     </div>
   </div>
 
@@ -4780,12 +4974,159 @@ setTimeout(function () {
     // ── Detect if embedded in iframe ──
     const isEmbedded = (window.self !== window.top);
 
-    // ── PRINT BUTTON + MODAL ──
+    // ── PRINT BUTTON + MODAL (OPENING NIGHT VERSION) ──
     const printBtn = document.getElementById('print-btn');
     const printOverlay = document.getElementById('print-modal-overlay');
-    const printEmailInput = document.getElementById('print-email-input');
+    const printContent = document.getElementById('print-modal-content');
+    const printFormView = document.getElementById('print-form');
+    const printSuccessView = document.getElementById('print-success');
+    const printNameInput = document.getElementById('print-name-input');
+    const printEmailInput2 = document.getElementById('print-email-input-2');
     const printSubmitBtn = document.getElementById('print-submit-btn');
+    const virtualKeyboard = document.getElementById('virtual-keyboard');
+
+    // ── ACTIVE FIELD TRACKING (which input the keyboard types into) ──
+    let activeInput = printNameInput;
+    function setActiveInput(el) {
+      activeInput = el;
+      [printNameInput, printEmailInput2].forEach(i => {
+        if (!i) return;
+        i.classList.toggle('active', i === el);
+      });
+    }
+    if (printNameInput) {
+      printNameInput.addEventListener('pointerdown', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        setActiveInput(printNameInput);
+      });
+    }
+    if (printEmailInput2) {
+      printEmailInput2.addEventListener('pointerdown', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        setActiveInput(printEmailInput2);
+      });
+    }
+
+    // ── VIRTUAL KEYBOARD ──
+    if (virtualKeyboard && printNameInput) {
+      virtualKeyboard.addEventListener('pointerdown', (e) => {
+        const key = e.target.closest('.kb-key');
+        if (!key) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const val = key.dataset.key;
+        // Domain shortcut keys (@gmail.com, etc) — auto-route to email field
+        const isDomainShortcut = val.length > 1 && val.startsWith('@');
+        let target = activeInput || printNameInput;
+        if (isDomainShortcut && printEmailInput2) {
+          target = printEmailInput2;
+          setActiveInput(printEmailInput2);
+        }
+        if (val === 'backspace') {
+          target.value = target.value.slice(0, -1);
+        } else if (val === 'clear') {
+          target.value = '';
+        } else if (isDomainShortcut) {
+          // Smart-append: avoid double @
+          let toAppend = val;
+          if (target.value.endsWith('@')) toAppend = val.slice(1);
+          else if (target.value.includes('@')) toAppend = val.slice(1);
+          if (target.value.length + toAppend.length <= 80) target.value += toAppend;
+        } else {
+          if (target.value.length < 80) target.value += val;
+        }
+        key.classList.add('pressed');
+        setTimeout(() => key.classList.remove('pressed'), 120);
+      });
+      ['touchstart','touchmove','touchend','pointerdown','pointermove','pointerup','mousedown','click'].forEach(evt => {
+        virtualKeyboard.addEventListener(evt, (e) => { e.stopPropagation(); }, { passive: false });
+      });
+    }
     const printStatus = document.getElementById('print-status');
+    const printCloseBtn = document.getElementById('print-close-btn');
+    const printSuccessNumber = document.getElementById('print-success-number');
+    const printSuccessNumberInline = document.getElementById('print-success-number-inline');
+    const printSuccessThumb = document.getElementById('print-success-thumb');
+    const printSuccessWarning = document.getElementById('print-success-warning');
+
+    // ── Local export folder (Edge File System Access API) ──
+    // First submit prompts user to pick D:/exports/. Handle is cached in IndexedDB.
+    const FSA_DB = 'opening-night';
+    const FSA_STORE = 'handles';
+    const FSA_KEY = 'export-folder';
+
+    function fsaOpenDb() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(FSA_DB, 1);
+        req.onupgradeneeded = () => req.result.createObjectStore(FSA_STORE);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+    async function fsaGetSavedHandle() {
+      try {
+        const db = await fsaOpenDb();
+        return await new Promise((resolve, reject) => {
+          const tx = db.transaction(FSA_STORE, 'readonly');
+          const r = tx.objectStore(FSA_STORE).get(FSA_KEY);
+          r.onsuccess = () => resolve(r.result || null);
+          r.onerror = () => reject(r.error);
+        });
+      } catch (_) { return null; }
+    }
+    async function fsaSaveHandle(handle) {
+      try {
+        const db = await fsaOpenDb();
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction(FSA_STORE, 'readwrite');
+          tx.objectStore(FSA_STORE).put(handle, FSA_KEY);
+          tx.oncomplete = resolve;
+          tx.onerror = () => reject(tx.error);
+        });
+      } catch (_) {}
+    }
+    async function fsaEnsurePermission(handle) {
+      if (!handle || !handle.queryPermission) return false;
+      const opts = { mode: 'readwrite' };
+      let perm = await handle.queryPermission(opts);
+      if (perm === 'granted') return true;
+      perm = await handle.requestPermission(opts);
+      return perm === 'granted';
+    }
+    async function fsaGetExportFolder() {
+      let handle = await fsaGetSavedHandle();
+      if (handle && await fsaEnsurePermission(handle)) return handle;
+      if (!window.showDirectoryPicker) return null;
+      try {
+        handle = await window.showDirectoryPicker({
+          id: 'opening-night-exports',
+          mode: 'readwrite',
+          startIn: 'desktop',
+        });
+        await fsaSaveHandle(handle);
+        return handle;
+      } catch (_) { return null; }
+    }
+    async function fsaWriteFile(folderHandle, filename, blob) {
+      const fileHandle = await folderHandle.getFileHandle(filename, { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+    }
+
+    // ── Local print number counter (offline fallback) ──
+    function nextLocalNumber() {
+      const k = 'opening-night-local-counter';
+      const n = (parseInt(localStorage.getItem(k) || '0', 10) || 0) + 1;
+      localStorage.setItem(k, String(n));
+      return n;
+    }
+    function formatPrintNumber(n) {
+      return '#' + String(n).padStart(4, '0');
+    }
+    function safeFilenamePart(s) {
+      return String(s).replace(/[^a-z0-9_.-]/gi, '_').slice(0, 60);
+    }
 
     if (isEmbedded) {
       if (printBtn) printBtn.style.display = 'none';
@@ -4793,24 +5134,67 @@ setTimeout(function () {
       if (exportWrapper) exportWrapper.style.display = 'none';
     }
 
+    function showFormView() {
+      printContent.classList.remove('success-view');
+      printNameInput.value = '';
+      if (printEmailInput2) printEmailInput2.value = '';
+      printStatus.textContent = '';
+      printSubmitBtn.disabled = false;
+      printSuccessWarning.style.display = 'none';
+      printSuccessWarning.textContent = '';
+      setActiveInput(printNameInput);
+    }
+    function showSuccessView({ printNumberStr, thumbDataUrl, isLocal, warningText }) {
+      printSuccessNumber.textContent = printNumberStr;
+      printSuccessNumberInline.textContent = printNumberStr;
+      printSuccessNumber.classList.toggle('local', !!isLocal);
+      printSuccessThumb.src = thumbDataUrl || '';
+      if (warningText) {
+        printSuccessWarning.textContent = warningText;
+        printSuccessWarning.style.display = 'block';
+      } else {
+        printSuccessWarning.style.display = 'none';
+      }
+      printContent.classList.add('success-view');
+    }
+
     if (printBtn && printOverlay && !isEmbedded) {
       printBtn.onclick = (e) => {
         e.stopPropagation();
         printOverlay.classList.add('open');
-        printEmailInput.value = '';
-        printStatus.textContent = '';
-        printSubmitBtn.disabled = false;
+        showFormView();
       };
 
       printOverlay.onclick = (e) => {
-        if (e.target === printOverlay) printOverlay.classList.remove('open');
+        if (e.target === printOverlay) {
+          printOverlay.classList.remove('open');
+          showFormView();
+        }
       };
 
+      if (printCloseBtn) {
+        printCloseBtn.onclick = () => {
+          printOverlay.classList.remove('open');
+          showFormView();
+          // Reset artwork to original positions + re-randomize face for next visitor
+          try { if (typeof resetPiecesToOriginalPositions === 'function') resetPiecesToOriginalPositions(); }
+          catch (e) { console.warn('Reset on DONE failed:', e); }
+        };
+      }
+
       printSubmitBtn.onclick = async () => {
-        const email = printEmailInput.value.trim();
-        if (!email || !email.includes('@')) {
+        const customerName = printNameInput.value.trim();
+        const customerEmail = printEmailInput2 ? printEmailInput2.value.trim() : '';
+        if (!customerName || customerName.length < 2) {
+          printStatus.style.color = '#e66';
+          printStatus.textContent = 'Please enter your name';
+          setActiveInput(printNameInput);
+          return;
+        }
+        if (!customerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
           printStatus.style.color = '#e66';
           printStatus.textContent = 'Please enter a valid email address';
+          setActiveInput(printEmailInput2);
           return;
         }
 
@@ -4819,8 +5203,8 @@ setTimeout(function () {
         printStatus.textContent = 'CAPTURING...';
 
         try {
-          const PRINT_W = 3508;
-          const PRINT_H = 4961;
+          const PRINT_W = 1712;
+          const PRINT_H = 2444;
           const r = await waitForRenderer();
 
           const origW = r.domElement.width;
@@ -4839,8 +5223,21 @@ setTimeout(function () {
             r.render(window.scene, window.camera);
           }
 
-          const dataUrl = r.domElement.toDataURL('image/jpeg', 0.80);
-          const imageBlob = await (await fetch(dataUrl)).blob();
+          const fullDataUrl = r.domElement.toDataURL('image/jpeg', 0.80);
+          const imageBlob = await (await fetch(fullDataUrl)).blob();
+
+          // Generate 600px-wide thumbnail for success view
+          const thumbCanvas = document.createElement('canvas');
+          const thumbW = 600;
+          const thumbH = Math.round(PRINT_H * (thumbW / PRINT_W));
+          thumbCanvas.width = thumbW;
+          thumbCanvas.height = thumbH;
+          const tctx = thumbCanvas.getContext('2d');
+          const sourceImg = new Image();
+          sourceImg.src = fullDataUrl;
+          await new Promise((res) => { sourceImg.onload = res; });
+          tctx.drawImage(sourceImg, 0, 0, thumbW, thumbH);
+          const thumbDataUrl = thumbCanvas.toDataURL('image/jpeg', 0.85);
 
           r.setSize(origW, origH);
           if (window.camera) {
@@ -4868,33 +5265,88 @@ setTimeout(function () {
           }
           const compositionJson = JSON.stringify({ meshes: meshStates, timestamp: new Date().toISOString() });
 
+          // Local sequential number (used in filename + offline fallback)
+          const localNum = nextLocalNumber();
+          const localRef = formatPrintNumber(localNum).replace('#', 'LOCAL-');
+          const ts = new Date();
+          const tsStr = ts.toISOString().replace(/[:.]/g, '-').slice(0, 19);
+          const baseName = `${String(localNum).padStart(4,'0')}_${tsStr}_${safeFilenamePart(customerName)}_${safeFilenamePart(customerEmail)}`;
+
+          // ── STEP 1: write to local export folder (offline-safe redundancy) ──
+          printStatus.textContent = 'SAVING LOCAL...';
+          let localSaved = false;
+          try {
+            const folder = await fsaGetExportFolder();
+            if (folder) {
+              await fsaWriteFile(folder, baseName + '.jpg', imageBlob);
+              await fsaWriteFile(folder, baseName + '.json', new Blob([JSON.stringify({
+                localRef, customerName, customerEmail, submittedAt: ts.toISOString(), composition: JSON.parse(compositionJson),
+              }, null, 2)], { type: 'application/json' }));
+              localSaved = true;
+            }
+          } catch (e) {
+            console.warn('Local save failed:', e);
+          }
+
+          // ── STEP 2: upload + Airtable + email ──
           printStatus.textContent = 'UPLOADING...';
-
           const form = new FormData();
-          form.append('email', email);
-          form.append('image', imageBlob, 'print-capture.jpg');
+          form.append('customerName', customerName);
+          form.append('email', customerEmail);
+          form.append('image', imageBlob, baseName + '.jpg');
           form.append('compositionJson', compositionJson);
+          form.append('localRef', localRef);
 
-          const API_URL = window.location.origin;
-          const res = await fetch(API_URL + '/api/print-order', { method: 'POST', body: form });
-          const data = await res.json().catch(() => ({}));
+          // When running from kiosk (localhost) or file://, route submits to
+          // production. Override at runtime via `window.PRINT_API_URL` if needed.
+          const _origin = window.location.origin || '';
+          const API_URL = window.PRINT_API_URL ||
+            (/^(file:|http:\/\/(localhost|127\.|\[::1\]))/.test(_origin)
+              ? 'https://www.knowyouroverlord.art'
+              : _origin);
+          let res, data;
+          try {
+            res = await fetch(API_URL + '/api/print-opening-night', { method: 'POST', body: form });
+            data = await res.json().catch(() => ({}));
+          } catch (netErr) {
+            // Pure network failure → show LOCAL number
+            const warning = localSaved
+              ? 'Submission queued locally. Show this LOCAL number to gallery staff. Will sync when online.'
+              : '⚠ Could not save locally OR upload. Show this LOCAL number to gallery staff and retry from this device.';
+            showSuccessView({
+              printNumberStr: localRef,
+              thumbDataUrl,
+              isLocal: true,
+              warningText: warning,
+            });
+            return;
+          }
 
           if (res.ok && data.ok) {
-            printStatus.style.color = '#4c4';
-            printStatus.textContent = 'Successful submission. Stay tuned by email to complete order.';
-            setTimeout(() => {
-              printOverlay.classList.remove('open');
-              printStatus.textContent = '';
-              printSubmitBtn.disabled = false;
-            }, 3000);
+            const numStr = data.printNumberStr || localRef;
+            showSuccessView({
+              printNumberStr: numStr,
+              thumbDataUrl,
+              isLocal: false,
+              warningText: '',
+            });
           } else {
             const detail = data.details || data.error || ('HTTP ' + res.status);
-            console.error('Print order error:', data);
-            throw new Error(detail);
+            console.error('Print opening-night error:', data);
+            const warning = localSaved
+              ? `Server error: ${detail}. Submission queued locally — show this LOCAL number to gallery staff.`
+              : `Server error: ${detail}. Local save also failed — please retry.`;
+            showSuccessView({
+              printNumberStr: localRef,
+              thumbDataUrl,
+              isLocal: true,
+              warningText: warning,
+            });
           }
         } catch (e) {
+          console.error('Submit error:', e);
           printStatus.style.color = '#e66';
-          printStatus.textContent = e.message || 'NETWORK ERROR — TRY AGAIN';
+          printStatus.textContent = e.message || 'ERROR — TRY AGAIN';
           printSubmitBtn.disabled = false;
         }
       };
