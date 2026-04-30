@@ -3728,7 +3728,8 @@ function init() {
     const buttonsConfig = [
         { label: '3D', property: 'yRotation', pass: null },
         { label: 'FLY', property: 'cameraAnimation', pass: null },
-        { label: 'SHADOW', property: 'shadow', pass: darkPass },
+        // SHADOW button hidden for opening-night kiosk (left UI clutter reduction)
+        // { label: 'SHADOW', property: 'shadow', pass: darkPass },
         { label: 'ASCII', property: 'ascii', pass: asciiPass },
         { label: 'HEATMAP', property: 'heatmap', pass: heatmapPass },
         { label: 'BLOOD', property: 'blood', pass: bloodPass },
