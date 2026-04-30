@@ -332,6 +332,13 @@
       flex: 1;
       max-width: 200px;
     }
+    #virtual-keyboard .kb-domains .kb-key {
+      flex: 1;
+      min-width: 0;
+      font-size: 9px;
+      padding: 0 4px;
+      letter-spacing: 0;
+    }
     #print-submit-btn {
       background: #fff;
       color: #000;
@@ -4938,6 +4945,13 @@ setTimeout(function () {
             <div class="kb-key space" data-key=" ">SPACE</div>
             <div class="kb-key wide" data-key="clear">CLEAR</div>
           </div>
+          <div class="kb-row kb-domains">
+            <div class="kb-key wide" data-key="@gmail.com">@gmail.com</div>
+            <div class="kb-key wide" data-key="@yahoo.com">@yahoo.com</div>
+            <div class="kb-key wide" data-key="@hotmail.com">@hotmail.com</div>
+            <div class="kb-key wide" data-key="@outlook.com">@outlook.com</div>
+            <div class="kb-key wide" data-key="@icloud.com">@icloud.com</div>
+          </div>
         </div>
         <button id="print-submit-btn">SUBMIT</button>
         <div id="print-status"></div>
@@ -5000,11 +5014,23 @@ setTimeout(function () {
         e.preventDefault();
         e.stopPropagation();
         const val = key.dataset.key;
-        const target = activeInput || printNameInput;
+        // Domain shortcut keys (@gmail.com, etc) — auto-route to email field
+        const isDomainShortcut = val.length > 1 && val.startsWith('@');
+        let target = activeInput || printNameInput;
+        if (isDomainShortcut && printEmailInput2) {
+          target = printEmailInput2;
+          setActiveInput(printEmailInput2);
+        }
         if (val === 'backspace') {
           target.value = target.value.slice(0, -1);
         } else if (val === 'clear') {
           target.value = '';
+        } else if (isDomainShortcut) {
+          // Smart-append: avoid double @
+          let toAppend = val;
+          if (target.value.endsWith('@')) toAppend = val.slice(1);
+          else if (target.value.includes('@')) toAppend = val.slice(1);
+          if (target.value.length + toAppend.length <= 80) target.value += toAppend;
         } else {
           if (target.value.length < 80) target.value += val;
         }
