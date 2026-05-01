@@ -2312,6 +2312,7 @@ function init() {
 
     // ─── TRANSFORM CONTROLS (Blender/AE-style gizmo) ───
     transformControls = new TransformControls(camera, renderer.domElement);
+    window.transformControls = transformControls; // expose for pinch-scale handler
     transformControls.setSize(0.9);
     transformControls.setSpace('local');
     // Suspend OrbitControls while dragging a gizmo handle so the camera doesn't pan
@@ -5906,7 +5907,7 @@ setTimeout(function () {
 
     function startUniform() {
       if (window.currentGizmoMode !== 'scale') return false;
-      target = window.selectedObject;
+      target = (window.transformControls && window.transformControls.object) || null;
       if (!target) return false;
       const p = pair();
       initDist = Math.max(1, dist(p[0], p[1]));
