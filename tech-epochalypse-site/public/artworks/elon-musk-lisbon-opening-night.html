@@ -5984,6 +5984,11 @@ setTimeout(function () {
       }
     }
 
+    // Tell the browser to not handle native gestures (pinch-zoom, pan) on the canvas —
+    // otherwise the browser eats 2-finger pinch as a page-zoom gesture before our
+    // handler ever sees the second pointer.
+    canvas.style.touchAction = 'none';
+
     const opts = { capture: true, passive: false };
     canvas.addEventListener('pointerdown', onDown, opts);
     canvas.addEventListener('pointermove', onMove, opts);

@@ -5967,6 +5967,7 @@ setTimeout(function () {
         initUserScale = target.userData.userScale || target.scale.x || 1;
       }
     }
+    canvas.style.touchAction = 'none'; // browser must not eat pinch for native zoom
     const opts = { capture: true, passive: false };
     canvas.addEventListener('pointerdown', onDown, opts);
     canvas.addEventListener('pointermove', onMove, opts);
