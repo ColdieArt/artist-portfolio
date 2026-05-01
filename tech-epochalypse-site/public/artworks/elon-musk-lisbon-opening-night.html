@@ -4381,10 +4381,8 @@ function updateOrbitalUIPosition() {
 /** Update the active-mode button highlight */
 function setGizmoMode(mode) {
     if (!transformControls) return;
-    // Scale mode disabled — pinch-to-scale is the only scale interaction.
-    // The TransformControls scale gizmo arrows intercept touches and break pinch.
-    if (mode === 'scale') mode = 'translate';
     currentGizmoMode = mode;
+    window.currentGizmoMode = mode; // expose for pinch handler gating
     transformControls.setMode(mode);
     document.querySelectorAll('#orbital-transform-ui .orb-mode-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.mode === mode);
@@ -5858,7 +5856,7 @@ setTimeout(function () {
         <span class="orb-mode-label">ROTATE</span>
         <span class="orb-mode-hotkey">R</span>
       </button>
-      <button class="orb-mode-btn" id="orb-mode-scale" data-mode="scale" title="Scale (S)" style="display:none !important;">
+      <button class="orb-mode-btn" id="orb-mode-scale" data-mode="scale" title="Scale (S)">
         <span class="orb-mode-icon">⤢</span>
         <span class="orb-mode-label">SCALE</span>
         <span class="orb-mode-hotkey">S</span>
@@ -5911,6 +5909,8 @@ setTimeout(function () {
     const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
     function startUniform() {
+      // Pinch-to-scale only active when the orbital UI is in SCALE mode.
+      if (window.currentGizmoMode !== 'scale') return false;
       target = window.selectedObject;
       if (!target) return false;
       const p = pair();
