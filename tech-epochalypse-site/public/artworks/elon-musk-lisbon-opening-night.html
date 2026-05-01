@@ -4384,6 +4384,11 @@ function setGizmoMode(mode) {
     currentGizmoMode = mode;
     window.currentGizmoMode = mode; // expose for pinch handler gating
     transformControls.setMode(mode);
+    // Hide all gizmo arrows in SCALE mode — pinch is the only scale interaction.
+    const showAxes = mode !== 'scale';
+    transformControls.showX = showAxes;
+    transformControls.showY = showAxes;
+    transformControls.showZ = showAxes;
     document.querySelectorAll('#orbital-transform-ui .orb-mode-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.mode === mode);
     });
