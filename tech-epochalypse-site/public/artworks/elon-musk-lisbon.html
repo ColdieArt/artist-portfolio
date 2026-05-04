@@ -5898,6 +5898,30 @@ setTimeout(function () {
   whenReady(() => {
     const canvas = window.renderer.domElement;
     const pointers = new Map();
+
+    // Defensive fix: when transformControls.detach() leaves .object null,
+    // the helper still tries to render and crashes. Manage helper visibility.
+    (function patchTransformControls() {
+      const tc = window.transformControls;
+      if (!tc || tc.__patchedAttachDetach) return;
+      tc.__patchedAttachDetach = true;
+      const helperOf = () => (tc.getHelper ? tc.getHelper() : tc);
+      const origDetach = tc.detach.bind(tc);
+      tc.detach = function() {
+        const r = origDetach();
+        const h = helperOf(); if (h) h.visible = false;
+        return r;
+      };
+      const origAttach = tc.attach.bind(tc);
+      tc.attach = function(obj) {
+        const r = origAttach(obj);
+        const h = helperOf(); if (h) h.visible = !!obj;
+        return r;
+      };
+      if (!tc.object) {
+        const h = helperOf(); if (h) h.visible = false;
+      }
+    })();
     let mode = 'idle', target = null, initDist = 0;
     let initScale = { x: 1, y: 1, z: 1 }, initUserScale = 1;
     const MIN_SCALE = 0.1, MAX_SCALE = 10;

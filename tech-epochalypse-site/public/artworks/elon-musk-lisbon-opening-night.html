@@ -5902,6 +5902,37 @@ setTimeout(function () {
     const canvas = window.renderer.domElement;
     const pointers = new Map();
 
+    // ── Defensive fix for stray TransformControls null-object error ──
+    // When detach() is called the gizmo's .object becomes null but the helper
+    // mesh stays in the scene. The next render frame calls updateMatrixWorld
+    // on the null object and crashes. Wrap attach/detach to manage helper
+    // visibility — invisible objects aren't traversed by the render loop.
+    (function patchTransformControls() {
+      const tc = window.transformControls;
+      if (!tc || tc.__patchedAttachDetach) return;
+      tc.__patchedAttachDetach = true;
+      const helperOf = () => (tc.getHelper ? tc.getHelper() : tc);
+      const origDetach = tc.detach.bind(tc);
+      tc.detach = function() {
+        const r = origDetach();
+        const h = helperOf();
+        if (h) h.visible = false;
+        return r;
+      };
+      const origAttach = tc.attach.bind(tc);
+      tc.attach = function(obj) {
+        const r = origAttach(obj);
+        const h = helperOf();
+        if (h) h.visible = !!obj;
+        return r;
+      };
+      // Initial state: hide helper if nothing attached at module load
+      if (!tc.object) {
+        const h = helperOf();
+        if (h) h.visible = false;
+      }
+    })();
+
     let mode = 'idle';   // 'idle' | 'uniform' | 'lock-x' | 'lock-y'
     let target = null;
     let initDist = 0;
