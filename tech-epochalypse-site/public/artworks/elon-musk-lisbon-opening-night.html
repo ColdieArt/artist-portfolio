@@ -5122,6 +5122,13 @@ setTimeout(function () {
     }
 
     // ── Local print number counter (offline fallback) ──
+    // Visit the page with #reset-counter once to reset to 0 → next print is LOCAL-0001.
+    if (window.location.hash === '#reset-counter') {
+      localStorage.removeItem('opening-night-local-counter');
+      try { alert('Local print counter reset. Next print will be LOCAL-0001.'); } catch (_) {}
+      // Strip the hash so a refresh doesn't re-trigger the alert.
+      try { history.replaceState(null, '', window.location.pathname); } catch (_) {}
+    }
     function nextLocalNumber() {
       const k = 'opening-night-local-counter';
       const n = (parseInt(localStorage.getItem(k) || '0', 10) || 0) + 1;
