@@ -6616,7 +6616,10 @@ setTimeout(function () {
       </div>
 
       <button class="export-btn" id="export-start-btn">EXPORT</button>
+      <button class="export-btn" id="load-json-btn" style="margin-top:8px;">LOAD JSON</button>
+      <input type="file" id="load-json-input" accept=".json,application/json" style="display:none;">
       <div class="status-line" id="export-status"></div>
+      <div class="status-line" id="load-json-status" style="margin-top:4px;font-size:11px;"></div>
     </div>
   </div>
 
@@ -7458,4 +7461,82 @@ setTimeout(function () {
     </div>
   </div>
 
+<script>
+/**
+ * LOAD JSON — restore a saved composition (from a previous PRINT submit) onto
+ * the current scene. JSON shape (matches what PRINT writes):
+ *   { meshes: [ { id, position:{x,y,z}, rotation:{x,y,z}, scale:{x,y,z},
+ *                 visible, userScale } ], timestamp: "..." }
+ *
+ * For each entry in `meshes`, we find the first scene child with a matching
+ * userData.id that hasn't been claimed yet, and apply its transform/visibility.
+ */
+(function() {
+  function whenReady(cb) {
+    if (window.scene && document.getElementById('load-json-btn')) cb();
+    else setTimeout(() => whenReady(cb), 100);
+  }
+  whenReady(() => {
+    const btn = document.getElementById('load-json-btn');
+    const input = document.getElementById('load-json-input');
+    const status = document.getElementById('load-json-status');
+
+    function setStatus(text, color) {
+      if (!status) return;
+      status.style.color = color || '#aaa';
+      status.textContent = text || '';
+    }
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      input.click();
+    });
+
+    input.addEventListener('change', async (e) => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      setStatus('READING ' + file.name + '…', '#aaa');
+      try {
+        const text = await file.text();
+        const json = JSON.parse(text);
+        const list = Array.isArray(json.meshes) ? json.meshes
+                  : Array.isArray(json.composition && json.composition.meshes) ? json.composition.meshes
+                  : null;
+        if (!list) {
+          setStatus('Invalid JSON: no meshes array', '#e66');
+          input.value = '';
+          return;
+        }
+        // Index scene meshes by userData.id (consumed FIFO so duplicates map 1:1)
+        const byId = {};
+        window.scene.children.forEach(c => {
+          if (c && c.userData && c.userData.id) {
+            (byId[c.userData.id] = byId[c.userData.id] || []).push(c);
+          }
+        });
+        let applied = 0, missing = 0;
+        list.forEach(s => {
+          if (!s || !s.id) return;
+          const arr = byId[s.id];
+          if (!arr || arr.length === 0) { missing++; return; }
+          const m = arr.shift();
+          if (s.position) m.position.set(s.position.x || 0, s.position.y || 0, s.position.z || 0);
+          if (s.rotation) m.rotation.set(s.rotation.x || 0, s.rotation.y || 0, s.rotation.z || 0);
+          if (s.scale)    m.scale.set(s.scale.x || 1, s.scale.y || 1, s.scale.z || 1);
+          if (typeof s.visible === 'boolean') m.visible = s.visible;
+          if (typeof s.userScale === 'number') m.userData.userScale = s.userScale;
+          applied++;
+        });
+        setStatus('Loaded ' + applied + ' piece' + (applied === 1 ? '' : 's')
+                  + (missing ? ' · ' + missing + ' not found' : ''),
+                  applied > 0 ? '#4c4' : '#e66');
+      } catch (err) {
+        console.error('[load-json] parse error:', err);
+        setStatus('Error: ' + (err.message || 'Could not parse'), '#e66');
+      }
+      input.value = ''; // allow re-loading the same file
+    });
+  });
+})();
+</script>
 </body></html>
