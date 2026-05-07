@@ -5233,8 +5233,27 @@ setTimeout(function () {
             r.render(window.scene, window.camera);
           }
 
-          const fullDataUrl = r.domElement.toDataURL('image/jpeg', 0.80);
-          const imageBlob = await (await fetch(fullDataUrl)).blob();
+          // Progressive JPEG compression — avoid Vercel HTTP 413 on heavy effects.
+          const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+          const QUALITY_STEPS = [0.78, 0.65, 0.55, 0.45, 0.35];
+          let fullDataUrl, imageBlob;
+          for (let i = 0; i < QUALITY_STEPS.length; i++) {
+            fullDataUrl = r.domElement.toDataURL('image/jpeg', QUALITY_STEPS[i]);
+            imageBlob = await (await fetch(fullDataUrl)).blob();
+            if (imageBlob.size <= MAX_UPLOAD_BYTES) break;
+          }
+          if (imageBlob.size > MAX_UPLOAD_BYTES) {
+            const downCanvas = document.createElement('canvas');
+            downCanvas.width = Math.round(PRINT_W * 0.75);
+            downCanvas.height = Math.round(PRINT_H * 0.75);
+            const dctx = downCanvas.getContext('2d');
+            const sourceImg = new Image();
+            sourceImg.src = fullDataUrl;
+            await new Promise((res) => { sourceImg.onload = res; });
+            dctx.drawImage(sourceImg, 0, 0, downCanvas.width, downCanvas.height);
+            fullDataUrl = downCanvas.toDataURL('image/jpeg', 0.55);
+            imageBlob = await (await fetch(fullDataUrl)).blob();
+          }
 
           // Generate 600px-wide thumbnail for success view
           const thumbCanvas = document.createElement('canvas');
