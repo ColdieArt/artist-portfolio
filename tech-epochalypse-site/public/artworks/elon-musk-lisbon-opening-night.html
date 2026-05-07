@@ -175,9 +175,8 @@
     }
     #post-modal-btn:hover { background: #1a8cd8; }
 
-    /* ─── PRINT BUTTON (bottom-left) — HIDDEN for kiosk ─── */
+    /* ─── PRINT BUTTON (bottom-left) ─── */
     #print-btn {
-      display: none !important;
       position: fixed;
       bottom: 16px;
       left: 16px;
@@ -1937,11 +1936,10 @@ function resetPiecesToOriginalPositions() {
                 signature.userData.initialScale = { width: signatureWidth, height: signatureHeight };
                 signature.userData.initialPosition = signatureConfig.initialPosition.clone(); // Ensure initialPosition is stored
                 signature.userData.initialLayer = signatureConfig.initialLayer;
-                signature.visible = false; // Hide signature for Lisbon variant
                 scene.add(signature);
             });
         }
-
+        
         // 4. Reset camera and controls
         resetCameraToGlobalStart(); // Use the dedicated hard reset function
 
@@ -2975,9 +2973,8 @@ function init() {
                         signature.userData.initialScale = { width: signatureWidth, height: signatureHeight };
                         signature.userData.initialPosition = signatureInitialPos.clone();
                         signature.userData.initialLayer = signatureNewLayer;
-                        signature.visible = false; // Hide signature for Lisbon variant
                         scene.add(signature);
-
+                        
                         // Call onWindowResize only to handle ear and text positions, not dogecoin/fiat/signature
                         onWindowResize();
                     });
@@ -5125,6 +5122,13 @@ setTimeout(function () {
     }
 
     // ── Local print number counter (offline fallback) ──
+    // Visit the page with #reset-counter once to reset to 0 → next print is LOCAL-0001.
+    if (window.location.hash === '#reset-counter') {
+      localStorage.removeItem('opening-night-local-counter');
+      try { alert('Local print counter reset. Next print will be LOCAL-0001.'); } catch (_) {}
+      // Strip the hash so a refresh doesn't re-trigger the alert.
+      try { history.replaceState(null, '', window.location.pathname); } catch (_) {}
+    }
     function nextLocalNumber() {
       const k = 'opening-night-local-counter';
       const n = (parseInt(localStorage.getItem(k) || '0', 10) || 0) + 1;
@@ -5891,6 +5895,10 @@ setTimeout(function () {
  * Pinch-to-scale gesture handler.
  *   2 fingers on canvas (with an asset selected) → uniform scale
  *   3 fingers                                    → axis-locked scale
+ *                                                  (pinch line dominant axis = X if horizontal,
+ *                                                   Y if vertical)
+ *   Capture-phase listeners run before existing single-pointer drag handlers
+ *   so they coexist without breaking tap-to-select / drag-to-move.
  */
 (function() {
   function whenReady(cb) {
@@ -5901,8 +5909,11 @@ setTimeout(function () {
     const canvas = window.renderer.domElement;
     const pointers = new Map();
 
-    // Defensive fix: when transformControls.detach() leaves .object null,
-    // the helper still tries to render and crashes. Manage helper visibility.
+    // ── Defensive fix for stray TransformControls null-object error ──
+    // When detach() is called the gizmo's .object becomes null but the helper
+    // mesh stays in the scene. The next render frame calls updateMatrixWorld
+    // on the null object and crashes. Wrap attach/detach to manage helper
+    // visibility — invisible objects aren't traversed by the render loop.
     (function patchTransformControls() {
       const tc = window.transformControls;
       if (!tc || tc.__patchedAttachDetach) return;
@@ -5911,28 +5922,40 @@ setTimeout(function () {
       const origDetach = tc.detach.bind(tc);
       tc.detach = function() {
         const r = origDetach();
-        const h = helperOf(); if (h) h.visible = false;
+        const h = helperOf();
+        if (h) h.visible = false;
         return r;
       };
       const origAttach = tc.attach.bind(tc);
       tc.attach = function(obj) {
         const r = origAttach(obj);
-        const h = helperOf(); if (h) h.visible = !!obj;
+        const h = helperOf();
+        if (h) h.visible = !!obj;
         return r;
       };
+      // Initial state: hide helper if nothing attached at module load
       if (!tc.object) {
-        const h = helperOf(); if (h) h.visible = false;
+        const h = helperOf();
+        if (h) h.visible = false;
       }
     })();
-    let mode = 'idle', target = null, initDist = 0;
-    let initScale = { x: 1, y: 1, z: 1 }, initUserScale = 1;
-    const MIN_SCALE = 0.1, MAX_SCALE = 10;
+
+    let mode = 'idle';   // 'idle' | 'uniform' | 'lock-x' | 'lock-y'
+    let target = null;
+    let initDist = 0;
+    let initScale = { x: 1, y: 1, z: 1 };
+    let initUserScale = 1;
+
+    const MIN_SCALE = 0.1;
+    const MAX_SCALE = 10;
     const clamp = (v) => Math.max(MIN_SCALE, Math.min(MAX_SCALE, v));
     const pair = () => Array.from(pointers.values()).slice(0, 2);
     const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
     function startUniform() {
+      // Pinch-to-scale only active when the orbital UI is in SCALE mode.
       if (window.currentGizmoMode !== 'scale') return false;
+      // Read attached mesh from TransformControls (selectedObject is module-scoped).
       target = (window.transformControls && window.transformControls.object) || null;
       if (!target) return false;
       const p = pair();
@@ -5943,6 +5966,7 @@ setTimeout(function () {
       if (window.controls) window.controls.enabled = false;
       return true;
     }
+
     function startAxisLock() {
       if (!target) return;
       const p = pair();
@@ -5952,16 +5976,20 @@ setTimeout(function () {
       initDist = Math.max(1, dist(p[0], p[1]));
       initScale = { x: target.scale.x, y: target.scale.y, z: target.scale.z };
     }
+
     function endPinch() {
-      mode = 'idle'; target = null;
+      mode = 'idle';
+      target = null;
       if (window.controls) window.controls.enabled = true;
     }
+
     function onDown(e) {
       pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (pointers.size === 2) {
         if (startUniform()) { e.preventDefault(); e.stopPropagation(); }
       } else if (pointers.size === 3 && (mode === 'uniform' || mode === 'lock-x' || mode === 'lock-y') && target) {
-        startAxisLock(); e.preventDefault(); e.stopPropagation();
+        startAxisLock();
+        e.preventDefault(); e.stopPropagation();
       }
     }
     function onMove(e) {
@@ -5987,6 +6015,7 @@ setTimeout(function () {
       if (pointers.size < 2) {
         endPinch();
       } else if (pointers.size === 2 && (mode === 'lock-x' || mode === 'lock-y')) {
+        // 3rd finger lifted — re-baseline as uniform from current state
         mode = 'uniform';
         const p = pair();
         initDist = Math.max(1, dist(p[0], p[1]));
@@ -5994,14 +6023,20 @@ setTimeout(function () {
         initUserScale = target.userData.userScale || target.scale.x || 1;
       }
     }
-    canvas.style.touchAction = 'none'; // browser must not eat pinch for native zoom
+
+    // Tell the browser to not handle native gestures (pinch-zoom, pan) on the canvas —
+    // otherwise the browser eats 2-finger pinch as a page-zoom gesture before our
+    // handler ever sees the second pointer.
+    canvas.style.touchAction = 'none';
+
     const opts = { capture: true, passive: false };
     canvas.addEventListener('pointerdown', onDown, opts);
     canvas.addEventListener('pointermove', onMove, opts);
     canvas.addEventListener('pointerup', onUp, opts);
     canvas.addEventListener('pointercancel', onUp, opts);
     canvas.addEventListener('pointerleave', onUp, opts);
-    if (window.console) console.log('[pinch-scale] ready');
+
+    if (window.console) console.log('[pinch-scale] ready — 2-finger uniform, 3-finger axis-lock');
   });
 })();
 </script>
