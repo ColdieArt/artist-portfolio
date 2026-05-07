@@ -1044,6 +1044,12 @@ const URL_BRANDED_3 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-ep
 const URL_BRANDED_4 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/blue-origin.gif';
 const URL_BRANDED_5 = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/huang/card-01.gif';
 
+// Bezos Amazon-tape labels — cycle on tap (blue → orange → black).
+const URL_TAPE_BLUE   = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-label-blue.gif';
+const URL_TAPE_ORANGE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-label-orange.gif';
+const URL_TAPE_BLACK  = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/bezos/Jeff-Bezos-label-black.gif';
+const TAPE_OPTIONS    = [URL_TAPE_BLUE, URL_TAPE_ORANGE, URL_TAPE_BLACK];
+
 // Aliases for backward compatibility with base template code
 const URL_DOGECOIN_ORIGINAL = URL_BRANDED_2;
 const URL_TESLA_SWAP = URL_BRANDED_2;
@@ -1147,6 +1153,7 @@ const URL_HEADSET = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoc
 OVERLORD_ASSETS['spacex'] = BRANDED_OPTIONS;
 OVERLORD_ASSETS['blueBill'] = BRANDED_OPTIONS;
 OVERLORD_ASSETS['rocket'] = BRANDED_OPTIONS;
+OVERLORD_ASSETS['amazonTape'] = TAPE_OPTIONS; // tap to cycle blue/orange/black
 
 // ── CONTRACT-GATED ASSETS ──
 // Each entry maps an ETH contract address to an image that unlocks when the connected wallet holds a token.
@@ -1188,7 +1195,8 @@ const elementOverlordIndex = {
     mouthOverlay: 0,     // Will be synced with mouth below
     spacex:       pickRandomOverlordIndex('spacex'),
     blueBill:     pickRandomOverlordIndex('blueBill'),
-    rocket:       pickRandomOverlordIndex('rocket')
+    rocket:       pickRandomOverlordIndex('rocket'),
+    amazonTape:   pickRandomOverlordIndex('amazonTape')
 };
 // Sync mouthOverlay with mouth choice
 elementOverlordIndex.mouthOverlay = elementOverlordIndex.mouth;
@@ -1201,7 +1209,7 @@ function getInitialURL(elementId) {
 }
 
 // Cyclable element IDs (matches userData.id on meshes)
-const CYCLABLE_ELEMENTS = ['rightEye', 'leftEye', 'nose', 'mouth', 'forehead', 'hair', 'ear', 'background', 'spacex', 'blueBill', 'rocket'];
+const CYCLABLE_ELEMENTS = ['rightEye', 'leftEye', 'nose', 'mouth', 'forehead', 'hair', 'ear', 'background', 'spacex', 'blueBill', 'rocket', 'amazonTape'];
 
 // Preloaded textures: { elementId: [texture0, texture1, ...texture4] }
 let preloadedElementTextures = {};
@@ -3102,6 +3110,39 @@ function init() {
         
         // After rocket is loaded, load dogecoin/tesla and calculate its position relative to the rocket/background
         loadDogecoinAndFiat();
+    });
+
+    // ── BEZOS AMAZON TAPE — tap to cycle blue / orange / black ──
+    const tapeLayer = 5;
+    const tapeZ = (tapeLayer - 1) * depthStep;
+    const tapeInitialX = -1.4;
+    const tapeInitialY = 1.4;
+    initialAssetConfigs.push({
+        id: 'amazonTape',
+        type: 'image',
+        url: getInitialURL('amazonTape'),
+        initialPosition: new THREE.Vector3(tapeInitialX, tapeInitialY, tapeZ),
+        initialLayer: tapeLayer,
+        baseScale: baseScale,
+        scaleFactor: 1.0,
+        removed: false
+    });
+    loadTexture(getInitialURL('amazonTape'), (texture) => {
+        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+        const tapeScaleFactor = 1.0;
+        const planeWidth = texture.image.width * baseScale * tapeScaleFactor;
+        const planeHeight = texture.image.height * baseScale * tapeScaleFactor;
+        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+        const tape = new THREE.Mesh(geometry, material);
+        tape.position.set(tapeInitialX, tapeInitialY, tapeZ);
+        tape.userData.currentLayer = tapeLayer;
+        tape.userData.initialPosition = tape.position.clone();
+        tape.userData.initialLayer = tapeLayer;
+        tape.userData.id = 'amazonTape';
+        tape.userData.initialScale = { width: planeWidth, height: planeHeight };
+        scene.add(tape);
+        draggableObjects.push(tape);
+        cameraAnimationTargets.push(tape);
     });
 
     // ── HEADSET — standalone asset, loads at 1:1 full size every time ──
