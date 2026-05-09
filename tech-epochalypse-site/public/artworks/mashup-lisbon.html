@@ -259,6 +259,38 @@
       text-transform: uppercase;
       transition: background 0.2s, border-color 0.2s;
     }
+    /* ─── LOAD BUTTON (bottom-right, mirrors PRINT) ─── */
+    #load-btn {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      z-index: 250;
+      background: #000;
+      color: #fff;
+      border: 1px solid #fff;
+      padding: 10px 22px;
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    #load-btn:hover {
+      background: #1a1a1a;
+      border-color: #aaa;
+    }
+    #load-btn-status {
+      position: fixed;
+      bottom: 56px;
+      right: 16px;
+      z-index: 250;
+      font-family: monospace;
+      font-size: 11px;
+      color: #aaa;
+      pointer-events: none;
+    }
     #print-btn:hover {
       background: #1a1a1a;
       border-color: #aaa;
@@ -6736,6 +6768,9 @@ setTimeout(function () {
 
   <!-- ─── PRINT BUTTON (bottom-left) ─── -->
   <button id="print-btn">PRINT</button>
+  <button id="load-btn">LOAD</button>
+  <div id="load-btn-status"></div>
+  <input type="file" id="load-btn-input" accept=".json,application/json" style="display:none;">
 
   <!-- ─── PRINT ORDER MODAL ─── -->
   <div id="print-modal-overlay">
@@ -7477,13 +7512,7 @@ setTimeout(function () {
     else setTimeout(() => whenReady(cb), 100);
   }
   whenReady(() => {
-    const btn = document.getElementById('load-json-btn');
-    const input = document.getElementById('load-json-input');
-    const status = document.getElementById('load-json-status');
-
     // ── Reveal the EXPORT panel when URL hash is #admin or #load ──
-    // The panel is hidden from gallery visitors by default; the artist visits
-    // /artworks/mashup-lisbon#admin to open it for LOAD JSON / EXPORT use.
     function maybeOpenAdminPanel() {
       const h = (window.location.hash || '').toLowerCase();
       if (h === '#admin' || h === '#load') {
@@ -7494,19 +7523,8 @@ setTimeout(function () {
     maybeOpenAdminPanel();
     window.addEventListener('hashchange', maybeOpenAdminPanel);
 
-    function setStatus(text, color) {
-      if (!status) return;
-      status.style.color = color || '#aaa';
-      status.textContent = text || '';
-    }
-
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      input.click();
-    });
-
-    input.addEventListener('change', async (e) => {
-      const file = input.files && input.files[0];
+    // ── Shared loader: applies a JSON file's composition to the scene ──
+    async function applyJsonFile(file, setStatus) {
       if (!file) return;
       setStatus('READING ' + file.name + '…', '#aaa');
       try {
@@ -7515,12 +7533,7 @@ setTimeout(function () {
         const list = Array.isArray(json.meshes) ? json.meshes
                   : Array.isArray(json.composition && json.composition.meshes) ? json.composition.meshes
                   : null;
-        if (!list) {
-          setStatus('Invalid JSON: no meshes array', '#e66');
-          input.value = '';
-          return;
-        }
-        // Index scene meshes by userData.id (consumed FIFO so duplicates map 1:1)
+        if (!list) { setStatus('Invalid JSON', '#e66'); return; }
         const byId = {};
         window.scene.children.forEach(c => {
           if (c && c.userData && c.userData.id) {
@@ -7547,8 +7560,31 @@ setTimeout(function () {
         console.error('[load-json] parse error:', err);
         setStatus('Error: ' + (err.message || 'Could not parse'), '#e66');
       }
-      input.value = ''; // allow re-loading the same file
-    });
+    }
+
+    // Generic wiring: button click → file picker; on file → applyJsonFile()
+    function wireLoader(btnId, inputId, statusId) {
+      const btn = document.getElementById(btnId);
+      const input = document.getElementById(inputId);
+      const statusEl = statusId ? document.getElementById(statusId) : null;
+      if (!btn || !input) return;
+      const setStatus = (text, color) => {
+        if (!statusEl) return;
+        statusEl.style.color = color || '#aaa';
+        statusEl.textContent = text || '';
+        if (text && color === '#4c4') setTimeout(() => { statusEl.textContent = ''; }, 4000);
+      };
+      btn.addEventListener('click', (e) => { e.stopPropagation(); input.click(); });
+      input.addEventListener('change', async () => {
+        const file = input.files && input.files[0];
+        await applyJsonFile(file, setStatus);
+        input.value = ''; // allow re-loading the same file
+      });
+    }
+
+    // EXPORT-panel loader (behind #admin hash) AND visible bottom-right LOAD button.
+    wireLoader('load-json-btn', 'load-json-input', 'load-json-status');
+    wireLoader('load-btn',      'load-btn-input',  'load-btn-status');
   });
 })();
 </script>
