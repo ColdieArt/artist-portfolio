@@ -7481,6 +7481,19 @@ setTimeout(function () {
     const input = document.getElementById('load-json-input');
     const status = document.getElementById('load-json-status');
 
+    // ── Reveal the EXPORT panel when URL hash is #admin or #load ──
+    // The panel is hidden from gallery visitors by default; the artist visits
+    // /artworks/mashup-lisbon#admin to open it for LOAD JSON / EXPORT use.
+    function maybeOpenAdminPanel() {
+      const h = (window.location.hash || '').toLowerCase();
+      if (h === '#admin' || h === '#load') {
+        const panel = document.getElementById('export-panel');
+        if (panel) panel.classList.add('open');
+      }
+    }
+    maybeOpenAdminPanel();
+    window.addEventListener('hashchange', maybeOpenAdminPanel);
+
     function setStatus(text, color) {
       if (!status) return;
       status.style.color = color || '#aaa';
