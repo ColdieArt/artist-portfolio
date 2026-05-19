@@ -196,6 +196,171 @@
       transition: background 0.2s;
     }
     #post-modal-btn:hover { background: #1a8cd8; }
+    /* ─── ORBITAL TRANSFORM UI ─── */
+    #orbital-transform-ui {
+      position: fixed;
+      z-index: 600;
+      background: rgba(0,0,0,0.93);
+      border: 1px solid rgba(255,255,255,0.28);
+      padding: 10px 12px 9px;
+      font-family: monospace;
+      color: #fff;
+      min-width: 204px;
+      pointer-events: all;
+      display: none;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 10px 40px rgba(0,0,0,0.85);
+    }
+    #orbital-transform-ui.open { display: block; }
+    #orbital-transform-ui .orb-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 0.5px solid rgba(255,255,255,0.12);
+      padding-bottom: 7px;
+      margin-bottom: 8px;
+    }
+    #orbital-transform-ui .orb-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    #orbital-transform-ui .orb-icon {
+      font-size: 12px;
+      opacity: 0.4;
+      line-height: 1;
+    }
+    #orbital-transform-ui .orb-asset-name {
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #aaa;
+    }
+    #orbital-transform-ui .orb-close {
+      cursor: pointer;
+      color: #555;
+      font-size: 11px;
+      line-height: 1;
+      padding: 1px 3px;
+      transition: color 0.15s;
+    }
+    #orbital-transform-ui .orb-close:hover { color: #fff; }
+    #orbital-transform-ui .orb-modes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+    #orbital-transform-ui .orb-mode-btn {
+      background: #0a0a0a;
+      color: #888;
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 8px 4px 6px;
+      font-family: monospace;
+      font-size: 8px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      line-height: 1;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    #orbital-transform-ui .orb-mode-btn:hover {
+      border-color: rgba(255,255,255,0.4);
+      color: #ddd;
+    }
+    #orbital-transform-ui .orb-mode-btn.active {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+    }
+    #orbital-transform-ui .orb-mode-icon {
+      font-size: 14px;
+      line-height: 1;
+    }
+    #orbital-transform-ui .orb-mode-label {
+      font-size: 8px;
+      letter-spacing: 1.2px;
+    }
+    #orbital-transform-ui .orb-mode-hotkey {
+      font-size: 7px;
+      opacity: 0.5;
+      letter-spacing: 0.5px;
+    }
+    #orbital-transform-ui .orb-legend {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 8px;
+      font-size: 8px;
+      letter-spacing: 1px;
+    }
+    #orbital-transform-ui .orb-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    #orbital-transform-ui .orb-legend-dot {
+      width: 6px;
+      height: 6px;
+      display: inline-block;
+    }
+    #orbital-transform-ui .orb-legend-dot.x { background: #e55; }
+    #orbital-transform-ui .orb-legend-dot.y { background: #5b5; }
+    #orbital-transform-ui .orb-legend-dot.z { background: #56f; }
+    #orbital-transform-ui .orb-legend-label { color: #666; }
+    #orbital-transform-ui .orb-reset-btn {
+      width: 100%;
+      margin-top: 8px;
+      background: transparent;
+      border: 0.5px solid rgba(255,255,255,0.15);
+      color: #555;
+      font-family: monospace;
+      font-size: 8px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 0;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    #orbital-transform-ui .orb-reset-btn:hover {
+      border-color: rgba(255,255,255,0.45);
+      color: #ccc;
+    }
+    #orbital-transform-ui .orb-action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    #orbital-transform-ui .orb-duplicate-btn,
+    #orbital-transform-ui .orb-trash-btn {
+      background: transparent;
+      font-family: monospace;
+      font-size: 8px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 5px 0;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    #orbital-transform-ui .orb-duplicate-btn {
+      border: 0.5px solid rgba(255,255,255,0.15);
+      color: #555;
+    }
+    #orbital-transform-ui .orb-duplicate-btn:hover {
+      border-color: rgba(255,255,255,0.45);
+      color: #ccc;
+    }
+    #orbital-transform-ui .orb-trash-btn {
+      border: 0.5px solid rgba(180,40,40,0.45);
+      color: #833;
+    }
+    #orbital-transform-ui .orb-trash-btn:hover {
+      border-color: rgba(220,60,60,0.9);
+      color: #e55;
+    }
   </style>
   <title>ELON-MUSK-AWS-MASTER | Made on juno.transient.xyz</title>
 </head>
@@ -205,6 +370,7 @@
   <script type="module">
     import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
@@ -225,6 +391,11 @@ const zeroParallaxDepth = (5 - 1) * depthStep; // Z-position for level 5
 let isDragging = false; // Flag to indicate if a drag operation is in progress
 let pointerDownPosition = new THREE.Vector2(); // To store the initial pointer down position
 const DRAG_THRESHOLD = 5; // Pixels threshold to consider a move as a drag
+
+// ─── ORBITAL TRANSFORM UI STATE ───
+let orbitalTarget       = null;
+let transformControls   = null;
+let currentGizmoMode    = 'translate';
 
 let backgroundMesh = null; // To store the background mesh for positioning calculations
 
@@ -1915,6 +2086,23 @@ function init() {
     initialGlobalCameraPos.copy(camera.position);
     initialGlobalCameraLookAt.copy(controls.target);
 
+    // ─── TRANSFORM CONTROLS (Blender/AE-style gizmo) ───
+    transformControls = new TransformControls(camera, renderer.domElement);
+    window.transformControls = transformControls;
+    transformControls.setSize(0.9);
+    transformControls.setSpace('local');
+    transformControls.addEventListener('dragging-changed', (e) => {
+        if (e.value) {
+            controls.enabled = false;
+        } else if (!cameraAnimationActive && !effectControls.yRotation) {
+            controls.enabled = true;
+        }
+    });
+    const _transformHelper = transformControls.getHelper ? transformControls.getHelper() : transformControls;
+    scene.add(_transformHelper);
+    _transformHelper.visible = false;
+    transformControls.enabled = false;
+
     // Post-processing setup
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
@@ -3335,7 +3523,7 @@ function init() {
     leftUiContainer = document.createElement('div'); // Assign to global variable
     leftUiContainer.id = 'left-ui-container';
     leftUiContainer.style.position = 'absolute';
-    leftUiContainer.style.top = '-190px'; // Start mostly hidden, revealing only the arrow
+    leftUiContainer.style.top = '10px'; // Start expanded
     leftUiContainer.style.left = '10px';
     leftUiContainer.style.backgroundColor = 'rgba(0, 0, 0, 0)';
     leftUiContainer.style.color = 'white';
@@ -3428,6 +3616,7 @@ function init() {
         button.id = 'trash-button'; // Unique ID for easy targeting
         button.innerHTML = 'TRASH'; // Text with trashcan icon
         button.style.cssText = `
+            display: none !important;
             background-color: black; /* Changed from #CC0000 to black */
             color: white;
             padding: 4px;
@@ -3462,6 +3651,158 @@ function init() {
     exportButtonElement = createExportButton();
     exportButtonElement.style.display = 'none';
     leftUiContainer.appendChild(exportButtonElement);
+
+    // ── LOAD IMAGE (JPEG / PNG / GIF) ──
+    let uploadedImageCounter = 0;
+    const imageFileInput = document.createElement('input');
+    imageFileInput.type = 'file';
+    imageFileInput.accept = 'image/jpeg, image/png, image/gif';
+    imageFileInput.style.display = 'none';
+    imageFileInput.id = 'image-upload-input';
+    document.body.appendChild(imageFileInput);
+
+    const loadImgBtn = document.createElement('button');
+    loadImgBtn.id = 'load-image-btn';
+    loadImgBtn.textContent = 'LOAD';
+    loadImgBtn.style.cssText = `background-color: black; color: white; padding: 4px; margin-top: 10px; border: 0.5px solid #FF9800; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; white-space: nowrap; box-sizing: border-box; display: none;`;
+    loadImgBtn.onclick = (e) => { e.stopPropagation(); imageFileInput.click(); };
+    leftUiContainer.appendChild(loadImgBtn);
+
+    imageFileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        if (!file.type.match(/^image\/(jpeg|png|gif)$/)) {
+            console.warn('Only JPEG, PNG, GIF images are supported.');
+            imageFileInput.value = '';
+            return;
+        }
+        const isGif = file.type === 'image/gif';
+
+        const addMeshFromTexture = (texture, width, height) => {
+            const localBaseScale = 0.005;
+            const planeWidth = width * localBaseScale;
+            const planeHeight = height * localBaseScale;
+            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+            const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+            const mesh = new THREE.Mesh(geometry, material);
+            const layer = 6;
+            mesh.position.set(0, 0, (layer - 1) * depthStep);
+            mesh.userData.currentLayer = layer;
+            mesh.userData.initialPosition = mesh.position.clone();
+            mesh.userData.initialLayer = layer;
+            mesh.userData.id = 'uploaded_' + (++uploadedImageCounter);
+            mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
+            mesh.userData.isUploaded = true;
+            scene.add(mesh);
+            draggableObjects.push(mesh);
+            if (typeof cameraAnimationTargets !== 'undefined') cameraAnimationTargets.push(mesh);
+            return mesh;
+        };
+
+        const setupTexture = (tex) => {
+            tex.colorSpace = THREE.SRGBColorSpace;
+            tex.minFilter = THREE.LinearFilter;
+            tex.magFilter = THREE.LinearFilter;
+            tex.generateMipmaps = false;
+            tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            tex.needsUpdate = true;
+        };
+
+        // Fallback: keep <img> at natural size, in DOM but offscreen, redraw to canvas each rAF
+        const loadGifViaImgFallback = async () => {
+            const blobUrl = URL.createObjectURL(file);
+            const img = new Image();
+            await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = blobUrl; });
+            const w = img.naturalWidth, h = img.naturalHeight;
+            img.style.cssText = `position:fixed;left:-${w + 100}px;top:0;width:${w}px;height:${h}px;opacity:0.01;pointer-events:none;z-index:-1;`;
+            document.body.appendChild(img);
+            const animatedCanvas = document.createElement('canvas');
+            animatedCanvas.width = w; animatedCanvas.height = h;
+            const ctx = animatedCanvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            const texture = new THREE.CanvasTexture(animatedCanvas);
+            setupTexture(texture);
+            const mesh = addMeshFromTexture(texture, w, h);
+            const tick = () => {
+                if (!mesh.parent) {
+                    if (img.parentNode) img.parentNode.removeChild(img);
+                    URL.revokeObjectURL(blobUrl);
+                    return;
+                }
+                ctx.clearRect(0, 0, w, h);
+                ctx.drawImage(img, 0, 0);
+                texture.needsUpdate = true;
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        };
+
+        const loadGifViaImageDecoder = async () => {
+            const buf = await file.arrayBuffer();
+            const decoder = new ImageDecoder({ data: buf, type: 'image/gif' });
+            await decoder.tracks.ready;
+            await decoder.completed;
+            const track = decoder.tracks.selectedTrack;
+            if (!track) throw new Error('No selectedTrack');
+            const frameCount = track.frameCount || 1;
+            console.log('[GIF] ImageDecoder: frames=', frameCount, 'animated=', track.animated);
+            if (frameCount <= 1) throw new Error('Single-frame GIF, falling through');
+            const first = await decoder.decode({ frameIndex: 0 });
+            const w = first.image.displayWidth, h = first.image.displayHeight;
+            const animatedCanvas = document.createElement('canvas');
+            animatedCanvas.width = w; animatedCanvas.height = h;
+            const ctx = animatedCanvas.getContext('2d');
+            ctx.drawImage(first.image, 0, 0);
+            const firstDurUs = first.image.duration;
+            first.image.close();
+            const texture = new THREE.CanvasTexture(animatedCanvas);
+            setupTexture(texture);
+            const mesh = addMeshFromTexture(texture, w, h);
+            let frameIdx = 0;
+            let lastDurMs = firstDurUs ? firstDurUs / 1000 : 100;
+            const playNext = async () => {
+                if (!mesh.parent) return;
+                frameIdx = (frameIdx + 1) % frameCount;
+                try {
+                    const { image } = await decoder.decode({ frameIndex: frameIdx });
+                    ctx.clearRect(0, 0, w, h);
+                    ctx.drawImage(image, 0, 0);
+                    texture.needsUpdate = true;
+                    const durMs = image.duration ? image.duration / 1000 : lastDurMs;
+                    lastDurMs = durMs;
+                    image.close();
+                    setTimeout(playNext, Math.max(20, durMs));
+                } catch (err) {
+                    console.warn('[GIF] frame decode failed:', err);
+                }
+            };
+            setTimeout(playNext, Math.max(20, lastDurMs));
+        };
+
+        if (isGif) {
+            (async () => {
+                if (typeof ImageDecoder !== 'undefined') {
+                    try { await loadGifViaImageDecoder(); return; }
+                    catch (err) { console.warn('[GIF] ImageDecoder failed, falling back:', err); }
+                }
+                try { await loadGifViaImgFallback(); }
+                catch (err) { console.error('[GIF] img fallback failed:', err); }
+            })();
+        } else {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const texture = new THREE.Texture(img);
+                    setupTexture(texture);
+                    addMeshFromTexture(texture, img.naturalWidth || img.width, img.naturalHeight || img.height);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        imageFileInput.value = '';
+    });
 
     // Add the thin black rectangle with a down-facing arrow below the TRASH button
     arrowContainer = document.createElement('div'); // Assign to global variable
@@ -3499,34 +3840,42 @@ function init() {
             leftUiContainer.style.top = '-190px'; // Hide it, revealing only the arrow
             trashButtonElement.style.display = 'none'; // Hide TRASH button
             exportButtonElement.style.display = 'none'; // Hide EXPORT button
+            loadImgBtn.style.display = 'none';
             const panel = document.getElementById('export-panel');
             if (panel) panel.classList.remove('open'); // Close export panel
             arrowContainer.style.top = '0px'; // Keep arrow at the top
             arrowSpan.innerHTML = '&#x25BC;'; // Change to down arrow
         } else {
             leftUiContainer.style.top = '10px'; // Show it
-            trashButtonElement.style.display = 'block'; // Show TRASH button
+            trashButtonElement.style.display = 'none'; // Show TRASH button
+            loadImgBtn.style.display = 'block';
             arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; // Move arrow below the UI
             arrowSpan.innerHTML = '&#x25B2'; // Change to up arrow
         }
     };
 
     // Initial state setup for TRASH/EXPORT buttons and arrowContainer
-    // When the page loads, the left UI is hidden, so these buttons should be hidden.
+    // Left UI starts EXPANDED — buttons visible (trash stays hidden), arrow pointing up below the panel.
     trashButtonElement.style.display = 'none';
     exportButtonElement.style.display = 'none';
+    loadImgBtn.style.display = 'block';
+    arrowSpan.innerHTML = '&#x25B2;';
+    requestAnimationFrame(() => {
+        arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
+    });
 
     window.addEventListener('resize', onWindowResize);
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
     renderer.domElement.addEventListener('pointermove', onPointerMove);
     renderer.domElement.addEventListener('pointerup', onPointerUp);
     renderer.domElement.addEventListener('click', onClick);
-    
+
     // Call onWindowResize once after init to ensure initial positions are calculated correctly
     // NOTE: This is called after the main assets are loaded in loadDogecoinAndFiat to ensure
     // responsive elements are placed correctly *after* the initial fixed elements are positioned.
     // However, calling it here ensures the camera/composer/UI are sized correctly from the start.
     onWindowResize();
+    setupOrbitalUI();
 }
 
 /**
@@ -3674,9 +4023,14 @@ function onPointerDown(event) {
     pointerDownPosition.set(event.clientX, event.clientY);
 
     // Check if the click is on a UI element
-    if (event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) {
+    if (event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#orbital-transform-ui')) {
         selectedObject = null;
         controls.enabled = true;
+        return;
+    }
+
+    if (transformControls && transformControls.axis) {
+        selectedObject = null;
         return;
     }
 
@@ -3848,9 +4202,11 @@ function onPointerUp(event) {
 function onClick(event) {
     
     // Only process click if no dragging occurred and not clicking on UI
-    if (isDragging || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container')) {
+    if (isDragging || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#orbital-transform-ui')) {
         return;
     }
+
+    if (transformControls && transformControls.dragging) return;
 
     stopCameraAnimationAndReset(); // Only stop FLY camera on explicit click if not dragging and not on UI
 
@@ -3929,33 +4285,12 @@ function onClick(event) {
             spacexRef.material.needsUpdate = true;
         }
 
-        // Skip depth cycling for non-draggable elements or those with special handling
-        if (clickedObject === backgroundMesh || clickedObject === rightEyeRedactionRect || clickedObject === leftEyeRedactionRect || clickedObject === marqueeTextMesh || clickedObject === biometricMarqueeTextMesh || clickedObject === bloodTextMesh || clickedObject === redactedGlitchTextMesh) { // Added redactedGlitchTextMesh
+        if (clickedObject === backgroundMesh || clickedObject === rightEyeRedactionRect || clickedObject === leftEyeRedactionRect || clickedObject === marqueeTextMesh || clickedObject === biometricMarqueeTextMesh || clickedObject === bloodTextMesh || clickedObject === redactedGlitchTextMesh) {
             return;
         }
-
-        // Cycle through depth levels
-        let currentLayer = clickedObject.userData.currentLayer || 1;
-        currentLayer--; // Move backward one level
-        if (currentLayer < 1) { // If it goes below 1
-            currentLayer = totalDepthLayers; // Wrap around to the highest layer
-        }
-        clickedObject.userData.currentLayer = currentLayer;
-        clickedObject.position.z = (currentLayer - 1) * depthStep;
-
-        // Update redaction rectangle Z position if the clicked object is an eye
-        if (clickedObject === rightEyeMesh) {
-            if (rightEyeRedactionRect) {
-                rightEyeRedactionRect.position.z = clickedObject.position.z + (1.5 * depthStep);
-            }
-        }
-        else if (clickedObject === leftEyeMesh) {
-            if (leftEyeRedactionRect) {
-                leftEyeRedactionRect.position.z = clickedObject.position.z + (1.5 * depthStep);
-            }
-        }
-
-        console.log(`Object moved to layer: ${currentLayer}, Z-position: ${clickedObject.position.z}`);
+        openOrbitalUI(clickedObject);
+    } else if (!clickedObject && orbitalTarget) {
+        closeOrbitalUI();
     }
 }
 
@@ -4092,8 +4427,161 @@ function updateCameraAnimation(currentTime) {
     camera.lookAt(controls.target);
 }
 
+function getOrbitalScreenBounds(mesh) {
+    const box = new THREE.Box3().setFromObject(mesh);
+    const corners = [
+        new THREE.Vector3(box.min.x, box.min.y, box.min.z),
+        new THREE.Vector3(box.min.x, box.min.y, box.max.z),
+        new THREE.Vector3(box.min.x, box.max.y, box.min.z),
+        new THREE.Vector3(box.min.x, box.max.y, box.max.z),
+        new THREE.Vector3(box.max.x, box.min.y, box.min.z),
+        new THREE.Vector3(box.max.x, box.min.y, box.max.z),
+        new THREE.Vector3(box.max.x, box.max.y, box.min.z),
+        new THREE.Vector3(box.max.x, box.max.y, box.max.z)
+    ];
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const c of corners) {
+        c.project(camera);
+        const sx = ( c.x * 0.5 + 0.5) * window.innerWidth;
+        const sy = (-c.y * 0.5 + 0.5) * window.innerHeight;
+        if (sx < minX) minX = sx;
+        if (sx > maxX) maxX = sx;
+        if (sy < minY) minY = sy;
+        if (sy > maxY) maxY = sy;
+    }
+    return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
+}
+
+function updateOrbitalUIPosition() {
+    const ui = document.getElementById('orbital-transform-ui');
+    if (!ui) return;
+    const lc = document.getElementById('left-ui-container');
+    if (lc) {
+        const lcRect = lc.getBoundingClientRect();
+        ui.style.left = '16px';
+        ui.style.top  = (lcRect.bottom + 8) + 'px';
+    } else {
+        ui.style.left = '16px';
+        ui.style.top = '80px';
+    }
+    ui.style.transform = '';
+}
+
+function setGizmoMode(mode) {
+    if (!transformControls) return;
+    currentGizmoMode = mode;
+    window.currentGizmoMode = mode;
+    transformControls.setMode(mode);
+    transformControls.showX = true;
+    transformControls.showY = true;
+    transformControls.showZ = true;
+    document.querySelectorAll('#orbital-transform-ui .orb-mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+}
+
+function openOrbitalUI(mesh) {
+    orbitalTarget = mesh;
+    if (transformControls) {
+        transformControls.attach(mesh);
+        transformControls.enabled = true;
+        const helper = transformControls.getHelper ? transformControls.getHelper() : transformControls;
+        helper.visible = true;
+        setGizmoMode(currentGizmoMode);
+    }
+    const id = mesh.userData.id || 'asset';
+    document.getElementById('orb-asset-name').textContent = id.toUpperCase();
+    updateOrbitalUIPosition();
+    document.getElementById('orbital-transform-ui').classList.add('open');
+}
+
+function closeOrbitalUI() {
+    if (transformControls) {
+        transformControls.detach();
+        transformControls.enabled = false;
+        const helper = transformControls.getHelper ? transformControls.getHelper() : transformControls;
+        helper.visible = false;
+    }
+    orbitalTarget = null;
+    const ui = document.getElementById('orbital-transform-ui');
+    if (ui) ui.classList.remove('open');
+}
+
+function setupOrbitalUI() {
+    document.querySelectorAll('#orbital-transform-ui .orb-mode-btn').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            setGizmoMode(this.dataset.mode);
+        });
+    });
+    document.getElementById('orb-reset-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!orbitalTarget) return;
+        orbitalTarget.rotation.set(0, 0, 0);
+        orbitalTarget.scale.set(1, 1, 1);
+    });
+    document.getElementById('orb-close').addEventListener('click', function (e) {
+        e.stopPropagation();
+        closeOrbitalUI();
+    });
+    document.getElementById('orb-duplicate-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!orbitalTarget) return;
+        const src = orbitalTarget;
+        const newGeo = src.geometry.clone();
+        const newMat = src.material.clone();
+        if (src.material.map) newMat.map = src.material.map;
+        const clone = new THREE.Mesh(newGeo, newMat);
+        const xOffset = (src.userData.initialScale ? src.userData.initialScale.width : 1) * 0.1;
+        clone.position.set(src.position.x + xOffset, src.position.y, src.position.z + 2 * depthStep);
+        clone.rotation.copy(src.rotation);
+        clone.scale.copy(src.scale);
+        clone.visible = src.visible;
+        clone.userData.id = 'dup_' + src.userData.id + '_' + Date.now();
+        clone.userData.currentLayer = (src.userData.currentLayer || 0) + 2;
+        clone.userData.initialPosition = clone.position.clone();
+        clone.userData.initialLayer = clone.userData.currentLayer;
+        clone.userData.initialScale = src.userData.initialScale
+            ? { width: src.userData.initialScale.width, height: src.userData.initialScale.height }
+            : undefined;
+        clone.userData.userScale = src.userData.userScale || 1.0;
+        if (src.userData.isUploaded) clone.userData.isUploaded = true;
+        scene.add(clone);
+        draggableObjects.push(clone);
+        if (typeof cameraAnimationTargets !== 'undefined') cameraAnimationTargets.push(clone);
+        openOrbitalUI(clone);
+    });
+    document.getElementById('orb-trash-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!orbitalTarget) return;
+        const target = orbitalTarget;
+        closeOrbitalUI();
+        const configIndex = initialAssetConfigs.findIndex(c => c.id === target.userData.id);
+        if (configIndex !== -1) initialAssetConfigs[configIndex].removed = true;
+        scene.remove(target);
+        draggableObjects = draggableObjects.filter(o => o !== target);
+        if (typeof cameraAnimationTargets !== 'undefined') cameraAnimationTargets = cameraAnimationTargets.filter(o => o !== target);
+        if (target.geometry) target.geometry.dispose();
+        if (target.material) {
+            if (Array.isArray(target.material)) target.material.forEach(m => m.dispose());
+            else target.material.dispose();
+        }
+    });
+    document.addEventListener('keydown', function (e) {
+        const tag = (document.activeElement && document.activeElement.tagName) || '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        if (e.key === 'Escape') { closeOrbitalUI(); return; }
+        if (!orbitalTarget) return;
+        if (e.key === 'g' || e.key === 'G') setGizmoMode('translate');
+        else if (e.key === 'r' || e.key === 'R') setGizmoMode('rotate');
+        else if (e.key === 's' || e.key === 'S') setGizmoMode('scale');
+    });
+}
+
 function animate(currentTime) {
     requestAnimationFrame(animate);
+
+    if (orbitalTarget) updateOrbitalUIPosition();
 
     // Apply Y-rotation if explicitly enabled
     if (effectControls.yRotation) {
@@ -4201,6 +4689,7 @@ setTimeout(function () {
     window.scene = typeof scene != "undefined" ? scene : undefined;
     window.composer = typeof composer != "undefined" ? composer : undefined;
     window.effectControls = typeof effectControls != "undefined" ? effectControls : undefined;
+    window.controls = typeof controls != "undefined" ? controls : undefined;
 }, 1000)
 
     // Expose for dae hooks
@@ -4211,6 +4700,7 @@ setTimeout(function () {
       window.scene = typeof scene != "undefined" ? scene : undefined;
       window.composer = typeof composer != "undefined" ? composer : undefined;
       window.effectControls = typeof effectControls != "undefined" ? effectControls : undefined;
+      window.controls = typeof controls != "undefined" ? controls : undefined;
     }, 1000)
   </script>
 
@@ -4767,5 +5257,152 @@ setTimeout(function () {
     setupExport();
   })();
   </script>
+
+<div id="orbital-transform-ui">
+  <div class="orb-header">
+    <div class="orb-title-wrap">
+      <span class="orb-icon">◎</span>
+      <span class="orb-asset-name" id="orb-asset-name">ASSET</span>
+    </div>
+    <span class="orb-close" id="orb-close" title="Close (Esc)">✕</span>
+  </div>
+  <div class="orb-modes">
+    <button class="orb-mode-btn active" id="orb-mode-translate" data-mode="translate" title="Move (G)">
+      <span class="orb-mode-icon">⇔</span>
+      <span class="orb-mode-label">MOVE</span>
+      <span class="orb-mode-hotkey">G</span>
+    </button>
+    <button class="orb-mode-btn" id="orb-mode-rotate" data-mode="rotate" title="Rotate (R)">
+      <span class="orb-mode-icon">⟳</span>
+      <span class="orb-mode-label">ROTATE</span>
+      <span class="orb-mode-hotkey">R</span>
+    </button>
+    <button class="orb-mode-btn" id="orb-mode-scale" data-mode="scale" title="Scale (S)">
+      <span class="orb-mode-icon">⤢</span>
+      <span class="orb-mode-label">SCALE</span>
+      <span class="orb-mode-hotkey">S</span>
+    </button>
+  </div>
+  <div class="orb-legend">
+    <span class="orb-legend-item"><span class="orb-legend-dot x"></span><span class="orb-legend-label">X</span></span>
+    <span class="orb-legend-item"><span class="orb-legend-dot y"></span><span class="orb-legend-label">Y</span></span>
+    <span class="orb-legend-item"><span class="orb-legend-dot z"></span><span class="orb-legend-label">Z</span></span>
+  </div>
+  <button class="orb-reset-btn" id="orb-reset-btn">↺ RESET TRANSFORM</button>
+  <div class="orb-action-row">
+    <button class="orb-duplicate-btn" id="orb-duplicate-btn">⧉ DUPLICATE</button>
+    <button class="orb-trash-btn" id="orb-trash-btn">✕ DELETE</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  function whenReady(cb) {
+    if (window.renderer && window.renderer.domElement) cb();
+    else setTimeout(() => whenReady(cb), 100);
+  }
+  whenReady(() => {
+    const canvas = window.renderer.domElement;
+    const pointers = new Map();
+    (function patchTransformControls() {
+      const tc = window.transformControls;
+      if (!tc || tc.__patchedAttachDetach) return;
+      tc.__patchedAttachDetach = true;
+      const helperOf = () => (tc.getHelper ? tc.getHelper() : tc);
+      const origDetach = tc.detach.bind(tc);
+      tc.detach = function() {
+        const r = origDetach();
+        const h = helperOf(); if (h) h.visible = false;
+        return r;
+      };
+      const origAttach = tc.attach.bind(tc);
+      tc.attach = function(obj) {
+        const r = origAttach(obj);
+        const h = helperOf(); if (h) h.visible = !!obj;
+        return r;
+      };
+      if (!tc.object) {
+        const h = helperOf(); if (h) h.visible = false;
+      }
+    })();
+    let mode = 'idle', target = null, initDist = 0;
+    let initScale = { x: 1, y: 1, z: 1 }, initUserScale = 1;
+    const MIN_SCALE = 0.1, MAX_SCALE = 10;
+    const clamp = (v) => Math.max(MIN_SCALE, Math.min(MAX_SCALE, v));
+    const pair = () => Array.from(pointers.values()).slice(0, 2);
+    const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+    function startUniform() {
+      if (window.currentGizmoMode !== 'scale') return false;
+      target = (window.transformControls && window.transformControls.object) || null;
+      if (!target) return false;
+      const p = pair();
+      initDist = Math.max(1, dist(p[0], p[1]));
+      initScale = { x: target.scale.x, y: target.scale.y, z: target.scale.z };
+      initUserScale = target.userData.userScale || target.scale.x || 1;
+      mode = 'uniform';
+      if (window.controls) window.controls.enabled = false;
+      return true;
+    }
+    function startAxisLock() {
+      if (!target) return;
+      const p = pair();
+      const dx = Math.abs(p[0].x - p[1].x);
+      const dy = Math.abs(p[0].y - p[1].y);
+      mode = (dx > dy) ? 'lock-x' : 'lock-y';
+      initDist = Math.max(1, dist(p[0], p[1]));
+      initScale = { x: target.scale.x, y: target.scale.y, z: target.scale.z };
+    }
+    function endPinch() {
+      mode = 'idle'; target = null;
+      if (window.controls) window.controls.enabled = true;
+    }
+    function onDown(e) {
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pointers.size === 2) {
+        if (startUniform()) { e.preventDefault(); e.stopPropagation(); }
+      } else if (pointers.size === 3 && (mode === 'uniform' || mode === 'lock-x' || mode === 'lock-y') && target) {
+        startAxisLock(); e.preventDefault(); e.stopPropagation();
+      }
+    }
+    function onMove(e) {
+      if (!pointers.has(e.pointerId)) return;
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (!target || mode === 'idle') return;
+      const p = pair();
+      const d = Math.max(1, dist(p[0], p[1]));
+      const ratio = d / initDist;
+      if (mode === 'uniform') {
+        const s = clamp(initUserScale * ratio);
+        target.scale.setScalar(s);
+        target.userData.userScale = s;
+      } else if (mode === 'lock-x') {
+        target.scale.x = clamp(initScale.x * ratio);
+      } else if (mode === 'lock-y') {
+        target.scale.y = clamp(initScale.y * ratio);
+      }
+      e.preventDefault(); e.stopPropagation();
+    }
+    function onUp(e) {
+      pointers.delete(e.pointerId);
+      if (pointers.size < 2) {
+        endPinch();
+      } else if (pointers.size === 2 && (mode === 'lock-x' || mode === 'lock-y')) {
+        mode = 'uniform';
+        const p = pair();
+        initDist = Math.max(1, dist(p[0], p[1]));
+        initScale = { x: target.scale.x, y: target.scale.y, z: target.scale.z };
+        initUserScale = target.userData.userScale || target.scale.x || 1;
+      }
+    }
+    canvas.style.touchAction = 'none';
+    const opts = { capture: true, passive: false };
+    canvas.addEventListener('pointerdown', onDown, opts);
+    canvas.addEventListener('pointermove', onMove, opts);
+    canvas.addEventListener('pointerup', onUp, opts);
+    canvas.addEventListener('pointercancel', onUp, opts);
+    canvas.addEventListener('pointerleave', onUp, opts);
+  });
+})();
+</script>
 
 </body></html>
