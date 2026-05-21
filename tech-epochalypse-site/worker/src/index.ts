@@ -107,6 +107,7 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
     const xAccount = (formData.get('xAccount') as string) || '';
     const title = (formData.get('title') as string) || '';
     const ethAddress = (formData.get('ethAddress') as string) || '';
+    const email = (formData.get('email') as string) || '';
     const composition = (formData.get('composition') as string) || '';
 
     if (!env.AIRTABLE_PAT || !env.AIRTABLE_BASE_ID || !env.AIRTABLE_TABLE_NAME) {
@@ -172,6 +173,7 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
       'X Account': xAccount || 'Anonymous',
     };
     if (ethAddress) fields['ETH Address'] = ethAddress;
+    if (email) fields['Email'] = email;
 
     if (imageUrl) {
       fields['Image URL'] = imageUrl;

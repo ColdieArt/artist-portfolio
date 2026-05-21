@@ -56,6 +56,7 @@ module.exports = async (req, res) => {
     const xAccount = getFieldValue(parts, 'xAccount') || '';
     const title = getFieldValue(parts, 'title') || '';
     const ethAddress = getFieldValue(parts, 'ethAddress') || '';
+    const email = getFieldValue(parts, 'email') || '';
     const composition = getFieldValue(parts, 'composition') || '';
 
     // Upload image or video directly to R2 via S3 API
@@ -122,6 +123,7 @@ module.exports = async (req, res) => {
       'X Account': xAccount || 'Anonymous',
     };
     if (ethAddress) fields['ETH Address'] = ethAddress;
+    if (email) fields['Email'] = email;
 
     if (imageUrl) {
       fields['Image URL'] = imageUrl;

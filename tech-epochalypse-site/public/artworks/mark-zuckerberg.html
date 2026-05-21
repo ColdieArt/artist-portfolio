@@ -4497,6 +4497,21 @@ setTimeout(function () {
         " />
       </div>
 
+      <div style="margin: 0 0 15px 0;">
+        <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 6px; letter-spacing: 1px;">JOIN MAILING LIST</label>
+        <input id="email-input" type="email" placeholder="you@example.com (optional)" style="
+          width: 100%;
+          box-sizing: border-box;
+          background: #111;
+          border: 1px solid #333;
+          color: #fff;
+          padding: 10px 12px;
+          font-family: monospace;
+          font-size: 13px;
+          outline: none;
+        " />
+      </div>
+
       <button id="judgment-btn" style="
         background: #000;
         color: #fff;
@@ -4581,6 +4596,7 @@ setTimeout(function () {
       const xAccount = document.getElementById('x-account-input').value.trim();
       const title = document.getElementById('title-input').value.trim();
       const ethAddress = document.getElementById('eth-address-input').value.trim();
+      const email = document.getElementById('email-input').value.trim();
       judgmentBtn.disabled = true;
       judgmentBtn.style.opacity = '0.5';
       judgmentStatus.style.color = '#aaa';
@@ -4651,6 +4667,7 @@ setTimeout(function () {
         })();
         if (compositionJson) form.append('composition', compositionJson);
         form.append('ethAddress', ethAddress);
+        form.append('email', email);
         const res = await fetch(WORKER_URL + '/submit', { method: 'POST', body: form });
         if (!res.ok) {
           const errBody = await res.json().catch(() => ({}));
