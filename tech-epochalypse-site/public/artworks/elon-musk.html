@@ -4986,14 +4986,24 @@ setTimeout(function () {
         else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
         if (_gizmoHelper) _gizmoHelper.visible = _gizmoWasVisible;
         const srcCanvas = applyCropToCanvas(r.domElement);
-        const MAX_DIM = 2048;
-        const scale = Math.min(1, MAX_DIM / Math.max(srcCanvas.width, srcCanvas.height));
+        // Target dimensions: 4K (3840 long edge) — exact size depends on crop mode
+        let _targetW, _targetH;
+        if (window.cropMode === '16:9')      { _targetW = 3840; _targetH = 2160; }
+        else if (window.cropMode === '9:16') { _targetW = 2160; _targetH = 3840; }
+        else {
+            const _ar = srcCanvas.width / srcCanvas.height;
+            if (_ar >= 1) { _targetW = 3840; _targetH = Math.round(3840 / _ar); }
+            else          { _targetH = 3840; _targetW = Math.round(3840 * _ar); }
+        }
         let outCanvas = srcCanvas;
-        if (scale < 1) {
+        if (srcCanvas.width !== _targetW || srcCanvas.height !== _targetH) {
             outCanvas = document.createElement('canvas');
-            outCanvas.width = Math.round(srcCanvas.width * scale);
-            outCanvas.height = Math.round(srcCanvas.height * scale);
-            outCanvas.getContext('2d').drawImage(srcCanvas, 0, 0, outCanvas.width, outCanvas.height);
+            outCanvas.width = _targetW;
+            outCanvas.height = _targetH;
+            const _ctx = outCanvas.getContext('2d');
+            _ctx.imageSmoothingEnabled = true;
+            _ctx.imageSmoothingQuality = 'high';
+            _ctx.drawImage(srcCanvas, 0, 0, _targetW, _targetH);
         }
         const blob = await new Promise(res => outCanvas.toBlob(res, 'image/jpeg', 0.92));
 
