@@ -1972,7 +1972,7 @@ function init() {
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 10; // Zoomed out to see the full canvas
-    camera.position.y = 1.534; // Pan up ~10% of visible scene height so art appears lower in viewport
+    camera.position.y = 0.767; // Pan up ~10% of visible scene height so art appears lower in viewport
     camera.userData.yRotationAngle = 0; // Initialize angle for Y-axis camera rotation
 
     renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -1990,7 +1990,7 @@ function init() {
     controls.minDistance = 1;
     controls.maxDistance = 20;
     controls.maxPolarAngle = Math.PI / 2;
-    controls.target.y = 1.534; // Match camera y-shift so view stays horizontal
+    controls.target.y = 0.767; // Match camera y-shift so view stays horizontal
     controls.addEventListener('change', () => {
         lastActivityTime = performance.now();
         stopCameraAnimationAndReset(); // Stop animation on camera control interaction
