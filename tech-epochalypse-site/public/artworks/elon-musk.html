@@ -5100,6 +5100,18 @@ setTimeout(function () {
     const submitOverlordBtn = document.getElementById('submit-overlord-btn');
     submitOverlordBtn.onclick = (e) => {
       e.stopPropagation();
+      if (!cropMode) {
+        const _orig = submitOverlordBtn.textContent;
+        submitOverlordBtn.textContent = 'SELECT 16:9 OR 9:16';
+        submitOverlordBtn.style.borderColor = '#e33';
+        submitOverlordBtn.style.color = '#e33';
+        setTimeout(() => {
+          submitOverlordBtn.textContent = _orig;
+          submitOverlordBtn.style.borderColor = '';
+          submitOverlordBtn.style.color = '';
+        }, 1800);
+        return;
+      }
       exportPNG();
     };
 
