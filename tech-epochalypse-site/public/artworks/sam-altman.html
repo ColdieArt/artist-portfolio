@@ -4475,6 +4475,21 @@ setTimeout(function () {
         " />
       </div>
 
+      <div style="margin: 0 0 15px 0;">
+        <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 6px; letter-spacing: 1px;">ETH ADDRESS</label>
+        <input id="eth-address-input" type="text" placeholder="0x… (optional)" style="
+          width: 100%;
+          box-sizing: border-box;
+          background: #111;
+          border: 1px solid #333;
+          color: #fff;
+          padding: 10px 12px;
+          font-family: monospace;
+          font-size: 13px;
+          outline: none;
+        " />
+      </div>
+
       <button id="judgment-btn" style="
         background: #000;
         color: #fff;
@@ -4558,26 +4573,37 @@ setTimeout(function () {
     judgmentBtn.onclick = async () => {
       const xAccount = document.getElementById('x-account-input').value.trim();
       const title = document.getElementById('title-input').value.trim();
+      const ethAddress = document.getElementById('eth-address-input').value.trim();
       judgmentBtn.disabled = true;
       judgmentBtn.style.opacity = '0.5';
       judgmentStatus.style.color = '#aaa';
       judgmentStatus.textContent = 'SUBMITTING...';
 
       try {
-        // Capture canvas as PNG
+        // Capture canvas, downscale if needed, encode as JPEG (keeps payload small)
         const r = await getRenderer();
         if (window.composer) { window.composer.render(); }
         else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
-        const dataUrl = r.domElement.toDataURL('image/png');
-        const blob = await (await fetch(dataUrl)).blob();
+        const srcCanvas = r.domElement;
+        const MAX_DIM = 2048;
+        const scale = Math.min(1, MAX_DIM / Math.max(srcCanvas.width, srcCanvas.height));
+        let outCanvas = srcCanvas;
+        if (scale < 1) {
+            outCanvas = document.createElement('canvas');
+            outCanvas.width = Math.round(srcCanvas.width * scale);
+            outCanvas.height = Math.round(srcCanvas.height * scale);
+            outCanvas.getContext('2d').drawImage(srcCanvas, 0, 0, outCanvas.width, outCanvas.height);
+        }
+        const blob = await new Promise(res => outCanvas.toBlob(res, 'image/jpeg', 0.92));
 
         // Upload image + create Airtable record in one request via Cloudflare Worker
         const WORKER_URL = window.GALLERY_API_URL || window.location.origin;
         const form = new FormData();
-        form.append('image', blob, 'export.png');
+        form.append('image', blob, 'export.jpg');
         form.append('overlord', OVERLORD_NAME);
         form.append('xAccount', xAccount);
         form.append('title', title);
+        form.append('ethAddress', ethAddress);
         const res = await fetch(WORKER_URL + '/submit', { method: 'POST', body: form });
         if (!res.ok) {
           const errBody = await res.json().catch(() => ({}));

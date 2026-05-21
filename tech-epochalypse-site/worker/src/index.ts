@@ -71,9 +71,8 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
       return json({ error: 'No image provided' }, 400);
     }
 
-    // Limit file size to 5MB
-    if (file.size > 5 * 1024 * 1024) {
-      return json({ error: 'File too large (max 5MB)' }, 400);
+    if (file.size > 25 * 1024 * 1024) {
+      return json({ error: `File too large (got ${(file.size / 1048576).toFixed(2)}MB, max 25MB)` }, 400);
     }
 
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -107,6 +106,7 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
     const overlord = (formData.get('overlord') as string) || 'unknown';
     const xAccount = (formData.get('xAccount') as string) || '';
     const title = (formData.get('title') as string) || '';
+    const ethAddress = (formData.get('ethAddress') as string) || '';
 
     if (!env.AIRTABLE_PAT || !env.AIRTABLE_BASE_ID || !env.AIRTABLE_TABLE_NAME) {
       return json({ error: 'Airtable not configured on server' }, 500);
@@ -116,8 +116,8 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
     let fileBytes: ArrayBuffer | null = null;
     let fileContentType = 'image/png';
     if (file && file.size > 0) {
-      if (file.size > 5 * 1024 * 1024) {
-        return json({ error: 'File too large (max 5MB)' }, 400);
+      if (file.size > 25 * 1024 * 1024) {
+        return json({ error: `File too large (got ${(file.size / 1048576).toFixed(2)}MB, max 25MB)` }, 400);
       }
       fileBytes = await file.arrayBuffer();
       fileContentType = file.type || 'image/png';
@@ -153,6 +153,7 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
       'Submission Date': today,
       'X Account': xAccount || 'Anonymous',
     };
+    if (ethAddress) fields['ETH Address'] = ethAddress;
 
     if (imageUrl) {
       fields['Image URL'] = imageUrl;
