@@ -263,6 +263,54 @@ let isDragging = false;
 let pointerDownPosition = new THREE.Vector2();
 const DRAG_THRESHOLD = 5;
 
+// ── CROP MODE STATE (16:9 / 9:16 / off) ──
+let cropMode = null;
+let cropOverlayEl = null;
+
+function _cropDims() {
+    const ww = window.innerWidth, wh = window.innerHeight;
+    let w, h;
+    if (cropMode === '16:9') { w = ww * 0.8; h = w * 9 / 16; }
+    else if (cropMode === '9:16') { h = wh * 0.8; w = h * 9 / 16; }
+    else return null;
+    if (h > wh * 0.95) { h = wh * 0.95; w = (cropMode === '16:9') ? h * 16/9 : h * 9/16; }
+    if (w > ww * 0.95) { w = ww * 0.95; h = (cropMode === '16:9') ? w * 9/16 : w * 16/9; }
+    return { x: (ww - w) / 2, y: (wh - h) / 2, w, h };
+}
+
+function updateCropOverlay() {
+    if (!cropOverlayEl) return;
+    const d = _cropDims();
+    if (!d) { cropOverlayEl.style.display = 'none'; return; }
+    cropOverlayEl.style.display = 'block';
+    cropOverlayEl.style.left = d.x + 'px';
+    cropOverlayEl.style.top = d.y + 'px';
+    cropOverlayEl.style.width = d.w + 'px';
+    cropOverlayEl.style.height = d.h + 'px';
+}
+
+function getCropCanvasRect(srcCanvas) {
+    const d = _cropDims();
+    if (!d) return null;
+    const ww = window.innerWidth, wh = window.innerHeight;
+    return {
+        sx: (srcCanvas.width / ww) * d.x,
+        sy: (srcCanvas.height / wh) * d.y,
+        sw: (srcCanvas.width / ww) * d.w,
+        sh: (srcCanvas.height / wh) * d.h,
+    };
+}
+
+function applyCropToCanvas(srcCanvas) {
+    const c = getCropCanvasRect(srcCanvas);
+    if (!c) return srcCanvas;
+    const out = document.createElement('canvas');
+    out.width = Math.max(1, Math.round(c.sw));
+    out.height = Math.max(1, Math.round(c.sh));
+    out.getContext('2d').drawImage(srcCanvas, c.sx, c.sy, c.sw, c.sh, 0, 0, out.width, out.height);
+    return out;
+}
+
 // ─── ORBITAL TRANSFORM UI STATE ───
 let orbitalTarget       = null;
 let transformControls   = null;
@@ -2510,6 +2558,36 @@ function init() {
     loadImgBtn.onclick = (e) => { e.stopPropagation(); imageFileInput.click(); };
     leftUiContainer.appendChild(loadImgBtn);
 
+    // ── CROP overlay element ──
+    cropOverlayEl = document.createElement('div');
+    cropOverlayEl.id = 'crop-overlay';
+    cropOverlayEl.style.cssText = 'position: fixed; border: 1px dashed rgba(255,255,255,0.65); box-shadow: 0 0 0 9999px rgba(0,0,0,0.55); pointer-events: none; z-index: 150; display: none; box-sizing: border-box;';
+    document.body.appendChild(cropOverlayEl);
+    window.addEventListener('resize', updateCropOverlay);
+
+    // ── CROP H / V buttons ──
+    const cropHBtn = document.createElement('button');
+    cropHBtn.id = 'crop-h-btn';
+    cropHBtn.textContent = '16:9';
+    cropHBtn.style.cssText = 'background-color: black; color: white; padding: 4px; margin-top: 10px; border: 0.5px solid #00BCD4; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; white-space: nowrap; box-sizing: border-box; display: none;';
+    leftUiContainer.appendChild(cropHBtn);
+
+    const cropVBtn = document.createElement('button');
+    cropVBtn.id = 'crop-v-btn';
+    cropVBtn.textContent = '9:16';
+    cropVBtn.style.cssText = 'background-color: black; color: white; padding: 4px; border: 0.5px solid #E91E63; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; white-space: nowrap; box-sizing: border-box; display: none;';
+    leftUiContainer.appendChild(cropVBtn);
+
+    function _setCropMode(mode) {
+        cropMode = (cropMode === mode) ? null : mode;
+        cropHBtn.style.backgroundColor = (cropMode === '16:9') ? '#00BCD4' : 'black';
+        cropHBtn.style.color = (cropMode === '16:9') ? 'black' : 'white';
+        cropVBtn.style.backgroundColor = (cropMode === '9:16') ? '#E91E63' : 'black';
+        updateCropOverlay();
+    }
+    cropHBtn.onclick = (e) => { e.stopPropagation(); _setCropMode('16:9'); };
+    cropVBtn.onclick = (e) => { e.stopPropagation(); _setCropMode('9:16'); };
+
     imageFileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -2654,14 +2732,16 @@ function init() {
     document.body.appendChild(arrowContainer);
     arrowContainer.onclick = (e) => {
         e.stopPropagation();
-        if (leftUiContainer.style.top === '10px') { leftUiContainer.style.top = '-190px'; trashButtonElement.style.display = 'none'; exportButtonElement.style.display = 'none'; loadImgBtn.style.display = 'none'; arrowContainer.style.top = '0px'; arrowSpan.innerHTML = '&#x25BC;'; }
-        else { leftUiContainer.style.top = '10px'; trashButtonElement.style.display = 'none'; loadImgBtn.style.display = 'block'; arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; arrowSpan.innerHTML = '&#x25B2'; }
+        if (leftUiContainer.style.top === '10px') { leftUiContainer.style.top = '-190px'; trashButtonElement.style.display = 'none'; exportButtonElement.style.display = 'none'; loadImgBtn.style.display = 'none'; cropHBtn.style.display = 'none'; cropVBtn.style.display = 'none'; arrowContainer.style.top = '0px'; arrowSpan.innerHTML = '&#x25BC;'; }
+        else { leftUiContainer.style.top = '10px'; trashButtonElement.style.display = 'none'; loadImgBtn.style.display = 'block'; cropHBtn.style.display = 'block'; cropVBtn.style.display = 'block'; arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; arrowSpan.innerHTML = '&#x25B2'; }
     };
     // Initial state setup for TRASH/EXPORT buttons and arrowContainer
     // Left UI starts EXPANDED — buttons visible (trash stays hidden), arrow pointing up below the panel.
     trashButtonElement.style.display = 'none';
     exportButtonElement.style.display = 'none';
     loadImgBtn.style.display = 'block';
+    cropHBtn.style.display = 'block';
+    cropVBtn.style.display = 'block';
     arrowSpan.innerHTML = '&#x25B2;';
     requestAnimationFrame(() => {
         arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
@@ -3211,7 +3291,7 @@ setTimeout(() => {
         if (window.composer) { window.composer.render(); }
         else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
         if (_gizmoHelper) _gizmoHelper.visible = _gizmoWasVisible;
-        const srcCanvas = r.domElement;
+        const srcCanvas = applyCropToCanvas(r.domElement);
         const MAX_DIM = 2048;
         const scale = Math.min(1, MAX_DIM / Math.max(srcCanvas.width, srcCanvas.height));
         let outCanvas = srcCanvas;
@@ -3419,10 +3499,11 @@ setTimeout(() => {
         r.render(window.scene, window.camera);
       }
       if (_gizmoHelper) _gizmoHelper.visible = _gizmoWasVisible;
-      r.domElement.toBlob((blob) => {
+      const _exportCanvas = applyCropToCanvas(r.domElement);
+      _exportCanvas.toBlob((blob) => {
         if (blob) {
           triggerDownload(blob, 'jensen-huang-coldie.jpg');
-          saveToGallery(r.domElement);
+          saveToGallery(_exportCanvas);
           setStatus('JPG saved ✓ — added to gallery', 'active');
           showPostModal();
         } else {
