@@ -118,7 +118,10 @@ module.exports = async (req, res) => {
       'Title': title || `${overlord} — ${today}`,
       'Overlord': overlord,
       'Submission Date': today,
+      'Date': today,
       'X Account': xAccount || 'Anonymous',
+      'Contributor': xAccount || 'Anonymous',
+      'Category': 'general submission',
     };
     if (ethAddress) fields['ETH Address'] = ethAddress;
     if (email) fields['Email'] = email;
