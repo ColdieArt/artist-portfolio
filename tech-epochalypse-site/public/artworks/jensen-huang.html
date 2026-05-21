@@ -310,6 +310,9 @@ function applyCropToCanvas(srcCanvas) {
     out.getContext('2d').drawImage(srcCanvas, c.sx, c.sy, c.sw, c.sh, 0, 0, out.width, out.height);
     return out;
 }
+// Expose to non-module scripts (export/submit handlers live in a plain <script> block).
+window.applyCropToCanvas = applyCropToCanvas;
+Object.defineProperty(window, 'cropMode', { get: () => cropMode, set: (v) => { cropMode = v; }, configurable: true });
 
 // ─── ORBITAL TRANSFORM UI STATE ───
 let orbitalTarget       = null;
