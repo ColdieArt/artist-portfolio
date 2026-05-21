@@ -3408,23 +3408,28 @@ setTimeout(() => {
       setStatus('Capturing…', 'active');
       lockUI(true);
       const r = await getRenderer();
+      // Hide orbital gizmo helper during export so it doesn't appear in the captured image
+      const _gizmoHelper = (typeof transformControls !== 'undefined' && transformControls) ? (transformControls.getHelper ? transformControls.getHelper() : transformControls) : null;
+      const _gizmoWasVisible = _gizmoHelper ? _gizmoHelper.visible : false;
+      if (_gizmoHelper) _gizmoHelper.visible = false;
       // Force a fresh render so the buffer has the current frame
       if (window.composer) {
         window.composer.render();
       } else if (window.scene && window.camera) {
         r.render(window.scene, window.camera);
       }
+      if (_gizmoHelper) _gizmoHelper.visible = _gizmoWasVisible;
       r.domElement.toBlob((blob) => {
         if (blob) {
-          triggerDownload(blob, 'jensen-huang-coldie.png');
+          triggerDownload(blob, 'jensen-huang-coldie.jpg');
           saveToGallery(r.domElement);
-          setStatus('PNG saved ✓ — added to gallery', 'active');
+          setStatus('JPG saved ✓ — added to gallery', 'active');
           showPostModal();
         } else {
           setStatus('Capture failed', 'error');
         }
         lockUI(false);
-      }, 'image/png');
+      }, 'image/jpeg', 0.92);
     }
     // ── Video (MP4) export ──────────────────────────────────────────
     async function exportVideo() {
