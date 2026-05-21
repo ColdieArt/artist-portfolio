@@ -55,13 +55,14 @@ module.exports = async (req, res) => {
     const overlord = getFieldValue(parts, 'overlord') || 'unknown';
     const xAccount = getFieldValue(parts, 'xAccount') || '';
     const title = getFieldValue(parts, 'title') || '';
+    const ethAddress = getFieldValue(parts, 'ethAddress') || '';
 
     // Upload image or video directly to R2 via S3 API
     let imageUrl = '';
     const imagePart = parts.find(p => p.name === 'image' && p.filename) || parts.find(p => p.name === 'video' && p.filename);
     if (imagePart && imagePart.data.length > 0) {
-      if (imagePart.data.length > 10 * 1024 * 1024) {
-        return res.status(400).json({ error: 'File too large (max 10MB)' });
+      if (imagePart.data.length > 25 * 1024 * 1024) {
+        return res.status(400).json({ error: `File too large (got ${(imagePart.data.length / 1048576).toFixed(2)}MB, max 25MB)` });
       }
 
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -97,6 +98,7 @@ module.exports = async (req, res) => {
       'Submission Date': today,
       'X Account': xAccount || 'Anonymous',
     };
+    if (ethAddress) fields['ETH Address'] = ethAddress;
 
     if (imageUrl) {
       fields['Image URL'] = imageUrl;
