@@ -4777,6 +4777,7 @@ setTimeout(function () {
     window.composer = typeof composer != "undefined" ? composer : undefined;
     window.effectControls = typeof effectControls != "undefined" ? effectControls : undefined;
     window.controls = typeof controls != "undefined" ? controls : undefined;
+      window._exportPasses = { pixelationPass: typeof pixelationPass !== 'undefined' ? pixelationPass : null, asciiPass: typeof asciiPass !== 'undefined' ? asciiPass : null, cctvFeedPass: typeof cctvFeedPass !== 'undefined' ? cctvFeedPass : null };
 }, 1000)
 
     // Expose for dae hooks
@@ -4788,6 +4789,7 @@ setTimeout(function () {
       window.composer = typeof composer != "undefined" ? composer : undefined;
       window.effectControls = typeof effectControls != "undefined" ? effectControls : undefined;
       window.controls = typeof controls != "undefined" ? controls : undefined;
+      window._exportPasses = { pixelationPass: typeof pixelationPass !== 'undefined' ? pixelationPass : null, asciiPass: typeof asciiPass !== 'undefined' ? asciiPass : null, cctvFeedPass: typeof cctvFeedPass !== 'undefined' ? cctvFeedPass : null };
     }, 1000)
   </script>
 
@@ -4976,16 +4978,42 @@ setTimeout(function () {
       judgmentStatus.textContent = 'SUBMITTING...';
 
       try {
-        // Capture canvas, downscale if needed, encode as JPEG (keeps payload small)
+        // Capture canvas at true 4K detail via temporary renderer-resolution boost, apply crop
         const r = await getRenderer();
-        // Hide orbital gizmo helper during export so it doesn't appear in the captured image
+        const _passes = window._exportPasses || {};
         const _gizmoHelper = (typeof transformControls !== 'undefined' && transformControls) ? (transformControls.getHelper ? transformControls.getHelper() : transformControls) : null;
         const _gizmoWasVisible = _gizmoHelper ? _gizmoHelper.visible : false;
         if (_gizmoHelper) _gizmoHelper.visible = false;
+
+        const _vw = window.innerWidth, _vh = window.innerHeight;
+        const _origPR = r.getPixelRatio();
+        const _maxTex = (r.capabilities && r.capabilities.maxTextureSize) || 4096;
+        let _hiPR;
+        if (window.cropMode === '16:9')      _hiPR = 3840 / (_vw * 0.8);
+        else if (window.cropMode === '9:16') _hiPR = 3840 / _vh;
+        else                                 _hiPR = 3840 / Math.max(_vw, _vh);
+        _hiPR = Math.max(_origPR, _hiPR);
+        _hiPR = Math.min(_hiPR, _maxTex / Math.max(_vw, _vh));
+
+        r.setPixelRatio(_hiPR);
+        r.setSize(_vw, _vh, false);
+        if (window.composer) window.composer.setSize(_vw, _vh);
+        if (_passes.pixelationPass) _passes.pixelationPass.uniforms['resolution'].value.set(_vw * _hiPR, _vh * _hiPR);
+        if (_passes.asciiPass)      _passes.asciiPass.uniforms['resolution'].value.set(_vw * _hiPR, _vh * _hiPR);
+        if (_passes.cctvFeedPass)   _passes.cctvFeedPass.uniforms['resolution'].value.set(_vw * _hiPR, _vh * _hiPR);
+
         if (window.composer) { window.composer.render(); }
         else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
-        if (_gizmoHelper) _gizmoHelper.visible = _gizmoWasVisible;
+
         const srcCanvas = applyCropToCanvas(r.domElement);
+
+        if (_gizmoHelper) _gizmoHelper.visible = _gizmoWasVisible;
+        r.setPixelRatio(_origPR);
+        r.setSize(_vw, _vh, false);
+        if (window.composer) window.composer.setSize(_vw, _vh);
+        if (_passes.pixelationPass) _passes.pixelationPass.uniforms['resolution'].value.set(_vw, _vh);
+        if (_passes.asciiPass)      _passes.asciiPass.uniforms['resolution'].value.set(_vw, _vh);
+        if (_passes.cctvFeedPass)   _passes.cctvFeedPass.uniforms['resolution'].value.set(_vw, _vh);
         // Target dimensions: 4K (3840 long edge) — exact size depends on crop mode
         let _targetW, _targetH;
         if (window.cropMode === '16:9')      { _targetW = 3840; _targetH = 2160; }
