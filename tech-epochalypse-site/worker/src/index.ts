@@ -107,6 +107,7 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
     const xAccount = (formData.get('xAccount') as string) || '';
     const title = (formData.get('title') as string) || '';
     const ethAddress = (formData.get('ethAddress') as string) || '';
+    const composition = (formData.get('composition') as string) || '';
 
     if (!env.AIRTABLE_PAT || !env.AIRTABLE_BASE_ID || !env.AIRTABLE_TABLE_NAME) {
       return json({ error: 'Airtable not configured on server' }, 500);
@@ -143,6 +144,23 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
       imageUrl = `${workerUrl.origin}/image/${key}`;
     }
 
+    // Upload composition JSON to R2 (when provided)
+    let jsonUrl = '';
+    if (composition && composition.length > 0) {
+      try {
+        const jsonId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const jsonKey = `compositions/${jsonId}.json`;
+        await env.GALLERY_BUCKET.put(jsonKey, composition, {
+          httpMetadata: { contentType: 'application/json' },
+          customMetadata: { overlord, date: new Date().toISOString().split('T')[0] },
+        });
+        const workerUrl = new URL(request.url);
+        jsonUrl = `${workerUrl.origin}/image/${jsonKey}`;
+      } catch (e) {
+        console.error('Composition upload failed:', e);
+      }
+    }
+
     const today = new Date().toISOString().split('T')[0];
 
     // Build Airtable record with R2 image URL in a text field
@@ -157,6 +175,9 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
 
     if (imageUrl) {
       fields['Image URL'] = imageUrl;
+    }
+    if (jsonUrl) {
+      fields['JSON URL'] = jsonUrl;
     }
 
     const airtableRes = await fetch(

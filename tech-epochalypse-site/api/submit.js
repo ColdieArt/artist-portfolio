@@ -56,6 +56,7 @@ module.exports = async (req, res) => {
     const xAccount = getFieldValue(parts, 'xAccount') || '';
     const title = getFieldValue(parts, 'title') || '';
     const ethAddress = getFieldValue(parts, 'ethAddress') || '';
+    const composition = getFieldValue(parts, 'composition') || '';
 
     // Upload image or video directly to R2 via S3 API
     let imageUrl = '';
@@ -90,6 +91,28 @@ module.exports = async (req, res) => {
       imageUrl = `${proto}://${host}/api/image?key=${encodeURIComponent(key)}`;
     }
 
+    // Upload composition JSON to R2 (when provided)
+    let jsonUrl = '';
+    if (composition && composition.length > 0) {
+      try {
+        const jsonId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const jsonKey = `compositions/${jsonId}.json`;
+        const s3 = getS3Client();
+        await s3.send(new PutObjectCommand({
+          Bucket: R2_BUCKET,
+          Key: jsonKey,
+          Body: Buffer.from(composition, 'utf8'),
+          ContentType: 'application/json',
+          Metadata: { overlord, date: new Date().toISOString().split('T')[0] },
+        }));
+        const host = req.headers['x-forwarded-host'] || req.headers.host || 'knowyouroverlord.art';
+        const proto = req.headers['x-forwarded-proto'] || 'https';
+        jsonUrl = `${proto}://${host}/api/image?key=${encodeURIComponent(jsonKey)}`;
+      } catch (e) {
+        console.error('Composition upload failed:', e);
+      }
+    }
+
     const today = new Date().toISOString().split('T')[0];
 
     const fields = {
@@ -102,6 +125,9 @@ module.exports = async (req, res) => {
 
     if (imageUrl) {
       fields['Image URL'] = imageUrl;
+    }
+    if (jsonUrl) {
+      fields['JSON URL'] = jsonUrl;
     }
 
     const airtableRes = await fetch(

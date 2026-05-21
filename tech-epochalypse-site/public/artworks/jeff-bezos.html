@@ -4371,6 +4371,46 @@ setTimeout(function () {
         form.append('overlord', OVERLORD_NAME);
         form.append('xAccount', xAccount);
         form.append('title', title);
+        // Build composition JSON snapshot (positions, transforms, effects, uploaded image data)
+        const compositionJson = (() => {
+          try {
+            const meshes = [];
+            scene.children.forEach(c => {
+              if (!c.userData || !c.userData.id) return;
+              const m = {
+                id: c.userData.id,
+                position: { x: c.position.x, y: c.position.y, z: c.position.z },
+                rotation: { x: c.rotation.x, y: c.rotation.y, z: c.rotation.z },
+                scale: { x: c.scale.x, y: c.scale.y, z: c.scale.z },
+                visible: c.visible,
+                userScale: c.userData.userScale || 1.0,
+                currentLayer: c.userData.currentLayer,
+                opacity: c.material ? c.material.opacity : 1,
+              };
+              if (c.userData.isUploaded && c.material && c.material.map && c.material.map.image) {
+                try {
+                  const img = c.material.map.image;
+                  const cv = document.createElement('canvas');
+                  cv.width = img.naturalWidth || img.width;
+                  cv.height = img.naturalHeight || img.height;
+                  cv.getContext('2d').drawImage(img, 0, 0);
+                  m.isUploaded = true;
+                  m.uploadedImageData = cv.toDataURL('image/png');
+                  m.initialScale = c.userData.initialScale;
+                } catch(e) {}
+              }
+              meshes.push(m);
+            });
+            const removedAssets = (typeof initialAssetConfigs !== 'undefined' ? initialAssetConfigs.filter(c => c.removed).map(c => c.id) : []);
+            return JSON.stringify({
+              version: 1, overlord: OVERLORD_NAME, timestamp: Date.now(),
+              meshes, removedAssets,
+              effects: (typeof effectControls !== 'undefined' ? { ...effectControls } : {}),
+              camera: { position: { x: camera.position.x, y: camera.position.y, z: camera.position.z }, target: { x: controls.target.x, y: controls.target.y, z: controls.target.z } },
+            });
+          } catch (err) { console.warn('composition build failed:', err); return ''; }
+        })();
+        if (compositionJson) form.append('composition', compositionJson);
         form.append('ethAddress', ethAddress);
         const res = await fetch(WORKER_URL + '/submit', { method: 'POST', body: form });
         if (!res.ok) {
