@@ -125,6 +125,7 @@ module.exports = async (req, res) => {
 
     if (imageUrl) {
       fields['Image URL'] = imageUrl;
+      fields['Image'] = [{ url: imageUrl }];
     }
     if (jsonUrl) {
       fields['JSON URL'] = jsonUrl;

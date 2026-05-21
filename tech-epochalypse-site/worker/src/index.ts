@@ -175,6 +175,7 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
 
     if (imageUrl) {
       fields['Image URL'] = imageUrl;
+      fields['Image'] = [{ url: imageUrl }];
     }
     if (jsonUrl) {
       fields['JSON URL'] = jsonUrl;
