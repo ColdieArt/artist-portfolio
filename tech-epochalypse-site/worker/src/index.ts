@@ -71,9 +71,8 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
       return json({ error: 'No image provided' }, 400);
     }
 
-    // Limit file size to 5MB
-    if (file.size > 5 * 1024 * 1024) {
-      return json({ error: 'File too large (max 5MB)' }, 400);
+    if (file.size > 25 * 1024 * 1024) {
+      return json({ error: `File too large (got ${(file.size / 1048576).toFixed(2)}MB, max 25MB)` }, 400);
     }
 
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -107,6 +106,9 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
     const overlord = (formData.get('overlord') as string) || 'unknown';
     const xAccount = (formData.get('xAccount') as string) || '';
     const title = (formData.get('title') as string) || '';
+    const ethAddress = (formData.get('ethAddress') as string) || '';
+    const email = (formData.get('email') as string) || '';
+    const composition = (formData.get('composition') as string) || '';
 
     if (!env.AIRTABLE_PAT || !env.AIRTABLE_BASE_ID || !env.AIRTABLE_TABLE_NAME) {
       return json({ error: 'Airtable not configured on server' }, 500);
@@ -116,8 +118,8 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
     let fileBytes: ArrayBuffer | null = null;
     let fileContentType = 'image/png';
     if (file && file.size > 0) {
-      if (file.size > 5 * 1024 * 1024) {
-        return json({ error: 'File too large (max 5MB)' }, 400);
+      if (file.size > 25 * 1024 * 1024) {
+        return json({ error: `File too large (got ${(file.size / 1048576).toFixed(2)}MB, max 25MB)` }, 400);
       }
       fileBytes = await file.arrayBuffer();
       fileContentType = file.type || 'image/png';
@@ -143,6 +145,23 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
       imageUrl = `${workerUrl.origin}/image/${key}`;
     }
 
+    // Upload composition JSON to R2 (when provided)
+    let jsonUrl = '';
+    if (composition && composition.length > 0) {
+      try {
+        const jsonId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const jsonKey = `compositions/${jsonId}.json`;
+        await env.GALLERY_BUCKET.put(jsonKey, composition, {
+          httpMetadata: { contentType: 'application/json' },
+          customMetadata: { overlord, date: new Date().toISOString().split('T')[0] },
+        });
+        const workerUrl = new URL(request.url);
+        jsonUrl = `${workerUrl.origin}/image/${jsonKey}`;
+      } catch (e) {
+        console.error('Composition upload failed:', e);
+      }
+    }
+
     const today = new Date().toISOString().split('T')[0];
 
     // Build Airtable record with R2 image URL in a text field
@@ -151,11 +170,21 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
       'Title': title || `${overlord} — ${today}`,
       'Overlord': overlord,
       'Submission Date': today,
+      'Date': today,
       'X Account': xAccount || 'Anonymous',
+      'Contributor': xAccount || 'Anonymous',
+      'Category': 'general submission',
     };
+    if (ethAddress) fields['ETH Address'] = ethAddress;
+    if (email) fields['Email'] = email;
 
     if (imageUrl) {
       fields['Image URL'] = imageUrl;
+      const imgFilename = `${overlord}-${Date.now()}.jpg`;
+      fields['Image'] = [{ url: imageUrl, filename: imgFilename }];
+    }
+    if (jsonUrl) {
+      fields['JSON URL'] = jsonUrl;
     }
 
     const airtableRes = await fetch(

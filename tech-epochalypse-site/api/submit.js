@@ -2,6 +2,7 @@ const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 
 const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || '8cd572b8af641d3f03353b7cd96a1a78';
 const R2_BUCKET = process.env.R2_BUCKET_NAME || 'te-gallery';
+const PUBLIC_GALLERY_BASE = process.env.PUBLIC_GALLERY_URL || 'https://te-gallery-api.coldieart.workers.dev';
 
 function getS3Client() {
   return new S3Client({
@@ -55,13 +56,16 @@ module.exports = async (req, res) => {
     const overlord = getFieldValue(parts, 'overlord') || 'unknown';
     const xAccount = getFieldValue(parts, 'xAccount') || '';
     const title = getFieldValue(parts, 'title') || '';
+    const ethAddress = getFieldValue(parts, 'ethAddress') || '';
+    const email = getFieldValue(parts, 'email') || '';
+    const composition = getFieldValue(parts, 'composition') || '';
 
     // Upload image or video directly to R2 via S3 API
     let imageUrl = '';
     const imagePart = parts.find(p => p.name === 'image' && p.filename) || parts.find(p => p.name === 'video' && p.filename);
     if (imagePart && imagePart.data.length > 0) {
-      if (imagePart.data.length > 10 * 1024 * 1024) {
-        return res.status(400).json({ error: 'File too large (max 10MB)' });
+      if (imagePart.data.length > 25 * 1024 * 1024) {
+        return res.status(400).json({ error: `File too large (got ${(imagePart.data.length / 1048576).toFixed(2)}MB, max 25MB)` });
       }
 
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -83,10 +87,29 @@ module.exports = async (req, res) => {
         },
       }));
 
-      // Build a public image URL served through our own API
-      const host = req.headers['x-forwarded-host'] || req.headers.host || 'knowyouroverlord.art';
-      const proto = req.headers['x-forwarded-proto'] || 'https';
-      imageUrl = `${proto}://${host}/api/image?key=${encodeURIComponent(key)}`;
+      // Use the always-public Cloudflare worker URL so Airtable can fetch the attachment
+      // (Vercel preview deploys are auth-protected and Airtable's servers can't get through.)
+      imageUrl = `${PUBLIC_GALLERY_BASE}/image/${key}`;
+    }
+
+    // Upload composition JSON to R2 (when provided)
+    let jsonUrl = '';
+    if (composition && composition.length > 0) {
+      try {
+        const jsonId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const jsonKey = `compositions/${jsonId}.json`;
+        const s3 = getS3Client();
+        await s3.send(new PutObjectCommand({
+          Bucket: R2_BUCKET,
+          Key: jsonKey,
+          Body: Buffer.from(composition, 'utf8'),
+          ContentType: 'application/json',
+          Metadata: { overlord, date: new Date().toISOString().split('T')[0] },
+        }));
+        jsonUrl = `${PUBLIC_GALLERY_BASE}/image/${jsonKey}`;
+      } catch (e) {
+        console.error('Composition upload failed:', e);
+      }
     }
 
     const today = new Date().toISOString().split('T')[0];
@@ -95,11 +118,21 @@ module.exports = async (req, res) => {
       'Title': title || `${overlord} — ${today}`,
       'Overlord': overlord,
       'Submission Date': today,
+      'Date': today,
       'X Account': xAccount || 'Anonymous',
+      'Contributor': xAccount || 'Anonymous',
+      'Category': 'general submission',
     };
+    if (ethAddress) fields['ETH Address'] = ethAddress;
+    if (email) fields['Email'] = email;
 
     if (imageUrl) {
       fields['Image URL'] = imageUrl;
+      const imgFilename = `${overlord}-${Date.now()}.jpg`;
+      fields['Image'] = [{ url: imageUrl, filename: imgFilename }];
+    }
+    if (jsonUrl) {
+      fields['JSON URL'] = jsonUrl;
     }
 
     const airtableRes = await fetch(
@@ -124,7 +157,8 @@ module.exports = async (req, res) => {
     }
 
     const record = await airtableRes.json();
-    return res.status(200).json({ ok: true, record: { id: record.id }, imageUrl });
+    console.log('[submit]', { overlord, hasImage: !!imageUrl, hasComposition: !!composition, compositionLen: composition.length, jsonUrl, hasEmail: !!email, hasEth: !!ethAddress });
+    return res.status(200).json({ ok: true, record: { id: record.id }, imageUrl, jsonUrl, compositionLen: composition.length, receivedEmail: email, receivedEth: ethAddress });
   } catch (e) {
     console.error('Submit error:', e);
     return res.status(500).json({ error: 'Submission failed', details: e.message });

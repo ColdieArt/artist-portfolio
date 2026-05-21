@@ -392,6 +392,57 @@ let isDragging = false; // Flag to indicate if a drag operation is in progress
 let pointerDownPosition = new THREE.Vector2(); // To store the initial pointer down position
 const DRAG_THRESHOLD = 5; // Pixels threshold to consider a move as a drag
 
+// ── CROP MODE STATE (16:9 / 9:16 / off) ──
+let cropMode = null;
+let cropOverlayEl = null;
+
+function _cropDims() {
+    const ww = window.innerWidth, wh = window.innerHeight;
+    let w, h;
+    if (cropMode === '16:9') { w = ww * 0.8; h = w * 9 / 16; }
+    else if (cropMode === '9:16') { h = wh; w = h * 9 / 16; }
+    else return null;
+    if (h > wh) { h = wh; w = (cropMode === '16:9') ? h * 16/9 : h * 9/16; }
+    if (w > ww) { w = ww; h = (cropMode === '16:9') ? w * 9/16 : w * 16/9; }
+    return { x: (ww - w) / 2, y: (wh - h) / 2, w, h };
+}
+
+function updateCropOverlay() {
+    if (!cropOverlayEl) return;
+    const d = _cropDims();
+    if (!d) { cropOverlayEl.style.display = 'none'; return; }
+    cropOverlayEl.style.display = 'block';
+    cropOverlayEl.style.left = d.x + 'px';
+    cropOverlayEl.style.top = d.y + 'px';
+    cropOverlayEl.style.width = d.w + 'px';
+    cropOverlayEl.style.height = d.h + 'px';
+}
+
+function getCropCanvasRect(srcCanvas) {
+    const d = _cropDims();
+    if (!d) return null;
+    const ww = window.innerWidth, wh = window.innerHeight;
+    return {
+        sx: (srcCanvas.width / ww) * d.x,
+        sy: (srcCanvas.height / wh) * d.y,
+        sw: (srcCanvas.width / ww) * d.w,
+        sh: (srcCanvas.height / wh) * d.h,
+    };
+}
+
+function applyCropToCanvas(srcCanvas) {
+    const c = getCropCanvasRect(srcCanvas);
+    if (!c) return srcCanvas;
+    const out = document.createElement('canvas');
+    out.width = Math.max(1, Math.round(c.sw));
+    out.height = Math.max(1, Math.round(c.sh));
+    out.getContext('2d').drawImage(srcCanvas, c.sx, c.sy, c.sw, c.sh, 0, 0, out.width, out.height);
+    return out;
+}
+// Expose to non-module scripts (export/submit handlers live in a plain <script> block).
+window.applyCropToCanvas = applyCropToCanvas;
+Object.defineProperty(window, 'cropMode', { get: () => cropMode, set: (v) => { cropMode = v; }, configurable: true });
+
 // ─── ORBITAL TRANSFORM UI STATE ───
 let orbitalTarget       = null;
 let transformControls   = null;
@@ -3668,6 +3719,36 @@ function init() {
     loadImgBtn.onclick = (e) => { e.stopPropagation(); imageFileInput.click(); };
     leftUiContainer.appendChild(loadImgBtn);
 
+    // ── CROP overlay element ──
+    cropOverlayEl = document.createElement('div');
+    cropOverlayEl.id = 'crop-overlay';
+    cropOverlayEl.style.cssText = 'position: fixed; border: 1px dashed rgba(255,255,255,0.65); box-shadow: 0 0 0 9999px rgba(0,0,0,0.55); pointer-events: none; z-index: 150; display: none; box-sizing: border-box;';
+    document.body.appendChild(cropOverlayEl);
+    window.addEventListener('resize', updateCropOverlay);
+
+    // ── CROP H / V buttons ──
+    const cropHBtn = document.createElement('button');
+    cropHBtn.id = 'crop-h-btn';
+    cropHBtn.textContent = '16:9';
+    cropHBtn.style.cssText = 'background-color: black; color: white; padding: 4px; margin-top: 10px; border: 0.5px solid #00BCD4; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; white-space: nowrap; box-sizing: border-box; display: none;';
+    leftUiContainer.appendChild(cropHBtn);
+
+    const cropVBtn = document.createElement('button');
+    cropVBtn.id = 'crop-v-btn';
+    cropVBtn.textContent = '9:16';
+    cropVBtn.style.cssText = 'background-color: black; color: white; padding: 4px; border: 0.5px solid #E91E63; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; white-space: nowrap; box-sizing: border-box; display: none;';
+    leftUiContainer.appendChild(cropVBtn);
+
+    function _setCropMode(mode) {
+        cropMode = (cropMode === mode) ? null : mode;
+        cropHBtn.style.backgroundColor = (cropMode === '16:9') ? '#00BCD4' : 'black';
+        cropHBtn.style.color = (cropMode === '16:9') ? 'black' : 'white';
+        cropVBtn.style.backgroundColor = (cropMode === '9:16') ? '#E91E63' : 'black';
+        updateCropOverlay();
+    }
+    cropHBtn.onclick = (e) => { e.stopPropagation(); _setCropMode('16:9'); };
+    cropVBtn.onclick = (e) => { e.stopPropagation(); _setCropMode('9:16'); };
+
     imageFileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -3841,6 +3922,8 @@ function init() {
             trashButtonElement.style.display = 'none'; // Hide TRASH button
             exportButtonElement.style.display = 'none'; // Hide EXPORT button
             loadImgBtn.style.display = 'none';
+            cropHBtn.style.display = 'none';
+            cropVBtn.style.display = 'none';
             const panel = document.getElementById('export-panel');
             if (panel) panel.classList.remove('open'); // Close export panel
             arrowContainer.style.top = '0px'; // Keep arrow at the top
@@ -3849,6 +3932,8 @@ function init() {
             leftUiContainer.style.top = '10px'; // Show it
             trashButtonElement.style.display = 'none'; // Show TRASH button
             loadImgBtn.style.display = 'block';
+            cropHBtn.style.display = 'block';
+            cropVBtn.style.display = 'block';
             arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; // Move arrow below the UI
             arrowSpan.innerHTML = '&#x25B2'; // Change to up arrow
         }
@@ -3859,6 +3944,8 @@ function init() {
     trashButtonElement.style.display = 'none';
     exportButtonElement.style.display = 'none';
     loadImgBtn.style.display = 'block';
+    cropHBtn.style.display = 'block';
+    cropVBtn.style.display = 'block';
     arrowSpan.innerHTML = '&#x25B2;';
     requestAnimationFrame(() => {
         arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
@@ -4690,6 +4777,7 @@ setTimeout(function () {
     window.composer = typeof composer != "undefined" ? composer : undefined;
     window.effectControls = typeof effectControls != "undefined" ? effectControls : undefined;
     window.controls = typeof controls != "undefined" ? controls : undefined;
+      window._exportPasses = { pixelationPass: typeof pixelationPass !== 'undefined' ? pixelationPass : null, asciiPass: typeof asciiPass !== 'undefined' ? asciiPass : null, cctvFeedPass: typeof cctvFeedPass !== 'undefined' ? cctvFeedPass : null };
 }, 1000)
 
     // Expose for dae hooks
@@ -4701,6 +4789,7 @@ setTimeout(function () {
       window.composer = typeof composer != "undefined" ? composer : undefined;
       window.effectControls = typeof effectControls != "undefined" ? effectControls : undefined;
       window.controls = typeof controls != "undefined" ? controls : undefined;
+      window._exportPasses = { pixelationPass: typeof pixelationPass !== 'undefined' ? pixelationPass : null, asciiPass: typeof asciiPass !== 'undefined' ? asciiPass : null, cctvFeedPass: typeof cctvFeedPass !== 'undefined' ? cctvFeedPass : null };
     }, 1000)
   </script>
 
@@ -4756,6 +4845,36 @@ setTimeout(function () {
       <div style="margin: 0 0 15px 0;">
         <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 6px; letter-spacing: 1px;">TITLE</label>
         <input id="title-input" type="text" placeholder="Name your creation" style="
+          width: 100%;
+          box-sizing: border-box;
+          background: #111;
+          border: 1px solid #333;
+          color: #fff;
+          padding: 10px 12px;
+          font-family: monospace;
+          font-size: 13px;
+          outline: none;
+        " />
+      </div>
+
+      <div style="margin: 0 0 15px 0;">
+        <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 6px; letter-spacing: 1px;">ETH ADDRESS</label>
+        <input id="eth-address-input" type="text" placeholder="0x… (optional)" style="
+          width: 100%;
+          box-sizing: border-box;
+          background: #111;
+          border: 1px solid #333;
+          color: #fff;
+          padding: 10px 12px;
+          font-family: monospace;
+          font-size: 13px;
+          outline: none;
+        " />
+      </div>
+
+      <div style="margin: 0 0 15px 0;">
+        <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 6px; letter-spacing: 1px;">JOIN MAILING LIST</label>
+        <input id="email-input" type="email" placeholder="you@example.com (optional)" style="
           width: 100%;
           box-sizing: border-box;
           background: #111;
@@ -4851,26 +4970,120 @@ setTimeout(function () {
     judgmentBtn.onclick = async () => {
       const xAccount = document.getElementById('x-account-input').value.trim();
       const title = document.getElementById('title-input').value.trim();
+      const ethAddress = document.getElementById('eth-address-input').value.trim();
+      const email = document.getElementById('email-input').value.trim();
       judgmentBtn.disabled = true;
       judgmentBtn.style.opacity = '0.5';
       judgmentStatus.style.color = '#aaa';
       judgmentStatus.textContent = 'SUBMITTING...';
 
       try {
-        // Capture canvas as PNG
+        // Capture canvas at true 4K detail via temporary renderer-resolution boost, apply crop
         const r = await getRenderer();
+        const _passes = window._exportPasses || {};
+        const _gizmoHelper = (typeof transformControls !== 'undefined' && transformControls) ? (transformControls.getHelper ? transformControls.getHelper() : transformControls) : null;
+        const _gizmoWasVisible = _gizmoHelper ? _gizmoHelper.visible : false;
+        if (_gizmoHelper) _gizmoHelper.visible = false;
+
+        const _vw = window.innerWidth, _vh = window.innerHeight;
+        const _origPR = r.getPixelRatio();
+        const _maxTex = (r.capabilities && r.capabilities.maxTextureSize) || 4096;
+        let _hiPR;
+        if (window.cropMode === '16:9')      _hiPR = 3840 / (_vw * 0.8);
+        else if (window.cropMode === '9:16') _hiPR = 3840 / _vh;
+        else                                 _hiPR = 3840 / Math.max(_vw, _vh);
+        _hiPR = Math.max(_origPR, _hiPR);
+        _hiPR = Math.min(_hiPR, _maxTex / Math.max(_vw, _vh));
+
+        r.setPixelRatio(_hiPR);
+        r.setSize(_vw, _vh, false);
+        if (window.composer) window.composer.setSize(_vw, _vh);
+        if (_passes.pixelationPass) _passes.pixelationPass.uniforms['resolution'].value.set(_vw * _hiPR, _vh * _hiPR);
+        if (_passes.asciiPass)      _passes.asciiPass.uniforms['resolution'].value.set(_vw * _hiPR, _vh * _hiPR);
+        if (_passes.cctvFeedPass)   _passes.cctvFeedPass.uniforms['resolution'].value.set(_vw * _hiPR, _vh * _hiPR);
+
         if (window.composer) { window.composer.render(); }
         else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
-        const dataUrl = r.domElement.toDataURL('image/png');
-        const blob = await (await fetch(dataUrl)).blob();
+
+        const srcCanvas = applyCropToCanvas(r.domElement);
+
+        if (_gizmoHelper) _gizmoHelper.visible = _gizmoWasVisible;
+        r.setPixelRatio(_origPR);
+        r.setSize(_vw, _vh, false);
+        if (window.composer) window.composer.setSize(_vw, _vh);
+        if (_passes.pixelationPass) _passes.pixelationPass.uniforms['resolution'].value.set(_vw, _vh);
+        if (_passes.asciiPass)      _passes.asciiPass.uniforms['resolution'].value.set(_vw, _vh);
+        if (_passes.cctvFeedPass)   _passes.cctvFeedPass.uniforms['resolution'].value.set(_vw, _vh);
+        // Target dimensions: 4K (3840 long edge) — exact size depends on crop mode
+        let _targetW, _targetH;
+        if (window.cropMode === '16:9')      { _targetW = 3840; _targetH = 2160; }
+        else if (window.cropMode === '9:16') { _targetW = 2160; _targetH = 3840; }
+        else {
+            const _ar = srcCanvas.width / srcCanvas.height;
+            if (_ar >= 1) { _targetW = 3840; _targetH = Math.round(3840 / _ar); }
+            else          { _targetH = 3840; _targetW = Math.round(3840 * _ar); }
+        }
+        let outCanvas = srcCanvas;
+        if (srcCanvas.width !== _targetW || srcCanvas.height !== _targetH) {
+            outCanvas = document.createElement('canvas');
+            outCanvas.width = _targetW;
+            outCanvas.height = _targetH;
+            const _ctx = outCanvas.getContext('2d');
+            _ctx.imageSmoothingEnabled = true;
+            _ctx.imageSmoothingQuality = 'high';
+            _ctx.drawImage(srcCanvas, 0, 0, _targetW, _targetH);
+        }
+        const blob = await new Promise(res => outCanvas.toBlob(res, 'image/jpeg', 0.92));
 
         // Upload image + create Airtable record in one request via Cloudflare Worker
         const WORKER_URL = window.GALLERY_API_URL || window.location.origin;
         const form = new FormData();
-        form.append('image', blob, 'export.png');
+        form.append('image', blob, 'export.jpg');
         form.append('overlord', OVERLORD_NAME);
         form.append('xAccount', xAccount);
         form.append('title', title);
+        // Build composition JSON snapshot (positions, transforms, effects, uploaded image data)
+        const compositionJson = (() => {
+          try {
+            const meshes = [];
+            scene.children.forEach(c => {
+              if (!c.userData || !c.userData.id) return;
+              const m = {
+                id: c.userData.id,
+                position: { x: c.position.x, y: c.position.y, z: c.position.z },
+                rotation: { x: c.rotation.x, y: c.rotation.y, z: c.rotation.z },
+                scale: { x: c.scale.x, y: c.scale.y, z: c.scale.z },
+                visible: c.visible,
+                userScale: c.userData.userScale || 1.0,
+                currentLayer: c.userData.currentLayer,
+                opacity: c.material ? c.material.opacity : 1,
+              };
+              if (c.userData.isUploaded && c.material && c.material.map && c.material.map.image) {
+                try {
+                  const img = c.material.map.image;
+                  const cv = document.createElement('canvas');
+                  cv.width = img.naturalWidth || img.width;
+                  cv.height = img.naturalHeight || img.height;
+                  cv.getContext('2d').drawImage(img, 0, 0);
+                  m.isUploaded = true;
+                  m.uploadedImageData = cv.toDataURL('image/png');
+                  m.initialScale = c.userData.initialScale;
+                } catch(e) {}
+              }
+              meshes.push(m);
+            });
+            const removedAssets = (typeof initialAssetConfigs !== 'undefined' ? initialAssetConfigs.filter(c => c.removed).map(c => c.id) : []);
+            return JSON.stringify({
+              version: 1, overlord: OVERLORD_NAME, timestamp: Date.now(),
+              meshes, removedAssets,
+              effects: (typeof effectControls !== 'undefined' ? { ...effectControls } : {}),
+              camera: { position: { x: camera.position.x, y: camera.position.y, z: camera.position.z }, target: { x: controls.target.x, y: controls.target.y, z: controls.target.z } },
+            });
+          } catch (err) { console.warn('composition build failed:', err); return ''; }
+        })();
+        if (compositionJson) form.append('composition', compositionJson);
+        form.append('ethAddress', ethAddress);
+        form.append('email', email);
         const res = await fetch(WORKER_URL + '/submit', { method: 'POST', body: form });
         if (!res.ok) {
           const errBody = await res.json().catch(() => ({}));
@@ -4928,6 +5141,18 @@ setTimeout(function () {
     const submitOverlordBtn = document.getElementById('submit-overlord-btn');
     submitOverlordBtn.onclick = (e) => {
       e.stopPropagation();
+      if (!cropMode) {
+        const _orig = submitOverlordBtn.textContent;
+        submitOverlordBtn.textContent = 'SELECT 16:9 OR 9:16';
+        submitOverlordBtn.style.borderColor = '#e33';
+        submitOverlordBtn.style.color = '#e33';
+        setTimeout(() => {
+          submitOverlordBtn.textContent = _orig;
+          submitOverlordBtn.style.borderColor = '';
+          submitOverlordBtn.style.color = '';
+        }, 1800);
+        return;
+      }
       exportPNG();
     };
 
@@ -5007,23 +5232,29 @@ setTimeout(function () {
       setStatus('Capturing…', 'active');
       lockUI(true);
       const r = await getRenderer();
+      // Hide orbital gizmo helper during export so it doesn't appear in the captured image
+      const _gizmoHelper = (typeof transformControls !== 'undefined' && transformControls) ? (transformControls.getHelper ? transformControls.getHelper() : transformControls) : null;
+      const _gizmoWasVisible = _gizmoHelper ? _gizmoHelper.visible : false;
+      if (_gizmoHelper) _gizmoHelper.visible = false;
       // Force a fresh render so the buffer has the current frame
       if (window.composer) {
         window.composer.render();
       } else if (window.scene && window.camera) {
         r.render(window.scene, window.camera);
       }
-      r.domElement.toBlob((blob) => {
+      if (_gizmoHelper) _gizmoHelper.visible = _gizmoWasVisible;
+      const _exportCanvas = applyCropToCanvas(r.domElement);
+      _exportCanvas.toBlob((blob) => {
         if (blob) {
-          triggerDownload(blob, 'elon-musk-coldie.png');
-          saveToGallery(r.domElement);
-          setStatus('PNG saved ✓ — added to gallery', 'active');
+          triggerDownload(blob, 'elon-musk-coldie.jpg');
+          saveToGallery(_exportCanvas);
+          setStatus('JPG saved ✓ — added to gallery', 'active');
           showPostModal();
         } else {
           setStatus('Capture failed', 'error');
         }
         lockUI(false);
-      }, 'image/png');
+      }, 'image/jpeg', 0.92);
     }
     // ── Video (MP4) export ──────────────────────────────────────────
     // Strategy: try native H.264 MP4 first (Safari, newer Chrome).
