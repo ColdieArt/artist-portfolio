@@ -4366,8 +4366,13 @@ setTimeout(function () {
       try {
         // Capture canvas, downscale if needed, encode as JPEG (keeps payload small)
         const r = await getRenderer();
+        // Hide orbital gizmo helper during export so it doesn't appear in the captured image
+        const _gizmoHelper = (typeof transformControls !== 'undefined' && transformControls) ? (transformControls.getHelper ? transformControls.getHelper() : transformControls) : null;
+        const _gizmoWasVisible = _gizmoHelper ? _gizmoHelper.visible : false;
+        if (_gizmoHelper) _gizmoHelper.visible = false;
         if (window.composer) { window.composer.render(); }
         else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
+        if (_gizmoHelper) _gizmoHelper.visible = _gizmoWasVisible;
         const srcCanvas = r.domElement;
         const MAX_DIM = 2048;
         const scale = Math.min(1, MAX_DIM / Math.max(srcCanvas.width, srcCanvas.height));
