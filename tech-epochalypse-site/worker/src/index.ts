@@ -187,23 +187,42 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
       fields['JSON URL'] = jsonUrl;
     }
 
-    const airtableRes = await fetch(
-      `https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${env.AIRTABLE_PAT}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ fields, typecast: true }),
-      }
-    );
+    // Retry the Airtable write, peeling off any field the schema doesn't have.
+    const droppedFields: string[] = [];
+    let airtableRes!: Response;
+    let errBody = '';
+    for (let attempt = 0; attempt < 12; attempt++) {
+      airtableRes = await fetch(
+        `https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${env.AIRTABLE_PAT}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ fields, typecast: true }),
+        }
+      );
+      if (airtableRes.ok) break;
+      errBody = await airtableRes.text();
+      let unknownField: string | null = null;
+      try {
+        const parsed = JSON.parse(errBody) as { error?: { type?: string; message?: string } };
+        if (parsed?.error?.type === 'UNKNOWN_FIELD_NAME') {
+          const m = parsed.error.message && parsed.error.message.match(/Unknown field name:\s*"([^"]+)"/);
+          if (m) unknownField = m[1];
+        }
+      } catch (_) { /* ignore */ }
+      if (!unknownField || !(unknownField in fields)) break;
+      droppedFields.push(unknownField);
+      delete fields[unknownField];
+    }
 
     if (!airtableRes.ok) {
-      const errBody = await airtableRes.text();
-      console.error('Airtable create error:', airtableRes.status, errBody);
-      return json({ error: 'Airtable submission failed', details: errBody }, airtableRes.status);
+      console.error('Airtable create error:', airtableRes.status, errBody, 'dropped:', droppedFields);
+      return json({ error: 'Airtable submission failed', details: errBody, droppedFields }, airtableRes.status);
     }
+    if (droppedFields.length) console.warn('[submit] dropped unknown Airtable fields:', droppedFields);
 
     const record = (await airtableRes.json()) as { id: string };
 

@@ -21,7 +21,7 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(204).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed', received: req.method, url: req.url, ua: (req.headers['user-agent']||'').slice(0, 80) });
 
   const AIRTABLE_PAT = process.env.AIRTABLE_PAT || process.env.AIRTABLE_TOKEN;
   const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
@@ -135,28 +135,48 @@ module.exports = async (req, res) => {
       fields['JSON URL'] = jsonUrl;
     }
 
-    const airtableRes = await fetch(
-      `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${AIRTABLE_PAT}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ fields, typecast: true }),
-      }
-    );
+    // Retry the Airtable write, peeling off any field that the schema doesn't have.
+    // This lets new optional features ship even before the user adds the column.
+    const droppedFields = [];
+    let airtableRes, errBody = '';
+    for (let attempt = 0; attempt < 12; attempt++) {
+      airtableRes = await fetch(
+        `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${AIRTABLE_PAT}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ fields, typecast: true }),
+        }
+      );
+      if (airtableRes.ok) break;
+      errBody = await airtableRes.text();
+      let unknownField = null;
+      try {
+        const parsed = JSON.parse(errBody);
+        if (parsed?.error?.type === 'UNKNOWN_FIELD_NAME') {
+          const m = parsed.error.message && parsed.error.message.match(/Unknown field name:\s*"([^"]+)"/);
+          if (m) unknownField = m[1];
+        }
+      } catch (_) {}
+      if (!unknownField || !(unknownField in fields)) break;
+      droppedFields.push(unknownField);
+      delete fields[unknownField];
+    }
 
     if (!airtableRes.ok) {
-      const errBody = await airtableRes.text();
-      console.error('Airtable create error:', airtableRes.status, errBody);
+      console.error('Airtable create error:', airtableRes.status, errBody, 'dropped:', droppedFields);
       return res.status(airtableRes.status).json({
         error: 'Airtable submission failed',
         details: errBody,
+        droppedFields,
       });
     }
 
     const record = await airtableRes.json();
+    if (droppedFields.length) console.warn('[submit] dropped unknown Airtable fields:', droppedFields);
     console.log('[submit]', { overlord, hasImage: !!imageUrl, hasComposition: !!composition, compositionLen: composition.length, jsonUrl, hasEmail: !!email, hasEth: !!ethAddress });
     return res.status(200).json({ ok: true, record: { id: record.id }, imageUrl, jsonUrl, compositionLen: composition.length, receivedEmail: email, receivedEth: ethAddress });
   } catch (e) {
