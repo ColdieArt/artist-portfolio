@@ -271,10 +271,10 @@ function _cropDims() {
     const ww = window.innerWidth, wh = window.innerHeight;
     let w, h;
     if (cropMode === '16:9') { w = ww * 0.8; h = w * 9 / 16; }
-    else if (cropMode === '9:16') { h = wh * 0.8; w = h * 9 / 16; }
+    else if (cropMode === '9:16') { h = wh; w = h * 9 / 16; }
     else return null;
-    if (h > wh * 0.95) { h = wh * 0.95; w = (cropMode === '16:9') ? h * 16/9 : h * 9/16; }
-    if (w > ww * 0.95) { w = ww * 0.95; h = (cropMode === '16:9') ? w * 9/16 : w * 16/9; }
+    if (h > wh) { h = wh; w = (cropMode === '16:9') ? h * 16/9 : h * 9/16; }
+    if (w > ww) { w = ww; h = (cropMode === '16:9') ? w * 9/16 : w * 16/9; }
     return { x: (ww - w) / 2, y: (wh - h) / 2, w, h };
 }
 
