@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react'
 import GalleryViewer, { type GalleryItem } from './GalleryViewer'
 
-const AIRTABLE_BASE_ID = process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID ?? ''
-const AIRTABLE_TABLE = process.env.NEXT_PUBLIC_AIRTABLE_TABLE ?? 'Gallery'
-const AIRTABLE_TOKEN = process.env.NEXT_PUBLIC_AIRTABLE_TOKEN ?? ''
+// Records are now fetched through a server-side proxy at /api/airtable-records
+// which uses the AIRTABLE_PAT / BASE_ID / TABLE_NAME server-side env vars.
+// No NEXT_PUBLIC_* token is needed in the client bundle.
 
 interface AirtableAttachment {
   id: string
@@ -78,17 +78,8 @@ export default function UserExports({ overlordNames, overlordSlugs, category, he
   useEffect(() => {
     async function fetchGallery() {
       try {
-        const formula = category
-          ? `AND({Approved}=1,LOWER({Category})="${category.toLowerCase()}")`
-          : '{Approved}=1'
-        const filter = encodeURIComponent(formula)
-        const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}?sort%5B0%5D%5Bfield%5D=Date&sort%5B0%5D%5Bdirection%5D=desc&filterByFormula=${filter}`
-        const res = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${AIRTABLE_TOKEN}`,
-          },
-          cache: 'no-store',
-        })
+        const qs = category ? `?category=${encodeURIComponent(category)}` : ''
+        const res = await fetch(`/api/airtable-records${qs}`, { cache: 'no-store' })
         if (!res.ok) throw new Error('Failed to fetch')
         const data = await res.json()
         setExports(parseRecords(data.records ?? [], nameToSlug))
