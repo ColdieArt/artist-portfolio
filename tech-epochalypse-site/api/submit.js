@@ -2,6 +2,7 @@ const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 
 const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || '8cd572b8af641d3f03353b7cd96a1a78';
 const R2_BUCKET = process.env.R2_BUCKET_NAME || 'te-gallery';
+const PUBLIC_GALLERY_BASE = process.env.PUBLIC_GALLERY_URL || 'https://te-gallery-api.coldieart.workers.dev';
 
 function getS3Client() {
   return new S3Client({
@@ -86,10 +87,9 @@ module.exports = async (req, res) => {
         },
       }));
 
-      // Build a public image URL served through our own API
-      const host = req.headers['x-forwarded-host'] || req.headers.host || 'knowyouroverlord.art';
-      const proto = req.headers['x-forwarded-proto'] || 'https';
-      imageUrl = `${proto}://${host}/api/image?key=${encodeURIComponent(key)}`;
+      // Use the always-public Cloudflare worker URL so Airtable can fetch the attachment
+      // (Vercel preview deploys are auth-protected and Airtable's servers can't get through.)
+      imageUrl = `${PUBLIC_GALLERY_BASE}/image/${key}`;
     }
 
     // Upload composition JSON to R2 (when provided)
@@ -106,9 +106,7 @@ module.exports = async (req, res) => {
           ContentType: 'application/json',
           Metadata: { overlord, date: new Date().toISOString().split('T')[0] },
         }));
-        const host = req.headers['x-forwarded-host'] || req.headers.host || 'knowyouroverlord.art';
-        const proto = req.headers['x-forwarded-proto'] || 'https';
-        jsonUrl = `${proto}://${host}/api/image?key=${encodeURIComponent(jsonKey)}`;
+        jsonUrl = `${PUBLIC_GALLERY_BASE}/image/${jsonKey}`;
       } catch (e) {
         console.error('Composition upload failed:', e);
       }
