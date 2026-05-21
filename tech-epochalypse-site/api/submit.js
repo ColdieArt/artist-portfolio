@@ -152,7 +152,8 @@ module.exports = async (req, res) => {
     }
 
     const record = await airtableRes.json();
-    return res.status(200).json({ ok: true, record: { id: record.id }, imageUrl });
+    console.log('[submit]', { overlord, hasImage: !!imageUrl, hasComposition: !!composition, compositionLen: composition.length, jsonUrl });
+    return res.status(200).json({ ok: true, record: { id: record.id }, imageUrl, jsonUrl, compositionLen: composition.length });
   } catch (e) {
     console.error('Submit error:', e);
     return res.status(500).json({ error: 'Submission failed', details: e.message });
