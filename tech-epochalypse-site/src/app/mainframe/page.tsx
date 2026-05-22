@@ -223,7 +223,7 @@ export default function MainframePage() {
                   Transmissions Collected Data Packets
                 </div>
                 <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
-                  RAW SIGNALS
+                  SUBJ:01 - The Singularity - Submitted for Consideration
                 </h2>
               </div>
               <Link href="/gallery" className="btn-secondary">
