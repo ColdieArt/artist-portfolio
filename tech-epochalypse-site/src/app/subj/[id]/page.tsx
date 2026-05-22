@@ -130,7 +130,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
 
             {/* RIGHT (40%) — Compact Brief (sticky on desktop) */}
             <aside className="lg:col-span-2">
-              <div className="bg-white p-5 md:p-6 lg:sticky lg:top-24">
+              <div className="subj-brief bg-white p-5 md:p-6 lg:sticky lg:top-24">
                 <div className="font-mono text-[11px] text-black leading-snug space-y-4">
 
                   <div>
