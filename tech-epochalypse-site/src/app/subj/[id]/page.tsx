@@ -30,7 +30,7 @@ const SUBJ_EVENTS: Record<string, SubjEvent> = {
     subtitle: 'Tech Epochalypse Remix Competition',
     status: 'live',
     shortDescription:
-      'The first remix competition in the Subject Series, under Tech Epochalypse. Five tech overlords, each a face of the Singularity. Pick one, remix it in Coldie’s editor, and submit your own parallax collage.',
+      'Five tech overlords, each a face of the Singularity. Pick one, remix it in Coldie’s editor, and submit your own parallax collage. Use Coldie’s assets, upload your own, or both — all entries compete equally.',
   },
 }
 
@@ -57,18 +57,16 @@ export default function SubjPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-void">
-      {/* ── Header ── */}
-      <section className="pt-28 pb-12 section-padding">
+      {/* ── Compact Header ── */}
+      <section className="pt-24 pb-6 section-padding">
         <div className="page-container">
           <ScrollReveal>
-            <div className="mb-8">
-              <div className="classified-header">
-                {event.subtitle}
-              </div>
+            <div>
+              <div className="classified-header">{event.subtitle}</div>
               <h1 className="font-display text-3xl md:text-5xl text-white uppercase tracking-[0.03em]">
                 SUBJ:{event.id} &mdash; {event.title}
               </h1>
-              <p className="font-mono text-sm text-white/70 leading-relaxed mt-4 max-w-3xl">
+              <p className="font-mono text-sm text-white/70 leading-relaxed mt-3 max-w-3xl">
                 {event.shortDescription}
               </p>
             </div>
@@ -78,234 +76,202 @@ export default function SubjPage({ params }: { params: { id: string } }) {
 
       <div className="line-accent" />
 
-      {/* ── The Five Overlords (cards) ── */}
-      <section className="py-12 md:py-16 section-padding">
+      {/* ── Main two-column: 60% Overlords  |  40% Brief ── */}
+      <section className="py-8 md:py-12 section-padding">
         <div className="page-container">
-          <ScrollReveal>
-            <div className="mb-8">
-              <div className="classified-header">Pick Your Overlord</div>
-              <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
-                The Five Faces of the Singularity
-              </h2>
-              <p className="font-mono text-sm text-white/70 leading-relaxed mt-4">
-                Pick one. Your choice locks your entry&rsquo;s category for the event.
-              </p>
-            </div>
-          </ScrollReveal>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8">
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {listedOverlords.map((o) => (
-              <Link
-                key={o.slug}
-                href={o.artworkFile}
-                className="group relative bg-charcoal/30 border border-white/5 hover:border-white/20 overflow-hidden transition-all duration-300"
-              >
-                <div className="aspect-video relative overflow-hidden bg-charcoal" style={{ aspectRatio: '16/9' }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={o.previewImage ?? '/images/placeholder.png'}
-                    alt={o.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/60 mb-1">
-                      SUBJECT {o.number} &mdash; {o.title}
+            {/* LEFT (60%) — Pick Your Overlord */}
+            <div className="lg:col-span-3">
+              <ScrollReveal>
+                <div className="mb-5">
+                  <div className="classified-header">Pick Your Overlord</div>
+                  <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em]">
+                    The Five Faces
+                  </h2>
+                  <p className="font-mono text-xs text-white/60 mt-2">
+                    Your pick locks your entry&rsquo;s category. Click to open the editor.
+                  </p>
+                </div>
+              </ScrollReveal>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                {listedOverlords.map((o) => (
+                  <Link
+                    key={o.slug}
+                    href={o.artworkFile}
+                    className="group relative bg-charcoal/30 border border-white/5 hover:border-white/30 overflow-hidden transition-all duration-300"
+                  >
+                    <div className="relative overflow-hidden bg-charcoal" style={{ aspectRatio: '16/9' }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={o.previewImage ?? '/images/placeholder.png'}
+                        alt={o.name}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
+                        <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/60 mb-0.5">
+                          SUBJECT {o.number} &mdash; {o.title}
+                        </div>
+                        <div className="font-display text-base md:text-lg text-white uppercase tracking-[0.03em] leading-tight">
+                          {o.name}
+                        </div>
+                      </div>
+                      <div className="absolute top-2 right-2 font-mono text-[9px] uppercase tracking-wider text-white/90 bg-black/60 border border-white/20 px-1.5 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Remix &rarr;
+                      </div>
                     </div>
-                    <div className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em]">
-                      {o.name}
-                    </div>
-                    <div className="font-mono text-[11px] text-white/70 mt-1">
-                      {o.tagline}
-                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* RIGHT (40%) — Compact Brief (sticky on desktop) */}
+            <aside className="lg:col-span-2">
+              <div className="bg-white p-5 md:p-6 lg:sticky lg:top-24">
+                <div className="font-mono text-[11px] text-black leading-snug space-y-4">
+
+                  <div>
+                    <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-black/50 mb-1">Brief</div>
+                    <h3 className="font-display text-lg md:text-xl text-black uppercase tracking-[0.03em] leading-tight">
+                      The Competition
+                    </h3>
                   </div>
-                  <div className="absolute top-3 right-3 font-mono text-[10px] uppercase tracking-wider text-white/80 bg-black/60 border border-white/20 px-2 py-1">
-                    Remix &rarr;
+
+                  {/* HOW TO ENTER */}
+                  <div className="border-t border-black/10 pt-3">
+                    <div className="font-bold uppercase tracking-widest text-[10px] mb-2">How to Enter</div>
+                    <ol className="space-y-1 ml-1">
+                      <li className="flex gap-1.5"><span className="shrink-0 font-bold">1.</span><span>Pick an overlord (left).</span></li>
+                      <li className="flex gap-1.5"><span className="shrink-0 font-bold">2.</span><span>Use depth + motion controls to build your collage.</span></li>
+                      <li className="flex gap-1.5"><span className="shrink-0 font-bold">3.</span><span>Remix Coldie&rsquo;s assets, upload your own, or both.</span></li>
+                      <li className="flex gap-1.5"><span className="shrink-0 font-bold">4.</span><span>Submit before the deadline.</span></li>
+                    </ol>
+                    <p className="mt-2 text-[10px] text-black/70">
+                      Follow <a href="https://x.com/coldie" target="_blank" rel="noopener noreferrer" className="underline">@coldie</a>, repost the announcement. One submission per person. Free.
+                    </p>
+                  </div>
+
+                  {/* KEY DATES */}
+                  <div className="border-t border-black/10 pt-3">
+                    <div className="font-bold uppercase tracking-widest text-[10px] mb-2">Key Dates</div>
+                    <ul className="space-y-0.5 ml-1">
+                      <li><span className="font-bold">Opens:</span> Sat May 23 &middot; 9 AM ET</li>
+                      <li><span className="font-bold">Closes:</span> Wed May 28 &middot; 11:59 PT</li>
+                      <li><span className="font-bold">Winners:</span> Thu Jun 4 &middot; 10 AM ET</li>
+                      <li><span className="font-bold">Mints + raffles:</span> Mon Jun 15</li>
+                    </ul>
+                  </div>
+
+                  {/* WINNERS */}
+                  <div className="border-t border-black/10 pt-3">
+                    <div className="font-bold uppercase tracking-widest text-[10px] mb-2">Winners (3)</div>
+                    <ul className="space-y-1 ml-1">
+                      <li className="flex gap-1.5"><span className="shrink-0">&rarr;</span><span><strong>Curator&rsquo;s Pick 1</strong> &mdash; Coldie picks &mdash; Edition of 10</span></li>
+                      <li className="flex gap-1.5"><span className="shrink-0">&rarr;</span><span><strong>Curator&rsquo;s Pick 2</strong> &mdash; Coldie picks &mdash; Edition of 10</span></li>
+                      <li className="flex gap-1.5"><span className="shrink-0">&rarr;</span><span><strong>Community Pick</strong> &mdash; most votes &mdash; Edition of 42</span></li>
+                    </ul>
+                    <p className="mt-2 text-[10px] text-black/70">
+                      Winning artists keep 80% of primary + secondary royalties.
+                    </p>
+                  </div>
+
+                  {/* EDITIONS — collapsible to keep the column short */}
+                  <details className="border-t border-black/10 pt-3 group">
+                    <summary className="font-bold uppercase tracking-widest text-[10px] cursor-pointer select-none flex items-center justify-between">
+                      <span>Edition Breakdown</span>
+                      <span className="text-black/40 group-open:rotate-90 transition-transform">&rsaquo;</span>
+                    </summary>
+                    <div className="mt-2 space-y-2">
+                      <div>
+                        <div className="font-bold text-[10px]">Curator&rsquo;s Picks (edition of 10):</div>
+                        <ul className="ml-1 mt-1 space-y-0.5">
+                          <li>&rarr; 1 to artist &middot; 1 to Coldie</li>
+                          <li>&rarr; 1 raffled to Moments holders</li>
+                          <li>&rarr; 1 raffled to Kinetic holders</li>
+                          <li>&rarr; 6 to public</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <div className="font-bold text-[10px]">Community Pick (edition of 42):</div>
+                        <ul className="ml-1 mt-1 space-y-0.5">
+                          <li>&rarr; Up to 10 to Kinetic holders</li>
+                          <li>&rarr; 10 raffled to Moments holders</li>
+                          <li>&rarr; Remainder to public</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </details>
+
+                  {/* COLLECTOR REWARDS — collapsible */}
+                  <details className="border-t border-black/10 pt-3 group">
+                    <summary className="font-bold uppercase tracking-widest text-[10px] cursor-pointer select-none flex items-center justify-between">
+                      <span>Collector Rewards</span>
+                      <span className="text-black/40 group-open:rotate-90 transition-transform">&rsaquo;</span>
+                    </summary>
+                    <div className="mt-2 space-y-2">
+                      <p className="text-[10px]">Snapshot at close (May 28, 11:59 PT). Hold through to qualify.</p>
+                      <div>
+                        <div className="font-bold text-[10px]">Moments holders (50 per overlord):</div>
+                        <ul className="ml-1 mt-1 space-y-0.5">
+                          <li>&rarr; Each Moment = one raffle entry</li>
+                          <li>&rarr; Every win triggers an overlord raffle</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <div className="font-bold text-[10px]">Kinetic holders (10 per overlord):</div>
+                        <ul className="ml-1 mt-1 space-y-0.5">
+                          <li>&rarr; 1 free NFT per Community Pick of your overlord</li>
+                          <li>&rarr; Dedicated Kinetic-only raffle per Curator&rsquo;s Pick</li>
+                        </ul>
+                      </div>
+                      <p className="italic text-[10px]">One win per wallet. Draws run Curator&rsquo;s 1 &rarr; 2 &rarr; Community. Winning wallets removed from later draws. No sweeps.</p>
+                    </div>
+                  </details>
+
+                  {/* THE VARIANT — collapsible */}
+                  <details className="border-t border-black/10 pt-3 group">
+                    <summary className="font-bold uppercase tracking-widest text-[10px] cursor-pointer select-none flex items-center justify-between">
+                      <span>The Variant</span>
+                      <span className="text-black/40 group-open:rotate-90 transition-transform">&rsaquo;</span>
+                    </summary>
+                    <p className="mt-2 text-[10px]">
+                      After winners are announced, Coldie creates a 1/1 Variant in response: a fully kinetic 3D piece with a unique control layer found in no other work. One Variant per SUBJ event, held as a dedicated series for institutional and gallery presentation.
+                    </p>
+                  </details>
+
+                  {/* PROMISE / Sign-off */}
+                  <div className="border-t border-black/10 pt-3">
+                    <p className="font-bold text-[10px] uppercase tracking-widest">The Promise</p>
+                    <p className="mt-1 text-[10px]">
+                      Artist-first, collector-rewarding. Winners keep 80%. Nearly half of every drop returns to the collector community.
+                    </p>
+                    <p className="mt-2 font-bold text-black text-xs">The Singularity has five faces. Pick yours.</p>
                   </div>
                 </div>
-              </Link>
-            ))}
+              </div>
+            </aside>
+
           </div>
         </div>
       </section>
 
       <div className="line-accent" />
 
-      {/* ── Competition Details (full overview) ── */}
-      <section className="py-12 md:py-16 section-padding">
-        <div className="page-container">
-          <ScrollReveal>
-            <div className="mb-8">
-              <div className="classified-header">Brief</div>
-              <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
-                The Competition
-              </h2>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal>
-            <div className="bg-white p-8 md:p-12">
-              <div className="font-mono text-sm text-black leading-relaxed space-y-8">
-
-                {/* WHAT IT IS */}
-                <div>
-                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-3">
-                    What It Is
-                  </h3>
-                  <p>
-                    The first remix competition in the Subject Series, under Tech Epochalypse. Five tech overlords, each a face of the Singularity. Pick one, remix it in Coldie&rsquo;s editor, and submit your own parallax collage. Two ways to play: use Coldie&rsquo;s overlord assets, or upload your own art and remix it in. Both compete equally.
-                  </p>
-                </div>
-
-                {/* THE FIVE OVERLORDS */}
-                <div className="border-t border-black/10 pt-8">
-                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-4">
-                    The Five Overlords
-                  </h3>
-                  <ul className="space-y-2 ml-1 mb-4">
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Musk</strong> &mdash; the physical substrate</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Altman</strong> &mdash; the intelligence layer</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Zuckerberg</strong> &mdash; the identity layer</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Bezos</strong> &mdash; the logistics</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Huang</strong> &mdash; the silicon</span></li>
-                  </ul>
-                  <p className="italic">Pick one. Your choice locks your entry&rsquo;s category for the event.</p>
-                </div>
-
-                {/* HOW TO ENTER */}
-                <div className="border-t border-black/10 pt-8">
-                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-4">
-                    How to Enter
-                  </h3>
-                  <ol className="space-y-2 ml-1 mb-4">
-                    <li className="flex gap-2"><span className="shrink-0 font-bold">1.</span><span>Go to <Link href={`/subj/${event.id}`} className="underline">knowyouroverlord.art/subj/{event.id}</Link></span></li>
-                    <li className="flex gap-2"><span className="shrink-0 font-bold">2.</span><span>Pick your overlord</span></li>
-                    <li className="flex gap-2"><span className="shrink-0 font-bold">3.</span><span>Use the editor&rsquo;s depth and motion controls to build your parallax collage (remix Coldie&rsquo;s assets, upload your own, or both)</span></li>
-                    <li className="flex gap-2"><span className="shrink-0 font-bold">4.</span><span>Submit before the deadline</span></li>
-                  </ol>
-                  <p>
-                    <strong>Requirements:</strong> Follow <a href="https://x.com/coldie" target="_blank" rel="noopener noreferrer" className="underline">@coldie</a> on X. Repost the announcement. One submission per person. Free to enter. Wallet or email both accepted.
-                  </p>
-                </div>
-
-                {/* KEY DATES */}
-                <div className="border-t border-black/10 pt-8">
-                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-4">
-                    Key Dates
-                  </h3>
-                  <ul className="space-y-2 ml-1">
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Opens:</strong> Saturday, May 23 &mdash; 9:00 AM ET</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Closes:</strong> Wednesday, May 28 &mdash; 11:59 PT</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Winners announced:</strong> Thursday, June 4 &mdash; 10:00 AM ET</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Mints + raffles:</strong> Monday, June 15</span></li>
-                  </ul>
-                </div>
-
-                {/* WINNERS */}
-                <div className="border-t border-black/10 pt-8">
-                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-4">
-                    Winners
-                  </h3>
-                  <p className="mb-4">Three winners, chosen across all five overlords.</p>
-                  <ul className="space-y-2 ml-1 mb-4">
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Curator&rsquo;s Pick 1</strong> (chosen by Coldie) &mdash; Edition of 10</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Curator&rsquo;s Pick 2</strong> (chosen by Coldie) &mdash; Edition of 10</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Community Pick</strong> (most public votes) &mdash; Edition of 42</span></li>
-                  </ul>
-                  <p className="mb-3">All winning artists receive 80% of public primary sales and 80% of secondary royalties on their edition.</p>
-                  <p className="italic">What wins: Use of depth. Surprising use of the upload feature. Risk over polish. Make work only this medium could produce.</p>
-                </div>
-
-                {/* EDITION BREAKDOWN */}
-                <div className="border-t border-black/10 pt-8">
-                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-4">
-                    Edition Breakdown
-                  </h3>
-                  <p className="font-bold mb-2 text-xs uppercase tracking-widest">Curator&rsquo;s Pick 1 &amp; 2 (edition of 10 each):</p>
-                  <ul className="space-y-2 ml-1 mb-6">
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>1 to the artist</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>1 to Coldie</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>1 raffled to Moments holders of that overlord</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>1 raffled to Kinetic holders of that overlord</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>6 available to the public</span></li>
-                  </ul>
-                  <p className="font-bold mb-2 text-xs uppercase tracking-widest">Community Pick (edition of 42):</p>
-                  <ul className="space-y-2 ml-1">
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>Up to 10 to Kinetic holders of that overlord</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>10 raffled to Moments holders of that overlord</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>The remainder available to the public</span></li>
-                  </ul>
-                </div>
-
-                {/* COLLECTOR REWARDS */}
-                <div className="border-t border-black/10 pt-8">
-                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-4">
-                    Collector Rewards
-                  </h3>
-                  <p className="mb-4">A snapshot of holder wallets is taken when the competition closes (May 28, 11:59 PT). Hold through then to qualify.</p>
-
-                  <p className="font-bold mb-2 text-xs uppercase tracking-widest">Moments holders (50 per overlord)</p>
-                  <ul className="space-y-2 ml-1 mb-6">
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>Each Moment held = one raffle entry</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>Every winning piece triggers a raffle of that overlord&rsquo;s Moments holders</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>Raffle pools align to the winning overlord</span></li>
-                  </ul>
-
-                  <p className="font-bold mb-2 text-xs uppercase tracking-widest">Kinetic holders (10 per overlord)</p>
-                  <ul className="space-y-2 ml-1 mb-6">
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>1 free NFT for each Community Pick win matching your overlord</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>Entry into a dedicated Kinetic-only raffle for each Curator&rsquo;s Pick of your overlord</span></li>
-                  </ul>
-
-                  <p className="italic">One win per wallet across the entire event. Raffles draw in order &mdash; Curator&rsquo;s Pick 1, Curator&rsquo;s Pick 2, then Community Pick &mdash; and winning wallets are removed from later drawings. More collectors win. No sweeps.</p>
-                </div>
-
-                {/* THE VARIANT */}
-                <div className="border-t border-black/10 pt-8">
-                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-4">
-                    The Variant
-                  </h3>
-                  <p>
-                    After winners are announced, Coldie creates a 1/1 Variant in response to the competition: a fully kinetic work with a complete 3D scene, built with a unique control layer found in no other piece. Each SUBJ event produces exactly one Variant. These are held as a dedicated series, reserved for future institutional and gallery presentation.
-                  </p>
-                </div>
-
-                {/* THE PROMISE */}
-                <div className="border-t border-black/10 pt-8">
-                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-4">
-                    The Promise
-                  </h3>
-                  <p className="mb-4">
-                    Artist-first, collector-rewarding. Winners keep 80%. Nearly half of every drop goes back to the collector community. SUBJ:{event.id} is built to elevate artists who make great work and reward the collectors who&rsquo;ve been here from the start.
-                  </p>
-                  <p className="font-bold text-base">The Singularity has five faces. Pick yours.</p>
-                </div>
-
-              </div>
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
-
-      <div className="line-accent" />
-
       {/* ── Submissions Gallery + Voting ── */}
-      <section className="py-12 md:py-16 section-padding">
+      <section className="py-8 md:py-12 section-padding">
         <div className="page-container">
           <ScrollReveal>
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <div className="classified-header">
-                  Transmissions Collected Data Packets
-                </div>
-                <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
-                  SUBJ:{event.id} &mdash; {event.title} &mdash; Submitted for Consideration
-                </h2>
-                <p className="font-mono text-sm text-white/60 mt-3">
-                  Vote on entries below. One vote per piece per 24h. Community Pick winner has the most votes when the event closes.
-                </p>
-              </div>
+            <div className="mb-6">
+              <div className="classified-header">Submitted for Consideration</div>
+              <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em]">
+                Community Vote
+              </h2>
+              <p className="font-mono text-xs text-white/60 mt-2">
+                One vote per visitor for the entire event. The piece with the most votes when the event closes wins the Community Pick.
+              </p>
             </div>
           </ScrollReveal>
 

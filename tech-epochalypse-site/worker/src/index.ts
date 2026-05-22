@@ -416,15 +416,18 @@ async function handleVote(request: Request, env: Env): Promise<Response> {
       return json({ error: 'Turnstile verification failed', codes: tsBody['error-codes'] || [] }, 403);
     }
 
-    // IP rate-limit via KV. Key includes a daily salt so reuse across days resets.
+    // GLOBAL 24h IP rate-limit — one vote per IP across the whole event,
+    // regardless of which record was voted for (Community Pick semantics:
+    // each voter picks ONE favorite). KV value stores the recordId so the
+    // client can show which submission the voter already backed.
     const ipHash = await sha256Hex(ip + '|' + env.AIRTABLE_BASE_ID);
-    const key = `vote:${ipHash}:${recordId}`;
+    const key = `vote:${ipHash}`;
     const existing = await env.VOTES_KV.get(key);
     if (existing) {
-      return json({ error: 'Already voted', alreadyVoted: true }, 429);
+      return json({ error: 'Already voted in the last 24h', alreadyVoted: true, votedFor: existing }, 429);
     }
-    // Set with 24h TTL so the slot frees up automatically.
-    await env.VOTES_KV.put(key, '1', { expirationTtl: 60 * 60 * 24 });
+    // Reserve the slot up-front; rollback below if Airtable write fails.
+    await env.VOTES_KV.put(key, recordId, { expirationTtl: 60 * 60 * 24 });
 
     // Increment Votes on the Airtable record. Fetch current, +1, PATCH.
     const airtableUrl = `https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}/${recordId}`;
