@@ -101,7 +101,7 @@ export default function MainframePage() {
                     How to Enter
                   </h3>
                   <ol className="space-y-2 ml-1 mb-4">
-                    <li className="flex gap-2"><span className="shrink-0 font-bold">1.</span><span>Go to <Link href="/overlords" className="underline">knowyouroverlord.art/subj/01</Link></span></li>
+                    <li className="flex gap-2"><span className="shrink-0 font-bold">1.</span><span>Go to <Link href="/subj/01" className="underline">knowyouroverlord.art/subj/01</Link></span></li>
                     <li className="flex gap-2"><span className="shrink-0 font-bold">2.</span><span>Pick your overlord</span></li>
                     <li className="flex gap-2"><span className="shrink-0 font-bold">3.</span><span>Use the editor&rsquo;s depth and motion controls to build your parallax collage (remix Coldie&rsquo;s assets, upload your own, or both)</span></li>
                     <li className="flex gap-2"><span className="shrink-0 font-bold">4.</span><span>Submit before the deadline</span></li>
