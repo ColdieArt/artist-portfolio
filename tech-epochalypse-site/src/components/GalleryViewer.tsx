@@ -546,7 +546,10 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
         }
         .lightbox-dialog[open] {
           display: grid;
-          grid-template-rows: auto 1fr auto;
+          /* minmax(0, 1fr) is the canonical "let me shrink below content" trick —
+             without it the 1fr track inherits an auto minimum from the image
+             and grows past the viewport, pushing the bottom bar off-screen. */
+          grid-template-rows: auto minmax(0, 1fr) auto;
           animation: lightbox-fade-in 0.2s ease-out;
         }
         @keyframes lightbox-fade-in {
@@ -568,20 +571,18 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
         }
         .lightbox-image-area {
           position: relative;
-          display: grid;
-          place-items: center;
           overflow: hidden;
           min-height: 0;
           min-width: 0;
         }
-        /* Letterbox the image inside its container so it's always fully visible,
-           regardless of aspect ratio (16:9 horizontal, 9:16 vertical, etc.).
-           object-fit:contain scales to fit while preserving aspect. */
+        /* Position the image absolutely so it can't push its container's size.
+           inset:0 + object-fit:contain letterboxes the image inside the box,
+           always fully visible regardless of aspect ratio (16:9, 9:16, etc.). */
         .lightbox-img {
+          position: absolute;
+          inset: 0;
           width: 100%;
           height: 100%;
-          max-width: 100%;
-          max-height: 100%;
           object-fit: contain;
           object-position: center;
           display: block;
