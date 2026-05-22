@@ -238,7 +238,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                       <span className="text-black/40 group-open:rotate-90 transition-transform">&rsaquo;</span>
                     </summary>
                     <p className="mt-2 text-[10px]">
-                      After winners are announced, Coldie creates a 1/1 Variant in response: a fully kinetic 3D piece with a unique control layer found in no other work. One Variant per SUBJ event, held as a dedicated series for institutional and gallery presentation.
+                      Coldie creates a 1/1 Variant in response: a fully kinetic 3D piece with a unique control layer found in no other work. One Variant per SUBJ event, held as a dedicated series for institutional and gallery presentation.
                     </p>
                   </details>
 

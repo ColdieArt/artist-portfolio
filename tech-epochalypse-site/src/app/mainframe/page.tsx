@@ -189,7 +189,7 @@ export default function MainframePage() {
                     The Variant
                   </h3>
                   <p>
-                    After winners are announced, Coldie creates a 1/1 Variant in response to the competition: a fully kinetic work with a complete 3D scene, built with a unique control layer found in no other piece. Each SUBJ event produces exactly one Variant. These are held as a dedicated series, reserved for future institutional and gallery presentation.
+                    Coldie creates a 1/1 Variant in response to the competition: a fully kinetic work with a complete 3D scene, built with a unique control layer found in no other piece. Each SUBJ event produces exactly one Variant. These are held as a dedicated series, reserved for future institutional and gallery presentation.
                   </p>
                 </div>
 
