@@ -572,32 +572,20 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
           place-items: center;
           overflow: hidden;
           min-height: 0;
+          min-width: 0;
         }
+        /* Letterbox the image inside its container so it's always fully visible,
+           regardless of aspect ratio (16:9 horizontal, 9:16 vertical, etc.).
+           object-fit:contain scales to fit while preserving aspect. */
         .lightbox-img {
+          width: 100%;
+          height: 100%;
           max-width: 100%;
           max-height: 100%;
           object-fit: contain;
+          object-position: center;
           display: block;
           filter: contrast(1.1);
-        }
-        /* Landscape: fill 100% height, auto width, centered */
-        @media (orientation: landscape) {
-          .lightbox-image-area {
-            align-items: stretch;
-            justify-items: center;
-          }
-          .lightbox-img {
-            height: 100%;
-            width: auto;
-            object-position: center;
-          }
-        }
-        /* Portrait: fill 100% width, auto height, centered */
-        @media (orientation: portrait) {
-          .lightbox-img {
-            width: 100%;
-            height: auto;
-          }
         }
         .lightbox-nav {
           position: absolute;
