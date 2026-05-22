@@ -283,9 +283,12 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
       {filtered.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {filtered.map((item, i) => (
-            <button
+            <div
               key={item.id}
+              role="button"
+              tabIndex={0}
               onClick={() => openLightbox(i)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(i) } }}
               className="group relative bg-charcoal/30 border border-white/5 overflow-hidden card-hover text-left cursor-pointer focus:outline-none focus:border-white/20"
             >
               <div className="aspect-video relative overflow-hidden bg-charcoal" style={{ aspectRatio: '16/9' }}>
@@ -327,7 +330,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                   <VoteButton recordId={item.id} initialVotes={item.votes ?? 0} size="sm" />
                 </div>
               </div>
-            </button>
+            </div>
           ))}
         </div>
       ) : (
