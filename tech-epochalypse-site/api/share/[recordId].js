@@ -43,8 +43,13 @@ module.exports = async (req, res) => {
         if (f.Title) title = String(f.Title);
         if (f.Contributor) contributor = String(f.Contributor);
         else if (f['X Account']) contributor = String(f['X Account']);
-        if (Array.isArray(f.Image) && f.Image[0] && f.Image[0].url) imageUrl = f.Image[0].url;
-        else if (f['Image URL']) imageUrl = String(f['Image URL']);
+        // Prefer the stable R2/worker public URL stored in 'Image URL' over
+        // Airtable's attachment URL — Airtable signs attachment URLs with a
+        // short expiry, so the X scraper may hit an expired URL and cache
+        // a blank card image. The Image URL field points at the worker which
+        // is always publicly accessible.
+        if (f['Image URL']) imageUrl = String(f['Image URL']);
+        else if (Array.isArray(f.Image) && f.Image[0] && f.Image[0].url) imageUrl = f.Image[0].url;
       }
     } catch (_) { /* fall through to defaults */ }
   }
