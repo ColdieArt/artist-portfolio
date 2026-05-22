@@ -269,8 +269,8 @@ export default function SubjPage({ params }: { params: { id: string } }) {
               <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em]">
                 Community Vote
               </h2>
-              <p className="font-mono text-xs text-white/60 mt-2">
-                One vote per visitor for the entire event. The piece with the most votes when the event closes wins the Community Pick.
+              <p className="font-mono text-sm text-white mt-3">
+                One vote per visitor, per day. The piece with the most votes when the event closes wins the Community Pick.
               </p>
             </div>
           </ScrollReveal>
