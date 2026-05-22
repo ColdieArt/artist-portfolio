@@ -66,7 +66,10 @@ export default function TurnstileProvider({ children }: { children: ReactNode })
       try {
         widgetIdRef.current = t.render(host, {
           sitekey: SITE_KEY,
-          size: 'invisible',
+          // 'execute' appearance keeps the widget hidden until execute() is called.
+          // Don't pass size: 'invisible' — Cloudflare removed it; valid sizes are
+          // 'normal' | 'compact' | 'flexible'. Width is clamped via the offscreen
+          // host element instead.
           appearance: 'execute',
           callback: (token: string) => {
             const p = pendingRef.current
