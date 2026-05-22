@@ -103,7 +103,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                 <div className="aspect-video relative overflow-hidden bg-charcoal" style={{ aspectRatio: '16/9' }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={o.previewImage}
+                    src={o.previewImage ?? '/images/placeholder.png'}
                     alt={o.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     loading="lazy"
