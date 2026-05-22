@@ -136,7 +136,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                   <div>
                     <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-black/50 mb-1">Brief</div>
                     <h3 className="font-display text-lg md:text-xl text-black uppercase tracking-[0.03em] leading-tight">
-                      The Competition
+                      The Singularity
                     </h3>
                   </div>
 
