@@ -83,9 +83,12 @@ module.exports = async (req, res) => {
 <meta name="twitter:image" content="${esc(imageUrl)}">
 <meta name="twitter:image:alt" content="${esc(title)}">
 
-<!-- Redirect humans to the gallery; bots/scrapers read the meta tags above -->
-<meta http-equiv="refresh" content="0; url=${esc(targetUrl)}">
-<script>setTimeout(function(){ window.location.replace(${JSON.stringify(targetUrl)}) }, 50)</script>
+<!-- JS-only redirect — bots/scrapers don't execute JS so they read the meta
+     tags above. Avoiding <meta http-equiv="refresh"> because some link-preview
+     bots (X, Facebook, Slack) follow the refresh to the destination URL and
+     parse meta tags there instead, missing this page's per-piece OG image. -->
+<script>setTimeout(function(){ window.location.replace(${JSON.stringify(targetUrl)}) }, 500)</script>
+<link rel="canonical" href="${esc(targetUrl)}">
 
 <style>
   html,body { margin:0; padding:0; background:#000; color:#fff; font-family:monospace; }
