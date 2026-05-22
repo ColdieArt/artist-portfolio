@@ -1,5 +1,6 @@
 interface Env {
   GALLERY_BUCKET: R2Bucket;
+  VOTES_KV: KVNamespace;
   TURNSTILE_SECRET: string;
   RESEND_API_KEY: string;
   CONTACT_EMAIL: string;
@@ -55,6 +56,11 @@ export default {
     // POST /api/contact — inquiry form with Turnstile CAPTCHA
     if (request.method === 'POST' && path === '/api/contact') {
       return handleContact(request, env);
+    }
+
+    // POST /vote — cast a vote on a gallery submission (Turnstile + IP rate-limit + honeypot)
+    if (request.method === 'POST' && path === '/vote') {
+      return handleVote(request, env);
     }
 
     return json({ error: 'Not found', path, method: request.method }, 404);
@@ -364,4 +370,97 @@ async function handleImage(key: string, env: Env): Promise<Response> {
       ...CORS_HEADERS,
     },
   });
+}
+
+// ─── VOTE ENDPOINT ─────────────────────────────────────────────────────────
+// POST /vote with JSON body: { recordId: string, turnstileToken: string, website?: string }
+// - 'website' is a honeypot field: any non-empty value is treated as a bot.
+// - Validates Turnstile, then IP rate-limits 1 vote per (IP, recordId) per 24h via KV.
+// - Increments the 'Votes' number field on the Airtable record.
+
+async function handleVote(request: Request, env: Env): Promise<Response> {
+  try {
+    let body: { recordId?: string; turnstileToken?: string; website?: string };
+    try { body = await request.json(); }
+    catch { return json({ error: 'Invalid JSON body' }, 400); }
+
+    const recordId = (body.recordId || '').toString().trim();
+    const turnstileToken = (body.turnstileToken || '').toString();
+    const honeypot = (body.website || '').toString();
+
+    if (!recordId || !/^rec[a-zA-Z0-9]{14,18}$/.test(recordId)) {
+      return json({ error: 'Invalid recordId' }, 400);
+    }
+
+    // Honeypot — silently accept (200) so bots think they succeeded, but do nothing.
+    if (honeypot.length > 0) {
+      return json({ ok: true, votes: -1, _hp: true });
+    }
+
+    // Turnstile validation
+    if (!turnstileToken) return json({ error: 'Missing Turnstile token' }, 400);
+    if (!env.TURNSTILE_SECRET) return json({ error: 'Turnstile not configured on server' }, 500);
+
+    const ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '0.0.0.0';
+
+    const tsForm = new FormData();
+    tsForm.set('secret', env.TURNSTILE_SECRET);
+    tsForm.set('response', turnstileToken);
+    tsForm.set('remoteip', ip);
+    const tsRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      body: tsForm,
+    });
+    const tsBody = await tsRes.json() as { success?: boolean; 'error-codes'?: string[] };
+    if (!tsBody.success) {
+      return json({ error: 'Turnstile verification failed', codes: tsBody['error-codes'] || [] }, 403);
+    }
+
+    // IP rate-limit via KV. Key includes a daily salt so reuse across days resets.
+    const ipHash = await sha256Hex(ip + '|' + env.AIRTABLE_BASE_ID);
+    const key = `vote:${ipHash}:${recordId}`;
+    const existing = await env.VOTES_KV.get(key);
+    if (existing) {
+      return json({ error: 'Already voted', alreadyVoted: true }, 429);
+    }
+    // Set with 24h TTL so the slot frees up automatically.
+    await env.VOTES_KV.put(key, '1', { expirationTtl: 60 * 60 * 24 });
+
+    // Increment Votes on the Airtable record. Fetch current, +1, PATCH.
+    const airtableUrl = `https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}/${recordId}`;
+    const getRes = await fetch(airtableUrl, {
+      headers: { Authorization: `Bearer ${env.AIRTABLE_PAT}` },
+    });
+    if (!getRes.ok) {
+      // Rollback the rate-limit so the user can retry.
+      await env.VOTES_KV.delete(key);
+      const errBody = await getRes.text();
+      return json({ error: 'Record not found', details: errBody }, getRes.status);
+    }
+    const getJson = await getRes.json() as { fields?: { Votes?: number } };
+    const current = Number(getJson.fields?.Votes || 0);
+    const next = current + 1;
+
+    const patchRes = await fetch(airtableUrl, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${env.AIRTABLE_PAT}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: { Votes: next }, typecast: true }),
+    });
+    if (!patchRes.ok) {
+      await env.VOTES_KV.delete(key);
+      const errBody = await patchRes.text();
+      return json({ error: 'Vote write failed', details: errBody }, patchRes.status);
+    }
+
+    return json({ ok: true, votes: next });
+  } catch (e) {
+    console.error('handleVote error:', e);
+    return json({ error: 'Vote failed', details: (e as Error).message }, 500);
+  }
+}
+
+async function sha256Hex(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
 }

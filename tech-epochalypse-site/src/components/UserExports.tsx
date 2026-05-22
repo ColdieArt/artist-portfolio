@@ -30,6 +30,7 @@ interface GalleryRecord {
     Contributor?: string
     Approved?: boolean
     Category?: string
+    Votes?: number
   }
   createdTime: string
 }
@@ -53,6 +54,7 @@ function parseRecords(records: GalleryRecord[], nameToSlug: Record<string, strin
         overlord,
         date: r.fields.Date ?? r.createdTime.split('T')[0],
         contributor: r.fields.Contributor ?? 'Visitor',
+        votes: typeof r.fields.Votes === 'number' ? r.fields.Votes : 0,
       }
     })
     .sort((a, b) => b.date.localeCompare(a.date))

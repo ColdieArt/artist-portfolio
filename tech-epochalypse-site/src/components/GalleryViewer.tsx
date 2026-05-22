@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import TurnstileProvider from './TurnstileProvider'
+import VoteButton from './VoteButton'
 
 export interface GalleryItem {
   id: string
@@ -10,6 +12,7 @@ export interface GalleryItem {
   contributor: string
   date: string
   overlord: string
+  votes?: number
 }
 
 interface Props {
@@ -201,7 +204,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
   const currentItem = lightboxIndex !== null ? activeList[lightboxIndex] : null
 
   return (
-    <>
+    <TurnstileProvider>
       {/* ── Filter Bar ── */}
       <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
         <span className="font-mono text-xs uppercase tracking-[0.2em] text-white mr-2">
@@ -318,6 +321,11 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                     </span>
                   </div>
                 </div>
+
+                {/* Vote button (top-right of card) */}
+                <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 2 }}>
+                  <VoteButton recordId={item.id} initialVotes={item.votes ?? 0} size="sm" />
+                </div>
               </div>
             </button>
           ))}
@@ -360,6 +368,11 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                 <span className="font-mono" style={{ fontSize: '11px', color: 'white', marginRight: '8px' }}>
                   {lightboxIndex! + 1} / {activeList.length}
                 </span>
+
+                {/* Vote button (in lightbox top-bar) */}
+                <div style={{ marginRight: '8px' }}>
+                  <VoteButton recordId={currentItem.id} initialVotes={currentItem.votes ?? 0} size="lg" />
+                </div>
 
                 {/* Slideshow toggle */}
                 <button
@@ -583,6 +596,6 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
           to { width: 100%; }
         }
       `}</style>
-    </>
+    </TurnstileProvider>
   )
 }
