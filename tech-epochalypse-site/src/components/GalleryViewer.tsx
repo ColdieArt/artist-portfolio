@@ -571,21 +571,25 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
         }
         .lightbox-image-area {
           position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           overflow: hidden;
           min-height: 0;
           min-width: 0;
         }
-        /* Position the image absolutely so it can't push its container's size.
-           inset:0 + object-fit:contain letterboxes the image inside the box,
-           always fully visible regardless of aspect ratio (16:9, 9:16, etc.). */
+        /* Hard viewport-unit caps guarantee the image never exceeds the
+           screen, regardless of how the grid resolves the parent track.
+           ~100px accounts for the top + bottom bars together. dvh handles
+           mobile browser chrome correctly. */
         .lightbox-img {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
+          display: block;
+          max-width: 100vw;
+          max-height: calc(100dvh - 100px);
+          width: auto;
+          height: auto;
           object-fit: contain;
           object-position: center;
-          display: block;
           filter: contrast(1.1);
         }
         .lightbox-nav {
