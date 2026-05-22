@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import TurnstileProvider from './TurnstileProvider'
 import VoteButton from './VoteButton'
+import ShareButton from './ShareButton'
 
 export interface GalleryItem {
   id: string
@@ -150,6 +151,38 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
       dialog.close()
     }
   }, [lightboxOpen])
+
+  // ── Deep-link sync: read ?p=<recordId> on mount, write it as lightbox moves ──
+  // Lets shareable links like /subj/01?p=recXXX auto-open the right submission
+  // and keeps the address bar updated as users navigate so any URL is shareable.
+  const didHydrateFromUrlRef = useRef(false)
+  useEffect(() => {
+    if (didHydrateFromUrlRef.current) return
+    didHydrateFromUrlRef.current = true
+    if (typeof window === 'undefined') return
+    try {
+      const p = new URLSearchParams(window.location.search).get('p')
+      if (!p) return
+      const idx = filtered.findIndex((i) => i.id === p)
+      if (idx >= 0) setLightboxIndex(idx)
+    } catch { /* ignore */ }
+    // Intentionally depend on `filtered` so the search runs after items load,
+    // but guard with the ref so we only hydrate once.
+  }, [filtered])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const url = new URL(window.location.href)
+      if (lightboxIndex !== null) {
+        const item = activeList[lightboxIndex]
+        if (item) url.searchParams.set('p', item.id)
+      } else {
+        url.searchParams.delete('p')
+      }
+      window.history.replaceState(null, '', url.toString())
+    } catch { /* ignore */ }
+  }, [lightboxIndex, activeList])
 
   // Handle native dialog cancel (browser Escape key fires this)
   useEffect(() => {
@@ -325,9 +358,10 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                   </div>
                 </div>
 
-                {/* Vote button (top-right of card) */}
-                <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 2 }}>
+                {/* Vote + Share buttons (top-right of card) */}
+                <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 2, display: 'flex', gap: '6px' }}>
                   <VoteButton recordId={item.id} initialVotes={item.votes ?? 0} size="sm" />
+                  <ShareButton recordId={item.id} title={item.title} contributor={item.contributor} size="sm" />
                 </div>
               </div>
             </div>
@@ -372,9 +406,10 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                   {lightboxIndex! + 1} / {activeList.length}
                 </span>
 
-                {/* Vote button (in lightbox top-bar) */}
-                <div style={{ marginRight: '8px' }}>
+                {/* Vote + Share buttons (in lightbox top-bar) */}
+                <div style={{ marginRight: '8px', display: 'flex', gap: '6px' }}>
                   <VoteButton recordId={currentItem.id} initialVotes={currentItem.votes ?? 0} size="lg" />
+                  <ShareButton recordId={currentItem.id} title={currentItem.title} contributor={currentItem.contributor} size="lg" />
                 </div>
 
                 {/* Slideshow toggle */}
