@@ -1,7 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import GalleryViewer, { type GalleryItem } from './GalleryViewer'
+import TurnstileProvider from './TurnstileProvider'
+
+const EnhancedGallery = dynamic(() => import('./EnhancedGallery'), { ssr: false })
 
 // Records are now fetched through a server-side proxy at /api/airtable-records
 // which uses the AIRTABLE_PAT / BASE_ID / TABLE_NAME server-side env vars.
@@ -60,20 +64,28 @@ function parseRecords(records: GalleryRecord[], nameToSlug: Record<string, strin
     .sort((a, b) => b.date.localeCompare(a.date))
 }
 
+const TRENDING_ENDPOINT = process.env.NEXT_PUBLIC_TRENDING_ENDPOINT
+  || 'https://te-gallery-api.coldieart.workers.dev/votes/recent?days=7'
+
 interface Props {
   overlordNames: Record<string, string>
   overlordSlugs: string[]
   category?: string
   headerText?: string
+  /** When true, render the rich multi-row EnhancedGallery (trending, newest,
+   *  hidden gems, leaders, per-overlord) with a shared lightbox. Otherwise
+   *  falls back to the legacy single-grid GalleryViewer. */
+  multiRow?: boolean
 }
 
-export default function UserExports({ overlordNames, overlordSlugs, category, headerText }: Props) {
+export default function UserExports({ overlordNames, overlordSlugs, category, headerText, multiRow }: Props) {
   // Reverse mapping: overlord name -> slug (e.g. "Elon Musk" -> "elon-musk")
   const nameToSlug: Record<string, string> = {}
   for (const [slug, name] of Object.entries(overlordNames)) {
     nameToSlug[name.toLowerCase()] = slug
   }
   const [exports, setExports] = useState<GalleryItem[]>([])
+  const [recentVotes, setRecentVotes] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
@@ -81,10 +93,20 @@ export default function UserExports({ overlordNames, overlordSlugs, category, he
     async function fetchGallery() {
       try {
         const qs = category ? `?category=${encodeURIComponent(category)}` : ''
-        const res = await fetch(`/api/airtable-records${qs}`, { cache: 'no-store' })
-        if (!res.ok) throw new Error('Failed to fetch')
-        const data = await res.json()
+        // Fetch records + trending counts in parallel. Trending is best-effort.
+        const [recordsRes, trendingRes] = await Promise.all([
+          fetch(`/api/airtable-records${qs}`, { cache: 'no-store' }),
+          fetch(TRENDING_ENDPOINT, { cache: 'no-store' }).catch(() => null),
+        ])
+        if (!recordsRes.ok) throw new Error('Failed to fetch')
+        const data = await recordsRes.json()
         setExports(parseRecords(data.records ?? [], nameToSlug))
+        if (trendingRes && trendingRes.ok) {
+          try {
+            const tdata = await trendingRes.json()
+            if (tdata && typeof tdata.counts === 'object') setRecentVotes(tdata.counts)
+          } catch { /* ignore — trending is decorative */ }
+        }
       } catch {
         setError(true)
       } finally {
@@ -104,6 +126,19 @@ export default function UserExports({ overlordNames, overlordSlugs, category, he
   }
 
   if (error || exports.length === 0) return null
+
+  if (multiRow) {
+    return (
+      <TurnstileProvider>
+        <EnhancedGallery
+          items={exports}
+          recentVotes={recentVotes}
+          overlordNames={overlordNames}
+          overlordSlugs={overlordSlugs}
+        />
+      </TurnstileProvider>
+    )
+  }
 
   return (
     <div className="mb-20">

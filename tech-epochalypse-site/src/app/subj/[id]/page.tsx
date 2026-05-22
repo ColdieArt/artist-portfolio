@@ -279,6 +279,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
             overlordNames={overlordNames}
             overlordSlugs={overlordSlugs}
             category="general submission"
+            multiRow
           />
         </div>
       </section>

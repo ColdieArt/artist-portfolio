@@ -63,6 +63,11 @@ export default {
       return handleVote(request, env);
     }
 
+    // GET /votes/recent — trending vote counts over the last N days (default 7)
+    if (request.method === 'GET' && path === '/votes/recent') {
+      return handleRecentVotes(request, env);
+    }
+
     return json({ error: 'Not found', path, method: request.method }, 404);
   },
 };
@@ -455,6 +460,17 @@ async function handleVote(request: Request, env: Env): Promise<Response> {
       return json({ error: 'Vote write failed', details: errBody }, patchRes.status);
     }
 
+    // Trending bucket: count this vote in today's per-record bucket so
+    // /votes/recent can sum up the last N days. 8-day TTL keeps a 7-day
+    // window always backed by full buckets and self-cleans old data.
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const trendKey = `votes:daily:${today}:${recordId}`;
+      const cur = await env.VOTES_KV.get(trendKey);
+      const n = (cur ? parseInt(cur, 10) : 0) + 1;
+      await env.VOTES_KV.put(trendKey, String(n), { expirationTtl: 60 * 60 * 24 * 8 });
+    } catch (_) { /* trending is best-effort; don't fail the vote */ }
+
     return json({ ok: true, votes: next });
   } catch (e) {
     console.error('handleVote error:', e);
@@ -466,4 +482,53 @@ async function sha256Hex(input: string): Promise<string> {
   const data = new TextEncoder().encode(input);
   const hash = await crypto.subtle.digest('SHA-256', data);
   return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// GET /votes/recent?days=7 — returns trending vote counts over a window.
+// Aggregates per-day buckets written by handleVote into { recordId: count }.
+// Cached briefly at the edge so gallery pages don't hammer KV on every load.
+async function handleRecentVotes(request: Request, env: Env): Promise<Response> {
+  try {
+    const url = new URL(request.url);
+    const daysParam = parseInt(url.searchParams.get('days') || '7', 10);
+    const days = Math.max(1, Math.min(7, isNaN(daysParam) ? 7 : daysParam));
+
+    // Build list of YYYY-MM-DD dates for the window (today + previous days-1)
+    const dates: string[] = [];
+    for (let i = 0; i < days; i++) {
+      const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+      dates.push(d.toISOString().split('T')[0]);
+    }
+
+    // List & sum all matching keys per date prefix.
+    const counts: Record<string, number> = {};
+    for (const date of dates) {
+      let cursor: string | undefined = undefined;
+      do {
+        const list: KVNamespaceListResult<unknown> = await env.VOTES_KV.list({ prefix: `votes:daily:${date}:`, cursor });
+        for (const k of list.keys) {
+          // Key shape: votes:daily:<date>:<recordId>
+          const parts = k.name.split(':');
+          const recordId = parts[3];
+          if (!recordId) continue;
+          const v = await env.VOTES_KV.get(k.name);
+          const n = v ? parseInt(v, 10) : 0;
+          counts[recordId] = (counts[recordId] || 0) + (isNaN(n) ? 0 : n);
+        }
+        cursor = list.list_complete ? undefined : list.cursor;
+      } while (cursor);
+    }
+
+    return new Response(JSON.stringify({ days, counts }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=30, s-maxage=60',
+        ...CORS_HEADERS,
+      },
+    });
+  } catch (e) {
+    console.error('handleRecentVotes error:', e);
+    return json({ error: 'Trending fetch failed', details: (e as Error).message }, 500);
+  }
 }
