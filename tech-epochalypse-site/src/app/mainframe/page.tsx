@@ -55,111 +55,153 @@ export default function MainframePage() {
           <ScrollReveal>
             <div className="mb-8">
               <div className="classified-header">
-                Active Operations -{' '}
-                <span className="redacted">Directives</span>
+                Tech Epochalypse Remix Competition
               </div>
               <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em]">
                 SUBJ:01 - The Singularity
               </h2>
               <p className="font-mono text-sm text-white/70 leading-relaxed mt-4">
-                Pay attention to exploits that are listed. Can happen at any time. They are of utmost importance and offer those willing to accept the challenge an opportunity to build the dossier against the overlords.
+                The first remix competition in the Subject Series, under Tech Epochalypse. Five tech overlords, each a face of the Singularity. Pick one, remix it in Coldie&rsquo;s editor, and submit your own parallax collage.
               </p>
             </div>
           </ScrollReveal>
 
           <ScrollReveal>
             <div className="bg-white p-8 md:p-12">
-              <div className="font-mono text-xs text-black uppercase tracking-[0.2em] mb-8">
-                <h3 className="font-display text-2xl md:text-3xl text-black uppercase tracking-[0.03em] mb-6">
-                  EXPLOITS - &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; BRIEFING
-                </h3>
-                <div className="space-y-1 mb-8 border-b border-black/10 pb-6">
-                  <p>CLASSIFICATION: &nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
-                  <p>INTELLIGENCE DIVISION: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DATA &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
-                  <p>STATUS: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MONITORING</p>
-                </div>
-              </div>
+              <div className="font-mono text-sm text-black leading-relaxed space-y-8">
 
-              <div className="font-mono text-sm text-black leading-relaxed space-y-6">
-                <p className="text-black/40 text-xs uppercase tracking-widest">
-                  // DIRECTIVE FROM &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; COMMAND
-                </p>
-
-                <p className="font-bold">
-                  This is the extraction point.
-                </p>
-
-                <p>
-                  Exploits is where &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; is collected, processed, and &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; on the five Overlords. Every submission builds a living &#9608;&#9608;&#9608;&#9608;. A growing intelligence file of visual data that &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; their agendas, their motives, and the architectures of &#9608;&#9608;&#9608;&#9608;&#9608;&#9608; they would rather you never &#9608;&#9608;&#9608;.
-                </p>
-
-                <p>
-                  Some of what you find will be &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Some will be damning. All of it matters.
-                </p>
-
-                <p>
-                  The &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; of their plans is the power we hold. Not capital. Not &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Sight. The ability to see what is &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; constructed around us and render it &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; for others. This information must be &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; with any who will have eyes to &#9608;&#9608;&#9608;.
-                </p>
-
-                {/* How the system operates */}
-                <div className="border-t border-b border-black/10 py-6 my-6">
-                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">
-                    HOW THE &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; OPERATES:
-                  </p>
-
+                {/* WHAT IT IS */}
+                <div>
+                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-3">
+                    What It Is
+                  </h3>
                   <p>
-                    When a new Exploit is &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; or a new bounty is issued, this is the node where the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; is published. Each operation comes with &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; directives and ground &#9608;&#9608;&#9608;&#9608; that must be followed. These are not &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. They are operational &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Deviation from the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; compromises the mission.
-                  </p>
-
-                  <p className="mt-4">
-                    Every Exploit is a &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. A targeted challenge designed to extract the highest-value &#9608;&#9608;&#9608;&#9608; from the network. Submit &#9608;&#9608;&#9608;&#9608;. Submit intelligence. Submit what the Overlord does not want &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
-                  </p>
-
-                  <p className="mt-4 italic">
-                    The best data &#9608;&#9608;&#9608;&#9608;.
+                    The first remix competition in the Subject Series, under Tech Epochalypse. Five tech overlords, each a face of the Singularity. Pick one, remix it in Coldie&rsquo;s editor, and submit your own parallax collage. Two ways to play: use Coldie&rsquo;s overlord assets, or upload your own art and remix it in. Both compete equally.
                   </p>
                 </div>
 
-                {/* Reward structure */}
-                <div className="border-b border-black/10 pb-6 mb-6">
-                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">
-                    &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; STRUCTURE:
+                {/* THE FIVE OVERLORDS */}
+                <div className="border-t border-black/10 pt-8">
+                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-4">
+                    The Five Overlords
+                  </h3>
+                  <ul className="space-y-2 ml-1 mb-4">
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Musk</strong> &mdash; the physical substrate</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Altman</strong> &mdash; the intelligence layer</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Zuckerberg</strong> &mdash; the identity layer</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Bezos</strong> &mdash; the logistics</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Huang</strong> &mdash; the silicon</span></li>
+                  </ul>
+                  <p className="italic">Pick one. Your choice locks your entry&rsquo;s category for the event.</p>
+                </div>
+
+                {/* HOW TO ENTER */}
+                <div className="border-t border-black/10 pt-8">
+                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-4">
+                    How to Enter
+                  </h3>
+                  <ol className="space-y-2 ml-1 mb-4">
+                    <li className="flex gap-2"><span className="shrink-0 font-bold">1.</span><span>Go to <Link href="/overlords" className="underline">knowyouroverlord.art/subj/01</Link></span></li>
+                    <li className="flex gap-2"><span className="shrink-0 font-bold">2.</span><span>Pick your overlord</span></li>
+                    <li className="flex gap-2"><span className="shrink-0 font-bold">3.</span><span>Use the editor&rsquo;s depth and motion controls to build your parallax collage (remix Coldie&rsquo;s assets, upload your own, or both)</span></li>
+                    <li className="flex gap-2"><span className="shrink-0 font-bold">4.</span><span>Submit before the deadline</span></li>
+                  </ol>
+                  <p>
+                    <strong>Requirements:</strong> Follow <a href="https://x.com/coldie" target="_blank" rel="noopener noreferrer" className="underline">@coldie</a> on X. Repost the announcement. One submission per person. Free to enter. Wallet or email both accepted.
                   </p>
+                </div>
+
+                {/* KEY DATES */}
+                <div className="border-t border-black/10 pt-8">
+                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-4">
+                    Key Dates
+                  </h3>
                   <ul className="space-y-2 ml-1">
-                    <li className="flex gap-2">
-                      <span className="shrink-0">&rarr;</span>
-                      <span>Rewards are &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; between the operative, the community, and the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; who fund the network.</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="shrink-0">&rarr;</span>
-                      <span>No single entity &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; the output.</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="shrink-0">&rarr;</span>
-                      <span>The network &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; the network.</span>
-                    </li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Opens:</strong> Saturday, May 23 &mdash; 9:00 AM ET</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Closes:</strong> Wednesday, May 28 &mdash; 11:59 PT</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Winners announced:</strong> Thursday, June 4 &mdash; 10:00 AM ET</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Mints + raffles:</strong> Monday, June 15</span></li>
                   </ul>
                 </div>
 
-                {/* Current status */}
-                <div>
-                  <p className="font-bold mb-3 text-xs uppercase tracking-widest">
-                    CURRENT STATUS:
-                  </p>
-                  <div className="font-mono text-xs text-black uppercase tracking-[0.2em] space-y-1 mb-6">
-                    <p>EXPLOIT #001: &nbsp;&nbsp;&nbsp;&nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
-                    <p>ANNOUNCEMENT: &nbsp;&nbsp;&nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
-                    <p>DIRECTIVE: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PENDING &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
-                    <p>REWARD TIER: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</p>
-                  </div>
+                {/* WINNERS */}
+                <div className="border-t border-black/10 pt-8">
+                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-4">
+                    Winners
+                  </h3>
+                  <p className="mb-4">Three winners, chosen across all five overlords.</p>
+                  <ul className="space-y-2 ml-1 mb-4">
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Curator&rsquo;s Pick 1</strong> (chosen by Coldie) &mdash; Edition of 10</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Curator&rsquo;s Pick 2</strong> (chosen by Coldie) &mdash; Edition of 10</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Community Pick</strong> (most public votes) &mdash; Edition of 42</span></li>
+                  </ul>
+                  <p className="mb-3">All winning artists receive 80% of public primary sales and 80% of secondary royalties on their edition.</p>
+                  <p className="italic">What wins: Use of depth. Surprising use of the upload feature. Risk over polish. Make work only this medium could produce.</p>
+                </div>
 
+                {/* EDITION BREAKDOWN */}
+                <div className="border-t border-black/10 pt-8">
+                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-4">
+                    Edition Breakdown
+                  </h3>
+                  <p className="font-bold mb-2 text-xs uppercase tracking-widest">Curator&rsquo;s Pick 1 &amp; 2 (edition of 10 each):</p>
+                  <ul className="space-y-2 ml-1 mb-6">
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>1 to the artist</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>1 to Coldie</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>1 raffled to Moments holders of that overlord</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>1 raffled to Kinetic holders of that overlord</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>6 available to the public</span></li>
+                  </ul>
+                  <p className="font-bold mb-2 text-xs uppercase tracking-widest">Community Pick (edition of 42):</p>
+                  <ul className="space-y-2 ml-1">
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>Up to 10 to Kinetic holders of that overlord</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>10 raffled to Moments holders of that overlord</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>The remainder available to the public</span></li>
+                  </ul>
+                </div>
+
+                {/* COLLECTOR REWARDS */}
+                <div className="border-t border-black/10 pt-8">
+                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-4">
+                    Collector Rewards
+                  </h3>
+                  <p className="mb-4">A snapshot of holder wallets is taken when the competition closes (May 28, 11:59 PT). Hold through then to qualify.</p>
+
+                  <p className="font-bold mb-2 text-xs uppercase tracking-widest">Moments holders (50 per overlord)</p>
+                  <ul className="space-y-2 ml-1 mb-6">
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>Each Moment held = one raffle entry</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>Every winning piece triggers a raffle of that overlord&rsquo;s Moments holders</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>Raffle pools align to the winning overlord</span></li>
+                  </ul>
+
+                  <p className="font-bold mb-2 text-xs uppercase tracking-widest">Kinetic holders (10 per overlord)</p>
+                  <ul className="space-y-2 ml-1 mb-6">
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>1 free NFT for each Community Pick win matching your overlord</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span>Entry into a dedicated Kinetic-only raffle for each Curator&rsquo;s Pick of your overlord</span></li>
+                  </ul>
+
+                  <p className="italic">One win per wallet across the entire event. Raffles draw in order &mdash; Curator&rsquo;s Pick 1, Curator&rsquo;s Pick 2, then Community Pick &mdash; and winning wallets are removed from later drawings. More collectors win. No sweeps.</p>
+                </div>
+
+                {/* THE VARIANT */}
+                <div className="border-t border-black/10 pt-8">
+                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-4">
+                    The Variant
+                  </h3>
                   <p>
-                    The first &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; is being &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Until the signal drops, your directive is &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Access the five Overlord nodes. Study the &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;. Learn the canvas you will be &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608; to breach.
+                    After winners are announced, Coldie creates a 1/1 Variant in response to the competition: a fully kinetic work with a complete 3D scene, built with a unique control layer found in no other piece. Each SUBJ event produces exactly one Variant. These are held as a dedicated series, reserved for future institutional and gallery presentation.
                   </p>
+                </div>
 
-                  <p className="mt-4">
-                    When the order &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;, you will be ready. Or you &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;.
+                {/* THE PROMISE */}
+                <div className="border-t border-black/10 pt-8">
+                  <h3 className="font-display text-xl md:text-2xl text-black uppercase tracking-[0.03em] mb-4">
+                    The Promise
+                  </h3>
+                  <p className="mb-4">
+                    Artist-first, collector-rewarding. Winners keep 80%. Nearly half of every drop goes back to the collector community. SUBJ:01 is built to elevate artists who make great work and reward the collectors who&rsquo;ve been here from the start.
                   </p>
+                  <p className="font-bold text-base">The Singularity has five faces. Pick yours.</p>
                 </div>
 
                 {/* CTA */}
@@ -175,9 +217,6 @@ export default function MainframePage() {
                   </Link>
                 </div>
 
-                <p className="text-black/40 text-xs italic mt-8">
-                  // END &#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;
-                </p>
               </div>
             </div>
           </ScrollReveal>
