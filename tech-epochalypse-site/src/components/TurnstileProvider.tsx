@@ -94,29 +94,45 @@ export default function TurnstileProvider({ children }: { children: ReactNode })
     return () => { cancelled = true }
   }, [])
 
+  // Serialize execute() so back-to-back calls (or a click while one is in-flight)
+  // share the same Turnstile execution instead of triggering "already executing".
+  const inFlightRef = useRef<Promise<string> | null>(null)
+
   const execute = (): Promise<string> => {
-    return new Promise((resolve, reject) => {
+    if (inFlightRef.current) return inFlightRef.current
+
+    const p = new Promise<string>((resolve, reject) => {
       if (!SITE_KEY) { reject(new Error('Turnstile not configured')); return }
       if (!ts() || !widgetIdRef.current) { reject(new Error('Turnstile not ready')); return }
-      if (pendingRef.current) { pendingRef.current.reject(new Error('Cancelled by newer execute')) }
-      pendingRef.current = { resolve, reject }
-      try {
-        // Reset to clear prior token, then execute to get a fresh one.
-        ts().reset(widgetIdRef.current)
-        ts().execute(widgetIdRef.current)
-      } catch (e) {
-        pendingRef.current = null
-        reject(e as Error)
+
+      pendingRef.current = {
+        resolve: (t: string) => { inFlightRef.current = null; resolve(t) },
+        reject: (e: Error) => { inFlightRef.current = null; reject(e) },
       }
+
+      const startExecute = () => {
+        try { ts().execute(widgetIdRef.current) }
+        catch (err) {
+          const p = pendingRef.current; pendingRef.current = null; inFlightRef.current = null
+          if (p) p.reject(err as Error)
+        }
+      }
+
+      // Reset clears any prior token. Give the widget a tick to settle before execute().
+      try { ts().reset(widgetIdRef.current) } catch (_) { /* may not be resettable; ignore */ }
+      setTimeout(startExecute, 50)
+
       // Safety timeout — 15s should be way more than enough.
       setTimeout(() => {
-        const p = pendingRef.current
-        if (p === pendingRef.current && pendingRef.current) {
-          pendingRef.current = null
-          reject(new Error('Turnstile timed out'))
+        if (pendingRef.current) {
+          const p = pendingRef.current; pendingRef.current = null; inFlightRef.current = null
+          p.reject(new Error('Turnstile timed out'))
         }
       }, 15000)
     })
+
+    inFlightRef.current = p
+    return p
   }
 
   const value: Ctx = { ready, enabled: !!SITE_KEY, execute }
