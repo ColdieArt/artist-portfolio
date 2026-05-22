@@ -4693,12 +4693,15 @@ setTimeout(function () {
         if (_gizmoHelper) _gizmoHelper.visible = false;
 
         const _vw = window.innerWidth, _vh = window.innerHeight;
+        const _isMobile = (_vw < 768) || (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches);
+        const _LONG_EDGE = _isMobile ? 1920 : 3840; // 2K on mobile (memory-safe), 4K on desktop
+        if (judgmentStatus) { judgmentStatus.textContent = _isMobile ? 'Rendering (mobile mode)…' : 'Rendering…'; }
         const _origPR = r.getPixelRatio();
         const _maxTex = (r.capabilities && r.capabilities.maxTextureSize) || 4096;
         let _hiPR;
-        if (window.cropMode === '16:9')      _hiPR = 3840 / (_vw * 0.8);
-        else if (window.cropMode === '4:5') _hiPR = 3840 / _vh;
-        else                                 _hiPR = 3840 / Math.max(_vw, _vh);
+        if (window.cropMode === '16:9')      _hiPR = _LONG_EDGE / (_vw * 0.8);
+        else if (window.cropMode === '4:5') _hiPR = _LONG_EDGE / _vh;
+        else                                 _hiPR = _LONG_EDGE / Math.max(_vw, _vh);
         _hiPR = Math.max(_origPR, _hiPR);
         _hiPR = Math.min(_hiPR, _maxTex / Math.max(_vw, _vh));
 
@@ -4723,12 +4726,12 @@ setTimeout(function () {
         if (_passes.cctvFeedPass)   _passes.cctvFeedPass.uniforms['resolution'].value.set(_vw, _vh);
         // Target dimensions: 4K (3840 long edge) — exact size depends on crop mode
         let _targetW, _targetH;
-        if (window.cropMode === '16:9')      { _targetW = 3840; _targetH = 2160; }
-        else if (window.cropMode === '4:5') { _targetW = 3072; _targetH = 3840; }
+        if (window.cropMode === '16:9')      { _targetW = _LONG_EDGE; _targetH = Math.round(_LONG_EDGE * 9/16); }
+        else if (window.cropMode === '4:5') { _targetW = Math.round(_LONG_EDGE * 4/5); _targetH = _LONG_EDGE; }
         else {
             const _ar = srcCanvas.width / srcCanvas.height;
-            if (_ar >= 1) { _targetW = 3840; _targetH = Math.round(3840 / _ar); }
-            else          { _targetH = 3840; _targetW = Math.round(3840 * _ar); }
+            if (_ar >= 1) { _targetW = _LONG_EDGE; _targetH = Math.round(_LONG_EDGE / _ar); }
+            else          { _targetH = _LONG_EDGE; _targetW = Math.round(_LONG_EDGE * _ar); }
         }
         let outCanvas = srcCanvas;
         if (srcCanvas.width !== _targetW || srcCanvas.height !== _targetH) {
@@ -4740,7 +4743,9 @@ setTimeout(function () {
             _ctx.imageSmoothingQuality = 'high';
             _ctx.drawImage(srcCanvas, 0, 0, _targetW, _targetH);
         }
-        const blob = await new Promise(res => outCanvas.toBlob(res, 'image/jpeg', 0.92));
+        if (judgmentStatus) { judgmentStatus.textContent = 'Encoding image…'; }
+        const _jpegQ = _isMobile ? 0.85 : 0.92;
+        const blob = await new Promise(res => outCanvas.toBlob(res, 'image/jpeg', _jpegQ));
 
         // Upload image + create Airtable record in one request via Cloudflare Worker
         const WORKER_URL = window.GALLERY_API_URL || window.location.origin;
@@ -4765,7 +4770,7 @@ setTimeout(function () {
                 currentLayer: c.userData.currentLayer,
                 opacity: c.material ? c.material.opacity : 1,
               };
-              if (c.userData.isUploaded && c.material && c.material.map && c.material.map.image) {
+              if (!_isMobile && c.userData.isUploaded && c.material && c.material.map && c.material.map.image) {
                 try {
                   const img = c.material.map.image;
                   const cv = document.createElement('canvas');
@@ -4791,7 +4796,12 @@ setTimeout(function () {
         if (compositionJson) form.append('composition', compositionJson);
         form.append('ethAddress', ethAddress);
         form.append('email', email);
-        const res = await fetch(WORKER_URL + '/submit', { method: 'POST', body: form });
+        if (judgmentStatus) { judgmentStatus.textContent = 'Uploading…'; }
+        const _ctrl = new AbortController();
+        const _to = setTimeout(() => _ctrl.abort(), 90000);
+        let res;
+        try { res = await fetch(WORKER_URL + '/submit', { method: 'POST', body: form, signal: _ctrl.signal }); }
+        finally { clearTimeout(_to); }
         if (!res.ok) {
           const errBody = await res.json().catch(() => ({}));
           throw new Error(errBody.error || 'Submission failed');

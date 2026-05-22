@@ -20,7 +20,7 @@ export default function ShareButton({ recordId, title, contributor, size = 'sm' 
     e.preventDefault()
     const shareUrl = `${SITE_URL}/share/${recordId}`
     const cleanContributor = contributor && contributor !== 'Anonymous' ? `by ${contributor}` : ''
-    const text = `Voted for "${title}" ${cleanContributor} in @coldie's SUBJ:01 — The Singularity remix competition ⚡ Cast yours:`
+    const text = `Voted for "${title}" ${cleanContributor} in @coldie's SUBJ:01 — The Singularity remix competition ⚡ Cast yours: #KnowYourOverlord`
       .replace(/\s+/g, ' ')
       .trim()
     const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`
