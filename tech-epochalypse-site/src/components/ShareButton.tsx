@@ -28,6 +28,22 @@ function buildTweetText(title: string, contributor: string) {
     .trim()
 }
 
+function isMobileDevice(): boolean {
+  if (typeof navigator === 'undefined' || typeof window === 'undefined') return false
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const nav: any = navigator
+  // Modern UA-Client-Hints API (Chrome/Edge/Android)
+  if (nav.userAgentData && nav.userAgentData.mobile === true) return true
+  const ua = navigator.userAgent || ''
+  // Standard mobile UA sniff (Android Mobile, iPhone, iPad, etc.)
+  if (/Android.*Mobile|iPhone|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua)) return true
+  // iPadOS 13+ identifies as Macintosh in UA but has touch — disambiguate via maxTouchPoints
+  if (ua.includes('Macintosh') && (nav.maxTouchPoints || 0) > 1) return true
+  // iPad with normal UA
+  if (/iPad/i.test(ua)) return true
+  return false
+}
+
 async function tryNativeShareWithImage(
   imageUrl: string | undefined,
   text: string,
@@ -35,17 +51,20 @@ async function tryNativeShareWithImage(
   filename: string,
 ): Promise<boolean> {
   if (!imageUrl) return false
-  // Web Share API availability + file support
   if (typeof navigator === 'undefined') return false
+  // Desktop browsers ALSO support navigator.share (macOS Safari opens the
+  // system share sheet, Windows opens the share charm) — but X isn't a
+  // first-class target in those sheets, so the result is worse than just
+  // opening the X tweet-intent URL. Only use Web Share on real mobile.
+  if (!isMobileDevice()) return false
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const nav: any = navigator
   if (typeof nav.share !== 'function') return false
 
-  // canShare with files is the right capability check; absence usually means
-  // desktop browser without file-share support → use fallback.
+  // canShare with files is the right capability check; absence means the
+  // mobile browser can't attach files (rare these days).
   let canShareFiles = false
   try {
-    // Probe without a file first to confirm files are supported at all.
     canShareFiles = typeof nav.canShare === 'function' && nav.canShare({ files: [new File([new Blob()], 'probe.jpg', { type: 'image/jpeg' })] })
   } catch { canShareFiles = false }
   if (!canShareFiles) return false
