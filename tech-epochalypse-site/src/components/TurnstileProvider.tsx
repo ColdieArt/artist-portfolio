@@ -7,8 +7,10 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 
 const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''
 
+// We deliberately don't extend the global Window.turnstile type here —
+// InquiryForm.tsx declares a stricter version. Cast locally as needed.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare global { interface Window { turnstile?: any } }
+function ts(): any { return (typeof window !== 'undefined' ? (window as any).turnstile : undefined) }
 
 type Ctx = {
   ready: boolean
@@ -59,10 +61,10 @@ export default function TurnstileProvider({ children }: { children: ReactNode })
     let cancelled = false
     const tryRender = () => {
       if (cancelled) return
-      const ts = window.turnstile
-      if (!ts || !host) { setTimeout(tryRender, 200); return }
+      const t = ts()
+      if (!t || !host) { setTimeout(tryRender, 200); return }
       try {
-        widgetIdRef.current = ts.render(host, {
+        widgetIdRef.current = t.render(host, {
           sitekey: SITE_KEY,
           size: 'invisible',
           appearance: 'execute',
@@ -92,13 +94,13 @@ export default function TurnstileProvider({ children }: { children: ReactNode })
   const execute = (): Promise<string> => {
     return new Promise((resolve, reject) => {
       if (!SITE_KEY) { reject(new Error('Turnstile not configured')); return }
-      if (!window.turnstile || !widgetIdRef.current) { reject(new Error('Turnstile not ready')); return }
+      if (!ts() || !widgetIdRef.current) { reject(new Error('Turnstile not ready')); return }
       if (pendingRef.current) { pendingRef.current.reject(new Error('Cancelled by newer execute')) }
       pendingRef.current = { resolve, reject }
       try {
         // Reset to clear prior token, then execute to get a fresh one.
-        window.turnstile.reset(widgetIdRef.current)
-        window.turnstile.execute(widgetIdRef.current)
+        ts().reset(widgetIdRef.current)
+        ts().execute(widgetIdRef.current)
       } catch (e) {
         pendingRef.current = null
         reject(e as Error)
