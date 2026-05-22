@@ -1,9 +1,15 @@
 'use client'
 
-// One-click "share this piece on X" button. Builds a tweet-intent URL with
-// pre-filled copy + a deep link pointing at /share/<recordId>, which the
-// Vercel function at /api/share/[recordId] renders with proper OG/Twitter
-// meta tags so the X preview card shows the actual artwork.
+// One-click "share this piece on X" button.
+//
+// MOBILE: tries the Web Share API with the actual image attached as a file.
+// On iOS/Android the system share sheet appears — picking X opens compose
+// with the image already on the post (not just a link preview).
+//
+// DESKTOP / browsers without file-sharing: falls back to the X tweet-intent
+// URL with a deep link to /share/<recordId>. The Vercel function at that
+// route returns OG/Twitter card meta tags so X still renders a rich preview
+// card with the artwork beneath the tweet text.
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.knowyouroverlord.art'
 
@@ -11,20 +17,73 @@ interface Props {
   recordId: string
   title: string
   contributor: string
+  imageUrl?: string
   size?: 'sm' | 'lg'
 }
 
-export default function ShareButton({ recordId, title, contributor, size = 'sm' }: Props) {
-  const handleShare = (e: React.MouseEvent) => {
+function buildTweetText(title: string, contributor: string) {
+  const cleanContributor = contributor && contributor !== 'Anonymous' ? `by ${contributor}` : ''
+  return `Voted for "${title}" ${cleanContributor} in @coldie's SUBJ:01 — The Singularity remix competition ⚡ Cast yours: #KnowYourOverlord`
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+async function tryNativeShareWithImage(
+  imageUrl: string | undefined,
+  text: string,
+  shareUrl: string,
+  filename: string,
+): Promise<boolean> {
+  if (!imageUrl) return false
+  // Web Share API availability + file support
+  if (typeof navigator === 'undefined') return false
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const nav: any = navigator
+  if (typeof nav.share !== 'function') return false
+
+  // canShare with files is the right capability check; absence usually means
+  // desktop browser without file-share support → use fallback.
+  let canShareFiles = false
+  try {
+    // Probe without a file first to confirm files are supported at all.
+    canShareFiles = typeof nav.canShare === 'function' && nav.canShare({ files: [new File([new Blob()], 'probe.jpg', { type: 'image/jpeg' })] })
+  } catch { canShareFiles = false }
+  if (!canShareFiles) return false
+
+  try {
+    // Fetch the image (must be CORS-permitted; Airtable thumbnails + our R2 worker URL both are).
+    const resp = await fetch(imageUrl, { mode: 'cors' })
+    if (!resp.ok) return false
+    const blob = await resp.blob()
+    const file = new File([blob], filename, { type: blob.type || 'image/jpeg' })
+    const data: ShareData & { files?: File[] } = { text, url: shareUrl, files: [file] }
+    if (typeof nav.canShare === 'function' && !nav.canShare(data)) return false
+    await nav.share(data)
+    return true
+  } catch (err) {
+    // User cancelled, or CORS, or share failed — fall back to intent URL.
+    const e = err as Error
+    if (e && e.name === 'AbortError') return true // user dismissed; don't open fallback
+    console.warn('Web Share with image failed; falling back to intent URL:', e)
+    return false
+  }
+}
+
+function openTweetIntent(text: string, shareUrl: string) {
+  const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`
+  window.open(intent, '_blank', 'noopener,noreferrer')
+}
+
+export default function ShareButton({ recordId, title, contributor, imageUrl, size = 'sm' }: Props) {
+  const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation()
     e.preventDefault()
     const shareUrl = `${SITE_URL}/share/${recordId}`
-    const cleanContributor = contributor && contributor !== 'Anonymous' ? `by ${contributor}` : ''
-    const text = `Voted for "${title}" ${cleanContributor} in @coldie's SUBJ:01 — The Singularity remix competition ⚡ Cast yours: #KnowYourOverlord`
-      .replace(/\s+/g, ' ')
-      .trim()
-    const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`
-    window.open(intent, '_blank', 'noopener,noreferrer')
+    const text = buildTweetText(title, contributor)
+    const filename = `subj01-${recordId}.jpg`
+
+    const shared = await tryNativeShareWithImage(imageUrl, text, shareUrl, filename)
+    if (!shared) openTweetIntent(text, shareUrl)
   }
 
   const isLarge = size === 'lg'

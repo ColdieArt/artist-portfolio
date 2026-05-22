@@ -350,7 +350,7 @@ export default function EnhancedGallery({ items, recentVotes, overlordNames, ove
                   {lightbox.index + 1} / {lightbox.list.length}
                 </span>
                 <VoteButton recordId={currentItem.id} initialVotes={currentItem.votes ?? 0} size="lg" />
-                <ShareButton recordId={currentItem.id} title={currentItem.title} contributor={currentItem.contributor} size="lg" />
+                <ShareButton recordId={currentItem.id} title={currentItem.title} contributor={currentItem.contributor} imageUrl={currentItem.src} size="lg" />
                 <button onClick={closeLightbox} style={{ padding: 8, background: 'none', border: 'none', cursor: 'pointer', color: '#fff' }} title="Close (Esc)">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
@@ -561,7 +561,7 @@ function Card({
           onClick={(e) => e.stopPropagation()}
         >
           <VoteButton recordId={item.id} initialVotes={item.votes ?? 0} size="sm" />
-          <ShareButton recordId={item.id} title={item.title} contributor={item.contributor} size="sm" />
+          <ShareButton recordId={item.id} title={item.title} contributor={item.contributor} imageUrl={item.src} size="sm" />
         </div>
       </div>
     </div>

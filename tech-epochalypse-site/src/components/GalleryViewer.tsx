@@ -361,7 +361,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                 {/* Vote + Share buttons (top-right of card) */}
                 <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 2, display: 'flex', gap: '6px' }}>
                   <VoteButton recordId={item.id} initialVotes={item.votes ?? 0} size="sm" />
-                  <ShareButton recordId={item.id} title={item.title} contributor={item.contributor} size="sm" />
+                  <ShareButton recordId={item.id} title={item.title} contributor={item.contributor} imageUrl={item.src} size="sm" />
                 </div>
               </div>
             </div>
@@ -409,7 +409,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                 {/* Vote + Share buttons (in lightbox top-bar) */}
                 <div style={{ marginRight: '8px', display: 'flex', gap: '6px' }}>
                   <VoteButton recordId={currentItem.id} initialVotes={currentItem.votes ?? 0} size="lg" />
-                  <ShareButton recordId={currentItem.id} title={currentItem.title} contributor={currentItem.contributor} size="lg" />
+                  <ShareButton recordId={currentItem.id} title={currentItem.title} contributor={currentItem.contributor} imageUrl={currentItem.src} size="lg" />
                 </div>
 
                 {/* Slideshow toggle */}
