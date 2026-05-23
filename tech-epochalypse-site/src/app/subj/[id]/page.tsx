@@ -100,12 +100,12 @@ export default function SubjPage({ params }: { params: { id: string } }) {
               </div>
               <p className="font-mono text-sm md:text-base text-white leading-relaxed">
                 We&rsquo;re collecting the first data packets for the dossier.
-                The overlords are making moves &mdash; each headline another
-                claim staked in the Tech Epochalypse. Take control of one.
-                Remix it in your language. Use Coldie&rsquo;s assets, upload
-                your own, build the evidence. The case file is only as strong
-                as what you put in it. Do your best work &mdash;{' '}
-                <strong className="font-bold text-white">just showing up is not enough.</strong>
+                The overlords are making moves. Each headline is another claim
+                staked in the Tech Epochalypse. Take control of one. Remix it
+                in your language. Use Coldie&rsquo;s assets, upload your own,
+                build the evidence. The case file is only as strong as what
+                you put in it. Do your best work.{' '}
+                <strong className="font-bold text-white">Just showing up is not enough.</strong>
               </p>
             </div>
           </ScrollReveal>
