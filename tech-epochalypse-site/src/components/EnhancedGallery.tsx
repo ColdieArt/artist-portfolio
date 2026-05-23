@@ -21,6 +21,18 @@ const GLOBAL_VOTE_KEY = 'tee_global_vote_v1'
 const VOTE_EVENT = 'tee:vote-cast'
 const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000
 
+// ⚠️ VOTING_ENABLED = false during the submission window.
+// While this is false:
+//   - the "YOU HAVE 1 VOTE TODAY" banner is hidden
+//   - all curated rows (Top per Overlord, Trending, Just Submitted, Hidden
+//     Gems, All-Time Leaders) are hidden — only "All Submissions" renders
+//   - the heart Vote button + vote-count pill are removed from each card
+//   - the lightbox renders the share button but NOT the vote button
+// The card → lightbox navigation, share buttons, and underlying vote
+// infrastructure (state, endpoint, server worker) are untouched. To open
+// voting after submissions close, flip this back to `true`.
+const VOTING_ENABLED = false
+
 type GlobalVote = { recordId: string; timestamp: number }
 
 function readGlobalVote(): GlobalVote | null {
@@ -203,73 +215,81 @@ export default function EnhancedGallery({ items, recentVotes, overlordNames, ove
   return (
     <div className="space-y-12">
 
-      {/* Vote-status banner */}
-      <VoteStatusBanner globalVote={globalVote} votedItem={votedItem} />
+      {/* ── Voting-only modules ──
+          Hidden during the submission window. Flip VOTING_ENABLED back to
+          `true` after submissions close to re-expose the banner + all five
+          curated rows. */}
+      {VOTING_ENABLED && (
+        <>
+          {/* Vote-status banner */}
+          <VoteStatusBanner globalVote={globalVote} votedItem={votedItem} />
 
-      {/* 🏆 Top from Each Overlord */}
-      {perOverlordTop.length > 0 && (
-        <Row
-          icon="🏆"
-          title="Top from Each Overlord"
-          subtitle="One leader per category — every overlord stays visible"
-          items={perOverlordTop}
-          overlordNames={overlordNames}
-          onCardClick={(i) => openLightbox(perOverlordTop, i)}
-          recentMap={recentVotes}
-        />
-      )}
+          {/* 🏆 Top from Each Overlord */}
+          {perOverlordTop.length > 0 && (
+            <Row
+              icon="🏆"
+              title="Top from Each Overlord"
+              subtitle="One leader per category — every overlord stays visible"
+              items={perOverlordTop}
+              overlordNames={overlordNames}
+              onCardClick={(i) => openLightbox(perOverlordTop, i)}
+              recentMap={recentVotes}
+            />
+          )}
 
-      {/* 🔥 Trending This Week */}
-      {trending.length > 0 && (
-        <Row
-          icon="🔥"
-          title="Trending This Week"
-          subtitle="Most votes in the last 7 days"
-          items={trending}
-          overlordNames={overlordNames}
-          onCardClick={(i) => openLightbox(trending, i)}
-          recentMap={recentVotes}
-          showTrendBadge
-        />
-      )}
+          {/* 🔥 Trending This Week */}
+          {trending.length > 0 && (
+            <Row
+              icon="🔥"
+              title="Trending This Week"
+              subtitle="Most votes in the last 7 days"
+              items={trending}
+              overlordNames={overlordNames}
+              onCardClick={(i) => openLightbox(trending, i)}
+              recentMap={recentVotes}
+              showTrendBadge
+            />
+          )}
 
-      {/* 🆕 Just Submitted */}
-      {newest.length > 0 && (
-        <Row
-          icon="🆕"
-          title="Just Submitted"
-          subtitle="Newest entries — give them their first vote"
-          items={newest}
-          overlordNames={overlordNames}
-          onCardClick={(i) => openLightbox(newest, i)}
-          recentMap={recentVotes}
-        />
-      )}
+          {/* 🆕 Just Submitted */}
+          {newest.length > 0 && (
+            <Row
+              icon="🆕"
+              title="Just Submitted"
+              subtitle="Newest entries — give them their first vote"
+              items={newest}
+              overlordNames={overlordNames}
+              onCardClick={(i) => openLightbox(newest, i)}
+              recentMap={recentVotes}
+            />
+          )}
 
-      {/* 💎 Hidden Gems */}
-      {hiddenGems.length > 0 && (
-        <Row
-          icon="💎"
-          title="Hidden Gems"
-          subtitle="Fewer than 10 votes — discover something new"
-          items={hiddenGems}
-          overlordNames={overlordNames}
-          onCardClick={(i) => openLightbox(hiddenGems, i)}
-          recentMap={recentVotes}
-        />
-      )}
+          {/* 💎 Hidden Gems */}
+          {hiddenGems.length > 0 && (
+            <Row
+              icon="💎"
+              title="Hidden Gems"
+              subtitle="Fewer than 10 votes — discover something new"
+              items={hiddenGems}
+              overlordNames={overlordNames}
+              onCardClick={(i) => openLightbox(hiddenGems, i)}
+              recentMap={recentVotes}
+            />
+          )}
 
-      {/* 🥇 All-Time Leaders */}
-      {leaders.length > 0 && (
-        <Row
-          icon="🥇"
-          title="All-Time Leaders"
-          subtitle="Top total vote counts"
-          items={leaders}
-          overlordNames={overlordNames}
-          onCardClick={(i) => openLightbox(leaders, i)}
-          recentMap={recentVotes}
-        />
+          {/* 🥇 All-Time Leaders */}
+          {leaders.length > 0 && (
+            <Row
+              icon="🥇"
+              title="All-Time Leaders"
+              subtitle="Top total vote counts"
+              items={leaders}
+              overlordNames={overlordNames}
+              onCardClick={(i) => openLightbox(leaders, i)}
+              recentMap={recentVotes}
+            />
+          )}
+        </>
       )}
 
       {/* All Submissions — full filterable grid */}
@@ -349,7 +369,9 @@ export default function EnhancedGallery({ items, recentVotes, overlordNames, ove
                 <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#fff', marginRight: 8 }}>
                   {lightbox.index + 1} / {lightbox.list.length}
                 </span>
-                <VoteButton recordId={currentItem.id} initialVotes={currentItem.votes ?? 0} size="lg" />
+                {VOTING_ENABLED && (
+                  <VoteButton recordId={currentItem.id} initialVotes={currentItem.votes ?? 0} size="lg" />
+                )}
                 <ShareButton recordId={currentItem.id} title={currentItem.title} contributor={currentItem.contributor} imageUrl={currentItem.src} size="lg" />
                 <button onClick={closeLightbox} style={{ padding: 8, background: 'none', border: 'none', cursor: 'pointer', color: '#fff' }} title="Close (Esc)">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -522,16 +544,20 @@ function Card({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent" />
 
-        {/* Always-visible vote count pill (top-left) */}
-        <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 2, display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(0,0,0,0.7)', padding: '4px 8px', border: '1px solid rgba(255,255,255,0.25)', backdropFilter: 'blur(2px)' }}>
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="#ff5a66" stroke="#ff5a66" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#fff', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
-            {item.votes ?? 0}
-          </span>
-          <span style={{ fontFamily: 'monospace', fontSize: 9, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.1em', marginLeft: 2 }}>
-            VOTES
-          </span>
-        </div>
+        {/* Always-visible vote count pill (top-left)
+            Hidden while VOTING_ENABLED is false so we don't surface stale
+            counters during the submission window. */}
+        {VOTING_ENABLED && (
+          <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 2, display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(0,0,0,0.7)', padding: '4px 8px', border: '1px solid rgba(255,255,255,0.25)', backdropFilter: 'blur(2px)' }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="#ff5a66" stroke="#ff5a66" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#fff', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+              {item.votes ?? 0}
+            </span>
+            <span style={{ fontFamily: 'monospace', fontSize: 9, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.1em', marginLeft: 2 }}>
+              VOTES
+            </span>
+          </div>
+        )}
 
         {/* Trend badge (when this card came from the Trending row) */}
         {showTrendBadge && recent > 0 && (
@@ -578,7 +604,9 @@ function Card({
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <VoteButton recordId={item.id} initialVotes={item.votes ?? 0} size="xl" />
+            {VOTING_ENABLED && (
+              <VoteButton recordId={item.id} initialVotes={item.votes ?? 0} size="xl" />
+            )}
             <ShareButton recordId={item.id} title={item.title} contributor={item.contributor} imageUrl={item.src} size="xl" />
           </div>
         ) : (
@@ -586,7 +614,9 @@ function Card({
             style={{ position: 'absolute', top: 8, right: 8, zIndex: 2, display: 'flex', gap: 6 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <VoteButton recordId={item.id} initialVotes={item.votes ?? 0} size="sm" />
+            {VOTING_ENABLED && (
+              <VoteButton recordId={item.id} initialVotes={item.votes ?? 0} size="sm" />
+            )}
             <ShareButton recordId={item.id} title={item.title} contributor={item.contributor} imageUrl={item.src} size="sm" />
           </div>
         )}

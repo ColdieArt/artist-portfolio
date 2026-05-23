@@ -260,18 +260,36 @@ export default function SubjPage({ params }: { params: { id: string } }) {
 
       <div className="line-accent" />
 
-      {/* ── Submissions Gallery + Voting ── */}
+      {/* ── Submissions Gallery + Voting ──
+          NOTE: voting is paused during the submission window. The
+          EnhancedGallery component (rendered by <UserExports multiRow>)
+          reads its own VOTING_ENABLED flag to hide the banner, curated
+          rows, and per-card vote controls. To re-open voting after
+          submissions close: flip VOTING_ENABLED back to true in
+          src/components/EnhancedGallery.tsx and restore the original
+          header copy below (kept verbatim in a JSX comment for easy
+          recovery). */}
       <section className="py-8 md:py-12 section-padding">
         <div className="page-container">
           <ScrollReveal>
             <div className="mb-6">
               <div className="classified-header">Submitted for Consideration</div>
               <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em]">
+                Submissions Gallery
+              </h2>
+              <p className="font-mono text-sm text-white mt-3">
+                Browse every entry as they come in. Voting opens once the
+                submission window closes — check back to pick the Community
+                Pick winner.
+              </p>
+              {/* ─── ORIGINAL VOTING-OPEN COPY (restore when voting reopens) ───
+              <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em]">
                 Community Vote
               </h2>
               <p className="font-mono text-sm text-white mt-3">
                 One vote per visitor, per day. The piece with the most votes when the event closes wins the Community Pick.
               </p>
+              ─── END ─── */}
             </div>
           </ScrollReveal>
 
