@@ -15,7 +15,12 @@ const BioCoder = dynamic(() => import('@/components/BioCoder'), {
 export default function HomePage() {
   return (
     <>
-      {/* ── Hero - Noir Dossier ── */}
+      {/* ── Hero - Noir Dossier ──
+          ⚠️ TEMPORARILY HIDDEN while the SUBJ:01 CTA block below acts as
+          the homepage hero (i.e. during an active competition window).
+          Flip the `false &&` to bring this hero back as the top module.
+          Do NOT delete the markup. */}
+      {false && (
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
         {/* Particle background with pixelated blocks */}
         <ParticleNetwork />
@@ -92,19 +97,20 @@ export default function HomePage() {
           </svg>
         </div>
       </section>
+      )}
 
-      {/* ── SUBJ:01 — Active competition CTA ──
+      {/* ── SUBJ:01 — Active competition CTA (now serving as the HERO) ──
           Funnels homepage visitors straight into the live competition page.
           The big white button is a 1:1 visual replica of the SUBJ:01 chip in
           the top nav (mono / uppercase / 0.2em tracking / bg-white text-black)
           just scaled way up so it can't be missed.
 
-          ⚠️ HIDDEN BETWEEN COMPETITIONS.
-          To bring this back when SUBJ:02 (or any future round) opens,
-          flip the `false` below to `true` and update the copy/dates as needed.
-          Do NOT delete the markup — it's intentionally kept in place. */}
-      {false && (
-      <section className="relative py-24 md:py-32 section-padding bg-black border-y border-white/10">
+          NOTE: While the Noir Dossier hero block above is gated off, this
+          section takes the hero slot (min-h-screen, flex-centered). Between
+          competitions, hide this with `{false && (…)}` and re-enable the
+          hero block above so the homepage falls back to the Noir Dossier
+          intro. Both blocks are intentionally retained. */}
+      <section className="relative min-h-screen flex items-center py-24 md:py-32 section-padding bg-black">
         <div className="page-container">
           <ScrollReveal>
             <div className="max-w-4xl mx-auto text-center">
@@ -165,7 +171,6 @@ export default function HomePage() {
           </ScrollReveal>
         </div>
       </section>
-      )}
 
       {/* ── Overlord Dossiers on Scroll ── */}
       <section className="relative py-32 section-padding bg-black grid-lines">
