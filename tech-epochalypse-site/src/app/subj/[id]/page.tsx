@@ -84,6 +84,44 @@ export default function SubjPage({ params }: { params: { id: string } }) {
         </div>
       </section>
 
+      {/* ── Mission Brief / Prompt ──
+          Three-step prompt that orients first-time visitors before they
+          dive into the Pick-Your-Overlord grid + Brief sidebar. Lives
+          right under the compact header so it's the first interactive
+          thing visitors see after the SUBJ:01 title. */}
+      <section className="pb-6 md:pb-8 section-padding">
+        <div className="page-container">
+          <ScrollReveal delay={50}>
+            <div className="border border-white/15 bg-white/[0.02] p-5 md:p-7 max-w-4xl">
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/50 mb-4">
+                Mission Brief — Prompt
+              </div>
+              <ol className="space-y-3 md:space-y-4">
+                <li className="flex gap-4 md:gap-5 items-start">
+                  <span className="font-mono text-xl md:text-2xl text-white/30 leading-none flex-shrink-0 mt-0.5 tabular-nums">01</span>
+                  <span className="font-mono text-sm md:text-base text-white leading-relaxed">
+                    Pick your overlord.
+                  </span>
+                </li>
+                <li className="flex gap-4 md:gap-5 items-start">
+                  <span className="font-mono text-xl md:text-2xl text-white/30 leading-none flex-shrink-0 mt-0.5 tabular-nums">02</span>
+                  <span className="font-mono text-sm md:text-base text-white leading-relaxed">
+                    Create work about how this person is affecting the world around us{' '}
+                    <span className="text-white/60">(for good, or bad)</span>.
+                  </span>
+                </li>
+                <li className="flex gap-4 md:gap-5 items-start">
+                  <span className="font-mono text-xl md:text-2xl text-white/30 leading-none flex-shrink-0 mt-0.5 tabular-nums">03</span>
+                  <span className="font-mono text-sm md:text-base text-white leading-relaxed">
+                    Use Coldie&rsquo;s assets and upload your own.
+                  </span>
+                </li>
+              </ol>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
       <div className="line-accent" />
 
       {/* ── Main two-column: 60% Overlords  |  40% Brief ── */}
