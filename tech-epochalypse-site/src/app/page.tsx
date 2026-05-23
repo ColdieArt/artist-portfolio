@@ -97,7 +97,13 @@ export default function HomePage() {
           Funnels homepage visitors straight into the live competition page.
           The big white button is a 1:1 visual replica of the SUBJ:01 chip in
           the top nav (mono / uppercase / 0.2em tracking / bg-white text-black)
-          just scaled way up so it can't be missed. */}
+          just scaled way up so it can't be missed.
+
+          ⚠️ HIDDEN BETWEEN COMPETITIONS.
+          To bring this back when SUBJ:02 (or any future round) opens,
+          flip the `false` below to `true` and update the copy/dates as needed.
+          Do NOT delete the markup — it's intentionally kept in place. */}
+      {false && (
       <section className="relative py-24 md:py-32 section-padding bg-black border-y border-white/10">
         <div className="page-container">
           <ScrollReveal>
@@ -159,6 +165,7 @@ export default function HomePage() {
           </ScrollReveal>
         </div>
       </section>
+      )}
 
       {/* ── Overlord Dossiers on Scroll ── */}
       <section className="relative py-32 section-padding bg-black grid-lines">
