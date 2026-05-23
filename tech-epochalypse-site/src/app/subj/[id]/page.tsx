@@ -13,6 +13,16 @@ const UserExports = dynamic(() => import('@/components/UserExports'), {
   ),
 })
 
+// ⚠️ SHOW_SUBMISSIONS_GALLERY = false while the submission window is open.
+// When false:
+//   - The <UserExports> block (curated rows + "All Submissions" grid) is
+//     not rendered on /subj/<id>. Visitors see the brief + Pick-Your-Overlord
+//     grid + the section header explaining the gallery will reveal later.
+// Flip to true to expose the live submissions gallery once the submission
+// window closes. The <UserExports> JSX is intentionally kept in place
+// below so re-enabling is a one-line edit.
+const SHOW_SUBMISSIONS_GALLERY = false
+
 // Each SUBJ event registered here. Add new IDs (02, 03, …) as future
 // competitions launch; everything else 404s automatically.
 type SubjEvent = {
@@ -261,14 +271,19 @@ export default function SubjPage({ params }: { params: { id: string } }) {
       <div className="line-accent" />
 
       {/* ── Submissions Gallery + Voting ──
-          NOTE: voting is paused during the submission window. The
-          EnhancedGallery component (rendered by <UserExports multiRow>)
-          reads its own VOTING_ENABLED flag to hide the banner, curated
-          rows, and per-card vote controls. To re-open voting after
-          submissions close: flip VOTING_ENABLED back to true in
-          src/components/EnhancedGallery.tsx and restore the original
-          header copy below (kept verbatim in a JSX comment for easy
-          recovery). */}
+          NOTE: BOTH the gallery and voting are paused during the submission
+          window:
+            • The <UserExports> block (curated rows + All Submissions grid)
+              is gated by the SHOW_SUBMISSIONS_GALLERY constant below.
+            • Inside EnhancedGallery.tsx, VOTING_ENABLED additionally hides
+              the vote banner, per-card heart buttons, and lightbox vote.
+          To bring the gallery back when submissions close:
+            1. Flip SHOW_SUBMISSIONS_GALLERY → true (below).
+            2. Optionally flip VOTING_ENABLED → true in EnhancedGallery.tsx
+               to also reveal voting rows / heart buttons.
+            3. Restore the original "Community Vote" copy from the JSX
+               comment block below.
+          All code paths are intentionally retained. */}
       <section className="py-8 md:py-12 section-padding">
         <div className="page-container">
           <ScrollReveal>
@@ -278,9 +293,9 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                 Submissions Gallery
               </h2>
               <p className="font-mono text-sm text-white mt-3">
-                Browse every entry as they come in. Voting opens once the
-                submission window closes — check back to pick the Community
-                Pick winner.
+                The submissions gallery reveals once the submission window
+                closes. Voting opens at the same time — check back to pick
+                the Community Pick winner.
               </p>
               {/* ─── ORIGINAL VOTING-OPEN COPY (restore when voting reopens) ───
               <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em]">
@@ -293,12 +308,14 @@ export default function SubjPage({ params }: { params: { id: string } }) {
             </div>
           </ScrollReveal>
 
-          <UserExports
-            overlordNames={overlordNames}
-            overlordSlugs={overlordSlugs}
-            category="general submission"
-            multiRow
-          />
+          {SHOW_SUBMISSIONS_GALLERY && (
+            <UserExports
+              overlordNames={overlordNames}
+              overlordSlugs={overlordSlugs}
+              category="general submission"
+              multiRow
+            />
+          )}
         </div>
       </section>
     </div>
