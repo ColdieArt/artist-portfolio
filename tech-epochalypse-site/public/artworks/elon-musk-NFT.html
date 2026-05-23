@@ -4398,8 +4398,23 @@ function updateOrbitalUIPosition() {
     const lc = document.getElementById('left-ui-container');
     if (lc) {
         const lcRect = lc.getBoundingClientRect();
-        ui.style.left = '16px';
-        ui.style.top  = (lcRect.bottom + 8) + 'px';
+        // Align the toolbar's LEFT edge with the buttons inside the left-ui-container
+        // (the container's outer rect includes its padding; the buttons sit at +padL).
+        const _lc      = document.getElementById('left-ui-container');
+        const _lcStyle = _lc ? window.getComputedStyle(_lc) : null;
+        const _padL    = _lcStyle ? (parseFloat(_lcStyle.paddingLeft)   || 0) : 0;
+        const _padB    = _lcStyle ? (parseFloat(_lcStyle.paddingBottom) || 8) : 8;
+        ui.style.left = (lcRect.left + _padL) + 'px';
+        // If the collapse-arrow chevron is visible, stack BELOW it so the toolbar
+        // no longer overlaps it. Gap matches the container's bottom padding so the
+        // spacing reads the same as the gap above the chevron.
+        const _arrow = document.getElementById('arrow-container');
+        let _topY = lcRect.bottom;
+        if (_arrow && window.getComputedStyle(_arrow).display !== 'none') {
+            const _aRect = _arrow.getBoundingClientRect();
+            if (_aRect.bottom > _topY) _topY = _aRect.bottom;
+        }
+        ui.style.top  = (_topY + _padB) + 'px';
     } else {
         ui.style.left = '16px';
         ui.style.top = '80px';
