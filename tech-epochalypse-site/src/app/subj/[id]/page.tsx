@@ -181,7 +181,13 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                     <ul className="space-y-1 ml-1">
                       <li className="flex gap-1.5"><span className="shrink-0">&rarr;</span><span><strong>Curator&rsquo;s Pick 1</strong> &mdash; Coldie picks &mdash; Edition of 10</span></li>
                       <li className="flex gap-1.5"><span className="shrink-0">&rarr;</span><span><strong>Curator&rsquo;s Pick 2</strong> &mdash; Coldie picks &mdash; Edition of 10</span></li>
-                      <li className="flex gap-1.5"><span className="shrink-0">&rarr;</span><span><strong>Community Pick</strong> &mdash; most votes &mdash; Edition of 42</span></li>
+                      <li className="flex gap-1.5">
+                        <span className="shrink-0">&rarr;</span>
+                        <span>
+                          <strong>Community Pick</strong> &mdash; most votes &mdash; Edition of 42
+                          <span className="block italic text-black/60 mt-0.5">Voting happens once submissions close.</span>
+                        </span>
+                      </li>
                     </ul>
                     <p className="mt-2 text-[10px] text-black/70">
                       Winning artists keep 80% of primary + secondary royalties.
