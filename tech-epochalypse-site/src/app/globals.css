@@ -28,6 +28,14 @@
     color: white;
   }
 
+  /* Selection on white-card surfaces (e.g. the /subj brief sidebar) needs
+     an opaque dark background so highlighted text stays legible. */
+  .subj-brief ::selection,
+  .subj-brief::selection {
+    background: #000;
+    color: #fff;
+  }
+
   ::-webkit-scrollbar {
     width: 4px;
   }

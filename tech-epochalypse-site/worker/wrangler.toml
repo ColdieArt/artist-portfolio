@@ -6,6 +6,11 @@ compatibility_date = "2024-12-01"
 binding = "GALLERY_BUCKET"
 bucket_name = "te-gallery"
 
+[[kv_namespaces]]
+binding = "VOTES_KV"
+id = "fcc59bfffd714fefa4373b4c0d26329b"
+preview_id = "f1c70412fc2b42e9a0321c2640c4a974"
+
 # Airtable integration — set these secrets via:
 #   npx wrangler secret put AIRTABLE_PAT
 #   npx wrangler secret put AIRTABLE_BASE_ID

@@ -475,11 +475,11 @@
     }
     #orbital-transform-ui .orb-mode-btn {
       background: #0a0a0a;
-      color: #888;
-      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
+      border: 0.5px solid rgba(255,255,255,0.7);
       padding: 8px 4px 6px;
       font-family: monospace;
-      font-size: 8px;
+      font-size: 9px;
       letter-spacing: 1.2px;
       text-transform: uppercase;
       cursor: pointer;
@@ -491,8 +491,8 @@
       transition: border-color 0.15s, color 0.15s, background 0.15s;
     }
     #orbital-transform-ui .orb-mode-btn:hover {
-      border-color: rgba(255,255,255,0.4);
-      color: #ddd;
+      border-color: rgba(255,255,255,1);
+      color: #fff;
     }
     #orbital-transform-ui .orb-mode-btn.active {
       background: #fff;
@@ -504,7 +504,7 @@
       line-height: 1;
     }
     #orbital-transform-ui .orb-mode-label {
-      font-size: 8px;
+      font-size: 9px;
       letter-spacing: 1.2px;
     }
     #orbital-transform-ui .orb-mode-hotkey {
@@ -540,10 +540,10 @@
       width: 100%;
       margin-top: 8px;
       background: transparent;
-      border: 0.5px solid rgba(255,255,255,0.15);
-      color: #555;
+      border: 0.5px solid rgba(255,255,255,0.7);
+      color: #fff;
       font-family: monospace;
-      font-size: 8px;
+      font-size: 9px;
       letter-spacing: 1.5px;
       text-transform: uppercase;
       padding: 5px 0;
@@ -551,8 +551,8 @@
       transition: border-color 0.15s, color 0.15s;
     }
     #orbital-transform-ui .orb-reset-btn:hover {
-      border-color: rgba(255,255,255,0.45);
-      color: #ccc;
+      border-color: rgba(255,255,255,1);
+      color: #fff;
     }
     /* Duplicate / Trash action row */
     #orbital-transform-ui .orb-action-row {
@@ -565,7 +565,7 @@
     #orbital-transform-ui .orb-trash-btn {
       background: transparent;
       font-family: monospace;
-      font-size: 8px;
+      font-size: 9px;
       letter-spacing: 1.2px;
       text-transform: uppercase;
       padding: 5px 0;
@@ -573,20 +573,20 @@
       transition: border-color 0.15s, color 0.15s;
     }
     #orbital-transform-ui .orb-duplicate-btn {
-      border: 0.5px solid rgba(255,255,255,0.15);
-      color: #555;
+      border: 0.5px solid rgba(255,255,255,0.7);
+      color: #fff;
     }
     #orbital-transform-ui .orb-duplicate-btn:hover {
-      border-color: rgba(255,255,255,0.45);
-      color: #ccc;
+      border-color: rgba(255,255,255,1);
+      color: #fff;
     }
     #orbital-transform-ui .orb-trash-btn {
-      border: 0.5px solid rgba(180,40,40,0.45);
-      color: #833;
+      border: 0.5px solid rgba(255,90,102,0.75);
+      color: #ff5a66;
     }
     #orbital-transform-ui .orb-trash-btn:hover {
-      border-color: rgba(220,60,60,0.9);
-      color: #e55;
+      border-color: rgba(255,120,130,1);
+      color: #ff8a95;
     }
 
   </style>
@@ -4377,8 +4377,23 @@ function updateOrbitalUIPosition() {
     if (!ui || !leftUiContainer) return;
     // Lock below the left UI container, flush to the same 16px left edge (matching PRINT)
     const lcRect = leftUiContainer.getBoundingClientRect();
-    ui.style.left = '16px';
-    ui.style.top  = (lcRect.bottom + 8) + 'px';
+    // Align the toolbar's LEFT edge with the buttons inside the left-ui-container
+    // (the container's outer rect includes its padding; the buttons sit at +padL).
+    const _lc      = document.getElementById('left-ui-container');
+    const _lcStyle = _lc ? window.getComputedStyle(_lc) : null;
+    const _padL    = _lcStyle ? (parseFloat(_lcStyle.paddingLeft)   || 0) : 0;
+    const _padB    = _lcStyle ? (parseFloat(_lcStyle.paddingBottom) || 8) : 8;
+    ui.style.left = (lcRect.left + _padL) + 'px';
+    // If the collapse-arrow chevron is visible, stack BELOW it so the toolbar
+    // no longer overlaps it. Gap matches the container's bottom padding so the
+    // spacing reads the same as the gap above the chevron.
+    const _arrow = document.getElementById('arrow-container');
+    let _topY = lcRect.bottom;
+    if (_arrow && window.getComputedStyle(_arrow).display !== 'none') {
+        const _aRect = _arrow.getBoundingClientRect();
+        if (_aRect.bottom > _topY) _topY = _aRect.bottom;
+    }
+    ui.style.top  = (_topY + _padB) + 'px';
     ui.style.transform = '';
 }
 

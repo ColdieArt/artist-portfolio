@@ -15,7 +15,12 @@ const BioCoder = dynamic(() => import('@/components/BioCoder'), {
 export default function HomePage() {
   return (
     <>
-      {/* ── Hero - Noir Dossier ── */}
+      {/* ── Hero - Noir Dossier ──
+          ⚠️ TEMPORARILY HIDDEN while the SUBJ:01 CTA block below acts as
+          the homepage hero (i.e. during an active competition window).
+          Flip the `false &&` to bring this hero back as the top module.
+          Do NOT delete the markup. */}
+      {false && (
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
         {/* Particle background with pixelated blocks */}
         <ParticleNetwork />
@@ -90,6 +95,80 @@ export default function HomePage() {
           <svg width="20" height="20" viewBox="0 0 16 16" fill="none" className="animate-bounce">
             <path d="M4 6l4 4 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.8"/>
           </svg>
+        </div>
+      </section>
+      )}
+
+      {/* ── SUBJ:01 — Active competition CTA (now serving as the HERO) ──
+          Funnels homepage visitors straight into the live competition page.
+          The big white button is a 1:1 visual replica of the SUBJ:01 chip in
+          the top nav (mono / uppercase / 0.2em tracking / bg-white text-black)
+          just scaled way up so it can't be missed.
+
+          NOTE: While the Noir Dossier hero block above is gated off, this
+          section takes the hero slot (min-h-screen, flex-centered). Between
+          competitions, hide this with `{false && (…)}` and re-enable the
+          hero block above so the homepage falls back to the Noir Dossier
+          intro. Both blocks are intentionally retained. */}
+      <section className="relative min-h-screen flex items-center py-24 md:py-32 section-padding bg-black">
+        <div className="page-container">
+          <ScrollReveal>
+            <div className="max-w-4xl mx-auto text-center">
+              {/* Live status pill */}
+              <div className="inline-flex items-center gap-2.5 mb-6">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: '#ff5a66' }} />
+                  <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: '#ff5a66' }} />
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: '#ff5a66' }}>
+                  Now Live — Submissions Open
+                </span>
+              </div>
+
+              {/* Classified header */}
+              <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/60 mb-3">
+                Tech Epochalypse Remix Competition
+              </p>
+
+              {/* Title — display font, big */}
+              <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-white uppercase tracking-[0.03em] leading-[0.95] mb-6">
+                SUBJ:&nbsp;01
+                <span className="block text-3xl md:text-5xl lg:text-6xl mt-3 text-white/70">
+                  The Singularity
+                </span>
+              </h2>
+
+              {/* Overview — same copy used on /subj/01's header */}
+              <p className="font-mono text-base md:text-lg text-white/80 leading-relaxed max-w-2xl mx-auto mb-10">
+                Five tech overlords, each a face of the Singularity. Pick one,
+                remix it in Coldie&rsquo;s editor, and submit your own parallax
+                collage. Use Coldie&rsquo;s assets, upload your own, or both —
+                all entries compete equally.
+              </p>
+
+              {/* The big button — same recipe as the nav chip, scaled ~3x */}
+              <Link
+                href="/subj/01"
+                className="group inline-flex items-center gap-4 font-mono text-base md:text-xl uppercase tracking-[0.2em] bg-white text-black px-10 md:px-16 py-5 md:py-7 hover:bg-white/90 transition-colors duration-300"
+              >
+                <span>Enter SUBJ:&nbsp;01</span>
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="none" className="transition-transform duration-300 group-hover:translate-x-1">
+                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
+
+              {/* Quick facts row */}
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 font-mono text-[10px] uppercase tracking-[0.2em] text-white/40">
+                <span>Free to enter</span>
+                <span className="hidden sm:inline w-px h-3 bg-white/20" />
+                <span>1 submission per person</span>
+                <span className="hidden sm:inline w-px h-3 bg-white/20" />
+                <span>3 winners</span>
+                <span className="hidden sm:inline w-px h-3 bg-white/20" />
+                <span>Artists keep 80%</span>
+              </div>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 

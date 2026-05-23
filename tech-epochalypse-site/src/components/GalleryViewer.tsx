@@ -1,6 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import TurnstileProvider from './TurnstileProvider'
+import VoteButton from './VoteButton'
+import ShareButton from './ShareButton'
 
 export interface GalleryItem {
   id: string
@@ -10,6 +13,7 @@ export interface GalleryItem {
   contributor: string
   date: string
   overlord: string
+  votes?: number
 }
 
 interface Props {
@@ -148,6 +152,38 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
     }
   }, [lightboxOpen])
 
+  // ── Deep-link sync: read ?p=<recordId> on mount, write it as lightbox moves ──
+  // Lets shareable links like /subj/01?p=recXXX auto-open the right submission
+  // and keeps the address bar updated as users navigate so any URL is shareable.
+  const didHydrateFromUrlRef = useRef(false)
+  useEffect(() => {
+    if (didHydrateFromUrlRef.current) return
+    didHydrateFromUrlRef.current = true
+    if (typeof window === 'undefined') return
+    try {
+      const p = new URLSearchParams(window.location.search).get('p')
+      if (!p) return
+      const idx = filtered.findIndex((i) => i.id === p)
+      if (idx >= 0) setLightboxIndex(idx)
+    } catch { /* ignore */ }
+    // Intentionally depend on `filtered` so the search runs after items load,
+    // but guard with the ref so we only hydrate once.
+  }, [filtered])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const url = new URL(window.location.href)
+      if (lightboxIndex !== null) {
+        const item = activeList[lightboxIndex]
+        if (item) url.searchParams.set('p', item.id)
+      } else {
+        url.searchParams.delete('p')
+      }
+      window.history.replaceState(null, '', url.toString())
+    } catch { /* ignore */ }
+  }, [lightboxIndex, activeList])
+
   // Handle native dialog cancel (browser Escape key fires this)
   useEffect(() => {
     const dialog = dialogRef.current
@@ -201,7 +237,7 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
   const currentItem = lightboxIndex !== null ? activeList[lightboxIndex] : null
 
   return (
-    <>
+    <TurnstileProvider>
       {/* ── Filter Bar ── */}
       <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
         <span className="font-mono text-xs uppercase tracking-[0.2em] text-white mr-2">
@@ -280,9 +316,12 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
       {filtered.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {filtered.map((item, i) => (
-            <button
+            <div
               key={item.id}
+              role="button"
+              tabIndex={0}
               onClick={() => openLightbox(i)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(i) } }}
               className="group relative bg-charcoal/30 border border-white/5 overflow-hidden card-hover text-left cursor-pointer focus:outline-none focus:border-white/20"
             >
               <div className="aspect-video relative overflow-hidden bg-charcoal" style={{ aspectRatio: '16/9' }}>
@@ -318,8 +357,14 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                     </span>
                   </div>
                 </div>
+
+                {/* Vote + Share buttons (top-right of card) */}
+                <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 2, display: 'flex', gap: '6px' }}>
+                  <VoteButton recordId={item.id} initialVotes={item.votes ?? 0} size="sm" />
+                  <ShareButton recordId={item.id} title={item.title} contributor={item.contributor} imageUrl={item.src} size="sm" />
+                </div>
               </div>
-            </button>
+            </div>
           ))}
         </div>
       ) : (
@@ -360,6 +405,12 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
                 <span className="font-mono" style={{ fontSize: '11px', color: 'white', marginRight: '8px' }}>
                   {lightboxIndex! + 1} / {activeList.length}
                 </span>
+
+                {/* Vote + Share buttons (in lightbox top-bar) */}
+                <div style={{ marginRight: '8px', display: 'flex', gap: '6px' }}>
+                  <VoteButton recordId={currentItem.id} initialVotes={currentItem.votes ?? 0} size="lg" />
+                  <ShareButton recordId={currentItem.id} title={currentItem.title} contributor={currentItem.contributor} imageUrl={currentItem.src} size="lg" />
+                </div>
 
                 {/* Slideshow toggle */}
                 <button
@@ -495,7 +546,10 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
         }
         .lightbox-dialog[open] {
           display: grid;
-          grid-template-rows: auto 1fr auto;
+          /* minmax(0, 1fr) is the canonical "let me shrink below content" trick —
+             without it the 1fr track inherits an auto minimum from the image
+             and grows past the viewport, pushing the bottom bar off-screen. */
+          grid-template-rows: auto minmax(0, 1fr) auto;
           animation: lightbox-fade-in 0.2s ease-out;
         }
         @keyframes lightbox-fade-in {
@@ -517,36 +571,26 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
         }
         .lightbox-image-area {
           position: relative;
-          display: grid;
-          place-items: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           overflow: hidden;
           min-height: 0;
+          min-width: 0;
         }
+        /* Hard viewport-unit caps guarantee the image never exceeds the
+           screen, regardless of how the grid resolves the parent track.
+           ~100px accounts for the top + bottom bars together. dvh handles
+           mobile browser chrome correctly. */
         .lightbox-img {
-          max-width: 100%;
-          max-height: 100%;
-          object-fit: contain;
           display: block;
+          max-width: 100vw;
+          max-height: calc(100dvh - 100px);
+          width: auto;
+          height: auto;
+          object-fit: contain;
+          object-position: center;
           filter: contrast(1.1);
-        }
-        /* Landscape: fill 100% height, auto width, centered */
-        @media (orientation: landscape) {
-          .lightbox-image-area {
-            align-items: stretch;
-            justify-items: center;
-          }
-          .lightbox-img {
-            height: 100%;
-            width: auto;
-            object-position: center;
-          }
-        }
-        /* Portrait: fill 100% width, auto height, centered */
-        @media (orientation: portrait) {
-          .lightbox-img {
-            width: 100%;
-            height: auto;
-          }
         }
         .lightbox-nav {
           position: absolute;
@@ -583,6 +627,6 @@ export default function GalleryViewer({ items, overlordNames, overlordSlugs }: P
           to { width: 100%; }
         }
       `}</style>
-    </>
+    </TurnstileProvider>
   )
 }

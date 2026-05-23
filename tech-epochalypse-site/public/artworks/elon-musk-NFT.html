@@ -130,6 +130,28 @@
     #export-panel .status-line.active { color: #4c4; }
     #export-panel .status-line.error   { color: #e66; }
 
+    /* ─── SUBMIT TO THE OVERLORD BUTTON ─── */
+    #submit-overlord-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 200;
+      background: #000;
+      color: #fff;
+      border: 2px solid #fff;
+      padding: 14px 24px;
+      font-family: monospace;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    #submit-overlord-btn:hover {
+      background: #1a1a1a;
+      border-color: #ccc;
+    }
+
     /* ─── POST TO X MODAL ─── */
     #post-modal {
       position: fixed;
@@ -174,249 +196,6 @@
       transition: background 0.2s;
     }
     #post-modal-btn:hover { background: #1a8cd8; }
-
-    /* ─── PRINT BUTTON (bottom-left) ─── */
-    #print-btn {
-      position: fixed;
-      bottom: 16px;
-      left: 16px;
-      z-index: 250;
-      background: #000;
-      color: #fff;
-      border: 1px solid #fff;
-      padding: 10px 22px;
-      font-family: monospace;
-      font-size: 12px;
-      font-weight: bold;
-      letter-spacing: 2px;
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    #print-btn:hover {
-      background: #1a1a1a;
-      border-color: #aaa;
-    }
-
-    /* ─── RESET BUTTON (bottom-left, above PRINT) ─── */
-    #reset-btn {
-      position: fixed;
-      bottom: 72px; /* 16px PRINT bottom + ~40px PRINT height + 16px gap */
-      left: 16px;
-      z-index: 250;
-      background: #000;
-      color: #fff;
-      border: 1px solid #fff;
-      padding: 10px 22px;
-      font-family: monospace;
-      font-size: 12px;
-      font-weight: bold;
-      letter-spacing: 2px;
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    #reset-btn:hover {
-      background: #1a1a1a;
-      border-color: #aaa;
-    }
-
-    /* ─── PRINT ORDER MODAL ─── */
-    #print-modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
-      display: none;
-      z-index: 400;
-      align-items: center;
-      justify-content: center;
-    }
-    #print-modal-overlay.open {
-      display: flex;
-    }
-    #print-modal-content {
-      background: rgba(0,0,0,0.95);
-      border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 4px;
-      padding: 28px 32px;
-      text-align: center;
-      font-family: monospace;
-      color: #fff;
-      max-width: 380px;
-      width: 90%;
-    }
-    #print-modal-content h2 {
-      margin: 0 0 16px 0;
-      font-size: 16px;
-      letter-spacing: 2px;
-      font-weight: bold;
-      text-transform: uppercase;
-    }
-    #print-modal-content p {
-      margin: 0 0 20px 0;
-      font-size: 10px;
-      color: #aaa;
-      line-height: 1.6;
-    }
-    #print-email-input,
-    .print-input {
-      width: 100%;
-      box-sizing: border-box;
-      background: #111;
-      border: 1px solid #333;
-      color: #fff;
-      padding: 12px 14px;
-      font-family: monospace;
-      font-size: 11px;
-      outline: none;
-      margin: 0;
-      cursor: pointer;
-    }
-    .print-input + .print-input { margin-top: 12px; }
-    .print-input.active {
-      border-color: #fff;
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.4);
-    }
-    #print-fields {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      margin-bottom: 24px;
-    }
-    #print-email-input:focus,
-    .print-input:focus {
-      border-color: #666;
-    }
-    /* ─── ON-SCREEN KEYBOARD (80% scale of mashup-lisbon) ─── */
-    #virtual-keyboard {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      margin-bottom: 14px;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    #virtual-keyboard .kb-row {
-      display: flex;
-      justify-content: center;
-      gap: 3px;
-    }
-    #virtual-keyboard .kb-key {
-      background: #222;
-      color: #fff;
-      border: 1px solid #444;
-      border-radius: 4px;
-      font-family: monospace;
-      font-size: 12px;
-      min-width: 26px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background 0.1s;
-      padding: 0 6px;
-      flex-shrink: 0;
-    }
-    #virtual-keyboard .kb-key:active,
-    #virtual-keyboard .kb-key.pressed {
-      background: #555;
-      border-color: #888;
-    }
-    #virtual-keyboard .kb-key.wide {
-      min-width: 48px;
-      font-size: 10px;
-      letter-spacing: 1px;
-    }
-    #virtual-keyboard .kb-key.space {
-      flex: 1;
-      max-width: 200px;
-    }
-    #virtual-keyboard .kb-domains .kb-key {
-      flex: 1;
-      min-width: 0;
-      font-size: 9px;
-      padding: 0 4px;
-      letter-spacing: 0;
-    }
-    #print-submit-btn {
-      background: #fff;
-      color: #000;
-      border: none;
-      padding: 12px 30px;
-      font-family: monospace;
-      font-size: 11px;
-      font-weight: bold;
-      cursor: pointer;
-      letter-spacing: 1px;
-      transition: background 0.2s;
-      width: 100%;
-    }
-    #print-submit-btn:hover { background: #ddd; }
-    #print-submit-btn:disabled {
-      background: #333;
-      color: #666;
-      cursor: not-allowed;
-    }
-    #print-status {
-      margin: 12px 0 0 0;
-      font-family: monospace;
-      font-size: 11px;
-      text-align: center;
-      min-height: 16px;
-    }
-    /* ─── PRINT SUCCESS VIEW (overrides max-width when shown) ─── */
-    #print-modal-content.success-view { max-width: 480px; }
-    #print-success { display: none; }
-    #print-modal-content.success-view #print-form { display: none; }
-    #print-modal-content.success-view #print-success { display: block; }
-    #print-success .print-number {
-      font-size: 36px;
-      font-weight: bold;
-      letter-spacing: 4px;
-      color: #fff;
-      margin: 8px 0 14px;
-      font-family: monospace;
-    }
-    #print-success .print-number.local { color: #ffb84d; }
-    #print-success .print-thumb {
-      max-width: 100%;
-      max-height: 320px;
-      border: 1px solid rgba(255,255,255,0.18);
-      margin: 8px 0 16px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    #print-success .print-message {
-      font-size: 11px;
-      color: #ccc;
-      line-height: 1.6;
-      margin: 0 0 18px;
-    }
-    #print-success .print-warning {
-      font-size: 10px;
-      color: #ffb84d;
-      line-height: 1.5;
-      margin: 8px 0 14px;
-      padding: 8px 10px;
-      border: 1px solid rgba(255,184,77,0.4);
-      background: rgba(255,184,77,0.08);
-    }
-    #print-close-btn {
-      background: #fff;
-      color: #000;
-      border: none;
-      padding: 10px 26px;
-      font-family: monospace;
-      font-size: 11px;
-      font-weight: bold;
-      cursor: pointer;
-      letter-spacing: 1px;
-      width: 100%;
-    }
-    #print-close-btn:hover { background: #ddd; }
-
     /* ─── ORBITAL TRANSFORM UI ─── */
     #orbital-transform-ui {
       position: fixed;
@@ -429,7 +208,6 @@
       min-width: 204px;
       pointer-events: all;
       display: none;
-      /* Locked to left side below left UI — no floating transform */
       box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 10px 40px rgba(0,0,0,0.85);
     }
     #orbital-transform-ui.open { display: block; }
@@ -466,7 +244,6 @@
       transition: color 0.15s;
     }
     #orbital-transform-ui .orb-close:hover { color: #fff; }
-    /* Mode switcher row */
     #orbital-transform-ui .orb-modes {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -511,7 +288,6 @@
       opacity: 0.5;
       letter-spacing: 0.5px;
     }
-    /* Legend with axis colors */
     #orbital-transform-ui .orb-legend {
       display: flex;
       justify-content: center;
@@ -534,7 +310,6 @@
     #orbital-transform-ui .orb-legend-dot.y { background: #5b5; }
     #orbital-transform-ui .orb-legend-dot.z { background: #56f; }
     #orbital-transform-ui .orb-legend-label { color: #666; }
-    /* Reset button */
     #orbital-transform-ui .orb-reset-btn {
       width: 100%;
       margin-top: 8px;
@@ -553,7 +328,6 @@
       border-color: rgba(255,255,255,1);
       color: #fff;
     }
-    /* Duplicate / Trash action row */
     #orbital-transform-ui .orb-action-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -587,9 +361,8 @@
       border-color: rgba(255,120,130,1);
       color: #ff8a95;
     }
-
   </style>
-  <title>ELON-MUSK-LISBON-VARIANT | Made on juno.transient.xyz</title>
+  <title>Elon Musk - Tech Epochalypse</title>
 </head>
 <body>
   
@@ -620,9 +393,9 @@ let pointerDownPosition = new THREE.Vector2(); // To store the initial pointer d
 const DRAG_THRESHOLD = 5; // Pixels threshold to consider a move as a drag
 
 // ─── ORBITAL TRANSFORM UI STATE ───
-let orbitalTarget       = null;         // Mesh currently bound to the orbital gizmo
-let transformControls   = null;         // Three.js TransformControls instance (Blender/AE-style gizmo)
-let currentGizmoMode    = 'translate';  // 'translate' | 'rotate' | 'scale'
+let orbitalTarget       = null;
+let transformControls   = null;
+let currentGizmoMode    = 'translate';
 
 let backgroundMesh = null; // To store the background mesh for positioning calculations
 
@@ -854,19 +627,19 @@ const REDACTED_GLITCH_PHRASES = [
 let redactedGlitchPhraseData = []; // Array of objects {text: string, redactedWordIndices: number[], redactionApplied: boolean}
 
 // Define all layer URLs at the top of the script
-const URL_BACKGROUND = './assets/lisbon/Euro50-BG.jpg';
-const URL_FOREHEAD = './assets/lisbon/forehead-lisbon.png';
-const URL_MOUTH = './assets/lisbon/mouth-lisbon.png';
-const URL_LEFT_EYE = './assets/lisbon/eye-left-lisbon.png';
+const URL_BACKGROUND = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/K-Dallas-Region-BG.jpg';
+const URL_FOREHEAD = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0010_forehead.png';
+const URL_MOUTH = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0008_mouth.png';
+const URL_LEFT_EYE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0009_Eye-L.png';
 const URL_X_LOGO_SWAP = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/X_Logo.png';
-const URL_NOSE = './assets/lisbon/nose-lisbon.png';
+const URL_NOSE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0003_nose-2.png';
 const URL_HAIR = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0001_hair.png';
 const URL_BLUE_BILL = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0018_K-bluebill.png';
 const URL_DOGECOIN_ORIGINAL = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/grok.gif';
 const URL_TESLA_SWAP = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/tesla.png';
     const URL_SIGNATURE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/coldie-sig.gif';
 const URL_ROCKET = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0016_rocket.png';
-const URL_RIGHT_EYE = './assets/lisbon/eye-right-lisbon.png'; 
+const URL_RIGHT_EYE = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0007_Eye-R.png'; 
 const URL_SPACEX_ORIGINAL = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0000_SpaceX.png';
 const URL_EAR = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0002_ear.png';
 const URL_FIAT_WORTHLESS = 'https://decentral-eyes.s3.us-west-2.amazonaws.com/tech-epoch/musk/Musk-_0000s_0005_Fiat-is-worthless-so-yes.png';
@@ -2309,30 +2082,26 @@ function init() {
         stopCameraAnimationAndReset(); // Stop animation on camera control interaction
     });
 
+    // Store initial global camera position and look-at target
+    initialGlobalCameraPos.copy(camera.position);
+    initialGlobalCameraLookAt.copy(controls.target);
+
     // ─── TRANSFORM CONTROLS (Blender/AE-style gizmo) ───
     transformControls = new TransformControls(camera, renderer.domElement);
-    window.transformControls = transformControls; // expose for pinch-scale handler
+    window.transformControls = transformControls;
     transformControls.setSize(0.9);
     transformControls.setSpace('local');
-    // Suspend OrbitControls while dragging a gizmo handle so the camera doesn't pan
     transformControls.addEventListener('dragging-changed', (e) => {
         if (e.value) {
-            // Drag started → always disable the orbit camera
             controls.enabled = false;
         } else if (!cameraAnimationActive && !effectControls.yRotation) {
-            // Drag ended → re-enable unless something else owns the camera
             controls.enabled = true;
         }
     });
-    // Keep gizmo in the scene (its visible gizmo is added via getHelper() in r165+)
     const _transformHelper = transformControls.getHelper ? transformControls.getHelper() : transformControls;
     scene.add(_transformHelper);
     _transformHelper.visible = false;
     transformControls.enabled = false;
-
-    // Store initial global camera position and look-at target
-    initialGlobalCameraPos.copy(camera.position);
-    initialGlobalCameraLookAt.copy(controls.target);
 
     // Post-processing setup
     composer = new EffectComposer(renderer);
@@ -3729,8 +3498,7 @@ function init() {
     const buttonsConfig = [
         { label: '3D', property: 'yRotation', pass: null },
         { label: 'FLY', property: 'cameraAnimation', pass: null },
-        // SHADOW button hidden for opening-night kiosk (left UI clutter reduction)
-        // { label: 'SHADOW', property: 'shadow', pass: darkPass },
+        { label: 'SHADOW', property: 'shadow', pass: darkPass },
         { label: 'ASCII', property: 'ascii', pass: asciiPass },
         { label: 'HEATMAP', property: 'heatmap', pass: heatmapPass },
         { label: 'BLOOD', property: 'blood', pass: bloodPass },
@@ -3751,24 +3519,23 @@ function init() {
         { label: 'GREYSCALE', property: 'greyscale', pass: greyscalePass }
     ];
 
-    // Create and append the left UI container — always visible, matching mashup-lisbon scale
+    // Create and append the left UI container
     leftUiContainer = document.createElement('div'); // Assign to global variable
     leftUiContainer.id = 'left-ui-container';
-    leftUiContainer.style.position = 'fixed';
-    leftUiContainer.style.top = '16px'; // Align with PRINT button's 16px edge
-    leftUiContainer.style.left = '16px';
+    leftUiContainer.style.position = 'absolute';
+    leftUiContainer.style.top = '-190px'; // Start mostly hidden, revealing only the arrow
+    leftUiContainer.style.left = '10px';
     leftUiContainer.style.backgroundColor = 'rgba(0, 0, 0, 0)';
     leftUiContainer.style.color = 'white';
-    leftUiContainer.style.padding = '34px 34px 34px 0'; /* No left padding — buttons flush with RESET/PRINT edge */
+    leftUiContainer.style.padding = '10px'; /* Reduced padding for more compact layout */
     leftUiContainer.style.borderRadius = '5px';
     leftUiContainer.style.fontFamily = 'monospace';
-    leftUiContainer.style.fontSize = '340%'; /* Match mashup-lisbon button scale */
     leftUiContainer.style.zIndex = '100';
     leftUiContainer.style.display = 'flex';
-    leftUiContainer.style.flexDirection = 'column';
-    leftUiContainer.style.flexWrap = 'nowrap';
-    leftUiContainer.style.gap = '17px'; /* Match mashup-lisbon gap */
-    leftUiContainer.style.transition = 'top 0.5s ease-in-out';
+    leftUiContainer.style.flexDirection = 'column'; /* Changed to column for vertical layout */
+    leftUiContainer.style.flexWrap = 'nowrap'; /* Not needed for single column */
+    leftUiContainer.style.gap = '5px'; /* Adjusted gap for vertical layout */
+    leftUiContainer.style.transition = 'top 0.5s ease-in-out'; // Smooth transition for top property
     document.body.appendChild(leftUiContainer);
 
     // Create and append the right UI container
@@ -3817,11 +3584,31 @@ function init() {
         }
     });
 
-    // RESET button: standalone bottom-left, above PRINT (wired to the existing #reset-btn in HTML)
-    const resetBtn = document.getElementById('reset-btn');
-    if (resetBtn) {
-        resetBtn.onclick = (event) => { event.stopPropagation(); resetPiecesToOriginalPositions(); };
-    }
+    // Add the RESET button to both UI containers
+    const createResetButton = () => {
+        const button = document.createElement('button');
+        button.textContent = 'RESET';
+        button.style.cssText = `
+            background-color: black;
+            color: white;
+            padding: 4px;
+            margin-top: 10px;
+            border: 0.5px solid rgba(0, 0, 0, 0.8);
+            border-radius: 0;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 7px;
+            outline: none;
+            white-space: nowrap;
+            box-sizing: border-box;
+        `;
+        button.onmouseover = () => { button.style.borderColor = 'rgba(0, 0, 0, 1.0)'; };
+        button.onmouseout = () => { button.style.borderColor = 'rgba(0, 0, 0, 0.8)'; };
+        button.onclick = (event) => { event.stopPropagation(); resetPiecesToOriginalPositions(); };
+        return button;
+    };
+    leftUiContainer.appendChild(createResetButton());
+    rightUiContainer.appendChild(createResetButton());
 
     // Create and append the TRASH button to the left UI container
     const createTrashButton = () => {
@@ -3829,6 +3616,7 @@ function init() {
         button.id = 'trash-button'; // Unique ID for easy targeting
         button.innerHTML = 'TRASH'; // Text with trashcan icon
         button.style.cssText = `
+            display: none !important;
             background-color: black; /* Changed from #CC0000 to black */
             color: white;
             padding: 4px;
@@ -3847,8 +3635,8 @@ function init() {
         // The actual removal logic will be in onPointerUp, triggered by dropping onto this button
         return button;
     };
-    // Trash button moved to orbital transform UI — not added to left UI
-    // trashButtonElement stays null; drag-to-trash in onPointerUp is guarded by null check
+    trashButtonElement = createTrashButton(); // Store reference to the button element
+    leftUiContainer.appendChild(trashButtonElement);
 
     // Create and append the EXPORT button below TRASH
     const createExportButton = () => {
@@ -3863,6 +3651,97 @@ function init() {
     exportButtonElement = createExportButton();
     exportButtonElement.style.display = 'none';
     leftUiContainer.appendChild(exportButtonElement);
+
+    // ── SAVE / LOAD / CLEAR SAVE buttons ──
+    const saveBtn = document.createElement('button');
+    saveBtn.id = 'save-btn';
+    saveBtn.textContent = 'SAVE';
+    saveBtn.style.cssText = `background-color: black; color: white; padding: 4px; margin-top: 10px; border: 0.5px solid #4CAF50; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; white-space: nowrap; box-sizing: border-box; display: none;`;
+    saveBtn.onclick = (e) => {
+        e.stopPropagation();
+        downloadComposition();
+        saveBtn.textContent = 'SAVED';
+        setTimeout(() => { saveBtn.textContent = 'SAVE'; }, 1500);
+    };
+    leftUiContainer.appendChild(saveBtn);
+
+    const loadBtn = document.createElement('button');
+    loadBtn.id = 'load-btn';
+    loadBtn.textContent = 'LOAD';
+    loadBtn.style.cssText = `background-color: black; color: white; padding: 4px; border: 0.5px solid #2196F3; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; white-space: nowrap; box-sizing: border-box; display: none;`;
+    loadBtn.onclick = (e) => { e.stopPropagation(); loadCompositionFromFile(); };
+    leftUiContainer.appendChild(loadBtn);
+
+    const clearSaveBtn = document.createElement('button');
+    clearSaveBtn.id = 'clear-save-btn';
+    clearSaveBtn.textContent = 'CLEAR SAVE';
+    clearSaveBtn.style.cssText = `background-color: black; color: #888; padding: 4px; border: 0.5px solid #555; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; white-space: nowrap; box-sizing: border-box; display: none;`;
+    clearSaveBtn.onclick = (e) => {
+        e.stopPropagation();
+        localStorage.removeItem(COMPOSITION_STORAGE_KEY);
+        clearSaveBtn.textContent = 'CLEARED';
+        setTimeout(() => { clearSaveBtn.textContent = 'CLEAR SAVE'; }, 1500);
+    };
+    leftUiContainer.appendChild(clearSaveBtn);
+
+    // ── UPLOAD IMAGE (JPEG / PNG / GIF) ──
+    let uploadedImageCounter = 0;
+    const imageFileInput = document.createElement('input');
+    imageFileInput.type = 'file';
+    imageFileInput.accept = 'image/jpeg, image/png, image/gif';
+    imageFileInput.style.display = 'none';
+    imageFileInput.id = 'image-upload-input';
+    document.body.appendChild(imageFileInput);
+
+    const uploadImgBtn = document.createElement('button');
+    uploadImgBtn.id = 'upload-image-btn';
+    uploadImgBtn.textContent = 'UPLOAD';
+    uploadImgBtn.style.cssText = `background-color: black; color: white; padding: 4px; margin-top: 10px; border: 0.5px solid #FF9800; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; white-space: nowrap; box-sizing: border-box; display: none;`;
+    uploadImgBtn.onclick = (e) => { e.stopPropagation(); imageFileInput.click(); };
+    leftUiContainer.appendChild(uploadImgBtn);
+
+    imageFileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        if (!file.type.match(/^image\/(jpeg|png|gif)$/)) {
+            console.warn('Only JPEG, PNG, GIF images are supported.');
+            imageFileInput.value = '';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const texture = new THREE.Texture(img);
+                texture.colorSpace = THREE.SRGBColorSpace;
+                texture.minFilter = THREE.LinearFilter;
+                texture.magFilter = THREE.LinearFilter;
+                texture.generateMipmaps = false;
+                texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                texture.needsUpdate = true;
+                const localBaseScale = 0.005;
+                const planeWidth = img.width * localBaseScale;
+                const planeHeight = img.height * localBaseScale;
+                const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+                const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+                const mesh = new THREE.Mesh(geometry, material);
+                const layer = 6;
+                mesh.position.set(0, 0, (layer - 1) * depthStep);
+                mesh.userData.currentLayer = layer;
+                mesh.userData.initialPosition = mesh.position.clone();
+                mesh.userData.initialLayer = layer;
+                mesh.userData.id = 'uploaded_' + (++uploadedImageCounter);
+                mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
+                mesh.userData.isUploaded = true;
+                scene.add(mesh);
+                draggableObjects.push(mesh);
+                if (typeof cameraAnimationTargets !== 'undefined') cameraAnimationTargets.push(mesh);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        imageFileInput.value = '';
+    });
 
     // Add the thin black rectangle with a down-facing arrow below the TRASH button
     arrowContainer = document.createElement('div'); // Assign to global variable
@@ -3892,13 +3771,37 @@ function init() {
     arrowSpan.innerHTML = '&#x25BC;'; // Down-facing triangle
     arrowContainer.appendChild(arrowSpan);
     document.body.appendChild(arrowContainer); // Append to body, not leftUiContainer
-    arrowContainer.style.display = 'none'; // Always-visible layout: arrow toggle not needed
 
     // Add click listener for the arrow container to toggle left UI visibility
-    // Arrow toggle disabled (always-visible layout) — onclick is a no-op
-    arrowContainer.onclick = (event) => { event.stopPropagation(); };
+    arrowContainer.onclick = (event) => {
+        event.stopPropagation(); // Prevent clicks from interacting with 3D scene
+        if (leftUiContainer.style.top === '10px') {
+            leftUiContainer.style.top = '-190px'; // Hide it, revealing only the arrow
+            trashButtonElement.style.display = 'none'; // Hide TRASH button
+            exportButtonElement.style.display = 'none'; // Hide EXPORT button
+            saveBtn.style.display = 'none';
+            loadBtn.style.display = 'none';
+            clearSaveBtn.style.display = 'none';
+            uploadImgBtn.style.display = 'none';
+            const panel = document.getElementById('export-panel');
+            if (panel) panel.classList.remove('open'); // Close export panel
+            arrowContainer.style.top = '0px'; // Keep arrow at the top
+            arrowSpan.innerHTML = '&#x25BC;'; // Change to down arrow
+        } else {
+            leftUiContainer.style.top = '10px'; // Show it
+            trashButtonElement.style.display = 'none'; // Show TRASH button
+            saveBtn.style.display = 'block';
+            loadBtn.style.display = 'block';
+            clearSaveBtn.style.display = 'block';
+            uploadImgBtn.style.display = 'block';
+            arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; // Move arrow below the UI
+            arrowSpan.innerHTML = '&#x25B2'; // Change to up arrow
+        }
+    };
 
-    // Trash moved to orbital UI; export button hidden (no toggle needed)
+    // Initial state setup for TRASH/EXPORT buttons and arrowContainer
+    // When the page loads, the left UI is hidden, so these buttons should be hidden.
+    trashButtonElement.style.display = 'none';
     exportButtonElement.style.display = 'none';
 
     window.addEventListener('resize', onWindowResize);
@@ -3906,13 +3809,13 @@ function init() {
     renderer.domElement.addEventListener('pointermove', onPointerMove);
     renderer.domElement.addEventListener('pointerup', onPointerUp);
     renderer.domElement.addEventListener('click', onClick);
-    setupOrbitalUI();
 
     // Call onWindowResize once after init to ensure initial positions are calculated correctly
     // NOTE: This is called after the main assets are loaded in loadDogecoinAndFiat to ensure
     // responsive elements are placed correctly *after* the initial fixed elements are positioned.
     // However, calling it here ensures the camera/composer/UI are sized correctly from the start.
     onWindowResize();
+    setupOrbitalUI();
 }
 
 /**
@@ -3981,7 +3884,10 @@ function onWindowResize() {
         cctvFeedPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
     }
 
-    // Arrow container hidden in always-visible layout — no resize adjustment needed
+    // Adjust arrow container position on resize if UI is open
+    if (leftUiContainer.style.top === '10px') {
+        arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
+    }
 
     // --- Dynamic Repositioning of Ear and Marquee Text ---
     const earConfig = initialAssetConfigs.find(c => c.id === 'ear');
@@ -4063,7 +3969,6 @@ function onPointerDown(event) {
         return;
     }
 
-    // If pointer is over a TransformControls gizmo handle, let the gizmo own the event
     if (transformControls && transformControls.axis) {
         selectedObject = null;
         return;
@@ -4241,10 +4146,7 @@ function onClick(event) {
         return;
     }
 
-    // If the user just finished dragging a gizmo handle, suppress this click
-    if (transformControls && transformControls.dragging) {
-        return;
-    }
+    if (transformControls && transformControls.dragging) return;
 
     stopCameraAnimationAndReset(); // Only stop FLY camera on explicit click if not dragging and not on UI
 
@@ -4323,227 +4225,13 @@ function onClick(event) {
             spacexRef.material.needsUpdate = true;
         }
 
-        // Skip orbital UI for non-transformable elements (background, text overlays, redaction rects)
         if (clickedObject === backgroundMesh || clickedObject === rightEyeRedactionRect || clickedObject === leftEyeRedactionRect || clickedObject === marqueeTextMesh || clickedObject === biometricMarqueeTextMesh || clickedObject === bloodTextMesh || clickedObject === redactedGlitchTextMesh) {
             return;
         }
-
-        // Single-tap → open orbital transform UI on this asset
         openOrbitalUI(clickedObject);
-    } else if (orbitalTarget) {
-        // Click on empty canvas while gizmo is open → close it
+    } else if (!clickedObject && orbitalTarget) {
         closeOrbitalUI();
     }
-}
-
-// ─── ORBITAL TRANSFORM UI (Blender/AE-style gizmo) ──────────────────────────
-
-/** Project the mesh's 3D bounding box to screen space and return its 2D extents */
-function getOrbitalScreenBounds(mesh) {
-    const box = new THREE.Box3().setFromObject(mesh);
-    const corners = [
-        new THREE.Vector3(box.min.x, box.min.y, box.min.z),
-        new THREE.Vector3(box.min.x, box.min.y, box.max.z),
-        new THREE.Vector3(box.min.x, box.max.y, box.min.z),
-        new THREE.Vector3(box.min.x, box.max.y, box.max.z),
-        new THREE.Vector3(box.max.x, box.min.y, box.min.z),
-        new THREE.Vector3(box.max.x, box.min.y, box.max.z),
-        new THREE.Vector3(box.max.x, box.max.y, box.min.z),
-        new THREE.Vector3(box.max.x, box.max.y, box.max.z)
-    ];
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    for (const c of corners) {
-        c.project(camera);
-        const sx = ( c.x * 0.5 + 0.5) * window.innerWidth;
-        const sy = (-c.y * 0.5 + 0.5) * window.innerHeight;
-        if (sx < minX) minX = sx;
-        if (sx > maxX) maxX = sx;
-        if (sy < minY) minY = sy;
-        if (sy > maxY) maxY = sy;
-    }
-    return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
-}
-
-/** Float the toolbar independently to the LEFT of the selected asset, with a
- *  fixed 120px gap (independent of asset scale). Auto-flips to the right side
- *  if there isn't room on the left in the viewport. Vertically centered. */
-const ORBITAL_UI_HORIZONTAL_PADDING = 120; // px
-
-function updateOrbitalUIPosition() {
-    const ui = document.getElementById('orbital-transform-ui');
-    if (!ui || !leftUiContainer) return;
-    // Lock below the left UI container, flush to the same 16px left edge (matching PRINT)
-    const lcRect = leftUiContainer.getBoundingClientRect();
-    // Align the toolbar's LEFT edge with the buttons inside the left-ui-container
-    // (the container's outer rect includes its padding; the buttons sit at +padL).
-    const _lc      = document.getElementById('left-ui-container');
-    const _lcStyle = _lc ? window.getComputedStyle(_lc) : null;
-    const _padL    = _lcStyle ? (parseFloat(_lcStyle.paddingLeft)   || 0) : 0;
-    const _padB    = _lcStyle ? (parseFloat(_lcStyle.paddingBottom) || 8) : 8;
-    ui.style.left = (lcRect.left + _padL) + 'px';
-    // If the collapse-arrow chevron is visible, stack BELOW it so the toolbar
-    // no longer overlaps it. Gap matches the container's bottom padding so the
-    // spacing reads the same as the gap above the chevron.
-    const _arrow = document.getElementById('arrow-container');
-    let _topY = lcRect.bottom;
-    if (_arrow && window.getComputedStyle(_arrow).display !== 'none') {
-        const _aRect = _arrow.getBoundingClientRect();
-        if (_aRect.bottom > _topY) _topY = _aRect.bottom;
-    }
-    ui.style.top  = (_topY + _padB) + 'px';
-    ui.style.transform = '';
-}
-
-/** Update the active-mode button highlight */
-function setGizmoMode(mode) {
-    if (!transformControls) return;
-    currentGizmoMode = mode;
-    window.currentGizmoMode = mode; // expose for pinch handler gating
-    transformControls.setMode(mode);
-    // Hide all gizmo arrows in SCALE mode — pinch is the only scale interaction.
-    const showAxes = mode !== 'scale';
-    transformControls.showX = showAxes;
-    transformControls.showY = showAxes;
-    transformControls.showZ = showAxes;
-    document.querySelectorAll('#orbital-transform-ui .orb-mode-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.mode === mode);
-    });
-}
-
-/** Attach the gizmo to a mesh and show the floating toolbar */
-function openOrbitalUI(mesh) {
-    orbitalTarget = mesh;
-
-    // Attach Blender/AE-style gizmo
-    if (transformControls) {
-        transformControls.attach(mesh);
-        transformControls.enabled = true;
-        const helper = transformControls.getHelper ? transformControls.getHelper() : transformControls;
-        helper.visible = true;
-        setGizmoMode(currentGizmoMode);
-    }
-
-    // Floating toolbar label + position (map internal ids to display labels)
-    const ORBITAL_LABEL_OVERRIDES = {
-        dogecoin: 'LOGO SWAP'
-    };
-    const id = mesh.userData.id || 'asset';
-    const label = ORBITAL_LABEL_OVERRIDES[id] || id.toUpperCase();
-    document.getElementById('orb-asset-name').textContent = label;
-    updateOrbitalUIPosition();
-    document.getElementById('orbital-transform-ui').classList.add('open');
-}
-
-/** Detach the gizmo and hide the floating toolbar */
-function closeOrbitalUI() {
-    if (transformControls) {
-        transformControls.detach();
-        transformControls.enabled = false;
-        const helper = transformControls.getHelper ? transformControls.getHelper() : transformControls;
-        helper.visible = false;
-    }
-    orbitalTarget = null;
-    document.getElementById('orbital-transform-ui').classList.remove('open');
-}
-
-/** Wire up all orbital-UI controls. Called once from init(). */
-function setupOrbitalUI() {
-    // Mode buttons: MOVE / ROTATE / SCALE
-    document.querySelectorAll('#orbital-transform-ui .orb-mode-btn').forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            setGizmoMode(this.dataset.mode);
-        });
-    });
-
-    // Reset transform (clears rotation + scale, leaves position)
-    document.getElementById('orb-reset-btn').addEventListener('click', function (e) {
-        e.stopPropagation();
-        if (!orbitalTarget) return;
-        orbitalTarget.rotation.set(0, 0, 0);
-        orbitalTarget.scale.set(1, 1, 1);
-    });
-
-    // Close button
-    document.getElementById('orb-close').addEventListener('click', function (e) {
-        e.stopPropagation();
-        closeOrbitalUI();
-    });
-
-    // Duplicate: clone orbitalTarget, offset slightly, add to scene
-    document.getElementById('orb-duplicate-btn').addEventListener('click', function (e) {
-        e.stopPropagation();
-        if (!orbitalTarget) return;
-        const src = orbitalTarget;
-        const newGeo = src.geometry.clone();
-        const newMat = src.material.clone();
-        if (src.material.map) newMat.map = src.material.map;
-        const clone = new THREE.Mesh(newGeo, newMat);
-        const xOffset = (src.userData.initialScale ? src.userData.initialScale.width : 1) * 0.1;
-        clone.position.set(src.position.x + xOffset, src.position.y, src.position.z + 2 * depthStep);
-        clone.rotation.copy(src.rotation);
-        clone.scale.copy(src.scale);
-        clone.visible = src.visible;
-        clone.userData.id = 'dup_' + src.userData.id + '_' + Date.now();
-        clone.userData.currentLayer = (src.userData.currentLayer || 0) + 2;
-        clone.userData.initialPosition = clone.position.clone();
-        clone.userData.initialLayer = clone.userData.currentLayer;
-        clone.userData.initialScale = src.userData.initialScale
-            ? { width: src.userData.initialScale.width, height: src.userData.initialScale.height }
-            : undefined;
-        clone.userData.userScale = src.userData.userScale || 1.0;
-        if (src.userData.isUploaded) clone.userData.isUploaded = true;
-        scene.add(clone);
-        draggableObjects.push(clone);
-        cameraAnimationTargets.push(clone);
-        // Switch orbital UI to the clone
-        openOrbitalUI(clone);
-    });
-
-    // Trash: remove orbitalTarget from scene and close
-    document.getElementById('orb-trash-btn').addEventListener('click', function (e) {
-        e.stopPropagation();
-        if (!orbitalTarget) return;
-        const target = orbitalTarget;
-        closeOrbitalUI();
-        // Mark removed in config
-        const configIndex = initialAssetConfigs.findIndex(c => c.id === target.userData.id);
-        if (configIndex !== -1) initialAssetConfigs[configIndex].removed = true;
-        // Remove from scene and arrays
-        scene.remove(target);
-        draggableObjects = draggableObjects.filter(o => o !== target);
-        cameraAnimationTargets = cameraAnimationTargets.filter(o => o !== target);
-        // Handle special tracked refs
-        if (target.userData.id === 'dogecoin') dogecoinRef = null;
-        if (target.userData.id === 'spacex') spacexRef = null;
-        if (target.userData.id === 'rightEye') {
-            if (rightEyeRedactionRect) { scene.remove(rightEyeRedactionRect); rightEyeRedactionRect.geometry.dispose(); rightEyeRedactionRect.material.dispose(); }
-            rightEyeMesh = null; rightEyeRedactionRect = null;
-        }
-        if (target.userData.id === 'leftEye') {
-            if (leftEyeRedactionRect) { scene.remove(leftEyeRedactionRect); leftEyeRedactionRect.geometry.dispose(); leftEyeRedactionRect.material.dispose(); }
-            leftEyeMesh = null; leftEyeRedactionRect = null;
-        }
-        // Dispose resources
-        if (target.geometry) target.geometry.dispose();
-        if (target.material) {
-            if (Array.isArray(target.material)) target.material.forEach(m => m.dispose());
-            else target.material.dispose();
-        }
-    });
-
-    // Keyboard shortcuts: G/R/S switch mode, ESC closes
-    document.addEventListener('keydown', function (e) {
-        // Ignore keys while typing in an input (email input, name input, etc.)
-        const tag = (document.activeElement && document.activeElement.tagName) || '';
-        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-
-        if (e.key === 'Escape') { closeOrbitalUI(); return; }
-        if (!orbitalTarget) return;
-        if (e.key === 'g' || e.key === 'G') setGizmoMode('translate');
-        else if (e.key === 'r' || e.key === 'R') setGizmoMode('rotate');
-        else if (e.key === 's' || e.key === 'S') setGizmoMode('scale');
-    });
 }
 
 // Ease-in-out function
@@ -4679,8 +4367,176 @@ function updateCameraAnimation(currentTime) {
     camera.lookAt(controls.target);
 }
 
+function getOrbitalScreenBounds(mesh) {
+    const box = new THREE.Box3().setFromObject(mesh);
+    const corners = [
+        new THREE.Vector3(box.min.x, box.min.y, box.min.z),
+        new THREE.Vector3(box.min.x, box.min.y, box.max.z),
+        new THREE.Vector3(box.min.x, box.max.y, box.min.z),
+        new THREE.Vector3(box.min.x, box.max.y, box.max.z),
+        new THREE.Vector3(box.max.x, box.min.y, box.min.z),
+        new THREE.Vector3(box.max.x, box.min.y, box.max.z),
+        new THREE.Vector3(box.max.x, box.max.y, box.min.z),
+        new THREE.Vector3(box.max.x, box.max.y, box.max.z)
+    ];
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const c of corners) {
+        c.project(camera);
+        const sx = ( c.x * 0.5 + 0.5) * window.innerWidth;
+        const sy = (-c.y * 0.5 + 0.5) * window.innerHeight;
+        if (sx < minX) minX = sx;
+        if (sx > maxX) maxX = sx;
+        if (sy < minY) minY = sy;
+        if (sy > maxY) maxY = sy;
+    }
+    return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
+}
+
+function updateOrbitalUIPosition() {
+    const ui = document.getElementById('orbital-transform-ui');
+    if (!ui) return;
+    const lc = document.getElementById('left-ui-container');
+    if (lc) {
+        const lcRect = lc.getBoundingClientRect();
+        // Align the toolbar's LEFT edge with the buttons inside the left-ui-container
+        // (the container's outer rect includes its padding; the buttons sit at +padL).
+        const _lc      = document.getElementById('left-ui-container');
+        const _lcStyle = _lc ? window.getComputedStyle(_lc) : null;
+        const _padL    = _lcStyle ? (parseFloat(_lcStyle.paddingLeft)   || 0) : 0;
+        const _padB    = _lcStyle ? (parseFloat(_lcStyle.paddingBottom) || 8) : 8;
+        ui.style.left = (lcRect.left + _padL) + 'px';
+        // If the collapse-arrow chevron is visible, stack BELOW it so the toolbar
+        // no longer overlaps it. Gap matches the container's bottom padding so the
+        // spacing reads the same as the gap above the chevron.
+        const _arrow = document.getElementById('arrow-container');
+        let _topY = lcRect.bottom;
+        if (_arrow && window.getComputedStyle(_arrow).display !== 'none') {
+            const _aRect = _arrow.getBoundingClientRect();
+            if (_aRect.bottom > _topY) _topY = _aRect.bottom;
+        }
+        ui.style.top  = (_topY + _padB) + 'px';
+    } else {
+        ui.style.left = '16px';
+        ui.style.top = '80px';
+    }
+    ui.style.transform = '';
+}
+
+function setGizmoMode(mode) {
+    if (!transformControls) return;
+    currentGizmoMode = mode;
+    window.currentGizmoMode = mode;
+    transformControls.setMode(mode);
+    transformControls.showX = true;
+    transformControls.showY = true;
+    transformControls.showZ = true;
+    document.querySelectorAll('#orbital-transform-ui .orb-mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+}
+
+function openOrbitalUI(mesh) {
+    orbitalTarget = mesh;
+    if (transformControls) {
+        transformControls.attach(mesh);
+        transformControls.enabled = true;
+        const helper = transformControls.getHelper ? transformControls.getHelper() : transformControls;
+        helper.visible = true;
+        setGizmoMode(currentGizmoMode);
+    }
+    const id = mesh.userData.id || 'asset';
+    document.getElementById('orb-asset-name').textContent = id.toUpperCase();
+    updateOrbitalUIPosition();
+    document.getElementById('orbital-transform-ui').classList.add('open');
+}
+
+function closeOrbitalUI() {
+    if (transformControls) {
+        transformControls.detach();
+        transformControls.enabled = false;
+        const helper = transformControls.getHelper ? transformControls.getHelper() : transformControls;
+        helper.visible = false;
+    }
+    orbitalTarget = null;
+    const ui = document.getElementById('orbital-transform-ui');
+    if (ui) ui.classList.remove('open');
+}
+
+function setupOrbitalUI() {
+    document.querySelectorAll('#orbital-transform-ui .orb-mode-btn').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            setGizmoMode(this.dataset.mode);
+        });
+    });
+    document.getElementById('orb-reset-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!orbitalTarget) return;
+        orbitalTarget.rotation.set(0, 0, 0);
+        orbitalTarget.scale.set(1, 1, 1);
+    });
+    document.getElementById('orb-close').addEventListener('click', function (e) {
+        e.stopPropagation();
+        closeOrbitalUI();
+    });
+    document.getElementById('orb-duplicate-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!orbitalTarget) return;
+        const src = orbitalTarget;
+        const newGeo = src.geometry.clone();
+        const newMat = src.material.clone();
+        if (src.material.map) newMat.map = src.material.map;
+        const clone = new THREE.Mesh(newGeo, newMat);
+        const xOffset = (src.userData.initialScale ? src.userData.initialScale.width : 1) * 0.1;
+        clone.position.set(src.position.x + xOffset, src.position.y, src.position.z + 2 * depthStep);
+        clone.rotation.copy(src.rotation);
+        clone.scale.copy(src.scale);
+        clone.visible = src.visible;
+        clone.userData.id = 'dup_' + src.userData.id + '_' + Date.now();
+        clone.userData.currentLayer = (src.userData.currentLayer || 0) + 2;
+        clone.userData.initialPosition = clone.position.clone();
+        clone.userData.initialLayer = clone.userData.currentLayer;
+        clone.userData.initialScale = src.userData.initialScale
+            ? { width: src.userData.initialScale.width, height: src.userData.initialScale.height }
+            : undefined;
+        clone.userData.userScale = src.userData.userScale || 1.0;
+        if (src.userData.isUploaded) clone.userData.isUploaded = true;
+        scene.add(clone);
+        draggableObjects.push(clone);
+        if (typeof cameraAnimationTargets !== 'undefined') cameraAnimationTargets.push(clone);
+        openOrbitalUI(clone);
+    });
+    document.getElementById('orb-trash-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!orbitalTarget) return;
+        const target = orbitalTarget;
+        closeOrbitalUI();
+        const configIndex = initialAssetConfigs.findIndex(c => c.id === target.userData.id);
+        if (configIndex !== -1) initialAssetConfigs[configIndex].removed = true;
+        scene.remove(target);
+        draggableObjects = draggableObjects.filter(o => o !== target);
+        if (typeof cameraAnimationTargets !== 'undefined') cameraAnimationTargets = cameraAnimationTargets.filter(o => o !== target);
+        if (target.geometry) target.geometry.dispose();
+        if (target.material) {
+            if (Array.isArray(target.material)) target.material.forEach(m => m.dispose());
+            else target.material.dispose();
+        }
+    });
+    document.addEventListener('keydown', function (e) {
+        const tag = (document.activeElement && document.activeElement.tagName) || '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        if (e.key === 'Escape') { closeOrbitalUI(); return; }
+        if (!orbitalTarget) return;
+        if (e.key === 'g' || e.key === 'G') setGizmoMode('translate');
+        else if (e.key === 'r' || e.key === 'R') setGizmoMode('rotate');
+        else if (e.key === 's' || e.key === 'S') setGizmoMode('scale');
+    });
+}
+
 function animate(currentTime) {
     requestAnimationFrame(animate);
+
+    if (orbitalTarget) updateOrbitalUIPosition();
 
     // Apply Y-rotation if explicitly enabled
     if (effectControls.yRotation) {
@@ -4774,14 +4630,250 @@ function animate(currentTime) {
         updateRedactedGlitchTexture();
     }
 
-    // Keep orbital UI anchored to its target mesh every frame
-    if (orbitalTarget) updateOrbitalUIPosition();
-
     composer.render();
+}
+
+// ─── COMPOSITION SAVE / LOAD / AUTO-RESTORE ──────────────────────────────────
+const COMPOSITION_STORAGE_KEY = 'elon_musk_nft_composition_v1';
+
+function saveComposition() {
+    const meshStates = [];
+    scene.children.forEach(child => {
+        if (!child.userData || !child.userData.id) return;
+        const state = {
+            id: child.userData.id,
+            position: { x: child.position.x, y: child.position.y, z: child.position.z },
+            rotation: { x: child.rotation.x, y: child.rotation.y, z: child.rotation.z },
+            scale: { x: child.scale.x, y: child.scale.y, z: child.scale.z },
+            visible: child.visible,
+            userScale: child.userData.userScale || 1.0,
+            currentLayer: child.userData.currentLayer,
+            opacity: child.material ? child.material.opacity : 1,
+            transparent: child.material ? child.material.transparent : false,
+        };
+        if (child.userData.isUploaded && child.material && child.material.map && child.material.map.image) {
+            try {
+                const img = child.material.map.image;
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth || img.width;
+                canvas.height = img.naturalHeight || img.height;
+                canvas.getContext('2d').drawImage(img, 0, 0);
+                state.uploadedImageData = canvas.toDataURL('image/png');
+                state.isUploaded = true;
+                state.initialScale = child.userData.initialScale;
+            } catch (e) { console.warn('Could not save uploaded image:', state.id, e); }
+        }
+        meshStates.push(state);
+    });
+    const removedAssets = initialAssetConfigs.filter(c => c.removed).map(c => c.id);
+    return {
+        version: 1,
+        timestamp: Date.now(),
+        meshStates,
+        removedAssets,
+        effectControls: { ...effectControls },
+        camera: {
+            position: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+            target: { x: controls.target.x, y: controls.target.y, z: controls.target.z },
+        },
+    };
+}
+
+function cloneFromOriginal(srcId, state) {
+    const orig = scene.children.find(c => c.userData && c.userData.id === srcId);
+    if (!orig || !orig.geometry || !orig.material) return null;
+    const newGeo = orig.geometry.clone();
+    const newMat = orig.material.clone();
+    if (orig.material.map) newMat.map = orig.material.map;
+    if (state.opacity !== undefined) {
+        newMat.opacity = state.opacity;
+        newMat.transparent = state.transparent || state.opacity < 1;
+        newMat.needsUpdate = true;
+    }
+    const clone = new THREE.Mesh(newGeo, newMat);
+    clone.position.set(state.position.x, state.position.y, state.position.z);
+    clone.rotation.set(state.rotation.x, state.rotation.y, state.rotation.z);
+    if (state.scale) clone.scale.set(state.scale.x, state.scale.y, state.scale.z);
+    clone.visible = state.visible !== false;
+    clone.userData.id = state.id;
+    clone.userData.currentLayer = state.currentLayer;
+    clone.userData.initialPosition = clone.position.clone();
+    clone.userData.initialLayer = state.currentLayer;
+    clone.userData.initialScale = orig.userData.initialScale
+        ? { width: orig.userData.initialScale.width, height: orig.userData.initialScale.height }
+        : undefined;
+    clone.userData.userScale = state.userScale || 1.0;
+    scene.add(clone);
+    draggableObjects.push(clone);
+    if (typeof cameraAnimationTargets !== 'undefined') cameraAnimationTargets.push(clone);
+    return clone;
+}
+
+function restoreComposition(data) {
+    if (!data || data.version !== 1) return false;
+
+    if (data.removedAssets && data.removedAssets.length > 0) {
+        data.removedAssets.forEach(id => {
+            const mesh = scene.children.find(c => c.userData && c.userData.id === id);
+            if (mesh) {
+                scene.remove(mesh);
+                const idx = draggableObjects.indexOf(mesh);
+                if (idx !== -1) draggableObjects.splice(idx, 1);
+                const tIdx = cameraAnimationTargets.indexOf(mesh);
+                if (tIdx !== -1) cameraAnimationTargets.splice(tIdx, 1);
+            }
+            const configIndex = initialAssetConfigs.findIndex(c => c.id === id);
+            if (configIndex !== -1) initialAssetConfigs[configIndex].removed = true;
+        });
+    }
+
+    const uploadedStates = (data.meshStates || []).filter(s => s.isUploaded && s.uploadedImageData);
+    const uploadPromises = uploadedStates.map(state => new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            const texture = new THREE.Texture(img);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            texture.needsUpdate = true;
+            const w = state.initialScale ? state.initialScale.width : 4;
+            const h = state.initialScale ? state.initialScale.height : 4;
+            const scale = state.userScale || 1.0;
+            const geometry = new THREE.PlaneGeometry(w * scale, h * scale);
+            const material = new THREE.MeshBasicMaterial({
+                map: texture, transparent: true, side: THREE.DoubleSide,
+                opacity: state.opacity !== undefined ? state.opacity : 1,
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(state.position.x, state.position.y, state.position.z);
+            mesh.rotation.set(state.rotation.x, state.rotation.y, state.rotation.z);
+            if (state.scale) mesh.scale.set(state.scale.x, state.scale.y, state.scale.z);
+            mesh.visible = state.visible !== false;
+            mesh.userData.currentLayer = state.currentLayer;
+            mesh.userData.initialPosition = mesh.position.clone();
+            mesh.userData.initialLayer = state.currentLayer;
+            mesh.userData.id = state.id;
+            mesh.userData.initialScale = { width: w, height: h };
+            mesh.userData.isUploaded = true;
+            mesh.userData.userScale = scale;
+            scene.add(mesh);
+            draggableObjects.push(mesh);
+            if (typeof cameraAnimationTargets !== 'undefined') cameraAnimationTargets.push(mesh);
+            resolve();
+        };
+        img.onerror = () => { console.warn('Failed to restore uploaded image:', state.id); resolve(); };
+        img.src = state.uploadedImageData;
+    }));
+
+    Promise.all(uploadPromises).then(() => {
+        (data.meshStates || []).forEach(state => {
+            if (state.isUploaded) return;
+            let mesh = scene.children.find(c => c.userData && c.userData.id === state.id);
+            if (!mesh && typeof state.id === 'string' && state.id.startsWith('dup_')) {
+                const m = state.id.match(/^dup_(.+)_\d+$/);
+                if (m) mesh = cloneFromOriginal(m[1], state);
+                if (mesh) return; // cloneFromOriginal already applied state
+            }
+            if (!mesh) return;
+            mesh.position.set(state.position.x, state.position.y, state.position.z);
+            mesh.rotation.set(state.rotation.x, state.rotation.y, state.rotation.z);
+            if (state.scale) mesh.scale.set(state.scale.x, state.scale.y, state.scale.z);
+            mesh.visible = state.visible !== false;
+            mesh.userData.currentLayer = state.currentLayer;
+            if (state.userScale && state.userScale !== 1.0 && mesh.userData.initialScale && !state.scale) {
+                const baseW = mesh.userData.initialScale.width;
+                const baseH = mesh.userData.initialScale.height;
+                mesh.geometry.dispose();
+                mesh.geometry = new THREE.PlaneGeometry(baseW * state.userScale, baseH * state.userScale);
+                mesh.userData.userScale = state.userScale;
+            }
+            if (mesh.material && state.opacity !== undefined) {
+                mesh.material.opacity = state.opacity;
+                mesh.material.transparent = state.transparent || state.opacity < 1;
+                mesh.material.needsUpdate = true;
+            }
+        });
+
+        if (data.camera) {
+            camera.position.set(data.camera.position.x, data.camera.position.y, data.camera.position.z);
+            controls.target.set(data.camera.target.x, data.camera.target.y, data.camera.target.z);
+            controls.update();
+        }
+
+        if (data.effectControls) {
+            const skipKeys = ['thresholdValue', 'shadowBrightness', 'pixelSize'];
+            const presetEffects = ['anon', 'og', 'hacker', 'surveillance', 'greed'];
+            presetEffects.forEach(key => {
+                if (data.effectControls[key] && !effectControls[key]) {
+                    const btn = document.querySelector(`button[data-effect="${key}"]`);
+                    if (btn) btn.click();
+                }
+            });
+            for (const key in data.effectControls) {
+                if (skipKeys.includes(key)) continue;
+                if (presetEffects.includes(key)) continue;
+                if (data.effectControls[key] && !effectControls[key]) {
+                    const btn = document.querySelector(`button[data-effect="${key}"]`);
+                    if (btn) btn.click();
+                }
+            }
+            if (data.effectControls.thresholdValue !== undefined) effectControls.thresholdValue = data.effectControls.thresholdValue;
+            if (data.effectControls.shadowBrightness !== undefined) effectControls.shadowBrightness = data.effectControls.shadowBrightness;
+            if (data.effectControls.pixelSize !== undefined) effectControls.pixelSize = data.effectControls.pixelSize;
+        }
+    });
+    return true;
+}
+
+function downloadComposition() {
+    const data = saveComposition();
+    const json = JSON.stringify(data);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'elon-musk-nft_composition_' + new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-') + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    try { localStorage.setItem(COMPOSITION_STORAGE_KEY, json); } catch (e) { /* quota */ }
+}
+
+function loadCompositionFromFile() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.style.display = 'none';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            try {
+                const data = JSON.parse(evt.target.result);
+                if (restoreComposition(data)) {
+                    try { localStorage.setItem(COMPOSITION_STORAGE_KEY, evt.target.result); } catch (e) { /* quota */ }
+                }
+            } catch (err) { console.error('Failed to load composition:', err); }
+        };
+        reader.readAsText(file);
+        document.body.removeChild(input);
+    };
+    document.body.appendChild(input);
+    input.click();
+}
+
+function autoRestoreComposition() {
+    try {
+        const json = localStorage.getItem(COMPOSITION_STORAGE_KEY);
+        if (!json) return;
+        const data = JSON.parse(json);
+        restoreComposition(data);
+    } catch (e) { console.warn('autoRestore failed:', e); }
 }
 
 init();
 animate();
+setTimeout(autoRestoreComposition, 1200);
 
 // Expose for dae hooks
 setTimeout(function () {
@@ -4791,6 +4883,7 @@ setTimeout(function () {
     window.scene = typeof scene != "undefined" ? scene : undefined;
     window.composer = typeof composer != "undefined" ? composer : undefined;
     window.effectControls = typeof effectControls != "undefined" ? effectControls : undefined;
+    window.controls = typeof controls != "undefined" ? controls : undefined;
 }, 1000)
 
     // Expose for dae hooks
@@ -4801,6 +4894,7 @@ setTimeout(function () {
       window.scene = typeof scene != "undefined" ? scene : undefined;
       window.composer = typeof composer != "undefined" ? composer : undefined;
       window.effectControls = typeof effectControls != "undefined" ? effectControls : undefined;
+      window.controls = typeof controls != "undefined" ? controls : undefined;
     }, 1000)
   </script>
 
@@ -4897,522 +4991,13 @@ setTimeout(function () {
     </div>
   </div>
 
-  <!-- ─── RESET BUTTON (bottom-left, above PRINT) ─── -->
-  <button id="reset-btn">RESET</button>
-
-  <!-- ─── PRINT BUTTON (bottom-left) ─── -->
-  <button id="print-btn">PRINT</button>
-
-  <!-- ─── PRINT ORDER MODAL ─── -->
-  <div id="print-modal-overlay">
-    <div id="print-modal-content">
-      <div id="print-form">
-        <h2>Print Your 3D Kinetic Collage</h2>
-        <p>Enter your name to register your custom layout. Save your print number — staff will use it to verify your name when you pick up your signed art print on opening night.</p>
-        <div id="print-fields">
-          <input id="print-name-input" class="print-input active" type="text" readonly placeholder="Customer Name" autocomplete="off" />
-          <input id="print-email-input-2" class="print-input" type="text" readonly placeholder="Email Address" autocomplete="off" />
-        </div>
-        <div id="virtual-keyboard">
-          <div class="kb-row">
-            <div class="kb-key" data-key="1">1</div>
-            <div class="kb-key" data-key="2">2</div>
-            <div class="kb-key" data-key="3">3</div>
-            <div class="kb-key" data-key="4">4</div>
-            <div class="kb-key" data-key="5">5</div>
-            <div class="kb-key" data-key="6">6</div>
-            <div class="kb-key" data-key="7">7</div>
-            <div class="kb-key" data-key="8">8</div>
-            <div class="kb-key" data-key="9">9</div>
-            <div class="kb-key" data-key="0">0</div>
-          </div>
-          <div class="kb-row">
-            <div class="kb-key" data-key="q">q</div>
-            <div class="kb-key" data-key="w">w</div>
-            <div class="kb-key" data-key="e">e</div>
-            <div class="kb-key" data-key="r">r</div>
-            <div class="kb-key" data-key="t">t</div>
-            <div class="kb-key" data-key="y">y</div>
-            <div class="kb-key" data-key="u">u</div>
-            <div class="kb-key" data-key="i">i</div>
-            <div class="kb-key" data-key="o">o</div>
-            <div class="kb-key" data-key="p">p</div>
-          </div>
-          <div class="kb-row">
-            <div class="kb-key" data-key="a">a</div>
-            <div class="kb-key" data-key="s">s</div>
-            <div class="kb-key" data-key="d">d</div>
-            <div class="kb-key" data-key="f">f</div>
-            <div class="kb-key" data-key="g">g</div>
-            <div class="kb-key" data-key="h">h</div>
-            <div class="kb-key" data-key="j">j</div>
-            <div class="kb-key" data-key="k">k</div>
-            <div class="kb-key" data-key="l">l</div>
-          </div>
-          <div class="kb-row">
-            <div class="kb-key" data-key="z">z</div>
-            <div class="kb-key" data-key="x">x</div>
-            <div class="kb-key" data-key="c">c</div>
-            <div class="kb-key" data-key="v">v</div>
-            <div class="kb-key" data-key="b">b</div>
-            <div class="kb-key" data-key="n">n</div>
-            <div class="kb-key" data-key="m">m</div>
-            <div class="kb-key wide" data-key="backspace">DEL</div>
-          </div>
-          <div class="kb-row">
-            <div class="kb-key" data-key="@">@</div>
-            <div class="kb-key" data-key=".">.</div>
-            <div class="kb-key" data-key="-">-</div>
-            <div class="kb-key" data-key="_">_</div>
-            <div class="kb-key" data-key="'">'</div>
-            <div class="kb-key space" data-key=" ">SPACE</div>
-            <div class="kb-key wide" data-key="clear">CLEAR</div>
-          </div>
-          <div class="kb-row kb-domains">
-            <div class="kb-key wide" data-key="@gmail.com">@gmail.com</div>
-            <div class="kb-key wide" data-key="@yahoo.com">@yahoo.com</div>
-            <div class="kb-key wide" data-key="@hotmail.com">@hotmail.com</div>
-            <div class="kb-key wide" data-key="@outlook.com">@outlook.com</div>
-            <div class="kb-key wide" data-key="@icloud.com">@icloud.com</div>
-          </div>
-        </div>
-        <button id="print-submit-btn">SUBMIT</button>
-        <div id="print-status"></div>
-      </div>
-      <div id="print-success">
-        <h2>Touched the Art</h2>
-        <div class="print-number" id="print-success-number">#0000</div>
-        <img id="print-success-thumb" class="print-thumb" alt="Your custom layout" />
-        <p class="print-message">Thank you for 'touching the art' with Coldie's Tech Epochalypse kinetic 3D collage of Elon Musk. Your print number is <strong id="print-success-number-inline">#0000</strong>. Save this number and verify with staff your name when picking up your art print.</p>
-        <div id="print-success-warning" class="print-warning" style="display:none;"></div>
-        <button id="print-close-btn">DONE</button>
-      </div>
-    </div>
-  </div>
-
   <!-- ─── EXPORT ENGINE ─── -->
   <script>
   (function(){
+    function setupExport() {
     // ── Detect if embedded in iframe ──
     const isEmbedded = (window.self !== window.top);
-
-    // ── PRINT BUTTON + MODAL (OPENING NIGHT VERSION) ──
-    const printBtn = document.getElementById('print-btn');
-    const printOverlay = document.getElementById('print-modal-overlay');
-    const printContent = document.getElementById('print-modal-content');
-    const printFormView = document.getElementById('print-form');
-    const printSuccessView = document.getElementById('print-success');
-    const printNameInput = document.getElementById('print-name-input');
-    const printEmailInput2 = document.getElementById('print-email-input-2');
-    const printSubmitBtn = document.getElementById('print-submit-btn');
-    const virtualKeyboard = document.getElementById('virtual-keyboard');
-
-    // ── ACTIVE FIELD TRACKING (which input the keyboard types into) ──
-    let activeInput = printNameInput;
-    function setActiveInput(el) {
-      activeInput = el;
-      [printNameInput, printEmailInput2].forEach(i => {
-        if (!i) return;
-        i.classList.toggle('active', i === el);
-      });
-    }
-    if (printNameInput) {
-      printNameInput.addEventListener('pointerdown', (e) => {
-        e.preventDefault(); e.stopPropagation();
-        setActiveInput(printNameInput);
-      });
-    }
-    if (printEmailInput2) {
-      printEmailInput2.addEventListener('pointerdown', (e) => {
-        e.preventDefault(); e.stopPropagation();
-        setActiveInput(printEmailInput2);
-      });
-    }
-
-    // ── VIRTUAL KEYBOARD ──
-    if (virtualKeyboard && printNameInput) {
-      virtualKeyboard.addEventListener('pointerdown', (e) => {
-        const key = e.target.closest('.kb-key');
-        if (!key) return;
-        e.preventDefault();
-        e.stopPropagation();
-        const val = key.dataset.key;
-        // Domain shortcut keys (@gmail.com, etc) — auto-route to email field
-        const isDomainShortcut = val.length > 1 && val.startsWith('@');
-        let target = activeInput || printNameInput;
-        if (isDomainShortcut && printEmailInput2) {
-          target = printEmailInput2;
-          setActiveInput(printEmailInput2);
-        }
-        if (val === 'backspace') {
-          target.value = target.value.slice(0, -1);
-        } else if (val === 'clear') {
-          target.value = '';
-        } else if (isDomainShortcut) {
-          // Smart-append: avoid double @
-          let toAppend = val;
-          if (target.value.endsWith('@')) toAppend = val.slice(1);
-          else if (target.value.includes('@')) toAppend = val.slice(1);
-          if (target.value.length + toAppend.length <= 80) target.value += toAppend;
-        } else {
-          if (target.value.length < 80) target.value += val;
-        }
-        key.classList.add('pressed');
-        setTimeout(() => key.classList.remove('pressed'), 120);
-      });
-      ['touchstart','touchmove','touchend','pointerdown','pointermove','pointerup','mousedown','click'].forEach(evt => {
-        virtualKeyboard.addEventListener(evt, (e) => { e.stopPropagation(); }, { passive: false });
-      });
-    }
-    const printStatus = document.getElementById('print-status');
-    const printCloseBtn = document.getElementById('print-close-btn');
-    const printSuccessNumber = document.getElementById('print-success-number');
-    const printSuccessNumberInline = document.getElementById('print-success-number-inline');
-    const printSuccessThumb = document.getElementById('print-success-thumb');
-    const printSuccessWarning = document.getElementById('print-success-warning');
-
-    // ── Local export folder (Edge File System Access API) ──
-    // First submit prompts user to pick D:/exports/. Handle is cached in IndexedDB.
-    const FSA_DB = 'opening-night';
-    const FSA_STORE = 'handles';
-    const FSA_KEY = 'export-folder';
-
-    function fsaOpenDb() {
-      return new Promise((resolve, reject) => {
-        const req = indexedDB.open(FSA_DB, 1);
-        req.onupgradeneeded = () => req.result.createObjectStore(FSA_STORE);
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-    }
-    async function fsaGetSavedHandle() {
-      try {
-        const db = await fsaOpenDb();
-        return await new Promise((resolve, reject) => {
-          const tx = db.transaction(FSA_STORE, 'readonly');
-          const r = tx.objectStore(FSA_STORE).get(FSA_KEY);
-          r.onsuccess = () => resolve(r.result || null);
-          r.onerror = () => reject(r.error);
-        });
-      } catch (_) { return null; }
-    }
-    async function fsaSaveHandle(handle) {
-      try {
-        const db = await fsaOpenDb();
-        await new Promise((resolve, reject) => {
-          const tx = db.transaction(FSA_STORE, 'readwrite');
-          tx.objectStore(FSA_STORE).put(handle, FSA_KEY);
-          tx.oncomplete = resolve;
-          tx.onerror = () => reject(tx.error);
-        });
-      } catch (_) {}
-    }
-    async function fsaEnsurePermission(handle) {
-      if (!handle || !handle.queryPermission) return false;
-      const opts = { mode: 'readwrite' };
-      let perm = await handle.queryPermission(opts);
-      if (perm === 'granted') return true;
-      perm = await handle.requestPermission(opts);
-      return perm === 'granted';
-    }
-    async function fsaGetExportFolder() {
-      let handle = await fsaGetSavedHandle();
-      if (handle && await fsaEnsurePermission(handle)) return handle;
-      if (!window.showDirectoryPicker) return null;
-      try {
-        handle = await window.showDirectoryPicker({
-          id: 'opening-night-exports',
-          mode: 'readwrite',
-          startIn: 'desktop',
-        });
-        await fsaSaveHandle(handle);
-        return handle;
-      } catch (_) { return null; }
-    }
-    async function fsaWriteFile(folderHandle, filename, blob) {
-      const fileHandle = await folderHandle.getFileHandle(filename, { create: true });
-      const writable = await fileHandle.createWritable();
-      await writable.write(blob);
-      await writable.close();
-    }
-
-    // ── Local print number counter (offline fallback) ──
-    // Visit the page with #reset-counter once to reset to 0 → next print is LOCAL-0001.
-    if (window.location.hash === '#reset-counter') {
-      localStorage.removeItem('opening-night-local-counter');
-      try { alert('Local print counter reset. Next print will be LOCAL-0001.'); } catch (_) {}
-      // Strip the hash so a refresh doesn't re-trigger the alert.
-      try { history.replaceState(null, '', window.location.pathname); } catch (_) {}
-    }
-    function nextLocalNumber() {
-      const k = 'opening-night-local-counter';
-      const n = (parseInt(localStorage.getItem(k) || '0', 10) || 0) + 1;
-      localStorage.setItem(k, String(n));
-      return n;
-    }
-    function formatPrintNumber(n) {
-      return '#' + String(n).padStart(4, '0');
-    }
-    function safeFilenamePart(s) {
-      return String(s).replace(/[^a-z0-9_.-]/gi, '_').slice(0, 60);
-    }
-
-    if (isEmbedded) {
-      if (printBtn) printBtn.style.display = 'none';
-      const exportWrapper = document.getElementById('export-wrapper');
-      if (exportWrapper) exportWrapper.style.display = 'none';
-    }
-
-    function showFormView() {
-      printContent.classList.remove('success-view');
-      printNameInput.value = '';
-      if (printEmailInput2) printEmailInput2.value = '';
-      printStatus.textContent = '';
-      printSubmitBtn.disabled = false;
-      printSuccessWarning.style.display = 'none';
-      printSuccessWarning.textContent = '';
-      setActiveInput(printNameInput);
-    }
-    function showSuccessView({ printNumberStr, thumbDataUrl, isLocal, warningText }) {
-      printSuccessNumber.textContent = printNumberStr;
-      printSuccessNumberInline.textContent = printNumberStr;
-      printSuccessNumber.classList.toggle('local', !!isLocal);
-      printSuccessThumb.src = thumbDataUrl || '';
-      if (warningText) {
-        printSuccessWarning.textContent = warningText;
-        printSuccessWarning.style.display = 'block';
-      } else {
-        printSuccessWarning.style.display = 'none';
-      }
-      printContent.classList.add('success-view');
-    }
-
-    if (printBtn && printOverlay && !isEmbedded) {
-      printBtn.onclick = (e) => {
-        e.stopPropagation();
-        printOverlay.classList.add('open');
-        showFormView();
-      };
-
-      printOverlay.onclick = (e) => {
-        if (e.target === printOverlay) {
-          printOverlay.classList.remove('open');
-          showFormView();
-        }
-      };
-
-      if (printCloseBtn) {
-        printCloseBtn.onclick = () => {
-          printOverlay.classList.remove('open');
-          showFormView();
-          // Reset artwork to original positions + re-randomize face for next visitor
-          try { if (typeof resetPiecesToOriginalPositions === 'function') resetPiecesToOriginalPositions(); }
-          catch (e) { console.warn('Reset on DONE failed:', e); }
-        };
-      }
-
-      printSubmitBtn.onclick = async () => {
-        const customerName = printNameInput.value.trim();
-        const customerEmail = printEmailInput2 ? printEmailInput2.value.trim() : '';
-        if (!customerName || customerName.length < 2) {
-          printStatus.style.color = '#e66';
-          printStatus.textContent = 'Please enter your name';
-          setActiveInput(printNameInput);
-          return;
-        }
-        if (!customerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
-          printStatus.style.color = '#e66';
-          printStatus.textContent = 'Please enter a valid email address';
-          setActiveInput(printEmailInput2);
-          return;
-        }
-
-        printSubmitBtn.disabled = true;
-        printStatus.style.color = '#aaa';
-        printStatus.textContent = 'CAPTURING...';
-
-        try {
-          const PRINT_W = 1712;
-          const PRINT_H = 2444;
-          const r = await waitForRenderer();
-
-          const origW = r.domElement.width;
-          const origH = r.domElement.height;
-          const origAspect = window.camera ? window.camera.aspect : 1;
-
-          r.setSize(PRINT_W, PRINT_H);
-          if (window.camera) {
-            window.camera.aspect = PRINT_W / PRINT_H;
-            window.camera.updateProjectionMatrix();
-          }
-          if (window.composer) {
-            window.composer.setSize(PRINT_W, PRINT_H);
-            window.composer.render();
-          } else if (window.scene && window.camera) {
-            r.render(window.scene, window.camera);
-          }
-
-          // Progressive JPEG compression — heavy effect stacks (BIO-CODER, OG, etc.)
-          // can push the JPEG past Vercel's 4.5MB body limit and trigger HTTP 413.
-          const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
-          const QUALITY_STEPS = [0.78, 0.65, 0.55, 0.45, 0.35];
-          let fullDataUrl, imageBlob;
-          for (let i = 0; i < QUALITY_STEPS.length; i++) {
-            fullDataUrl = r.domElement.toDataURL('image/jpeg', QUALITY_STEPS[i]);
-            imageBlob = await (await fetch(fullDataUrl)).blob();
-            if (imageBlob.size <= MAX_UPLOAD_BYTES) break;
-            console.warn('[print] q=' + QUALITY_STEPS[i] + ' → ' + (imageBlob.size/1048576).toFixed(2) + 'MB');
-          }
-          if (imageBlob.size > MAX_UPLOAD_BYTES) {
-            const downCanvas = document.createElement('canvas');
-            downCanvas.width = Math.round(PRINT_W * 0.75);
-            downCanvas.height = Math.round(PRINT_H * 0.75);
-            const dctx = downCanvas.getContext('2d');
-            const sourceImg = new Image();
-            sourceImg.src = fullDataUrl;
-            await new Promise((res) => { sourceImg.onload = res; });
-            dctx.drawImage(sourceImg, 0, 0, downCanvas.width, downCanvas.height);
-            fullDataUrl = downCanvas.toDataURL('image/jpeg', 0.55);
-            imageBlob = await (await fetch(fullDataUrl)).blob();
-          }
-
-          // Generate 600px-wide thumbnail for success view
-          const thumbCanvas = document.createElement('canvas');
-          const thumbW = 600;
-          const thumbH = Math.round(PRINT_H * (thumbW / PRINT_W));
-          thumbCanvas.width = thumbW;
-          thumbCanvas.height = thumbH;
-          const tctx = thumbCanvas.getContext('2d');
-          const sourceImg = new Image();
-          sourceImg.src = fullDataUrl;
-          await new Promise((res) => { sourceImg.onload = res; });
-          tctx.drawImage(sourceImg, 0, 0, thumbW, thumbH);
-          const thumbDataUrl = thumbCanvas.toDataURL('image/jpeg', 0.85);
-
-          r.setSize(origW, origH);
-          if (window.camera) {
-            window.camera.aspect = origAspect;
-            window.camera.updateProjectionMatrix();
-          }
-          if (window.composer) {
-            window.composer.setSize(origW, origH);
-          }
-
-          const meshStates = [];
-          if (window.scene) {
-            window.scene.children.forEach(child => {
-              if (child.userData && child.userData.id) {
-                meshStates.push({
-                  id: child.userData.id,
-                  position: { x: child.position.x, y: child.position.y, z: child.position.z },
-                  rotation: { x: child.rotation.x, y: child.rotation.y, z: child.rotation.z },
-                  scale: { x: child.scale.x, y: child.scale.y, z: child.scale.z },
-                  visible: child.visible,
-                  userScale: child.userData.userScale || 1.0,
-                });
-              }
-            });
-          }
-          const compositionJson = JSON.stringify({ meshes: meshStates, timestamp: new Date().toISOString() });
-
-          // Local sequential number (used in filename + offline fallback)
-          const localNum = nextLocalNumber();
-          const localRef = formatPrintNumber(localNum).replace('#', 'LOCAL-');
-          const ts = new Date();
-          const tsStr = ts.toISOString().replace(/[:.]/g, '-').slice(0, 19);
-          const baseName = `${String(localNum).padStart(4,'0')}_${tsStr}_${safeFilenamePart(customerName)}_${safeFilenamePart(customerEmail)}`;
-
-          // ── STEP 1: write to local export folder (offline-safe redundancy) ──
-          printStatus.textContent = 'SAVING LOCAL...';
-          let localSaved = false;
-          try {
-            const folder = await fsaGetExportFolder();
-            if (folder) {
-              await fsaWriteFile(folder, baseName + '.jpg', imageBlob);
-              await fsaWriteFile(folder, baseName + '.json', new Blob([JSON.stringify({
-                localRef, customerName, customerEmail, submittedAt: ts.toISOString(), composition: JSON.parse(compositionJson),
-              }, null, 2)], { type: 'application/json' }));
-              localSaved = true;
-            }
-          } catch (e) {
-            console.warn('Local save failed:', e);
-          }
-
-          // ── STEP 2: upload + Airtable + email ──
-          printStatus.textContent = 'UPLOADING...';
-          const form = new FormData();
-          form.append('customerName', customerName);
-          form.append('email', customerEmail);
-          form.append('image', imageBlob, baseName + '.jpg');
-          form.append('compositionJson', compositionJson);
-          form.append('localRef', localRef);
-
-          // When running from kiosk (localhost) or file://, route submits to
-          // production. Override at runtime via `window.PRINT_API_URL` if needed.
-          const _origin = window.location.origin || '';
-          const API_URL = window.PRINT_API_URL ||
-            (/^(file:|http:\/\/(localhost|127\.|\[::1\]))/.test(_origin)
-              ? 'https://www.knowyouroverlord.art'
-              : _origin);
-          let res, data;
-          try {
-            res = await fetch(API_URL + '/api/print-opening-night', { method: 'POST', body: form });
-            data = await res.json().catch(() => ({}));
-          } catch (netErr) {
-            // Pure network failure → show LOCAL number
-            const warning = localSaved
-              ? 'Submission queued locally. Show this LOCAL number to gallery staff. Will sync when online.'
-              : '⚠ Could not save locally OR upload. Show this LOCAL number to gallery staff and retry from this device.';
-            showSuccessView({
-              printNumberStr: localRef,
-              thumbDataUrl,
-              isLocal: true,
-              warningText: warning,
-            });
-            return;
-          }
-
-          if (res.ok && data.ok) {
-            const numStr = data.printNumberStr || localRef;
-            showSuccessView({
-              printNumberStr: numStr,
-              thumbDataUrl,
-              isLocal: false,
-              warningText: '',
-            });
-          } else {
-            const detail = data.details || data.error || ('HTTP ' + res.status);
-            console.error('Print opening-night error:', data);
-            const warning = localSaved
-              ? `Server error: ${detail}. Submission queued locally — show this LOCAL number to gallery staff.`
-              : `Server error: ${detail}. Local save also failed — please retry.`;
-            showSuccessView({
-              printNumberStr: localRef,
-              thumbDataUrl,
-              isLocal: true,
-              warningText: warning,
-            });
-          }
-        } catch (e) {
-          console.error('Submit error:', e);
-          printStatus.style.color = '#e66';
-          printStatus.textContent = e.message || 'ERROR — TRY AGAIN';
-          printSubmitBtn.disabled = false;
-        }
-      };
-    }
-
-    function waitForRenderer() {
-      return new Promise((resolve) => {
-        const check = () => {
-          if (window.renderer && window.renderer.domElement) resolve(window.renderer);
-          else setTimeout(check, 100);
-        };
-        check();
-      });
-    }
-
-    function setupExport() {
+    
     // ── DOM refs ──
     const toggle    = document.getElementById('export-toggle');
     if (!toggle) { setTimeout(setupExport, 50); return; } // wait for init() to create it
@@ -5422,6 +5007,8 @@ setTimeout(function () {
       toggle.style.display = 'none';
       const modal = document.getElementById('post-modal');
       if (modal) modal.style.display = 'none';
+      const submitOverlordBtn = document.getElementById('submit-overlord-btn');
+      if (submitOverlordBtn) submitOverlordBtn.style.display = 'none';
       return;
     }
     
@@ -5452,7 +5039,7 @@ setTimeout(function () {
     // Wire judgment protocol button to submit via Airtable API
     const judgmentBtn = document.getElementById('judgment-btn');
     const judgmentStatus = document.getElementById('judgment-status');
-    const OVERLORD_NAME = 'elon-musk-lisbon';
+    const OVERLORD_NAME = 'elon-musk';
 
     judgmentBtn.onclick = async () => {
       const xAccount = document.getElementById('x-account-input').value.trim();
@@ -5530,6 +5117,13 @@ setTimeout(function () {
       if (!panel.contains(e.target) && e.target !== toggle) panel.classList.remove('open');
     });
 
+    // ── SUBMIT YOURSELF button — capture PNG then show post modal ──
+    const submitOverlordBtn = document.getElementById('submit-overlord-btn');
+    if (submitOverlordBtn) submitOverlordBtn.onclick = (e) => {
+      e.stopPropagation();
+      exportPNG();
+    };
+
     // ── Format is PNG-only, duration row stays hidden ──
     fmtSel.onchange = () => {
       durRow.style.display = 'none';
@@ -5588,7 +5182,7 @@ setTimeout(function () {
           if (!blob) return;
           const form = new FormData();
           form.append('image', blob, 'export.jpg');
-          form.append('overlord', 'elon-musk-lisbon');
+          form.append('overlord', 'elon-musk');
           try {
             const res = await fetch(GALLERY_API + '/upload', { method: 'POST', body: form });
             if (!res.ok) console.warn('Gallery upload response:', res.status);
@@ -5606,44 +5200,17 @@ setTimeout(function () {
       setStatus('Capturing…', 'active');
       lockUI(true);
       const r = await getRenderer();
-
-      // 300 DPI at 297×420 mm (A3)
-      const EXPORT_W = 3508;
-      const EXPORT_H = 4961;
-
-      // Save original size
-      const origW = r.domElement.width;
-      const origH = r.domElement.height;
-      const origAspect = window.camera ? window.camera.aspect : 1;
-
-      // Resize to print resolution
-      r.setSize(EXPORT_W, EXPORT_H);
-      if (window.camera) {
-        window.camera.aspect = EXPORT_W / EXPORT_H;
-        window.camera.updateProjectionMatrix();
-      }
+      // Force a fresh render so the buffer has the current frame
       if (window.composer) {
-        window.composer.setSize(EXPORT_W, EXPORT_H);
         window.composer.render();
       } else if (window.scene && window.camera) {
         r.render(window.scene, window.camera);
       }
-
       r.domElement.toBlob((blob) => {
-        // Restore original size
-        r.setSize(origW, origH);
-        if (window.camera) {
-          window.camera.aspect = origAspect;
-          window.camera.updateProjectionMatrix();
-        }
-        if (window.composer) {
-          window.composer.setSize(origW, origH);
-        }
-
         if (blob) {
-          triggerDownload(blob, 'elon-musk-lisbon-coldie.png');
+          triggerDownload(blob, 'elon-musk-coldie.png');
           saveToGallery(r.domElement);
-          setStatus('PNG saved ✓ (3508×4961 @ 300 DPI) — added to gallery', 'active');
+          setStatus('PNG saved ✓ — added to gallery', 'active');
           showPostModal();
         } else {
           setStatus('Capture failed', 'error');
@@ -5884,58 +5451,44 @@ setTimeout(function () {
   })();
   </script>
 
-  <!-- ─── ORBITAL TRANSFORM UI (Blender/AE-style gizmo toolbar) ─── -->
-  <div id="orbital-transform-ui">
-    <div class="orb-header">
-      <div class="orb-title-wrap">
-        <span class="orb-icon">◎</span>
-        <span class="orb-asset-name" id="orb-asset-name">ASSET</span>
-      </div>
-      <span class="orb-close" id="orb-close" title="Close (Esc)">✕</span>
+<div id="orbital-transform-ui">
+  <div class="orb-header">
+    <div class="orb-title-wrap">
+      <span class="orb-icon">◎</span>
+      <span class="orb-asset-name" id="orb-asset-name">ASSET</span>
     </div>
-
-    <div class="orb-modes">
-      <button class="orb-mode-btn active" id="orb-mode-translate" data-mode="translate" title="Move (G)">
-        <span class="orb-mode-icon">⇔</span>
-        <span class="orb-mode-label">MOVE</span>
-        <span class="orb-mode-hotkey">G</span>
-      </button>
-      <button class="orb-mode-btn" id="orb-mode-rotate" data-mode="rotate" title="Rotate (R)">
-        <span class="orb-mode-icon">⟳</span>
-        <span class="orb-mode-label">ROTATE</span>
-        <span class="orb-mode-hotkey">R</span>
-      </button>
-      <button class="orb-mode-btn" id="orb-mode-scale" data-mode="scale" title="Scale (S)">
-        <span class="orb-mode-icon">⤢</span>
-        <span class="orb-mode-label">SCALE</span>
-        <span class="orb-mode-hotkey">S</span>
-      </button>
-    </div>
-
-    <div class="orb-legend">
-      <span class="orb-legend-item"><span class="orb-legend-dot x"></span><span class="orb-legend-label">X</span></span>
-      <span class="orb-legend-item"><span class="orb-legend-dot y"></span><span class="orb-legend-label">Y</span></span>
-      <span class="orb-legend-item"><span class="orb-legend-dot z"></span><span class="orb-legend-label">Z</span></span>
-    </div>
-
-    <button class="orb-reset-btn" id="orb-reset-btn">↺ RESET TRANSFORM</button>
-
-    <div class="orb-action-row">
-      <button class="orb-duplicate-btn" id="orb-duplicate-btn">⧉ DUPLICATE</button>
-      <button class="orb-trash-btn" id="orb-trash-btn">✕ DELETE</button>
-    </div>
+    <span class="orb-close" id="orb-close" title="Close (Esc)">✕</span>
   </div>
+  <div class="orb-modes">
+    <button class="orb-mode-btn active" id="orb-mode-translate" data-mode="translate" title="Move (G)">
+      <span class="orb-mode-icon">⇔</span>
+      <span class="orb-mode-label">MOVE</span>
+      <span class="orb-mode-hotkey">G</span>
+    </button>
+    <button class="orb-mode-btn" id="orb-mode-rotate" data-mode="rotate" title="Rotate (R)">
+      <span class="orb-mode-icon">⟳</span>
+      <span class="orb-mode-label">ROTATE</span>
+      <span class="orb-mode-hotkey">R</span>
+    </button>
+    <button class="orb-mode-btn" id="orb-mode-scale" data-mode="scale" title="Scale (S)">
+      <span class="orb-mode-icon">⤢</span>
+      <span class="orb-mode-label">SCALE</span>
+      <span class="orb-mode-hotkey">S</span>
+    </button>
+  </div>
+  <div class="orb-legend">
+    <span class="orb-legend-item"><span class="orb-legend-dot x"></span><span class="orb-legend-label">X</span></span>
+    <span class="orb-legend-item"><span class="orb-legend-dot y"></span><span class="orb-legend-label">Y</span></span>
+    <span class="orb-legend-item"><span class="orb-legend-dot z"></span><span class="orb-legend-label">Z</span></span>
+  </div>
+  <button class="orb-reset-btn" id="orb-reset-btn">↺ RESET TRANSFORM</button>
+  <div class="orb-action-row">
+    <button class="orb-duplicate-btn" id="orb-duplicate-btn">⧉ DUPLICATE</button>
+    <button class="orb-trash-btn" id="orb-trash-btn">✕ DELETE</button>
+  </div>
+</div>
 
 <script>
-/**
- * Pinch-to-scale gesture handler.
- *   2 fingers on canvas (with an asset selected) → uniform scale
- *   3 fingers                                    → axis-locked scale
- *                                                  (pinch line dominant axis = X if horizontal,
- *                                                   Y if vertical)
- *   Capture-phase listeners run before existing single-pointer drag handlers
- *   so they coexist without breaking tap-to-select / drag-to-move.
- */
 (function() {
   function whenReady(cb) {
     if (window.renderer && window.renderer.domElement) cb();
@@ -5944,12 +5497,6 @@ setTimeout(function () {
   whenReady(() => {
     const canvas = window.renderer.domElement;
     const pointers = new Map();
-
-    // ── Defensive fix for stray TransformControls null-object error ──
-    // When detach() is called the gizmo's .object becomes null but the helper
-    // mesh stays in the scene. The next render frame calls updateMatrixWorld
-    // on the null object and crashes. Wrap attach/detach to manage helper
-    // visibility — invisible objects aren't traversed by the render loop.
     (function patchTransformControls() {
       const tc = window.transformControls;
       if (!tc || tc.__patchedAttachDetach) return;
@@ -5958,40 +5505,27 @@ setTimeout(function () {
       const origDetach = tc.detach.bind(tc);
       tc.detach = function() {
         const r = origDetach();
-        const h = helperOf();
-        if (h) h.visible = false;
+        const h = helperOf(); if (h) h.visible = false;
         return r;
       };
       const origAttach = tc.attach.bind(tc);
       tc.attach = function(obj) {
         const r = origAttach(obj);
-        const h = helperOf();
-        if (h) h.visible = !!obj;
+        const h = helperOf(); if (h) h.visible = !!obj;
         return r;
       };
-      // Initial state: hide helper if nothing attached at module load
       if (!tc.object) {
-        const h = helperOf();
-        if (h) h.visible = false;
+        const h = helperOf(); if (h) h.visible = false;
       }
     })();
-
-    let mode = 'idle';   // 'idle' | 'uniform' | 'lock-x' | 'lock-y'
-    let target = null;
-    let initDist = 0;
-    let initScale = { x: 1, y: 1, z: 1 };
-    let initUserScale = 1;
-
-    const MIN_SCALE = 0.1;
-    const MAX_SCALE = 10;
+    let mode = 'idle', target = null, initDist = 0;
+    let initScale = { x: 1, y: 1, z: 1 }, initUserScale = 1;
+    const MIN_SCALE = 0.1, MAX_SCALE = 10;
     const clamp = (v) => Math.max(MIN_SCALE, Math.min(MAX_SCALE, v));
     const pair = () => Array.from(pointers.values()).slice(0, 2);
     const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-
     function startUniform() {
-      // Pinch-to-scale only active when the orbital UI is in SCALE mode.
       if (window.currentGizmoMode !== 'scale') return false;
-      // Read attached mesh from TransformControls (selectedObject is module-scoped).
       target = (window.transformControls && window.transformControls.object) || null;
       if (!target) return false;
       const p = pair();
@@ -6002,7 +5536,6 @@ setTimeout(function () {
       if (window.controls) window.controls.enabled = false;
       return true;
     }
-
     function startAxisLock() {
       if (!target) return;
       const p = pair();
@@ -6012,20 +5545,16 @@ setTimeout(function () {
       initDist = Math.max(1, dist(p[0], p[1]));
       initScale = { x: target.scale.x, y: target.scale.y, z: target.scale.z };
     }
-
     function endPinch() {
-      mode = 'idle';
-      target = null;
+      mode = 'idle'; target = null;
       if (window.controls) window.controls.enabled = true;
     }
-
     function onDown(e) {
       pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (pointers.size === 2) {
         if (startUniform()) { e.preventDefault(); e.stopPropagation(); }
       } else if (pointers.size === 3 && (mode === 'uniform' || mode === 'lock-x' || mode === 'lock-y') && target) {
-        startAxisLock();
-        e.preventDefault(); e.stopPropagation();
+        startAxisLock(); e.preventDefault(); e.stopPropagation();
       }
     }
     function onMove(e) {
@@ -6051,7 +5580,6 @@ setTimeout(function () {
       if (pointers.size < 2) {
         endPinch();
       } else if (pointers.size === 2 && (mode === 'lock-x' || mode === 'lock-y')) {
-        // 3rd finger lifted — re-baseline as uniform from current state
         mode = 'uniform';
         const p = pair();
         initDist = Math.max(1, dist(p[0], p[1]));
@@ -6059,21 +5587,15 @@ setTimeout(function () {
         initUserScale = target.userData.userScale || target.scale.x || 1;
       }
     }
-
-    // Tell the browser to not handle native gestures (pinch-zoom, pan) on the canvas —
-    // otherwise the browser eats 2-finger pinch as a page-zoom gesture before our
-    // handler ever sees the second pointer.
     canvas.style.touchAction = 'none';
-
     const opts = { capture: true, passive: false };
     canvas.addEventListener('pointerdown', onDown, opts);
     canvas.addEventListener('pointermove', onMove, opts);
     canvas.addEventListener('pointerup', onUp, opts);
     canvas.addEventListener('pointercancel', onUp, opts);
     canvas.addEventListener('pointerleave', onUp, opts);
-
-    if (window.console) console.log('[pinch-scale] ready — 2-finger uniform, 3-finger axis-lock');
   });
 })();
 </script>
+
 </body></html>
