@@ -83,9 +83,15 @@ export default function VoteButton({ recordId, initialVotes, size = 'sm' }: Prop
         setCount(data.votes)
         setGlobalVote(recordId)
       } else if (res.status === 429 || data.alreadyVoted) {
-        // Server says this IP already voted (maybe from another device/browser);
-        // mirror the server's record into local state.
-        setGlobalVote(data.votedFor || recordId)
+        // Server says this IP already voted today (maybe from another device/browser).
+        // Mirror the server's record into local state so the UI reflects the real vote.
+        const previousVote = data.votedFor || recordId
+        setGlobalVote(previousVote)
+        // If the IP voted for a DIFFERENT piece than the one the user just clicked,
+        // surface a clear message so they understand why the banner shows a different title.
+        if (previousVote !== recordId) {
+          setError('This device already voted for another piece today')
+        }
       } else {
         setError(data.error || 'Vote failed')
       }
@@ -118,7 +124,12 @@ export default function VoteButton({ recordId, initialVotes, size = 'sm' }: Prop
     <button
       type="button"
       onClick={handleClick}
-      disabled={disabled}
+      // Note: intentionally NOT using the HTML `disabled` attribute here.
+      // Disabled buttons don't fire click events in some browsers, which means
+      // e.stopPropagation() in handleClick never runs and the click may bubble
+      // up to the Card's lightbox handler. We handle the disabled state purely
+      // via JS (handleClick returns early) + visual CSS instead.
+      aria-disabled={disabled}
       title={title}
       aria-pressed={votedForThis}
       style={{
