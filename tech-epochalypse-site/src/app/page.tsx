@@ -110,18 +110,38 @@ export default function HomePage() {
           competitions, hide this with `{false && (…)}` and re-enable the
           hero block above so the homepage falls back to the Noir Dossier
           intro. Both blocks are intentionally retained. */}
-      <section className="relative min-h-screen flex items-center py-24 md:py-32 section-padding bg-black">
-        <div className="page-container">
+      <section className="relative min-h-screen flex items-center py-24 md:py-32 section-padding bg-black overflow-hidden">
+        {/* Pulsing red radial glow — fills the section with a warning ambience.
+            Sits behind everything, never receives pointer events. */}
+        <div
+          className="absolute inset-0 pointer-events-none animate-warning-glow"
+          style={{ background: 'radial-gradient(ellipse at center, rgba(229,57,70,0.22) 0%, rgba(229,57,70,0.04) 45%, transparent 75%)' }}
+          aria-hidden
+        />
+        {/* Top + bottom red bars flashing in sync with the banner — emergency-tape feel. */}
+        <div className="absolute inset-x-0 top-0 h-[3px] animate-warning-bar pointer-events-none" style={{ background: '#ff5a66' }} aria-hidden />
+        <div className="absolute inset-x-0 bottom-0 h-[3px] animate-warning-bar pointer-events-none" style={{ background: '#ff5a66' }} aria-hidden />
+
+        <div className="page-container relative z-10">
           <ScrollReveal>
-            <div className="max-w-4xl mx-auto text-center">
-              {/* Live status pill */}
-              <div className="inline-flex items-center gap-2.5 mb-6">
-                <span className="relative flex h-2 w-2">
+            <div className="max-w-5xl mx-auto text-center">
+              {/* GIANT FLASHING RED WARNING BANNER — emergency-system styling.
+                  Border, fill, and box-shadow all pulse via animate-warning-flash;
+                  the dot inside still has its own ping animation for the second beat. */}
+              <div
+                className="inline-flex items-center justify-center gap-4 md:gap-6 mb-10 md:mb-14 px-6 py-4 md:px-12 md:py-6 border-2 animate-warning-flash"
+                style={{
+                  borderColor: '#ff5a66',
+                  background: 'rgba(229, 57, 70, 0.12)',
+                  boxShadow: '0 0 40px rgba(229, 57, 70, 0.55), inset 0 0 20px rgba(229, 57, 70, 0.15)',
+                }}
+              >
+                <span className="relative flex h-4 w-4 md:h-5 md:w-5 flex-shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: '#ff5a66' }} />
-                  <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: '#ff5a66' }} />
+                  <span className="relative inline-flex rounded-full h-full w-full" style={{ background: '#ff5a66' }} />
                 </span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: '#ff5a66' }}>
-                  Now Live — Submissions Open
+                <span className="font-mono text-lg sm:text-2xl md:text-3xl lg:text-4xl uppercase tracking-[0.18em] md:tracking-[0.25em] font-bold leading-none" style={{ color: '#ff5a66' }}>
+                  Now Live <span className="opacity-70">—</span> Submissions Open
                 </span>
               </div>
 

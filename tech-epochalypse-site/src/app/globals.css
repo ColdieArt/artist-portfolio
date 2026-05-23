@@ -442,3 +442,26 @@
   0% { top: -2px; }
   100% { top: 100%; }
 }
+
+/* ── Warning-system pulses (used by homepage SUBJ:01 hero) ── */
+@keyframes warning-flash {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+@keyframes warning-bar {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 24px rgba(229, 57, 70, 0.7), 0 0 8px rgba(229, 57, 70, 0.9);
+  }
+  50% {
+    opacity: 0.45;
+    box-shadow: 0 0 8px rgba(229, 57, 70, 0.3);
+  }
+}
+@keyframes warning-glow {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+.animate-warning-flash { animation: warning-flash 1.1s ease-in-out infinite; }
+.animate-warning-bar   { animation: warning-bar   1.1s ease-in-out infinite; }
+.animate-warning-glow  { animation: warning-glow  2.2s ease-in-out infinite; }
