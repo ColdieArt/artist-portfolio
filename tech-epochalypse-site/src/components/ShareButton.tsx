@@ -18,7 +18,9 @@ interface Props {
   title: string
   contributor: string
   imageUrl?: string
-  size?: 'sm' | 'lg'
+  // 'xl' is the badge-style variant used on trending cards — same red fill as
+  // the "🔥 +N THIS WEEK" chip, scaled ~3x for an obvious tap target.
+  size?: 'sm' | 'lg' | 'xl'
 }
 
 function buildTweetText(title: string, contributor: string) {
@@ -105,9 +107,14 @@ export default function ShareButton({ recordId, title, contributor, imageUrl, si
     if (!shared) openTweetIntent(text, shareUrl)
   }
 
+  const isXl = size === 'xl'
   const isLarge = size === 'lg'
-  const px = isLarge ? '10px 14px' : '6px 10px'
-  const iconSize = isLarge ? 14 : 11
+  // 'xl' mirrors the trend-badge padding ratio scaled ~3x.
+  const px = isXl ? '12px 24px' : isLarge ? '10px 14px' : '6px 10px'
+  const iconSize = isXl ? 28 : isLarge ? 14 : 11
+  // Same red fill as the trend badge in 'xl' mode; otherwise the original dark chip.
+  const baseBg = isXl ? 'rgba(229,57,70,0.85)' : 'rgba(0,0,0,0.55)'
+  const hoverBg = isXl ? 'rgba(229,57,70,1)' : 'rgba(255,255,255,0.12)'
 
   return (
     <button
@@ -119,8 +126,8 @@ export default function ShareButton({ recordId, title, contributor, imageUrl, si
         alignItems: 'center',
         gap: '6px',
         padding: px,
-        background: 'rgba(0,0,0,0.55)',
-        border: '1px solid rgba(255,255,255,0.2)',
+        background: baseBg,
+        border: isXl ? 'none' : '1px solid rgba(255,255,255,0.2)',
         color: '#fff',
         fontFamily: 'monospace',
         cursor: 'pointer',
@@ -128,8 +135,8 @@ export default function ShareButton({ recordId, title, contributor, imageUrl, si
         backdropFilter: 'blur(2px)',
         userSelect: 'none',
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)' }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.55)' }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = hoverBg }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = baseBg }}
     >
       {/* X (Twitter) logo */}
       <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

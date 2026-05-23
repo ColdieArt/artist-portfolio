@@ -555,14 +555,41 @@ function Card({
           </div>
         </div>
 
-        {/* Vote + Share controls (bottom-right of image area, overlay on hover) */}
-        <div
-          style={{ position: 'absolute', top: 8, right: showTrendBadge && recent > 0 ? 'auto' : 8, bottom: showTrendBadge && recent > 0 ? 8 : 'auto', zIndex: 2, display: 'flex', gap: 6 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <VoteButton recordId={item.id} initialVotes={item.votes ?? 0} size="sm" />
-          <ShareButton recordId={item.id} title={item.title} contributor={item.contributor} imageUrl={item.src} size="sm" />
-        </div>
+        {/* Vote + Share controls
+            ─────────────────────
+            On TRENDING cards we stack these vertically in the top-right,
+            directly beneath the "🔥 +N THIS WEEK" chip, rendered in the badge
+            style (red fill, monospace caps) at ~3x the regular text size so
+            they're the obvious tap target.
+            On non-trending cards we keep the compact top-right pair. */}
+        {showTrendBadge && recent > 0 ? (
+          <div
+            style={{
+              position: 'absolute',
+              // Badge sits at top:8 and is ~22px tall → start the stack at 38
+              // so there's a small gap matching the badge's own padding.
+              top: 38,
+              right: 8,
+              zIndex: 2,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              gap: 6,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <VoteButton recordId={item.id} initialVotes={item.votes ?? 0} size="xl" />
+            <ShareButton recordId={item.id} title={item.title} contributor={item.contributor} imageUrl={item.src} size="xl" />
+          </div>
+        ) : (
+          <div
+            style={{ position: 'absolute', top: 8, right: 8, zIndex: 2, display: 'flex', gap: 6 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <VoteButton recordId={item.id} initialVotes={item.votes ?? 0} size="sm" />
+            <ShareButton recordId={item.id} title={item.title} contributor={item.contributor} imageUrl={item.src} size="sm" />
+          </div>
+        )}
       </div>
     </div>
   )

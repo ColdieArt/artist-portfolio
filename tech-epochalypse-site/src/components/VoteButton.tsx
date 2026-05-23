@@ -41,7 +41,10 @@ function setGlobalVote(recordId: string) {
 interface Props {
   recordId: string
   initialVotes: number
-  size?: 'sm' | 'lg'
+  // 'xl' is the badge-style variant used on trending cards: red background,
+  // monospace uppercase, ~3x the text size of 'sm' so it visually matches and
+  // stacks beneath the "🔥 +N THIS WEEK" trend badge.
+  size?: 'sm' | 'lg' | 'xl'
 }
 
 export default function VoteButton({ recordId, initialVotes, size = 'sm' }: Props) {
@@ -102,18 +105,29 @@ export default function VoteButton({ recordId, initialVotes, size = 'sm' }: Prop
     }
   }
 
+  const isXl = size === 'xl'
   const isLarge = size === 'lg'
-  const px = isLarge ? '10px 14px' : '6px 10px'
-  const fs = isLarge ? '13px' : '11px'
-  const heartSize = isLarge ? 16 : 13
+  // 'xl' mirrors the badge's padding ratio (4px/8px) scaled ~3x so the button
+  // reads at the same density as the "🔥 +N THIS WEEK" chip but larger.
+  const px = isXl ? '12px 24px' : isLarge ? '10px 14px' : '6px 10px'
+  const fs = isXl ? '30px' : isLarge ? '13px' : '11px'
+  const heartSize = isXl ? 28 : isLarge ? 16 : 13
 
   // Visual state:
   //  - voted-this  → filled red heart, count, "you voted for this" tooltip
   //  - voted-other → muted heart + count, disabled, "you already voted today" tooltip
   //  - idle        → grey heart + count, clickable
-  const bg = votedForThis ? 'rgba(229, 57, 70, 0.15)' : votedForOther ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.55)'
-  const border = votedForThis ? '1px solid rgba(229,57,70,0.6)' : '1px solid rgba(255,255,255,0.2)'
-  const color = votedForThis ? '#ff7a85' : votedForOther ? 'rgba(255,255,255,0.4)' : '#fff'
+  // In 'xl' (badge) mode we render the same red fill as the trend badge in all
+  // states except voted-other (which dims to keep the disabled signal).
+  const bg = isXl
+    ? (votedForOther ? 'rgba(229,57,70,0.35)' : 'rgba(229,57,70,0.85)')
+    : (votedForThis ? 'rgba(229, 57, 70, 0.15)' : votedForOther ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.55)')
+  const border = isXl
+    ? 'none'
+    : (votedForThis ? '1px solid rgba(229,57,70,0.6)' : '1px solid rgba(255,255,255,0.2)')
+  const color = isXl
+    ? (votedForOther ? 'rgba(255,255,255,0.55)' : '#fff')
+    : (votedForThis ? '#ff7a85' : votedForOther ? 'rgba(255,255,255,0.4)' : '#fff')
   const title = votedForThis
     ? 'You voted for this in the last 24h'
     : votedForOther
@@ -135,13 +149,18 @@ export default function VoteButton({ recordId, initialVotes, size = 'sm' }: Prop
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: '6px',
+        gap: isXl ? '12px' : '6px',
         padding: px,
         background: bg,
         border,
         color,
         fontFamily: 'monospace',
         fontSize: fs,
+        // Badge-style typography on 'xl': uppercase + tight letter-spacing,
+        // bold weight, matching the "🔥 +N THIS WEEK" chip's look.
+        fontWeight: isXl ? 700 : 'normal',
+        letterSpacing: isXl ? '0.1em' : 'normal',
+        textTransform: isXl ? 'uppercase' : 'none',
         cursor: disabled ? 'default' : 'pointer',
         opacity: busy ? 0.6 : 1,
         transition: 'background 0.15s, border-color 0.15s, opacity 0.15s, color 0.15s',
@@ -149,7 +168,7 @@ export default function VoteButton({ recordId, initialVotes, size = 'sm' }: Prop
         backdropFilter: 'blur(2px)',
       }}
     >
-      <svg width={heartSize} height={heartSize} viewBox="0 0 24 24" fill={votedForThis ? '#ff5a66' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width={heartSize} height={heartSize} viewBox="0 0 24 24" fill={votedForThis ? (isXl ? '#fff' : '#ff5a66') : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
       </svg>
       <span style={{ fontVariantNumeric: 'tabular-nums' }}>{count}</span>
