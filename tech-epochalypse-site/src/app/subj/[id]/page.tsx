@@ -84,39 +84,29 @@ export default function SubjPage({ params }: { params: { id: string } }) {
         </div>
       </section>
 
-      {/* ── Mission Brief / Prompt ──
-          Three-step prompt that orients first-time visitors before they
-          dive into the Pick-Your-Overlord grid + Brief sidebar. Lives
-          right under the compact header so it's the first interactive
-          thing visitors see after the SUBJ:01 title. */}
+      {/* ── Brief / Prompt ──
+          Classified-doc style orientation paragraph that primes visitors
+          on what they're being asked to make. Lives right under the
+          compact header so it's the first thing visitors read after the
+          SUBJ:01 title. Uses the existing "classified-header" / dossier
+          tone (data packets, case file, evidence) for voice consistency
+          with the rest of the site. */}
       <section className="pb-6 md:pb-8 section-padding">
         <div className="page-container">
           <ScrollReveal delay={50}>
             <div className="border border-white/15 bg-white/[0.02] p-5 md:p-7 max-w-4xl">
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/50 mb-4">
-                Mission Brief — Prompt
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/50 mb-3">
+                Brief
               </div>
-              <ol className="space-y-3 md:space-y-4">
-                <li className="flex gap-4 md:gap-5 items-start">
-                  <span className="font-mono text-xl md:text-2xl text-white/30 leading-none flex-shrink-0 mt-0.5 tabular-nums">01</span>
-                  <span className="font-mono text-sm md:text-base text-white leading-relaxed">
-                    Pick your overlord.
-                  </span>
-                </li>
-                <li className="flex gap-4 md:gap-5 items-start">
-                  <span className="font-mono text-xl md:text-2xl text-white/30 leading-none flex-shrink-0 mt-0.5 tabular-nums">02</span>
-                  <span className="font-mono text-sm md:text-base text-white leading-relaxed">
-                    Create work about how this person is affecting the world around us{' '}
-                    <span className="text-white/60">(for good, or bad)</span>.
-                  </span>
-                </li>
-                <li className="flex gap-4 md:gap-5 items-start">
-                  <span className="font-mono text-xl md:text-2xl text-white/30 leading-none flex-shrink-0 mt-0.5 tabular-nums">03</span>
-                  <span className="font-mono text-sm md:text-base text-white leading-relaxed">
-                    Use Coldie&rsquo;s assets and upload your own.
-                  </span>
-                </li>
-              </ol>
+              <p className="font-mono text-sm md:text-base text-white leading-relaxed">
+                We&rsquo;re collecting the first data packets for the dossier.
+                The overlords are making moves &mdash; each headline another
+                claim staked in the Tech Epochalypse. Take control of one.
+                Remix it in your language. Use Coldie&rsquo;s assets, upload
+                your own, build the evidence. The case file is only as strong
+                as what you put in it. Do your best work &mdash;{' '}
+                <strong className="font-bold text-white">just showing up is not enough.</strong>
+              </p>
             </div>
           </ScrollReveal>
         </div>
