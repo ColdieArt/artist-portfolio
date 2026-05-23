@@ -232,7 +232,7 @@
     #orbital-transform-ui .orb-trash-btn { border: 0.5px solid rgba(180,40,40,0.45); color: #b55; }
     #orbital-transform-ui .orb-trash-btn:hover { border-color: rgba(220,60,60,0.9); color: #e55; }
   </style>
-  <title>JENSEN-HUANG-AWS-MASTER | Made on juno.transient.xyz</title>
+  <title>Jensen Huang - Tech Epochalypse</title>
 </head>
 <body>
   
@@ -261,57 +261,6 @@ const zeroParallaxDepth = (5 - 1) * depthStep;
 let isDragging = false;
 let pointerDownPosition = new THREE.Vector2();
 const DRAG_THRESHOLD = 5;
-
-// ── CROP MODE STATE (16:9 / 9:16 / off) ──
-let cropMode = null;
-let cropOverlayEl = null;
-
-function _cropDims() {
-    const ww = window.innerWidth, wh = window.innerHeight;
-    let w, h;
-    if (cropMode === '16:9') { w = ww * 0.8; h = w * 9 / 16; }
-    else if (cropMode === '4:5') { h = wh; w = h * 4 / 5; }
-    else return null;
-    if (h > wh) { h = wh; w = (cropMode === '16:9') ? h * 16/9 : h * 4/5; }
-    if (w > ww) { w = ww; h = (cropMode === '16:9') ? w * 9/16 : w * 5/4; }
-    return { x: (ww - w) / 2, y: (wh - h) / 2, w, h };
-}
-
-function updateCropOverlay() {
-    if (!cropOverlayEl) return;
-    const d = _cropDims();
-    if (!d) { cropOverlayEl.style.display = 'none'; return; }
-    cropOverlayEl.style.display = 'block';
-    cropOverlayEl.style.left = d.x + 'px';
-    cropOverlayEl.style.top = d.y + 'px';
-    cropOverlayEl.style.width = d.w + 'px';
-    cropOverlayEl.style.height = d.h + 'px';
-}
-
-function getCropCanvasRect(srcCanvas) {
-    const d = _cropDims();
-    if (!d) return null;
-    const ww = window.innerWidth, wh = window.innerHeight;
-    return {
-        sx: (srcCanvas.width / ww) * d.x,
-        sy: (srcCanvas.height / wh) * d.y,
-        sw: (srcCanvas.width / ww) * d.w,
-        sh: (srcCanvas.height / wh) * d.h,
-    };
-}
-
-function applyCropToCanvas(srcCanvas) {
-    const c = getCropCanvasRect(srcCanvas);
-    if (!c) return srcCanvas;
-    const out = document.createElement('canvas');
-    out.width = Math.max(1, Math.round(c.sw));
-    out.height = Math.max(1, Math.round(c.sh));
-    out.getContext('2d').drawImage(srcCanvas, c.sx, c.sy, c.sw, c.sh, 0, 0, out.width, out.height);
-    return out;
-}
-// Expose to non-module scripts (export/submit handlers live in a plain <script> block).
-window.applyCropToCanvas = applyCropToCanvas;
-Object.defineProperty(window, 'cropMode', { get: () => cropMode, set: (v) => { cropMode = v; }, configurable: true });
 
 // ─── ORBITAL TRANSFORM UI STATE ───
 let orbitalTarget       = null;
@@ -2499,8 +2448,7 @@ function init() {
 
     leftUiContainer = document.createElement('div');
     leftUiContainer.id = 'left-ui-container';
-    leftUiContainer.style.cssText = 'position: absolute; top: 10px; left: 10px; padding: 10px; border-radius: 5px; font-family: monospace; z-index: 100; display: flex; flex-direction: column; gap: 5px; transition: top 0.5s ease-in-out;';
-    leftUiContainer.style.top = '10px'; // Start expanded
+    leftUiContainer.style.cssText = 'position: absolute; top: -190px; left: 10px; padding: 10px; border-radius: 5px; font-family: monospace; z-index: 100; display: flex; flex-direction: column; gap: 5px; transition: top 0.5s ease-in-out;';
     document.body.appendChild(leftUiContainer);
     const rightUiContainer = document.createElement('div');
     rightUiContainer.id = 'right-ui-container';
@@ -2544,188 +2492,6 @@ function init() {
     exportButtonElement.style.display = 'none';
     leftUiContainer.appendChild(exportButtonElement);
 
-    // ── LOAD IMAGE (JPEG / PNG / GIF) ──
-    let uploadedImageCounter = 0;
-    const imageFileInput = document.createElement('input');
-    imageFileInput.type = 'file';
-    imageFileInput.accept = 'image/jpeg, image/png, image/gif';
-    imageFileInput.style.display = 'none';
-    imageFileInput.id = 'image-upload-input';
-    document.body.appendChild(imageFileInput);
-
-    const loadImgBtn = document.createElement('button');
-    loadImgBtn.id = 'load-image-btn';
-    loadImgBtn.textContent = 'LOAD';
-    loadImgBtn.style.cssText = `background-color: black; color: white; padding: 4px; margin-top: 10px; border: 0.5px solid #FF9800; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; white-space: nowrap; box-sizing: border-box; display: none;`;
-    loadImgBtn.onclick = (e) => { e.stopPropagation(); imageFileInput.click(); };
-    leftUiContainer.appendChild(loadImgBtn);
-
-    // ── CROP overlay element ──
-    cropOverlayEl = document.createElement('div');
-    cropOverlayEl.id = 'crop-overlay';
-    cropOverlayEl.style.cssText = 'position: fixed; border: 1px dashed rgba(255,255,255,0.65); box-shadow: 0 0 0 9999px rgba(0,0,0,0.55); pointer-events: none; z-index: 150; display: none; box-sizing: border-box;';
-    document.body.appendChild(cropOverlayEl);
-    window.addEventListener('resize', updateCropOverlay);
-
-    // ── CROP H / V buttons ──
-    const cropHBtn = document.createElement('button');
-    cropHBtn.id = 'crop-h-btn';
-    cropHBtn.textContent = '16:9';
-    cropHBtn.style.cssText = 'background-color: black; color: white; padding: 4px; margin-top: 10px; border: 0.5px solid #00BCD4; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; white-space: nowrap; box-sizing: border-box; display: none;';
-    leftUiContainer.appendChild(cropHBtn);
-
-    const cropVBtn = document.createElement('button');
-    cropVBtn.id = 'crop-v-btn';
-    cropVBtn.textContent = '4:5';
-    cropVBtn.style.cssText = 'background-color: black; color: white; padding: 4px; border: 0.5px solid #E91E63; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; white-space: nowrap; box-sizing: border-box; display: none;';
-    leftUiContainer.appendChild(cropVBtn);
-
-    function _setCropMode(mode) {
-        cropMode = (cropMode === mode) ? null : mode;
-        cropHBtn.style.backgroundColor = (cropMode === '16:9') ? '#00BCD4' : 'black';
-        cropHBtn.style.color = (cropMode === '16:9') ? 'black' : 'white';
-        cropVBtn.style.backgroundColor = (cropMode === '4:5') ? '#E91E63' : 'black';
-        updateCropOverlay();
-    }
-    cropHBtn.onclick = (e) => { e.stopPropagation(); _setCropMode('16:9'); };
-    cropVBtn.onclick = (e) => { e.stopPropagation(); _setCropMode('4:5'); };
-
-    imageFileInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-        if (!file.type.match(/^image\/(jpeg|png|gif)$/)) {
-            console.warn('Only JPEG, PNG, GIF images are supported.');
-            imageFileInput.value = '';
-            return;
-        }
-        const isGif = file.type === 'image/gif';
-
-        const addMeshFromTexture = (texture, width, height) => {
-            const localBaseScale = 0.005;
-            const planeWidth = width * localBaseScale;
-            const planeHeight = height * localBaseScale;
-            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-            const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
-            const mesh = new THREE.Mesh(geometry, material);
-            const layer = 6;
-            mesh.position.set(0, 0, (layer - 1) * depthStep);
-            mesh.userData.currentLayer = layer;
-            mesh.userData.initialPosition = mesh.position.clone();
-            mesh.userData.initialLayer = layer;
-            mesh.userData.id = 'uploaded_' + (++uploadedImageCounter);
-            mesh.userData.initialScale = { width: planeWidth, height: planeHeight };
-            mesh.userData.isUploaded = true;
-            scene.add(mesh);
-            draggableObjects.push(mesh);
-            if (typeof cameraAnimationTargets !== 'undefined') cameraAnimationTargets.push(mesh);
-            return mesh;
-        };
-
-        const setupTexture = (tex) => {
-            tex.colorSpace = THREE.SRGBColorSpace;
-            tex.minFilter = THREE.LinearFilter;
-            tex.magFilter = THREE.LinearFilter;
-            tex.generateMipmaps = false;
-            tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-            tex.needsUpdate = true;
-        };
-
-        // Fallback: keep <img> at natural size, in DOM but offscreen, redraw to canvas each rAF
-        const loadGifViaImgFallback = async () => {
-            const blobUrl = URL.createObjectURL(file);
-            const img = new Image();
-            await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = blobUrl; });
-            const w = img.naturalWidth, h = img.naturalHeight;
-            img.style.cssText = `position:fixed;left:-${w + 100}px;top:0;width:${w}px;height:${h}px;opacity:0.01;pointer-events:none;z-index:-1;`;
-            document.body.appendChild(img);
-            const animatedCanvas = document.createElement('canvas');
-            animatedCanvas.width = w; animatedCanvas.height = h;
-            const ctx = animatedCanvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-            const texture = new THREE.CanvasTexture(animatedCanvas);
-            setupTexture(texture);
-            const mesh = addMeshFromTexture(texture, w, h);
-            const tick = () => {
-                if (!mesh.parent) {
-                    if (img.parentNode) img.parentNode.removeChild(img);
-                    URL.revokeObjectURL(blobUrl);
-                    return;
-                }
-                ctx.clearRect(0, 0, w, h);
-                ctx.drawImage(img, 0, 0);
-                texture.needsUpdate = true;
-                requestAnimationFrame(tick);
-            };
-            requestAnimationFrame(tick);
-        };
-
-        const loadGifViaImageDecoder = async () => {
-            const buf = await file.arrayBuffer();
-            const decoder = new ImageDecoder({ data: buf, type: 'image/gif' });
-            await decoder.tracks.ready;
-            await decoder.completed;
-            const track = decoder.tracks.selectedTrack;
-            if (!track) throw new Error('No selectedTrack');
-            const frameCount = track.frameCount || 1;
-            console.log('[GIF] ImageDecoder: frames=', frameCount, 'animated=', track.animated);
-            if (frameCount <= 1) throw new Error('Single-frame GIF, falling through');
-            const first = await decoder.decode({ frameIndex: 0 });
-            const w = first.image.displayWidth, h = first.image.displayHeight;
-            const animatedCanvas = document.createElement('canvas');
-            animatedCanvas.width = w; animatedCanvas.height = h;
-            const ctx = animatedCanvas.getContext('2d');
-            ctx.drawImage(first.image, 0, 0);
-            const firstDurUs = first.image.duration;
-            first.image.close();
-            const texture = new THREE.CanvasTexture(animatedCanvas);
-            setupTexture(texture);
-            const mesh = addMeshFromTexture(texture, w, h);
-            let frameIdx = 0;
-            let lastDurMs = firstDurUs ? firstDurUs / 1000 : 100;
-            const playNext = async () => {
-                if (!mesh.parent) return;
-                frameIdx = (frameIdx + 1) % frameCount;
-                try {
-                    const { image } = await decoder.decode({ frameIndex: frameIdx });
-                    ctx.clearRect(0, 0, w, h);
-                    ctx.drawImage(image, 0, 0);
-                    texture.needsUpdate = true;
-                    const durMs = image.duration ? image.duration / 1000 : lastDurMs;
-                    lastDurMs = durMs;
-                    image.close();
-                    setTimeout(playNext, Math.max(20, durMs));
-                } catch (err) {
-                    console.warn('[GIF] frame decode failed:', err);
-                }
-            };
-            setTimeout(playNext, Math.max(20, lastDurMs));
-        };
-
-        if (isGif) {
-            (async () => {
-                if (typeof ImageDecoder !== 'undefined') {
-                    try { await loadGifViaImageDecoder(); return; }
-                    catch (err) { console.warn('[GIF] ImageDecoder failed, falling back:', err); }
-                }
-                try { await loadGifViaImgFallback(); }
-                catch (err) { console.error('[GIF] img fallback failed:', err); }
-            })();
-        } else {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const texture = new THREE.Texture(img);
-                    setupTexture(texture);
-                    addMeshFromTexture(texture, img.naturalWidth || img.width, img.naturalHeight || img.height);
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-        imageFileInput.value = '';
-    });
-
     arrowContainer = document.createElement('div');
     arrowContainer.style.cssText = 'position: absolute; top: 0px; left: 20px; background-color: black; width: 60px; height: 15px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 101; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; transition: top 0.5s ease-in-out;';
     const arrowSpan = document.createElement('span');
@@ -2734,20 +2500,10 @@ function init() {
     document.body.appendChild(arrowContainer);
     arrowContainer.onclick = (e) => {
         e.stopPropagation();
-        if (leftUiContainer.style.top === '10px') { leftUiContainer.style.top = '-190px'; trashButtonElement.style.display = 'none'; exportButtonElement.style.display = 'none'; loadImgBtn.style.display = 'none'; cropHBtn.style.display = 'none'; cropVBtn.style.display = 'none'; arrowContainer.style.top = '0px'; arrowSpan.innerHTML = '&#x25BC;'; }
-        else { leftUiContainer.style.top = '10px'; trashButtonElement.style.display = 'none'; loadImgBtn.style.display = 'block'; cropHBtn.style.display = 'block'; cropVBtn.style.display = 'block'; arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; arrowSpan.innerHTML = '&#x25B2'; }
+        if (leftUiContainer.style.top === '10px') { leftUiContainer.style.top = '-190px'; trashButtonElement.style.display = 'none'; exportButtonElement.style.display = 'none'; arrowContainer.style.top = '0px'; arrowSpan.innerHTML = '&#x25BC;'; }
+        else { leftUiContainer.style.top = '10px'; trashButtonElement.style.display = 'none'; arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; arrowSpan.innerHTML = '&#x25B2'; }
     };
-    // Initial state setup for TRASH/EXPORT buttons and arrowContainer
-    // Left UI starts EXPANDED — buttons visible (trash stays hidden), arrow pointing up below the panel.
     trashButtonElement.style.display = 'none';
-    exportButtonElement.style.display = 'none';
-    loadImgBtn.style.display = 'block';
-    cropHBtn.style.display = 'block';
-    cropVBtn.style.display = 'block';
-    arrowSpan.innerHTML = '&#x25B2;';
-    requestAnimationFrame(() => {
-        arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
-    });
     setupOrbitalUI();
 }
 
@@ -3085,7 +2841,6 @@ setTimeout(() => {
     window.scene = typeof scene != "undefined" ? scene : undefined;
     window.effectControls = typeof effectControls != "undefined" ? effectControls : undefined;
     window.controls = typeof controls != "undefined" ? controls : undefined;
-      window._exportPasses = { pixelationPass: typeof pixelationPass !== 'undefined' ? pixelationPass : null, asciiPass: typeof asciiPass !== 'undefined' ? asciiPass : null, cctvFeedPass: typeof cctvFeedPass !== 'undefined' ? cctvFeedPass : null };
 }, 1000);
 
     // Expose for dae hooks
@@ -3097,12 +2852,10 @@ setTimeout(() => {
       window.composer = typeof composer != "undefined" ? composer : undefined;
       window.effectControls = typeof effectControls != "undefined" ? effectControls : undefined;
       window.controls = typeof controls != "undefined" ? controls : undefined;
-      window._exportPasses = { pixelationPass: typeof pixelationPass !== 'undefined' ? pixelationPass : null, asciiPass: typeof asciiPass !== 'undefined' ? asciiPass : null, cctvFeedPass: typeof cctvFeedPass !== 'undefined' ? cctvFeedPass : null };
     }, 1000)
   </script>
 
   <!-- ─── EXPORT PANEL HTML ─── -->
-  <button id="submit-overlord-btn">SUBMIT</button>
 
   <div id="export-panel">
     <div class="panel-title">EXPORT</div>
@@ -3153,36 +2906,6 @@ setTimeout(() => {
       <div style="margin: 0 0 15px 0;">
         <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 6px; letter-spacing: 1px;">TITLE</label>
         <input id="title-input" type="text" placeholder="Name your creation" style="
-          width: 100%;
-          box-sizing: border-box;
-          background: #111;
-          border: 1px solid #333;
-          color: #fff;
-          padding: 10px 12px;
-          font-family: monospace;
-          font-size: 13px;
-          outline: none;
-        " />
-      </div>
-
-      <div style="margin: 0 0 15px 0;">
-        <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 6px; letter-spacing: 1px;">ETH ADDRESS</label>
-        <input id="eth-address-input" type="text" placeholder="0x… (optional)" style="
-          width: 100%;
-          box-sizing: border-box;
-          background: #111;
-          border: 1px solid #333;
-          color: #fff;
-          padding: 10px 12px;
-          font-family: monospace;
-          font-size: 13px;
-          outline: none;
-        " />
-      </div>
-
-      <div style="margin: 0 0 15px 0;">
-        <label style="display: block; font-family: monospace; font-size: 10px; color: #aaa; margin-bottom: 6px; letter-spacing: 1px;">JOIN MAILING LIST</label>
-        <input id="email-input" type="email" placeholder="you@example.com (optional)" style="
           width: 100%;
           box-sizing: border-box;
           background: #111;
@@ -3278,131 +3001,27 @@ setTimeout(() => {
     judgmentBtn.onclick = async () => {
       const xAccount = document.getElementById('x-account-input').value.trim();
       const title = document.getElementById('title-input').value.trim();
-      const ethAddress = document.getElementById('eth-address-input').value.trim();
-      const email = document.getElementById('email-input').value.trim();
       judgmentBtn.disabled = true;
       judgmentBtn.style.opacity = '0.5';
       judgmentStatus.style.color = '#aaa';
       judgmentStatus.textContent = 'SUBMITTING...';
 
       try {
-        // Capture canvas at true 4K detail via temporary renderer-resolution boost, apply crop
+        // Capture canvas as PNG
         const r = await getRenderer();
-        const _passes = window._exportPasses || {};
-        const _gizmoHelper = (typeof transformControls !== 'undefined' && transformControls) ? (transformControls.getHelper ? transformControls.getHelper() : transformControls) : null;
-        const _gizmoWasVisible = _gizmoHelper ? _gizmoHelper.visible : false;
-        if (_gizmoHelper) _gizmoHelper.visible = false;
-
-        const _vw = window.innerWidth, _vh = window.innerHeight;
-        const _isMobile = (_vw < 768) || (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches);
-        const _LONG_EDGE = _isMobile ? 1920 : 3840; // 2K on mobile (memory-safe), 4K on desktop
-        if (judgmentStatus) { judgmentStatus.textContent = _isMobile ? 'Rendering (mobile mode)…' : 'Rendering…'; }
-        const _origPR = r.getPixelRatio();
-        const _maxTex = (r.capabilities && r.capabilities.maxTextureSize) || 4096;
-        let _hiPR;
-        if (window.cropMode === '16:9')      _hiPR = _LONG_EDGE / (_vw * 0.8);
-        else if (window.cropMode === '4:5') _hiPR = _LONG_EDGE / _vh;
-        else                                 _hiPR = _LONG_EDGE / Math.max(_vw, _vh);
-        _hiPR = Math.max(_origPR, _hiPR);
-        _hiPR = Math.min(_hiPR, _maxTex / Math.max(_vw, _vh));
-
-        r.setPixelRatio(_hiPR);
-        r.setSize(_vw, _vh, false);
-        if (window.composer) window.composer.setSize(_vw, _vh);
-        if (_passes.pixelationPass) _passes.pixelationPass.uniforms['resolution'].value.set(_vw * _hiPR, _vh * _hiPR);
-        if (_passes.asciiPass)      _passes.asciiPass.uniforms['resolution'].value.set(_vw * _hiPR, _vh * _hiPR);
-        if (_passes.cctvFeedPass)   _passes.cctvFeedPass.uniforms['resolution'].value.set(_vw * _hiPR, _vh * _hiPR);
-
         if (window.composer) { window.composer.render(); }
         else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
-
-        const srcCanvas = applyCropToCanvas(r.domElement);
-
-        if (_gizmoHelper) _gizmoHelper.visible = _gizmoWasVisible;
-        r.setPixelRatio(_origPR);
-        r.setSize(_vw, _vh, false);
-        if (window.composer) window.composer.setSize(_vw, _vh);
-        if (_passes.pixelationPass) _passes.pixelationPass.uniforms['resolution'].value.set(_vw, _vh);
-        if (_passes.asciiPass)      _passes.asciiPass.uniforms['resolution'].value.set(_vw, _vh);
-        if (_passes.cctvFeedPass)   _passes.cctvFeedPass.uniforms['resolution'].value.set(_vw, _vh);
-        // Target dimensions: 4K (3840 long edge) — exact size depends on crop mode
-        let _targetW, _targetH;
-        if (window.cropMode === '16:9')      { _targetW = _LONG_EDGE; _targetH = Math.round(_LONG_EDGE * 9/16); }
-        else if (window.cropMode === '4:5') { _targetW = Math.round(_LONG_EDGE * 4/5); _targetH = _LONG_EDGE; }
-        else {
-            const _ar = srcCanvas.width / srcCanvas.height;
-            if (_ar >= 1) { _targetW = _LONG_EDGE; _targetH = Math.round(_LONG_EDGE / _ar); }
-            else          { _targetH = _LONG_EDGE; _targetW = Math.round(_LONG_EDGE * _ar); }
-        }
-        let outCanvas = srcCanvas;
-        if (srcCanvas.width !== _targetW || srcCanvas.height !== _targetH) {
-            outCanvas = document.createElement('canvas');
-            outCanvas.width = _targetW;
-            outCanvas.height = _targetH;
-            const _ctx = outCanvas.getContext('2d');
-            _ctx.imageSmoothingEnabled = true;
-            _ctx.imageSmoothingQuality = 'high';
-            _ctx.drawImage(srcCanvas, 0, 0, _targetW, _targetH);
-        }
-        if (judgmentStatus) { judgmentStatus.textContent = 'Encoding image…'; }
-        const _jpegQ = _isMobile ? 0.85 : 0.92;
-        const blob = await new Promise(res => outCanvas.toBlob(res, 'image/jpeg', _jpegQ));
+        const dataUrl = r.domElement.toDataURL('image/png');
+        const blob = await (await fetch(dataUrl)).blob();
 
         // Upload image + create Airtable record in one request via Cloudflare Worker
         const WORKER_URL = window.GALLERY_API_URL || window.location.origin;
         const form = new FormData();
-        form.append('image', blob, 'export.jpg');
+        form.append('image', blob, 'export.png');
         form.append('overlord', OVERLORD_NAME);
         form.append('xAccount', xAccount);
         form.append('title', title);
-        // Build composition JSON snapshot (positions, transforms, effects, uploaded image data)
-        const compositionJson = (() => {
-          try {
-            const meshes = [];
-            scene.children.forEach(c => {
-              if (!c.userData || !c.userData.id) return;
-              const m = {
-                id: c.userData.id,
-                position: { x: c.position.x, y: c.position.y, z: c.position.z },
-                rotation: { x: c.rotation.x, y: c.rotation.y, z: c.rotation.z },
-                scale: { x: c.scale.x, y: c.scale.y, z: c.scale.z },
-                visible: c.visible,
-                userScale: c.userData.userScale || 1.0,
-                currentLayer: c.userData.currentLayer,
-                opacity: c.material ? c.material.opacity : 1,
-              };
-              if (!_isMobile && c.userData.isUploaded && c.material && c.material.map && c.material.map.image) {
-                try {
-                  const img = c.material.map.image;
-                  const cv = document.createElement('canvas');
-                  cv.width = img.naturalWidth || img.width;
-                  cv.height = img.naturalHeight || img.height;
-                  cv.getContext('2d').drawImage(img, 0, 0);
-                  m.isUploaded = true;
-                  m.uploadedImageData = cv.toDataURL('image/png');
-                  m.initialScale = c.userData.initialScale;
-                } catch(e) {}
-              }
-              meshes.push(m);
-            });
-            const removedAssets = (typeof initialAssetConfigs !== 'undefined' ? initialAssetConfigs.filter(c => c.removed).map(c => c.id) : []);
-            return JSON.stringify({
-              version: 1, overlord: OVERLORD_NAME, timestamp: Date.now(),
-              meshes, removedAssets,
-              effects: (typeof effectControls !== 'undefined' ? { ...effectControls } : {}),
-              camera: { position: { x: camera.position.x, y: camera.position.y, z: camera.position.z }, target: { x: controls.target.x, y: controls.target.y, z: controls.target.z } },
-            });
-          } catch (err) { console.warn('composition build failed:', err); return ''; }
-        })();
-        if (compositionJson) form.append('composition', compositionJson);
-        form.append('ethAddress', ethAddress);
-        form.append('email', email);
-        if (judgmentStatus) { judgmentStatus.textContent = 'Uploading…'; }
-        const _ctrl = new AbortController();
-        const _to = setTimeout(() => _ctrl.abort(), 90000);
-        let res;
-        try { res = await fetch(WORKER_URL + '/submit', { method: 'POST', body: form, signal: _ctrl.signal }); }
-        finally { clearTimeout(_to); }
+        const res = await fetch(WORKER_URL + '/submit', { method: 'POST', body: form });
         if (!res.ok) {
           const errBody = await res.json().catch(() => ({}));
           throw new Error(errBody.error || 'Submission failed');
@@ -3457,20 +3076,8 @@ setTimeout(() => {
 
     // ── SUBMIT YOURSELF button — capture PNG then show post modal ──
     const submitOverlordBtn = document.getElementById('submit-overlord-btn');
-    submitOverlordBtn.onclick = (e) => {
+    if (submitOverlordBtn) submitOverlordBtn.onclick = (e) => {
       e.stopPropagation();
-      if (!cropMode) {
-        const _orig = submitOverlordBtn.textContent;
-        submitOverlordBtn.textContent = 'SELECT 16:9 OR 4:5';
-        submitOverlordBtn.style.borderColor = '#e33';
-        submitOverlordBtn.style.color = '#e33';
-        setTimeout(() => {
-          submitOverlordBtn.textContent = _orig;
-          submitOverlordBtn.style.borderColor = '';
-          submitOverlordBtn.style.color = '';
-        }, 1800);
-        return;
-      }
       exportPNG();
     };
 
@@ -3550,29 +3157,23 @@ setTimeout(() => {
       setStatus('Capturing…', 'active');
       lockUI(true);
       const r = await getRenderer();
-      // Hide orbital gizmo helper during export so it doesn't appear in the captured image
-      const _gizmoHelper = (typeof transformControls !== 'undefined' && transformControls) ? (transformControls.getHelper ? transformControls.getHelper() : transformControls) : null;
-      const _gizmoWasVisible = _gizmoHelper ? _gizmoHelper.visible : false;
-      if (_gizmoHelper) _gizmoHelper.visible = false;
       // Force a fresh render so the buffer has the current frame
       if (window.composer) {
         window.composer.render();
       } else if (window.scene && window.camera) {
         r.render(window.scene, window.camera);
       }
-      if (_gizmoHelper) _gizmoHelper.visible = _gizmoWasVisible;
-      const _exportCanvas = applyCropToCanvas(r.domElement);
-      _exportCanvas.toBlob((blob) => {
+      r.domElement.toBlob((blob) => {
         if (blob) {
-          triggerDownload(blob, 'jensen-huang-coldie.jpg');
-          saveToGallery(_exportCanvas);
-          setStatus('JPG saved ✓ — added to gallery', 'active');
+          triggerDownload(blob, 'jensen-huang-coldie.png');
+          saveToGallery(r.domElement);
+          setStatus('PNG saved ✓ — added to gallery', 'active');
           showPostModal();
         } else {
           setStatus('Capture failed', 'error');
         }
         lockUI(false);
-      }, 'image/jpeg', 0.92);
+      }, 'image/png');
     }
     // ── Video (MP4) export ──────────────────────────────────────────
     async function exportVideo() {
