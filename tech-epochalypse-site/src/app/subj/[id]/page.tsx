@@ -268,56 +268,56 @@ export default function SubjPage({ params }: { params: { id: string } }) {
         </div>
       </section>
 
-      <div className="line-accent" />
-
       {/* ── Submissions Gallery + Voting ──
-          NOTE: BOTH the gallery and voting are paused during the submission
-          window:
-            • The <UserExports> block (curated rows + All Submissions grid)
-              is gated by the SHOW_SUBMISSIONS_GALLERY constant below.
-            • Inside EnhancedGallery.tsx, VOTING_ENABLED additionally hides
-              the vote banner, per-card heart buttons, and lightbox vote.
-          To bring the gallery back when submissions close:
-            1. Flip SHOW_SUBMISSIONS_GALLERY → true (below).
+          NOTE: while SHOW_SUBMISSIONS_GALLERY is false (during the
+          submission window), the ENTIRE section below — line accent,
+          section header, AND the <UserExports> gallery — is hidden so
+          /subj/01 ends after the brief + Pick-Your-Overlord grid.
+          To restore when submissions close:
+            1. Flip SHOW_SUBMISSIONS_GALLERY → true (top of file).
             2. Optionally flip VOTING_ENABLED → true in EnhancedGallery.tsx
                to also reveal voting rows / heart buttons.
             3. Restore the original "Community Vote" copy from the JSX
                comment block below.
           All code paths are intentionally retained. */}
-      <section className="py-8 md:py-12 section-padding">
-        <div className="page-container">
-          <ScrollReveal>
-            <div className="mb-6">
-              <div className="classified-header">Submitted for Consideration</div>
-              <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em]">
-                Submissions Gallery
-              </h2>
-              <p className="font-mono text-sm text-white mt-3">
-                The submissions gallery reveals once the submission window
-                closes. Voting opens at the same time — check back to pick
-                the Community Pick winner.
-              </p>
-              {/* ─── ORIGINAL VOTING-OPEN COPY (restore when voting reopens) ───
-              <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em]">
-                Community Vote
-              </h2>
-              <p className="font-mono text-sm text-white mt-3">
-                One vote per visitor, per day. The piece with the most votes when the event closes wins the Community Pick.
-              </p>
-              ─── END ─── */}
-            </div>
-          </ScrollReveal>
+      {SHOW_SUBMISSIONS_GALLERY && (
+        <>
+          <div className="line-accent" />
 
-          {SHOW_SUBMISSIONS_GALLERY && (
-            <UserExports
-              overlordNames={overlordNames}
-              overlordSlugs={overlordSlugs}
-              category="general submission"
-              multiRow
-            />
-          )}
-        </div>
-      </section>
+          <section className="py-8 md:py-12 section-padding">
+            <div className="page-container">
+              <ScrollReveal>
+                <div className="mb-6">
+                  <div className="classified-header">Submitted for Consideration</div>
+                  <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em]">
+                    Submissions Gallery
+                  </h2>
+                  <p className="font-mono text-sm text-white mt-3">
+                    The submissions gallery reveals once the submission window
+                    closes. Voting opens at the same time — check back to pick
+                    the Community Pick winner.
+                  </p>
+                  {/* ─── ORIGINAL VOTING-OPEN COPY (restore when voting reopens) ───
+                  <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em]">
+                    Community Vote
+                  </h2>
+                  <p className="font-mono text-sm text-white mt-3">
+                    One vote per visitor, per day. The piece with the most votes when the event closes wins the Community Pick.
+                  </p>
+                  ─── END ─── */}
+                </div>
+              </ScrollReveal>
+
+              <UserExports
+                overlordNames={overlordNames}
+                overlordSlugs={overlordSlugs}
+                category="general submission"
+                multiRow
+              />
+            </div>
+          </section>
+        </>
+      )}
     </div>
   )
 }
