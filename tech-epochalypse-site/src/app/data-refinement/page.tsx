@@ -91,7 +91,7 @@ export default function VsPage() {
         <div className="text-center mb-8">
           <p className="font-mono text-xs uppercase tracking-[0.4em] text-white mb-3">Pairwise</p>
           <h1 className="font-display text-4xl md:text-6xl text-white mb-3 uppercase tracking-[0.05em]">
-            Versus
+            Data Refinement
           </h1>
           <p className="font-mono text-sm text-white/70 max-w-xl mx-auto mb-6">
             Pick the image you prefer. Each vote ranks the community pool using Elo. Use ← / → keys.
@@ -112,7 +112,7 @@ export default function VsPage() {
               ))}
             </select>
             <span className="text-white/40">Votes this session: {count}</span>
-            <a href="/vs/leaderboard" className="text-white/80 underline underline-offset-4">
+            <a href="/data-refinement/leaderboard" className="text-white/80 underline underline-offset-4">
               Leaderboard →
             </a>
           </div>
