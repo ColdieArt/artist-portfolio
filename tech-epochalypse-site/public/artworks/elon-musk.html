@@ -58,6 +58,48 @@
       color: rgba(0, 0, 0, 0.9);
     }
 
+    /* ─── SUBMIT SUCCESS OVERLAY ───
+       Shown for 3s after a successful judgment-protocol submission,
+       then the page navigates to /subj/01. Solid red full-viewport
+       cover with the SUBJ:01 chip + "SUBMIT SUCCESS" message. */
+    #submit-success-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(229, 57, 70, 0.97);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 28px;
+      font-family: monospace;
+      animation: submit-success-fade-in 0.15s ease-out;
+    }
+    #submit-success-overlay.open { display: flex; }
+    #submit-success-overlay .ss-chip {
+      background: #fff;
+      color: #000;
+      font-family: monospace;
+      font-weight: bold;
+      font-size: 30px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      padding: 20px 40px;
+      white-space: nowrap;
+    }
+    #submit-success-overlay .ss-message {
+      color: #fff;
+      font-family: monospace;
+      font-weight: bold;
+      font-size: 22px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+    }
+    @keyframes submit-success-fade-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
     main {
       height: 100%;
       display: flex;
@@ -406,6 +448,15 @@
   <div id="brand-stamp">
     KNOWYOUROVERLORD.ART&nbsp;&ndash;&nbsp;TECH EPOCHALYPSE&nbsp;&ndash;&nbsp;CREATED BY <a href="https://coldie3d.com/" target="_blank" rel="noopener noreferrer">COLDIE</a>&nbsp;2026
   </div>
+  <!-- Submit-success overlay — shown for 3s after a successful judgment
+       submission, then redirects to /subj/01. See #submit-success-overlay
+       rule in <style> and the success branch of the judgmentBtn handler
+       in the inline <script> below. -->
+  <div id="submit-success-overlay" role="dialog" aria-live="polite" aria-hidden="true">
+    <div class="ss-chip">SUBJ:&nbsp;01</div>
+    <div class="ss-message">Submit Success</div>
+  </div>
+
 
   <script type="module">
     import * as THREE from 'three';
@@ -5157,14 +5208,19 @@ setTimeout(function () {
         const data = await res.json();
 
         if (res.ok && data.ok) {
+          // Show the red SUBMIT SUCCESS overlay for 3s, then redirect
+          // visitors to the SUBJ:01 overview so they can see their
+          // submission listed alongside the rest of the cohort.
           judgmentStatus.style.color = '#4c4';
           judgmentStatus.textContent = 'SUBMITTED SUCCESSFULLY';
+          const _overlay = document.getElementById('submit-success-overlay');
+          if (_overlay) {
+            _overlay.classList.add('open');
+            _overlay.setAttribute('aria-hidden', 'false');
+          }
           setTimeout(() => {
-            modal.classList.remove('open');
-            judgmentStatus.textContent = '';
-            judgmentBtn.disabled = false;
-            judgmentBtn.style.opacity = '1';
-          }, 2000);
+            window.location.href = '/subj/01';
+          }, 3000);
         } else {
           const errMsg = data.details || data.error || `HTTP ${res.status}`;
           judgmentStatus.style.color = '#e66';
