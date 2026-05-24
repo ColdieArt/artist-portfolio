@@ -68,7 +68,7 @@ export default function VsLeaderboardPage() {
                 </option>
               ))}
             </select>
-            <a href="/vs" className="text-white/80 underline underline-offset-4">
+            <a href="/data-refinement" className="text-white/80 underline underline-offset-4">
               Vote →
             </a>
           </div>
