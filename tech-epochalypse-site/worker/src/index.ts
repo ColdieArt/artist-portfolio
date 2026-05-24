@@ -137,6 +137,11 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
   try {
     const formData = await request.formData();
     const file = formData.get('image') as File | null;
+    // Optional smaller thumbnail JPEG produced client-side. Used for the
+    // Airtable Image attachment when present (Airtable can't reliably
+    // attach 25MB+ files). Falls back to the full-size image URL if the
+    // client didn't send one.
+    const thumb = formData.get('thumb') as File | null;
     const overlord = (formData.get('overlord') as string) || 'unknown';
     const xAccount = (formData.get('xAccount') as string) || '';
     const title = (formData.get('title') as string) || '';
@@ -179,6 +184,31 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
 
       const workerUrl = new URL(request.url);
       imageUrl = `${workerUrl.origin}/image/${key}`;
+    }
+
+    // Upload thumbnail to R2 if the client supplied one. Used as the
+    // Airtable Image-attachment URL so the attachment column displays
+    // reliably even when the full export is 25MB+.
+    let thumbUrl = '';
+    if (thumb && thumb.size > 0) {
+      try {
+        const thumbBytes = await thumb.arrayBuffer();
+        const thumbId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}-thumb`;
+        const thumbKey = `exports/${thumbId}.jpg`;
+        await env.GALLERY_BUCKET.put(thumbKey, thumbBytes, {
+          httpMetadata: { contentType: thumb.type || 'image/jpeg' },
+          customMetadata: {
+            overlord,
+            kind: 'thumbnail',
+            date: new Date().toISOString().split('T')[0],
+            uploadedAt: new Date().toISOString(),
+          },
+        });
+        const workerUrl = new URL(request.url);
+        thumbUrl = `${workerUrl.origin}/image/${thumbKey}`;
+      } catch (e) {
+        console.error('Thumbnail upload failed:', e);
+      }
     }
 
     // Upload composition JSON to R2 (when provided)
@@ -229,12 +259,26 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
     if (email) fields['Email'] = email;
 
     if (imageUrl) {
+      // 'Image URL' text field always points at the full-size export so
+      // anyone clicking through gets the original quality.
       fields['Image URL'] = imageUrl;
+      // The 'Image' attachment column gets the smaller thumbnail URL when
+      // the client sent one (~0.5-2MB), or falls back to the full-size
+      // URL on older clients. Airtable's attachment service fetches this
+      // URL itself — keeping it small avoids silent attachment failures
+      // when the full export is over the plan's per-attachment cap.
       const imgFilename = `${overlord}-${Date.now()}.jpg`;
-      fields['Image'] = [{ url: imageUrl, filename: imgFilename }];
+      const attachmentUrl = thumbUrl || imageUrl;
+      fields['Image'] = [{ url: attachmentUrl, filename: imgFilename }];
     }
     if (jsonUrl) {
+      // Send the JSON to a few likely column names so it lands in the
+      // base regardless of which one the schema actually uses.
+      // 'JSON URL' — text field for a clickable URL
+      // 'JSON'     — attachment field (Airtable downloads the .json into the cell)
       fields['JSON URL'] = jsonUrl;
+      const jsonFilename = `composition-${Date.now()}.json`;
+      fields['JSON'] = [{ url: jsonUrl, filename: jsonFilename }];
     }
 
     // Retry the Airtable write, peeling off any field the schema doesn't have.

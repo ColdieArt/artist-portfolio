@@ -3405,10 +3405,35 @@ setTimeout(() => {
         const _jpegQ = _isMobile ? 0.85 : 0.92;
         const blob = await new Promise(res => outCanvas.toBlob(res, 'image/jpeg', _jpegQ));
 
+        // Build a smaller thumbnail JPEG to use as the Airtable IMAGE
+        // attachment. Full-size JPEG still goes to R2 and the URL is
+        // stored in the "Image URL" text field. Airtable's attachment
+        // service can't reliably fetch large URLs — Free tier caps each
+        // attachment at 20MB, and paid tiers can still time out on big
+        // files — so a ~2K long-edge JPEG at quality 0.85 (typically
+        // 0.5–2MB) is the safer payload for the attachment column.
+        let thumbBlob = null;
+        try {
+          const _thumbMax = 2048;
+          const _longEdge = Math.max(outCanvas.width, outCanvas.height);
+          if (_longEdge <= _thumbMax) {
+            // Already small enough — just re-encode at the thumbnail quality.
+            thumbBlob = await new Promise(res => outCanvas.toBlob(res, 'image/jpeg', 0.85));
+          } else {
+            const _s = _thumbMax / _longEdge;
+            const _tc = document.createElement('canvas');
+            _tc.width = Math.round(outCanvas.width * _s);
+            _tc.height = Math.round(outCanvas.height * _s);
+            _tc.getContext('2d').drawImage(outCanvas, 0, 0, _tc.width, _tc.height);
+            thumbBlob = await new Promise(res => _tc.toBlob(res, 'image/jpeg', 0.85));
+          }
+        } catch (e) { console.warn('thumbnail generation failed:', e); }
+
         // Upload image + create Airtable record in one request via Cloudflare Worker
         const WORKER_URL = window.GALLERY_API_URL || window.location.origin;
         const form = new FormData();
         form.append('image', blob, 'export.jpg');
+        if (thumbBlob) form.append('thumb', thumbBlob, 'export-thumb.jpg');
         form.append('overlord', OVERLORD_NAME);
         form.append('xAccount', xAccount);
         form.append('title', title);
