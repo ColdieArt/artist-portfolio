@@ -2613,7 +2613,7 @@ function init() {
     // is suppressed. Remove an entry to bring its button back.
     //   '3D'  ↔ 'yRotation'
     //   'FLY' ↔ 'cameraAnimation'
-    const HIDDEN_BUTTONS = new Set(['yRotation', 'cameraAnimation']);
+    const HIDDEN_BUTTONS = new Set(['yRotation', 'cameraAnimation', 'shadow']);
     leftUiOrder.forEach(p => { if (HIDDEN_BUTTONS.has(p)) return; const c = buttonConfigMap.get(p); if (c) addButtonToggle(leftUiContainer, c.label, c.property, c.pass); });
     buttonsConfig.forEach(c => { if (!leftUiOrder.includes(c.property)) addButtonToggle(rightUiContainer, c.label, c.property, c.pass); });
 
@@ -2668,7 +2668,7 @@ function init() {
     // ── CROP overlay element ──
     cropOverlayEl = document.createElement('div');
     cropOverlayEl.id = 'crop-overlay';
-    cropOverlayEl.style.cssText = 'position: fixed; border: 1px dashed rgba(255,255,255,0.65); box-shadow: 0 0 0 9999px rgba(0,0,0,0.55); pointer-events: none; z-index: 150; display: none; box-sizing: border-box;';
+    cropOverlayEl.style.cssText = 'position: fixed; border: 1px dashed rgba(255,255,255,0.65); box-shadow: 0 0 0 9999px rgba(0,0,0,0.55); pointer-events: none; z-index: 50; display: none; box-sizing: border-box;';
     document.body.appendChild(cropOverlayEl);
     window.addEventListener('resize', updateCropOverlay);
     // 1:1 crop is default-on during SUBJ:01 — show the overlay immediately
@@ -3256,13 +3256,14 @@ setTimeout(() => {
            exportPNG() populates the src — see toBlob callback below. -->
       <img id="post-modal-preview" alt="1:1 submission preview" style="
         display: none;
-        width: 100%;
-        max-width: 240px;
-        aspect-ratio: 1 / 1;
-        object-fit: cover;
+        width: 240px;
+        height: 240px;
+        max-width: 100%;
+        object-fit: contain;
         margin: 0 auto 16px;
         border: 1px solid #333;
         background: #000;
+        box-sizing: border-box;
       " />
 
       <p style="margin: 0 0 20px 0; font-size: 12px; color: #aaa;">Attach your downloaded file before posting</p>
