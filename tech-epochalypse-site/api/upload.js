@@ -50,8 +50,8 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'No file provided' });
     }
 
-    if (imagePart.data.length > 10 * 1024 * 1024) {
-      return res.status(400).json({ error: 'File too large (max 10MB)' });
+    if (imagePart.data.length > 96 * 1024 * 1024) {
+      return res.status(400).json({ error: 'File too large (max 96MB)' });
     }
 
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
