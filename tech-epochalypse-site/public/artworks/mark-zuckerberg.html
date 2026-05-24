@@ -3538,7 +3538,19 @@ function init() {
     const buttonConfigMap = new Map(buttonsConfig.map(config => [config.property, config]));
 
     // Add buttons to the left UI container in the specified order
+    // ⚠️ HIDDEN_BUTTONS — property names listed here are NOT rendered in
+    // the left UI for the current SUBJ:01 competition. The underlying
+    // effect controls, state, and handler code stay fully wired up — only
+    // the button is suppressed. To bring a button back, remove its
+    // property name from this Set:
+    //
+    //   '3D'  ↔ 'yRotation'
+    //   'FLY' ↔ 'cameraAnimation'
+    //
+    // (See the buttonsConfig array above for the full label↔property map.)
+    const HIDDEN_BUTTONS = new Set(['yRotation', 'cameraAnimation']);
     leftUiOrder.forEach(propertyName => {
+        if (HIDDEN_BUTTONS.has(propertyName)) return;
         const config = buttonConfigMap.get(propertyName);
         if (config) {
             addButtonToggle(leftUiContainer, config.label, config.property, config.pass);

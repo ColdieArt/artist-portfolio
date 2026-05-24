@@ -2602,7 +2602,14 @@ function init() {
 
     const leftUiOrder = ['yRotation', 'cameraAnimation', 'surveillance', 'greed', 'hacker', 'shadow', 'redactedGlitch'];
     const buttonConfigMap = new Map(buttonsConfig.map(config => [config.property, config]));
-    leftUiOrder.forEach(p => { const c = buttonConfigMap.get(p); if (c) addButtonToggle(leftUiContainer, c.label, c.property, c.pass); });
+    // ⚠️ HIDDEN_BUTTONS — property names listed here are NOT rendered in
+    // the left UI for the current SUBJ:01 competition. The underlying
+    // effect controls + handler code stay fully wired up; only the button
+    // is suppressed. Remove an entry to bring its button back.
+    //   '3D'  ↔ 'yRotation'
+    //   'FLY' ↔ 'cameraAnimation'
+    const HIDDEN_BUTTONS = new Set(['yRotation', 'cameraAnimation']);
+    leftUiOrder.forEach(p => { if (HIDDEN_BUTTONS.has(p)) return; const c = buttonConfigMap.get(p); if (c) addButtonToggle(leftUiContainer, c.label, c.property, c.pass); });
     buttonsConfig.forEach(c => { if (!leftUiOrder.includes(c.property)) addButtonToggle(rightUiContainer, c.label, c.property, c.pass); });
 
     const createResetButton = () => {
