@@ -160,14 +160,11 @@ export default function VsPage() {
                     className="w-full h-full object-cover"
                     draggable={false}
                   />
-                  <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent text-left">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/60">
-                      {img.overlord}
-                    </p>
-                    <p className="font-mono text-xs text-white/80">
-                      Elo {img.elo} · {img.votes} votes
-                    </p>
-                  </div>
+                  {img.title && (
+                    <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent text-left">
+                      <p className="font-mono text-xs text-white/90">{img.title}</p>
+                    </div>
+                  )}
                 </button>
               )
             })}
