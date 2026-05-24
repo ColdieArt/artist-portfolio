@@ -613,6 +613,9 @@ async function handleRecentVotes(request: Request, env: Env): Promise<Response> 
   } catch (e) {
     console.error('handleRecentVotes error:', e);
     return json({ error: 'Trending fetch failed', details: (e as Error).message }, 500);
+  }
+}
+
 // ---------- /vs voting tool ----------
 
 type ImageRow = {
