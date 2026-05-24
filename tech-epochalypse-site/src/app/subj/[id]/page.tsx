@@ -13,6 +13,16 @@ const UserExports = dynamic(() => import('@/components/UserExports'), {
   ),
 })
 
+// ⚠️ SHOW_SUBMISSIONS_GALLERY = false while the submission window is open.
+// When false:
+//   - The <UserExports> block (curated rows + "All Submissions" grid) is
+//     not rendered on /subj/<id>. Visitors see the brief + Pick-Your-Overlord
+//     grid + the section header explaining the gallery will reveal later.
+// Flip to true to expose the live submissions gallery once the submission
+// window closes. The <UserExports> JSX is intentionally kept in place
+// below so re-enabling is a one-line edit.
+const SHOW_SUBMISSIONS_GALLERY = false
+
 // Each SUBJ event registered here. Add new IDs (02, 03, …) as future
 // competitions launch; everything else 404s automatically.
 type SubjEvent = {
@@ -68,6 +78,34 @@ export default function SubjPage({ params }: { params: { id: string } }) {
               </h1>
               <p className="font-mono text-sm text-white/70 leading-relaxed mt-3 max-w-3xl">
                 {event.shortDescription}
+              </p>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ── Brief / Prompt ──
+          Classified-doc style orientation paragraph that primes visitors
+          on what they're being asked to make. Lives right under the
+          compact header so it's the first thing visitors read after the
+          SUBJ:01 title. Uses the existing "classified-header" / dossier
+          tone (data packets, case file, evidence) for voice consistency
+          with the rest of the site. */}
+      <section className="pb-6 md:pb-8 section-padding">
+        <div className="page-container">
+          <ScrollReveal delay={50}>
+            <div className="border border-white/15 bg-white/[0.02] p-5 md:p-7 max-w-4xl">
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/50 mb-3">
+                Brief
+              </div>
+              <p className="font-mono text-sm md:text-base text-white leading-relaxed">
+                We&rsquo;re collecting the first data packets for the dossier.
+                The overlords are making moves. Each headline is another claim
+                staked in the Tech Epochalypse. Take control of one. Remix it
+                in your language. Use Coldie&rsquo;s assets, upload your own,
+                build the evidence. The case file is only as strong as what
+                you put in it. Do your best work.{' '}
+                <strong className="font-bold text-white">Just showing up is not enough.</strong>
               </p>
             </div>
           </ScrollReveal>
@@ -171,7 +209,13 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                     <ul className="space-y-1 ml-1">
                       <li className="flex gap-1.5"><span className="shrink-0">&rarr;</span><span><strong>Curator&rsquo;s Pick 1</strong> &mdash; Coldie picks &mdash; Edition of 10</span></li>
                       <li className="flex gap-1.5"><span className="shrink-0">&rarr;</span><span><strong>Curator&rsquo;s Pick 2</strong> &mdash; Coldie picks &mdash; Edition of 10</span></li>
-                      <li className="flex gap-1.5"><span className="shrink-0">&rarr;</span><span><strong>Community Pick</strong> &mdash; most votes &mdash; Edition of 42</span></li>
+                      <li className="flex gap-1.5">
+                        <span className="shrink-0">&rarr;</span>
+                        <span>
+                          <strong>Community Pick</strong> &mdash; most votes &mdash; Edition of 42
+                          <span className="block italic text-black/60 mt-0.5">Voting happens once submissions close.</span>
+                        </span>
+                      </li>
                     </ul>
                     <p className="mt-2 text-[10px] text-black/70">
                       Winning artists keep 80% of primary + secondary royalties.
@@ -258,49 +302,56 @@ export default function SubjPage({ params }: { params: { id: string } }) {
         </div>
       </section>
 
-      <div className="line-accent" />
-
       {/* ── Submissions Gallery + Voting ──
-          NOTE: voting is paused during the submission window. The
-          EnhancedGallery component (rendered by <UserExports multiRow>)
-          reads its own VOTING_ENABLED flag to hide the banner, curated
-          rows, and per-card vote controls. To re-open voting after
-          submissions close: flip VOTING_ENABLED back to true in
-          src/components/EnhancedGallery.tsx and restore the original
-          header copy below (kept verbatim in a JSX comment for easy
-          recovery). */}
-      <section className="py-8 md:py-12 section-padding">
-        <div className="page-container">
-          <ScrollReveal>
-            <div className="mb-6">
-              <div className="classified-header">Submitted for Consideration</div>
-              <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em]">
-                Submissions Gallery
-              </h2>
-              <p className="font-mono text-sm text-white mt-3">
-                Browse every entry as they come in. Voting opens once the
-                submission window closes — check back to pick the Community
-                Pick winner.
-              </p>
-              {/* ─── ORIGINAL VOTING-OPEN COPY (restore when voting reopens) ───
-              <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em]">
-                Community Vote
-              </h2>
-              <p className="font-mono text-sm text-white mt-3">
-                One vote per visitor, per day. The piece with the most votes when the event closes wins the Community Pick.
-              </p>
-              ─── END ─── */}
-            </div>
-          </ScrollReveal>
+          NOTE: while SHOW_SUBMISSIONS_GALLERY is false (during the
+          submission window), the ENTIRE section below — line accent,
+          section header, AND the <UserExports> gallery — is hidden so
+          /subj/01 ends after the brief + Pick-Your-Overlord grid.
+          To restore when submissions close:
+            1. Flip SHOW_SUBMISSIONS_GALLERY → true (top of file).
+            2. Optionally flip VOTING_ENABLED → true in EnhancedGallery.tsx
+               to also reveal voting rows / heart buttons.
+            3. Restore the original "Community Vote" copy from the JSX
+               comment block below.
+          All code paths are intentionally retained. */}
+      {SHOW_SUBMISSIONS_GALLERY && (
+        <>
+          <div className="line-accent" />
 
-          <UserExports
-            overlordNames={overlordNames}
-            overlordSlugs={overlordSlugs}
-            category="general submission"
-            multiRow
-          />
-        </div>
-      </section>
+          <section className="py-8 md:py-12 section-padding">
+            <div className="page-container">
+              <ScrollReveal>
+                <div className="mb-6">
+                  <div className="classified-header">Submitted for Consideration</div>
+                  <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em]">
+                    Submissions Gallery
+                  </h2>
+                  <p className="font-mono text-sm text-white mt-3">
+                    The submissions gallery reveals once the submission window
+                    closes. Voting opens at the same time — check back to pick
+                    the Community Pick winner.
+                  </p>
+                  {/* ─── ORIGINAL VOTING-OPEN COPY (restore when voting reopens) ───
+                  <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.03em]">
+                    Community Vote
+                  </h2>
+                  <p className="font-mono text-sm text-white mt-3">
+                    One vote per visitor, per day. The piece with the most votes when the event closes wins the Community Pick.
+                  </p>
+                  ─── END ─── */}
+                </div>
+              </ScrollReveal>
+
+              <UserExports
+                overlordNames={overlordNames}
+                overlordSlugs={overlordSlugs}
+                category="general submission"
+                multiRow
+              />
+            </div>
+          </section>
+        </>
+      )}
     </div>
   )
 }

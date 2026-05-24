@@ -25,6 +25,38 @@
       overflow: auto;
       background: transparent;
     }
+    /* ─── BRAND STAMP (top-right attribution watermark) ───
+       Subtle credit + Coldie link so anyone showing screenshots / videos
+       of the tool carries the KnowYourOverlord.ART → Tech Epochalypse →
+       Coldie attribution. Black @ 50% so it reads against light areas of
+       the artwork and falls away over dark areas. Body font, italic, 100
+       tracking (= 0.1em letter-spacing). */
+    #brand-stamp {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 200;
+      font-family: "IBM Plex Mono", "Courier New", monospace;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.5);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      user-select: none;
+      white-space: nowrap;
+      pointer-events: auto; /* let the COLDIE link receive clicks */
+    }
+    #brand-stamp a {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      transition: color 0.15s;
+    }
+    #brand-stamp a:hover {
+      color: rgba(0, 0, 0, 0.9);
+    }
+
 
     main {
       height: 100%;
@@ -233,8 +265,18 @@
     #orbital-transform-ui .orb-trash-btn:hover { border-color: rgba(255,120,130,1); color: #ff8a95; }
   </style>
   <title>SAM ALTMAN-AWS-MASTER | Made on juno.transient.xyz</title>
+  <!-- Brand-stamp watermark uses the same body font as the marketing site
+       (IBM Plex Mono italic 400). Preconnect to keep the FOUT short. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital@1&display=swap">
+
 </head>
 <body>
+  <!-- Top-right attribution watermark — see #brand-stamp rule in <style>. -->
+  <div id="brand-stamp">
+    KNOWYOUROVERLORD.ART&nbsp;&ndash;&nbsp;TECH EPOCHALYPSE&nbsp;&ndash;&nbsp;CREATED BY <a href="https://coldie3d.com/" target="_blank" rel="noopener noreferrer">COLDIE</a>&nbsp;2026
+  </div>
   
     
   <script type="module">
