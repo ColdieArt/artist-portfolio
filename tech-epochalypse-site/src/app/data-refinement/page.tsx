@@ -94,7 +94,7 @@ export default function VsPage() {
             Data Refinement
           </h1>
           <p className="font-mono text-sm text-white/70 max-w-xl mx-auto mb-6">
-            Pick the image you prefer. Each vote ranks the community pool using Elo. Use ← / → keys.
+            Pick one. Then pick another. Use ← / → keys.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 font-mono text-xs uppercase tracking-wider">
