@@ -93,10 +93,14 @@ export default function VsPage() {
           <h1 className="font-display text-4xl md:text-6xl text-white mb-3 uppercase tracking-[0.05em]">
             Data Refinement
           </h1>
-          <p className="font-mono text-sm text-white/70 max-w-xl mx-auto mb-6">
+          <p className="font-mono text-sm text-white/70 max-w-xl mx-auto mb-3">
             Pick one. Then pick another.
             <br />
-            <span className="text-white/50">Use ← / → keys.</span>
+            The highest voted work will win the Community Vote and will be
+            minted into the Tech Epochalypse dossier.
+          </p>
+          <p className="font-mono text-sm text-white/50 max-w-xl mx-auto mb-6">
+            Use ← / → keys.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 font-mono text-xs uppercase tracking-wider">
@@ -114,9 +118,13 @@ export default function VsPage() {
               ))}
             </select>
             <span className="text-white/40">Votes this session: {count}</span>
-            <a href="/data-refinement/leaderboard" className="text-white/80 underline underline-offset-4">
-              Leaderboard →
-            </a>
+            {/* Leaderboard link hidden during the submission window.
+                Flip the `false` to bring it back once results are public. */}
+            {false && (
+              <a href="/data-refinement/leaderboard" className="text-white/80 underline underline-offset-4">
+                Leaderboard →
+              </a>
+            )}
           </div>
         </div>
 
