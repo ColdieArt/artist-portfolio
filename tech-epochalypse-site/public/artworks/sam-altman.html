@@ -358,8 +358,12 @@ let isDragging = false; // Flag to indicate if a drag operation in progress
 let pointerDownPosition = new THREE.Vector2(); // To store the initial pointer down position
 const DRAG_THRESHOLD = 5; // Pixels threshold to consider a move as a drag
 
-// ── CROP MODE STATE (16:9 / 9:16 / off) ──
-let cropMode = null;
+// ── CROP MODE STATE ──
+// During SUBJ:01 the only available crop is 1:1 (square) and it is ON
+// by default the moment the page loads. The 16:9 and 4:5 branches below
+// stay in place so they can be re-enabled later by exposing the buttons
+// + restoring the original null default.
+let cropMode = '1:1';
 let cropOverlayEl = null;
 
 function _cropDims() {
@@ -367,9 +371,10 @@ function _cropDims() {
     let w, h;
     if (cropMode === '16:9') { w = ww * 0.8; h = w * 9 / 16; }
     else if (cropMode === '4:5') { h = wh; w = h * 4 / 5; }
+    else if (cropMode === '1:1') { const s = Math.min(ww, wh) * 0.9; w = s; h = s; }
     else return null;
-    if (h > wh) { h = wh; w = (cropMode === '16:9') ? h * 16/9 : h * 4/5; }
-    if (w > ww) { w = ww; h = (cropMode === '16:9') ? w * 9/16 : w * 5/4; }
+    if (h > wh) { h = wh; w = (cropMode === '16:9') ? h * 16/9 : (cropMode === '1:1') ? h : h * 4/5; }
+    if (w > ww) { w = ww; h = (cropMode === '16:9') ? w * 9/16 : (cropMode === '1:1') ? w : w * 5/4; }
     return { x: (ww - w) / 2, y: (wh - h) / 2, w, h };
 }
 
@@ -3893,8 +3898,8 @@ function init() {
             leftUiContainer.style.top = '10px'; // Show it
             trashButtonElement.style.display = 'none'; // Show TRASH button
             loadImgBtn.style.display = 'block';
-            cropHBtn.style.display = 'block';
-            cropVBtn.style.display = 'block';
+            cropHBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */
+            cropVBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */
             arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; // Move arrow below the UI
             arrowSpan.innerHTML = '&#x25B2'; // Change to up arrow
         }
@@ -3905,8 +3910,8 @@ function init() {
     trashButtonElement.style.display = 'none';
     exportButtonElement.style.display = 'none';
     loadImgBtn.style.display = 'block';
-    cropHBtn.style.display = 'block';
-    cropVBtn.style.display = 'block';
+    cropHBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */
+    cropVBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */
     arrowSpan.innerHTML = '&#x25B2;';
     requestAnimationFrame(() => {
         arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
@@ -4820,6 +4825,7 @@ setTimeout(function () {
         let _hiPR;
         if (window.cropMode === '16:9')      _hiPR = _LONG_EDGE / (_vw * 0.8);
         else if (window.cropMode === '4:5') _hiPR = _LONG_EDGE / _vh;
+        else if (window.cropMode === '1:1') _hiPR = _LONG_EDGE / (Math.min(_vw, _vh) * 0.9);
         else                                 _hiPR = _LONG_EDGE / Math.max(_vw, _vh);
         _hiPR = Math.max(_origPR, _hiPR);
         _hiPR = Math.min(_hiPR, _maxTex / Math.max(_vw, _vh));
@@ -5043,18 +5049,22 @@ setTimeout(function () {
     const submitOverlordBtn = document.getElementById('submit-overlord-btn');
     submitOverlordBtn.onclick = (e) => {
       e.stopPropagation();
-      if (!cropMode) {
-        const _orig = submitOverlordBtn.textContent;
-        submitOverlordBtn.textContent = 'SELECT 16:9 OR 4:5';
-        submitOverlordBtn.style.borderColor = '#e33';
-        submitOverlordBtn.style.color = '#e33';
-        setTimeout(() => {
-          submitOverlordBtn.textContent = _orig;
-          submitOverlordBtn.style.borderColor = '';
-          submitOverlordBtn.style.color = '';
-        }, 1800);
-        return;
-      }
+      // During SUBJ:01 the only crop is 1:1 and it is ON by default, so
+      // there is nothing to block on here. Original "SELECT 16:9 OR 4:5"
+      // gate retained as a comment for easy restoration:
+      //
+      // if (!cropMode) {
+      //   const _orig = submitOverlordBtn.textContent;
+      //   submitOverlordBtn.textContent = 'SELECT 16:9 OR 4:5';
+      //   submitOverlordBtn.style.borderColor = '#e33';
+      //   submitOverlordBtn.style.color = '#e33';
+      //   setTimeout(() => {
+      //     submitOverlordBtn.textContent = _orig;
+      //     submitOverlordBtn.style.borderColor = '';
+      //     submitOverlordBtn.style.color = '';
+      //   }, 1800);
+      //   return;
+      // }
       exportPNG();
     };
 
