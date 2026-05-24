@@ -64,8 +64,8 @@ module.exports = async (req, res) => {
     let imageUrl = '';
     const imagePart = parts.find(p => p.name === 'image' && p.filename) || parts.find(p => p.name === 'video' && p.filename);
     if (imagePart && imagePart.data.length > 0) {
-      if (imagePart.data.length > 25 * 1024 * 1024) {
-        return res.status(400).json({ error: `File too large (got ${(imagePart.data.length / 1048576).toFixed(2)}MB, max 25MB)` });
+      if (imagePart.data.length > 96 * 1024 * 1024) {
+        return res.status(400).json({ error: `File too large (got ${(imagePart.data.length / 1048576).toFixed(2)}MB, max 96MB)` });
       }
 
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;

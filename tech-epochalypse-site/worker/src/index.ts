@@ -105,8 +105,8 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
       return json({ error: 'No image provided' }, 400);
     }
 
-    if (file.size > 25 * 1024 * 1024) {
-      return json({ error: `File too large (got ${(file.size / 1048576).toFixed(2)}MB, max 25MB)` }, 400);
+    if (file.size > 96 * 1024 * 1024) {
+      return json({ error: `File too large (got ${(file.size / 1048576).toFixed(2)}MB, max 96MB)` }, 400);
     }
 
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -152,8 +152,8 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
     let fileBytes: ArrayBuffer | null = null;
     let fileContentType = 'image/png';
     if (file && file.size > 0) {
-      if (file.size > 25 * 1024 * 1024) {
-        return json({ error: `File too large (got ${(file.size / 1048576).toFixed(2)}MB, max 25MB)` }, 400);
+      if (file.size > 96 * 1024 * 1024) {
+        return json({ error: `File too large (got ${(file.size / 1048576).toFixed(2)}MB, max 96MB)` }, 400);
       }
       fileBytes = await file.arrayBuffer();
       fileContentType = file.type || 'image/png';
