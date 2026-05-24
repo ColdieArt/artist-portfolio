@@ -3659,6 +3659,9 @@ function init() {
     cropOverlayEl.style.cssText = 'position: fixed; border: 1px dashed rgba(255,255,255,0.65); box-shadow: 0 0 0 9999px rgba(0,0,0,0.55); pointer-events: none; z-index: 150; display: none; box-sizing: border-box;';
     document.body.appendChild(cropOverlayEl);
     window.addEventListener('resize', updateCropOverlay);
+    // 1:1 crop is default-on during SUBJ:01 — show the overlay immediately
+    // so the user can see what region will be captured.
+    updateCropOverlay();
 
     // ── CROP H / V buttons ──
     const cropHBtn = document.createElement('button');
@@ -4658,6 +4661,20 @@ setTimeout(function () {
   <div id="post-modal">
     <div id="post-modal-content">
       <h2>Share your overlord</h2>
+
+      <!-- 1:1 cropped preview of what the user just captured. Hidden until
+           exportPNG() populates the src — see toBlob callback below. -->
+      <img id="post-modal-preview" alt="1:1 submission preview" style="
+        display: none;
+        width: 100%;
+        max-width: 240px;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        margin: 0 auto 16px;
+        border: 1px solid #333;
+        background: #000;
+      " />
+
       <p style="margin: 0 0 20px 0; font-size: 12px; color: #aaa;">Attach your downloaded file before posting</p>
       <button id="post-modal-btn">POST TO X</button>
 
@@ -5165,6 +5182,16 @@ setTimeout(function () {
       const _exportCanvas = applyCropToCanvas(r.domElement);
       _exportCanvas.toBlob((blob) => {
         if (blob) {
+          // Show the 1:1 crop in the post-modal as a preview thumbnail.
+          const _previewImg = document.getElementById('post-modal-preview');
+          if (_previewImg) {
+            if (_previewImg._prevUrl) URL.revokeObjectURL(_previewImg._prevUrl);
+            const _url = URL.createObjectURL(blob);
+            _previewImg.src = _url;
+            _previewImg.style.display = 'block';
+            _previewImg._prevUrl = _url;
+          }
+
           triggerDownload(blob, 'mark-zuckerberg-coldie.jpg');
           saveToGallery(_exportCanvas);
           setStatus('JPG saved ✓ — added to gallery', 'active');
