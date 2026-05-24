@@ -94,7 +94,9 @@ export default function VsPage() {
             Data Refinement
           </h1>
           <p className="font-mono text-sm text-white/70 max-w-xl mx-auto mb-6">
-            Pick one. Then pick another. Use ← / → keys.
+            Pick one. Then pick another.
+            <br />
+            <span className="text-white/50">Use ← / → keys.</span>
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 font-mono text-xs uppercase tracking-wider">
