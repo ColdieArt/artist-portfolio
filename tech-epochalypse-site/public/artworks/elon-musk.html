@@ -5095,6 +5095,29 @@ setTimeout(function () {
       const title = document.getElementById('title-input').value.trim();
       const ethAddress = document.getElementById('eth-address-input').value.trim();
       const email = document.getElementById('email-input').value.trim();
+
+      // ── REQUIRED-FIELD GUARD ──
+      // NAME / X ACCOUNT and TITLE must be filled in. If either is empty,
+      // outline the empty input(s) in red, set an explanatory status
+      // message, focus the first empty field, and abort before the upload
+      // starts.
+      const _nameInput  = document.getElementById('x-account-input');
+      const _titleInput = document.getElementById('title-input');
+      if (!xAccount || !title) {
+        if (_nameInput)  _nameInput.style.borderColor  = xAccount ? '#333' : '#e33';
+        if (_titleInput) _titleInput.style.borderColor = title    ? '#333' : '#e33';
+        judgmentStatus.style.color = '#e66';
+        judgmentStatus.textContent =
+          (!xAccount && !title) ? 'NAME AND TITLE ARE REQUIRED'
+          : !xAccount           ? 'NAME IS REQUIRED'
+                                : 'TITLE IS REQUIRED';
+        (xAccount ? _titleInput : _nameInput)?.focus();
+        return;
+      }
+      // Both fields filled — clear any previous red borders from a prior attempt.
+      if (_nameInput)  _nameInput.style.borderColor  = '#333';
+      if (_titleInput) _titleInput.style.borderColor = '#333';
+
       judgmentBtn.disabled = true;
       judgmentBtn.style.opacity = '0.5';
       judgmentStatus.style.color = '#aaa';
