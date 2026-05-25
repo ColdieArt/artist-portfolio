@@ -90,6 +90,9 @@ export default {
     if (request.method === 'POST' && path === '/vs/admin/sync') {
       return handleVsSync(request, env);
     }
+    if (request.method === 'POST' && path === '/vs/admin/airtable-import') {
+      return handleVsAirtableImport(request, env);
+    }
 
     return json({ error: 'Not found', path, method: request.method }, 404);
   },
@@ -229,13 +232,16 @@ async function handleSubmit(request: Request, env: Env): Promise<Response> {
     }
 
     // Register the submission in the /vs voting pool as pending (admin approves later).
+    // We register the THUMBNAIL URL (when the client supplied a thumb) rather than
+    // the full-size URL so the voting UI loads quickly. Falls back to the full
+    // image for older clients that didn't generate a thumb.
     if (r2Key && env.VS_DB) {
       try {
         await env.VS_DB.prepare(
           `INSERT OR IGNORE INTO images (id, overlord, title, image_url, elo, votes, wins, losses, status, created_at)
            VALUES (?1, ?2, ?3, ?4, 1500, 0, 0, 0, 'pending', ?5)`
         )
-          .bind(r2Key, overlord, title || '', imageUrl, Date.now())
+          .bind(r2Key, overlord, title || '', thumbUrl || imageUrl, Date.now())
           .run();
       } catch (e) {
         console.error('VS_DB insert (submit) failed:', e);
@@ -880,13 +886,22 @@ async function handleVsSync(request: Request, env: Env): Promise<Response> {
       });
       for (const obj of listed.objects) {
         scanned++;
+        // Skip thumbnail objects — they're auxiliary copies of submissions
+        // we already index below, not separate submissions in their own right.
+        if (obj.key.endsWith('-thumb.jpg')) continue;
         const head = await env.GALLERY_BUCKET.head(obj.key);
         const overlord = head?.customMetadata?.overlord || 'unknown';
+        // Prefer the matching thumbnail (exports/<id>-thumb.jpg) when present
+        // so the voting UI loads small images. Falls back to the full export
+        // when no thumb was generated for older submissions.
+        const thumbKey = obj.key.replace(/\.(jpg|png)$/i, '-thumb.jpg');
+        const thumbHead = await env.GALLERY_BUCKET.head(thumbKey).catch(() => null);
+        const servedKey = thumbHead ? thumbKey : obj.key;
         const res = await env.VS_DB.prepare(
           `INSERT OR IGNORE INTO images (id, overlord, title, image_url, elo, votes, wins, losses, status, created_at)
            VALUES (?1, ?2, '', ?3, 1500, 0, 0, 0, 'pending', ?4)`
         )
-          .bind(obj.key, overlord, `${origin}/image/${obj.key}`, obj.uploaded?.getTime() || Date.now())
+          .bind(obj.key, overlord, `${origin}/image/${servedKey}`, obj.uploaded?.getTime() || Date.now())
           .run();
         if (res.meta.changes) inserted++;
       }
@@ -896,5 +911,126 @@ async function handleVsSync(request: Request, env: Env): Promise<Response> {
   } catch (e) {
     console.error('vs/sync error:', e);
     return json({ error: 'Sync failed' }, 500);
+  }
+}
+
+// POST /vs/admin/airtable-import — populate D1 from Airtable, using Airtable's
+// auto-generated image thumbnails as the voting-tool image URL. Admin only.
+//
+// Behavior:
+//   • Iterates every record in the configured Airtable table where
+//     `Approved` is TRUE (matches the same filter the public gallery uses).
+//   • Picks the largest available auto-thumbnail
+//     (attachment.thumbnails.large.url) for each record's `Image`
+//     attachment; falls back to `small` and then the raw url.
+//   • Upserts each row into D1 using the Airtable record id (recXXX…) as
+//     the D1 primary key, so this endpoint is idempotent — re-running it
+//     refreshes URLs (Airtable URLs are signed and expire after a few
+//     hours) without inserting duplicates.
+//   • Imports come in as status='approved' since they're already curated
+//     in Airtable.
+//
+// Returns: { ok, total, inserted, updated, skipped, note }
+async function handleVsAirtableImport(request: Request, env: Env): Promise<Response> {
+  if (!isAdmin(request, env)) return json({ error: 'Unauthorized' }, 401);
+  if (!env.AIRTABLE_PAT || !env.AIRTABLE_BASE_ID || !env.AIRTABLE_TABLE_NAME) {
+    return json({ error: 'Airtable not configured on server' }, 500);
+  }
+  try {
+    // 1. Page through every Approved record.
+    type AirtableAttachment = {
+      url: string;
+      thumbnails?: {
+        small?: { url: string };
+        large?: { url: string };
+        full?: { url: string };
+      };
+    };
+    type AirtableRecord = {
+      id: string;
+      createdTime?: string;
+      fields: {
+        Overlord?: string;
+        Title?: string;
+        Image?: AirtableAttachment[];
+        Approved?: boolean;
+      };
+    };
+
+    const records: AirtableRecord[] = [];
+    let offset: string | undefined;
+    do {
+      const u = new URL(
+        `https://api.airtable.com/v0/${env.AIRTABLE_BASE_ID}/${encodeURIComponent(env.AIRTABLE_TABLE_NAME)}`
+      );
+      u.searchParams.set('filterByFormula', '{Approved}=TRUE()');
+      u.searchParams.set('pageSize', '100');
+      if (offset) u.searchParams.set('offset', offset);
+      const res = await fetch(u.toString(), {
+        headers: { Authorization: `Bearer ${env.AIRTABLE_PAT}` },
+      });
+      if (!res.ok) {
+        const t = await res.text();
+        return json({ error: 'Airtable fetch failed', status: res.status, details: t }, res.status);
+      }
+      const data = (await res.json()) as { records?: AirtableRecord[]; offset?: string };
+      records.push(...(data.records || []));
+      offset = data.offset;
+    } while (offset);
+
+    // 2. Upsert each into D1.
+    let inserted = 0;
+    let updated = 0;
+    let skipped = 0;
+    for (const r of records) {
+      const overlord = r.fields?.Overlord || 'unknown';
+      const title = r.fields?.Title || '';
+      const image = r.fields?.Image?.[0];
+      if (!image) {
+        skipped++;
+        continue;
+      }
+      const thumbUrl =
+        image.thumbnails?.large?.url ||
+        image.thumbnails?.small?.url ||
+        image.url;
+      if (!thumbUrl) {
+        skipped++;
+        continue;
+      }
+      const existing = await env.VS_DB.prepare('SELECT id FROM images WHERE id = ?1')
+        .bind(r.id)
+        .first();
+      if (existing) {
+        await env.VS_DB.prepare(
+          `UPDATE images SET image_url = ?1, overlord = ?2, title = ?3, status = 'approved'
+           WHERE id = ?4`
+        )
+          .bind(thumbUrl, overlord, title, r.id)
+          .run();
+        updated++;
+      } else {
+        const createdAt = r.createdTime ? new Date(r.createdTime).getTime() : Date.now();
+        await env.VS_DB.prepare(
+          `INSERT INTO images (id, overlord, title, image_url, elo, votes, wins, losses, status, created_at)
+           VALUES (?1, ?2, ?3, ?4, 1500, 0, 0, 0, 'approved', ?5)`
+        )
+          .bind(r.id, overlord, title, thumbUrl, createdAt)
+          .run();
+        inserted++;
+      }
+    }
+
+    return json({
+      ok: true,
+      total: records.length,
+      inserted,
+      updated,
+      skipped,
+      note: 'Airtable image URLs are signed and expire after ~2 hours. Re-run this endpoint periodically to refresh the URLs in D1.',
+    });
+  } catch (e) {
+    console.error('airtable-import error:', e);
+    return json({ error: 'Airtable import failed', details: (e as Error).message }, 500);
   }
 }
