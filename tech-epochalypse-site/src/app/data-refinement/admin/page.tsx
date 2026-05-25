@@ -23,6 +23,8 @@ export default function VsAdminPage() {
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [syncing, setSyncing] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [importMsg, setImportMsg] = useState<string | null>(null)
 
   // Persist token in sessionStorage so reloads don't lock you out mid-review.
   useEffect(() => {
@@ -92,6 +94,31 @@ export default function VsAdminPage() {
     }
   }
 
+  // Pull every Approved record from Airtable and (re)write D1 rows using
+  // Airtable's auto-generated image thumbnails as the image_url. Idempotent —
+  // safe to re-run whenever Airtable's signed URLs expire (~every 2 hours).
+  async function importFromAirtable() {
+    setImporting(true)
+    setImportMsg(null)
+    try {
+      const res = await fetch(`${WORKER_URL}/vs/admin/airtable-import`, {
+        method: 'POST',
+        headers: { 'X-Admin-Token': token },
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok && data.ok) {
+        setImportMsg(`Imported: ${data.total} record(s) — ${data.inserted} new, ${data.updated} updated, ${data.skipped} skipped (no image).`)
+      } else {
+        setImportMsg(`Import failed: ${data.error || res.status}`)
+      }
+      await load(token)
+    } catch (e) {
+      setImportMsg(`Import error: ${(e as Error).message}`)
+    } finally {
+      setImporting(false)
+    }
+  }
+
   if (!authed) {
     return (
       <section className="pt-32 pb-24 section-padding bg-black min-h-screen">
@@ -130,6 +157,9 @@ export default function VsAdminPage() {
             </h1>
           </div>
           <div className="flex items-center gap-3 font-mono text-xs uppercase tracking-wider">
+            <button onClick={importFromAirtable} disabled={importing} className="btn-secondary">
+              <span>{importing ? 'Importing…' : 'Import from Airtable'}</span>
+            </button>
             <button onClick={sync} disabled={syncing} className="btn-secondary">
               <span>{syncing ? 'Syncing…' : 'Sync from R2'}</span>
             </button>
@@ -145,6 +175,10 @@ export default function VsAdminPage() {
             </button>
           </div>
         </div>
+
+        {importMsg && (
+          <p className="mb-6 font-mono text-xs text-white/70">{importMsg}</p>
+        )}
 
         {loading ? (
           <p className="text-center font-mono text-xs text-white/40 uppercase tracking-wider py-20">
