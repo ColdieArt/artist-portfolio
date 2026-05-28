@@ -5162,16 +5162,62 @@ setTimeout(function () {
         else                                 _hiPR = _LONG_EDGE / Math.max(_vw, _vh);
         _hiPR = Math.max(_origPR, _hiPR);
         _hiPR = Math.min(_hiPR, _maxTex / Math.max(_vw, _vh));
+        // Extra safety cap: keep the canvas long edge <= 8192px. Large
+        // framebuffers (especially with the EffectComposer's render targets
+        // + MSAA) can silently fail to allocate on memory-limited GPUs,
+        // returning an all-black capture. This is a first line of defense;
+        // the retry loop below is the real adaptive safety net.
+        _hiPR = Math.min(_hiPR, 8192 / Math.max(_vw, _vh));
+        // 1:1 is the active competition crop. Cap its render canvas long edge
+        // to 3840px: the square only needs to reach 3840 OUTPUT px and the
+        // target-dimension upscale further below restores a consistent
+        // 3840x3840, so this trades a little 1:1 sharpness (~1950px of true
+        // detail on a typical window) for a ~74% smaller framebuffer
+        // (e.g. 32MP -> 8MP), which keeps memory-limited GPUs from blacking
+        // out. 16:9/4:5 (currently hidden) keep their full-res render.
+        if (window.cropMode === "1:1") {
+          _hiPR = Math.min(_hiPR, 3840 / Math.max(_vw, _vh));
+        }
+        _hiPR = Math.max(_origPR, _hiPR);
 
-        r.setPixelRatio(_hiPR);
-        r.setSize(_vw, _vh, false);
-        if (window.composer) window.composer.setSize(_vw, _vh);
-        if (_passes.pixelationPass) _passes.pixelationPass.uniforms['resolution'].value.set(_vw * _hiPR, _vh * _hiPR);
-        if (_passes.asciiPass)      _passes.asciiPass.uniforms['resolution'].value.set(_vw * _hiPR, _vh * _hiPR);
-        if (_passes.cctvFeedPass)   _passes.cctvFeedPass.uniforms['resolution'].value.set(_vw * _hiPR, _vh * _hiPR);
-
-        if (window.composer) { window.composer.render(); }
-        else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
+        // Render at _hiPR, then probe the center of the canvas. If the GPU
+        // couldn't allocate the framebuffer the frame comes back all-black,
+        // so step the pixel ratio down (×0.7) and re-render until we get
+        // real pixels or bottom out at the display pixel ratio. This keeps
+        // full 4K quality on capable GPUs while still producing a valid
+        // (lower-res) image on constrained devices instead of pure black.
+        const _renderAt = (pr) => {
+          r.setPixelRatio(pr);
+          r.setSize(_vw, _vh, false);
+          if (window.composer) window.composer.setSize(_vw, _vh);
+          if (_passes.pixelationPass) _passes.pixelationPass.uniforms['resolution'].value.set(_vw * pr, _vh * pr);
+          if (_passes.asciiPass)      _passes.asciiPass.uniforms['resolution'].value.set(_vw * pr, _vh * pr);
+          if (_passes.cctvFeedPass)   _passes.cctvFeedPass.uniforms['resolution'].value.set(_vw * pr, _vh * pr);
+          if (window.composer) { window.composer.render(); }
+          else if (window.scene && window.camera) { r.render(window.scene, window.camera); }
+        };
+        const _looksBlack = () => {
+          try {
+            const _src = r.domElement;
+            const _probe = document.createElement('canvas');
+            _probe.width = 8; _probe.height = 8;
+            const _pctx = _probe.getContext('2d');
+            _pctx.drawImage(_src, _src.width / 2 - 4, _src.height / 2 - 4, 8, 8, 0, 0, 8, 8);
+            const _d = _pctx.getImageData(0, 0, 8, 8).data;
+            for (let _i = 0; _i < _d.length; _i += 4) {
+              if (_d[_i] > 6 || _d[_i + 1] > 6 || _d[_i + 2] > 6) return false;
+            }
+            return true;
+          } catch (_e) { return false; }
+        };
+        _renderAt(_hiPR);
+        let _blackAttempts = 0;
+        while (_looksBlack() && _hiPR > _origPR && _blackAttempts < 6) {
+          _hiPR = Math.max(_origPR, _hiPR * 0.7);
+          if (judgmentStatus) { judgmentStatus.textContent = 'Rendering (reducing size)…'; }
+          _renderAt(_hiPR);
+          _blackAttempts++;
+        }
 
         const srcCanvas = applyCropToCanvas(r.domElement);
 
