@@ -4639,6 +4639,16 @@ setTimeout(function () {
         // returning an all-black capture. This is a first line of defense;
         // the retry loop below is the real adaptive safety net.
         _hiPR = Math.min(_hiPR, 8192 / Math.max(_vw, _vh));
+        // 1:1 is the active competition crop. Cap its render canvas long edge
+        // to 3840px: the square only needs to reach 3840 OUTPUT px and the
+        // target-dimension upscale further below restores a consistent
+        // 3840x3840, so this trades a little 1:1 sharpness (~1950px of true
+        // detail on a typical window) for a ~74% smaller framebuffer
+        // (e.g. 32MP -> 8MP), which keeps memory-limited GPUs from blacking
+        // out. 16:9/4:5 (currently hidden) keep their full-res render.
+        if (window.cropMode === "1:1") {
+          _hiPR = Math.min(_hiPR, 3840 / Math.max(_vw, _vh));
+        }
         _hiPR = Math.max(_origPR, _hiPR);
 
         // Render at _hiPR, then probe the center of the canvas. If the GPU
