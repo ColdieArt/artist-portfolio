@@ -11,6 +11,10 @@ const BioCoder = dynamic(() => import('@/components/BioCoder'), {
   ssr: false,
   loading: () => null,
 })
+const SubjEntriesGallery = dynamic(() => import('@/components/SubjEntriesGallery'), {
+  ssr: false,
+  loading: () => null,
+})
 
 export default function HomePage() {
   return (
@@ -191,6 +195,12 @@ export default function HomePage() {
           </ScrollReveal>
         </div>
       </section>
+
+      {/* ── SUBJ:01 Live Entries Gallery ──
+          Read-only wall of every approved submission, fetched from Airtable
+          via /api/airtable-records (category: "general submission").
+          Hides itself if there are no entries or the fetch fails. */}
+      <SubjEntriesGallery />
 
       {/* ── Overlord Dossiers on Scroll ── */}
       <section className="relative py-32 section-padding bg-black grid-lines">
