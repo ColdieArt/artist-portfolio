@@ -99,8 +99,11 @@ export default function VsPage() {
             The highest voted work will win the Community Vote and will be
             minted into the Tech Epochalypse dossier.
           </p>
-          <p className="font-mono text-sm text-white/50 max-w-xl mx-auto mb-6">
+          <p className="font-mono text-sm text-white/50 max-w-xl mx-auto mb-2">
             Use ← / → keys.
+          </p>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/60 max-w-xl mx-auto mb-6">
+            Voting: Fri May 29 &ndash; June 10 &middot; 11:59 PM PT
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 font-mono text-xs uppercase tracking-wider">
