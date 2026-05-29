@@ -761,7 +761,9 @@ async function handleVsVote(request: Request, env: Env): Promise<Response> {
       .bind(hash, winnerId, loserId)
       .first();
     if (recent) {
-      return json({ ok: true, deduped: true });
+      // Same voter already weighed in on this pair — Elo unchanged, but we
+      // still return a badge so the UI always shows confirmation.
+      return json({ ok: true, deduped: true, badge: { kind: 'dup', label: 'ALREADY COUNTED' } });
     }
 
     // --- Pre-vote signals (used to compute the flavor badge) ---

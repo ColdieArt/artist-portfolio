@@ -72,14 +72,16 @@ export default function VsPage() {
           body: JSON.stringify({ winner: winnerId, loser: loserId }),
         })
         const data = await res.json().catch(() => null)
-        if (data?.badge) {
-          setBadge(data.badge as Badge)
-          // Flip visible on the next frame so the CSS transition catches.
-          requestAnimationFrame(() => setBadgeVisible(true))
-        }
+        // Always show a badge so the vote feels acknowledged, even if the
+        // worker didn't supply one (network blip, older worker version, etc.).
+        const nextBadge: Badge = (data?.badge as Badge) || { kind: 'delta', label: 'VOTE LOCKED' }
+        setBadge(nextBadge)
+        requestAnimationFrame(() => setBadgeVisible(true))
         setCount((c) => c + 1)
       } catch {
-        // swallow — UI will move on regardless
+        // Network failure — still confirm the click visually.
+        setBadge({ kind: 'delta', label: 'VOTE LOCKED' })
+        requestAnimationFrame(() => setBadgeVisible(true))
       }
       // Pause so the badge can land + read, then load the next pair.
       setTimeout(() => loadPair(overlord), 1200)
