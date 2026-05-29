@@ -119,7 +119,7 @@ export default function MainframePage() {
                   <ul className="space-y-2 ml-1">
                     <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Opens:</strong> Saturday, May 23 &mdash; 9:00 AM ET</span></li>
                     <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Closes:</strong> Wednesday, May 28 &mdash; 11:59 PT</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Winners announced:</strong> Thursday, June 4 &mdash; 10:00 AM ET</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Winners announced:</strong> Thursday, June 11 &mdash; 2:00 PM PT</span></li>
                     <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Mints + raffles:</strong> Monday, June 15</span></li>
                   </ul>
                 </div>
