@@ -198,6 +198,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                     <ul className="space-y-0.5 ml-1">
                       <li><span className="font-bold">Opens:</span> Sat May 23 &middot; 9 AM ET</li>
                       <li><span className="font-bold">Closes:</span> Wed May 28 &middot; 11:59 PT</li>
+                      <li><span className="font-bold">Voting:</span> Fri May 29 &ndash; June 10 &middot; 11:59 PM PT</li>
                       <li><span className="font-bold">Winners:</span> Thu Jun 11 &middot; 2 PM PT</li>
                       <li><span className="font-bold">Mints + raffles:</span> Mon Jun 15</li>
                     </ul>
