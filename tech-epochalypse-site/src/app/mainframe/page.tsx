@@ -134,9 +134,10 @@ export default function MainframePage() {
                   <ul className="space-y-2 ml-1 mb-4">
                     <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Curator&rsquo;s Pick 1</strong> (chosen by Coldie) &mdash; Edition of 10</span></li>
                     <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Curator&rsquo;s Pick 2</strong> (chosen by Coldie) &mdash; Edition of 10</span></li>
-                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Community Pick</strong> (most public votes) &mdash; Edition of 42</span></li>
+                    <li className="flex gap-2"><span className="shrink-0">&rarr;</span><span><strong>Community Pick</strong> (top-ranked by public head-to-head voting) &mdash; Edition of 42</span></li>
                   </ul>
                   <p className="mb-3">All winning artists receive 80% of public primary sales and 80% of secondary royalties on their edition.</p>
+                  <p className="mb-3 text-xs"><strong>How the Community Pick is decided:</strong> Visitors see two entries side by side and pick the one they prefer. Every choice is a head-to-head match, not a tally. Votes feed a ranking algorithm (Elo, the system used to rank chess players) that tracks <em>which</em> entries beat <em>which</em>. The top-ranked work wins. Cast yours at <Link href="/dossier-refinement" className="underline">/dossier-refinement</Link>.</p>
                   <p className="italic">What wins: Use of depth. Surprising use of the upload feature. Risk over polish. Make work only this medium could produce.</p>
                 </div>
 

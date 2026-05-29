@@ -105,10 +105,13 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                   <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em] mt-1">
                     Dossier Refinement
                   </h2>
-                  <p className="font-mono text-xs md:text-sm text-white/70 mt-2 max-w-2xl">
-                    Two entries, side by side. Pick the one you prefer. The
-                    highest-voted work wins the Community Pick and is minted
-                    into the Tech Epochalypse dossier.
+                  <p className="font-mono text-xs md:text-sm text-white/70 mt-2 max-w-2xl leading-relaxed">
+                    Two entries, side by side. Pick the one you prefer — then
+                    do it again. Every choice is a head-to-head match, not a
+                    tally. Votes feed a ranking algorithm (Elo, the system used
+                    to rank chess players) that tracks <em>which</em> entries
+                    beat <em>which</em>. The top-ranked work wins the Community
+                    Pick and is minted into the Tech Epochalypse dossier.
                   </p>
                 </div>
                 <span className="inline-flex items-center gap-3 font-mono text-xs md:text-sm uppercase tracking-[0.2em] bg-white text-black px-5 md:px-7 py-3 md:py-4 shrink-0">
