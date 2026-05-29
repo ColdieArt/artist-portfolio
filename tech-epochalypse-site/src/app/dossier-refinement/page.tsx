@@ -1,7 +1,6 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import overlords from '@/data/overlords.json'
 
 const WORKER_URL =
   process.env.NEXT_PUBLIC_GALLERY_WORKER_URL ||
@@ -18,11 +17,12 @@ type Img = {
 
 type Pair = { left: Img; right: Img; overlord: string }
 
-const overlordOptions = (overlords as Array<{ slug: string; name: string; status?: string }>)
-  .filter((o) => o.status !== 'unlisted')
+// Overlord filter removed from the UI — every pair is drawn from the full
+// approved pool. The `overlord` constant is kept as 'all' so the existing
+// worker call signature still works.
+const overlord = 'all'
 
 export default function VsPage() {
-  const [overlord, setOverlord] = useState<string>('all')
   const [pair, setPair] = useState<Pair | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -104,19 +104,6 @@ export default function VsPage() {
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 font-mono text-xs uppercase tracking-wider">
-            <label className="text-white/60">Overlord:</label>
-            <select
-              value={overlord}
-              onChange={(e) => setOverlord(e.target.value)}
-              className="bg-black border border-white/30 text-white px-3 py-1.5"
-            >
-              <option value="all">All Overlords</option>
-              {overlordOptions.map((o) => (
-                <option key={o.slug} value={o.slug}>
-                  {o.name}
-                </option>
-              ))}
-            </select>
             <span className="text-white/40">Votes this session: {count}</span>
             {/* Leaderboard link hidden during the submission window.
                 Flip the `false` to bring it back once results are public. */}
