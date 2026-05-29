@@ -102,8 +102,7 @@ export default function SubjEntriesGallery({
             SUBJ:&nbsp;01 Submissions
           </h2>
           <p className="font-mono text-xs md:text-sm text-white/60 max-w-xl mx-auto">
-            {entries.length} {entries.length === 1 ? 'entry' : 'entries'} so far. Submissions
-            close at midnight tonight.
+            {entries.length} {entries.length === 1 ? 'entry' : 'entries'} so far.
           </p>
         </div>
 
