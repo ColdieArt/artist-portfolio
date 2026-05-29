@@ -88,6 +88,41 @@ export default function SubjPage({ params }: { params: { id: string } }) {
         </div>
       </section>
 
+      {/* ── Dossier Refinement CTA ──
+          Sits directly under the SUBJ header. Funnels visitors to the
+          pairwise voting tool so the Community Pick winner gets surfaced
+          while the submission window stays open. */}
+      <section className="pb-6 md:pb-8 section-padding">
+        <div className="page-container">
+          <ScrollReveal>
+            <Link
+              href="/dossier-refinement"
+              className="group block border border-white/20 hover:border-white bg-white/[0.02] hover:bg-white/[0.06] transition-colors duration-300 p-5 md:p-7"
+            >
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <div className="classified-header">Community Vote — Now Open</div>
+                  <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em] mt-1">
+                    Dossier Refinement
+                  </h2>
+                  <p className="font-mono text-xs md:text-sm text-white/70 mt-2 max-w-2xl">
+                    Two entries, side by side. Pick the one you prefer. The
+                    highest-voted work wins the Community Pick and is minted
+                    into the Tech Epochalypse dossier.
+                  </p>
+                </div>
+                <span className="inline-flex items-center gap-3 font-mono text-xs md:text-sm uppercase tracking-[0.2em] bg-white text-black px-5 md:px-7 py-3 md:py-4 shrink-0">
+                  <span>Start Voting</span>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="transition-transform duration-300 group-hover:translate-x-1">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
+              </div>
+            </Link>
+          </ScrollReveal>
+        </div>
+      </section>
+
       {/* ── Brief / Prompt ──
           Classified-doc style orientation paragraph that primes visitors
           on what they're being asked to make. Lives right under the
