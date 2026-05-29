@@ -124,7 +124,7 @@ export default function VsAdminPage() {
       <section className="pt-32 pb-24 section-padding bg-black min-h-screen">
         <div className="max-w-md mx-auto text-center">
           <h1 className="font-display text-3xl text-white uppercase tracking-wider mb-6">
-            Data Refinement Admin
+            Dossier Refinement Admin
           </h1>
           <input
             type="password"

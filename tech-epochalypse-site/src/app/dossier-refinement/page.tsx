@@ -91,7 +91,7 @@ export default function VsPage() {
         <div className="text-center mb-8">
           <p className="font-mono text-xs uppercase tracking-[0.4em] text-white mb-3">Pairwise</p>
           <h1 className="font-display text-4xl md:text-6xl text-white mb-3 uppercase tracking-[0.05em]">
-            Data Refinement
+            Dossier Refinement
           </h1>
           <p className="font-mono text-sm text-white/70 max-w-xl mx-auto mb-3">
             Pick one. Then pick another.
@@ -121,7 +121,7 @@ export default function VsPage() {
             {/* Leaderboard link hidden during the submission window.
                 Flip the `false` to bring it back once results are public. */}
             {false && (
-              <a href="/data-refinement/leaderboard" className="text-white/80 underline underline-offset-4">
+              <a href="/dossier-refinement/leaderboard" className="text-white/80 underline underline-offset-4">
                 Leaderboard →
               </a>
             )}
