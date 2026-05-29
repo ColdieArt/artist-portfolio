@@ -764,6 +764,34 @@ async function handleVsVote(request: Request, env: Env): Promise<Response> {
       return json({ ok: true, deduped: true });
     }
 
+    // --- Pre-vote signals (used to compute the flavor badge) ---
+    const preGap = Math.abs(winner.elo - loser.elo);
+    const isUpset = winner.elo < loser.elo && loser.elo - winner.elo >= 100;
+    const isTightCall = preGap < 30;
+
+    // Streak check: did this image win each of its last 2 matchups?
+    // Combined with the current vote that makes a 3-in-a-row streak.
+    const recentForWinner = await env.VS_DB.prepare(
+      `SELECT winner_id FROM votes
+       WHERE winner_id = ?1 OR loser_id = ?1
+       ORDER BY ts DESC
+       LIMIT 2`
+    )
+      .bind(winnerId)
+      .all<{ winner_id: string }>();
+    const isStreak =
+      (recentForWinner.results?.length ?? 0) === 2 &&
+      recentForWinner.results!.every((r) => r.winner_id === winnerId);
+
+    // Rank before the vote (1-based; count of strictly-higher Elo + 1).
+    const beforeRankRow = await env.VS_DB.prepare(
+      `SELECT COUNT(*) AS c FROM images
+       WHERE status = 'approved' AND id != ?1 AND elo > ?2`
+    )
+      .bind(winnerId, winner.elo)
+      .first<{ c: number }>();
+    const beforeRank = (beforeRankRow?.c ?? 0) + 1;
+
     // Elo update, K = 32.
     const K = 32;
     const expectedW = 1 / (1 + Math.pow(10, (loser.elo - winner.elo) / 400));
@@ -785,10 +813,44 @@ async function handleVsVote(request: Request, env: Env): Promise<Response> {
       ).bind(winnerId, loserId, overlordTag, hash, Date.now()),
     ]);
 
+    // Rank after the vote, recomputed against the freshly-updated Elo column.
+    const afterRankRow = await env.VS_DB.prepare(
+      `SELECT COUNT(*) AS c FROM images
+       WHERE status = 'approved' AND id != ?1 AND elo > ?2`
+    )
+      .bind(winnerId, newWinnerElo)
+      .first<{ c: number }>();
+    const afterRank = (afterRankRow?.c ?? 0) + 1;
+
+    const eloDelta = Math.round(newWinnerElo - winner.elo);
+    const isTopContender = afterRank <= 5;
+    const isClimber = afterRank < beforeRank;
+
+    // Priority cascade — exactly one badge per vote. Pure flavor.
+    let badge: { kind: string; label: string; detail?: string };
+    if (isUpset) {
+      badge = { kind: 'upset', label: 'UPSET', detail: `+${eloDelta}` };
+    } else if (isStreak) {
+      badge = { kind: 'streak', label: 'STREAK ×3', detail: `+${eloDelta}` };
+    } else if (isTopContender) {
+      badge = { kind: 'top', label: 'TOP CONTENDER', detail: `#${afterRank}` };
+    } else if (isClimber) {
+      badge = {
+        kind: 'climber',
+        label: 'CLIMBER',
+        detail: `#${beforeRank} → #${afterRank}`,
+      };
+    } else if (isTightCall) {
+      badge = { kind: 'tight', label: 'TIGHT CALL', detail: `+${eloDelta}` };
+    } else {
+      badge = { kind: 'delta', label: `+${eloDelta}` };
+    }
+
     return json({
       ok: true,
       winner: { id: winnerId, elo: Math.round(newWinnerElo) },
       loser: { id: loserId, elo: Math.round(newLoserElo) },
+      badge,
     });
   } catch (e) {
     console.error('vs/vote error:', e);

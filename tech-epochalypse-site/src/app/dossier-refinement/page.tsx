@@ -22,17 +22,23 @@ type Pair = { left: Img; right: Img; overlord: string }
 // worker call signature still works.
 const overlord = 'all'
 
+type Badge = { kind: string; label: string; detail?: string }
+
 export default function VsPage() {
   const [pair, setPair] = useState<Pair | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [voted, setVoted] = useState<{ winnerId: string; loserId: string } | null>(null)
   const [count, setCount] = useState(0)
+  const [badge, setBadge] = useState<Badge | null>(null)
+  const [badgeVisible, setBadgeVisible] = useState(false)
 
   const loadPair = useCallback(async (slug: string) => {
     setLoading(true)
     setError(null)
     setVoted(null)
+    setBadge(null)
+    setBadgeVisible(false)
     try {
       const res = await fetch(`${WORKER_URL}/vs/pair?overlord=${encodeURIComponent(slug)}`, {
         cache: 'no-store',
@@ -53,26 +59,32 @@ export default function VsPage() {
 
   useEffect(() => {
     loadPair(overlord)
-  }, [overlord, loadPair])
+  }, [loadPair])
 
   const castVote = useCallback(
     async (winnerId: string, loserId: string) => {
       if (voted) return
       setVoted({ winnerId, loserId })
       try {
-        await fetch(`${WORKER_URL}/vs/vote`, {
+        const res = await fetch(`${WORKER_URL}/vs/vote`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ winner: winnerId, loser: loserId }),
         })
+        const data = await res.json().catch(() => null)
+        if (data?.badge) {
+          setBadge(data.badge as Badge)
+          // Flip visible on the next frame so the CSS transition catches.
+          requestAnimationFrame(() => setBadgeVisible(true))
+        }
         setCount((c) => c + 1)
       } catch {
         // swallow — UI will move on regardless
       }
-      // brief pause so the user sees the highlight, then next pair
-      setTimeout(() => loadPair(overlord), 450)
+      // Pause so the badge can land + read, then load the next pair.
+      setTimeout(() => loadPair(overlord), 1200)
     },
-    [voted, overlord, loadPair]
+    [voted, loadPair]
   )
 
   useEffect(() => {
@@ -93,11 +105,20 @@ export default function VsPage() {
           <h1 className="font-display text-4xl md:text-6xl text-white mb-3 uppercase tracking-[0.05em]">
             Dossier Refinement
           </h1>
-          <p className="font-mono text-sm text-white/70 max-w-xl mx-auto mb-3">
-            Pick one. Then pick another.
-            <br />
-            The highest voted work will win the Community Vote and will be
-            minted into the Tech Epochalypse dossier.
+          <p className="font-mono text-sm text-white/70 max-w-2xl mx-auto mb-3 leading-relaxed">
+            Two entries, side by side. Pick the one you prefer — then do it
+            again. Every choice is a head-to-head match, not a tally.
+          </p>
+          <p className="font-mono text-sm text-white/60 max-w-2xl mx-auto mb-3 leading-relaxed">
+            Each vote feeds a ranking algorithm (Elo, the system used to rank
+            chess players) that tracks <em>which</em> entries beat <em>which</em>,
+            not just how many votes they got. Beat a strong piece, gain more
+            points. Lose to a weak one, drop more. The more matchups, the
+            sharper the ranking.
+          </p>
+          <p className="font-mono text-sm text-white/60 max-w-2xl mx-auto mb-3 leading-relaxed">
+            The top-ranked work wins the Community Pick and is minted into the
+            Tech Epochalypse dossier.
           </p>
           <p className="font-mono text-sm text-white/50 max-w-xl mx-auto mb-2">
             Use ← / → keys.
@@ -163,6 +184,33 @@ export default function VsPage() {
                   {img.title && (
                     <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent text-left">
                       <p className="font-mono text-xs text-white/90">{img.title}</p>
+                    </div>
+                  )}
+
+                  {/* Flavor stamp — typewriter-style badge punches onto the
+                      winning thumbnail right after the vote registers. Pure
+                      decoration: no links, no interactions. Fades + scales
+                      in via CSS transition. */}
+                  {isWinner && badge && (
+                    <div
+                      className={[
+                        'absolute inset-0 flex items-center justify-center pointer-events-none',
+                        'transition-all duration-200 ease-out',
+                        badgeVisible
+                          ? 'opacity-100 scale-100 -rotate-3'
+                          : 'opacity-0 scale-50 rotate-12',
+                      ].join(' ')}
+                    >
+                      <div className="bg-black/85 border-2 border-white px-5 py-3 font-mono uppercase text-white text-center shadow-lg">
+                        <div className="text-base md:text-xl tracking-[0.25em] leading-none">
+                          {badge.label}
+                        </div>
+                        {badge.detail && (
+                          <div className="text-xs md:text-sm tracking-[0.2em] text-white/70 mt-1.5">
+                            {badge.detail}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </button>
