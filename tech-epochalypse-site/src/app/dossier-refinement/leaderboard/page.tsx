@@ -7,6 +7,13 @@ const WORKER_URL =
   process.env.NEXT_PUBLIC_GALLERY_WORKER_URL ||
   'https://te-gallery-api.coldieart.workers.dev'
 
+// Client-side gate only. The worker /vs/leaderboard endpoint itself stays
+// public (the data is decorative), but the page is hidden behind a shared
+// password so the standings stay private until launch. Persisted in
+// sessionStorage so a tab refresh doesn't re-prompt.
+const LEADERBOARD_PASSWORD = 'iknowsomeday'
+const STORAGE_KEY = 'dossierLeaderboardUnlocked'
+
 type Item = {
   id: string
   overlord: string
@@ -20,12 +27,34 @@ const overlordOptions = (overlords as Array<{ slug: string; name: string; status
   .filter((o) => o.status !== 'unlisted')
 
 export default function VsLeaderboardPage() {
+  const [unlocked, setUnlocked] = useState(false)
+  const [pw, setPw] = useState('')
+  const [pwError, setPwError] = useState<string | null>(null)
   const [overlord, setOverlord] = useState<string>('all')
   const [items, setItems] = useState<Item[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
 
+  // Restore unlock state on mount.
   useEffect(() => {
+    if (typeof window !== 'undefined' && sessionStorage.getItem(STORAGE_KEY) === '1') {
+      setUnlocked(true)
+    }
+  }, [])
+
+  function tryUnlock(e: React.FormEvent) {
+    e.preventDefault()
+    if (pw === LEADERBOARD_PASSWORD) {
+      sessionStorage.setItem(STORAGE_KEY, '1')
+      setUnlocked(true)
+      setPwError(null)
+    } else {
+      setPwError('Incorrect password.')
+    }
+  }
+
+  useEffect(() => {
+    if (!unlocked) return
     let cancelled = false
     setLoading(true)
     fetch(`${WORKER_URL}/vs/leaderboard?overlord=${encodeURIComponent(overlord)}`, {
@@ -41,7 +70,37 @@ export default function VsLeaderboardPage() {
     return () => {
       cancelled = true
     }
-  }, [overlord])
+  }, [overlord, unlocked])
+
+  if (!unlocked) {
+    return (
+      <section className="pt-32 pb-24 section-padding bg-black min-h-screen">
+        <div className="max-w-md mx-auto text-center">
+          <p className="font-mono text-xs uppercase tracking-[0.4em] text-white mb-3">Restricted</p>
+          <h1 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-wider">
+            Leaderboard
+          </h1>
+          <p className="font-mono text-sm text-white/60 mb-6">
+            Standings are private until launch. Enter the access code to view.
+          </p>
+          <form onSubmit={tryUnlock}>
+            <input
+              type="password"
+              value={pw}
+              onChange={(e) => setPw(e.target.value)}
+              placeholder="Access code"
+              autoFocus
+              className="w-full bg-black border border-white/30 text-white px-3 py-2 font-mono text-sm mb-4"
+            />
+            <button type="submit" className="btn-primary w-full" disabled={!pw}>
+              <span>Unlock</span>
+            </button>
+          </form>
+          {pwError && <p className="mt-4 font-mono text-xs text-red-400">{pwError}</p>}
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="pt-28 md:pt-36 pb-24 section-padding bg-black min-h-screen">
