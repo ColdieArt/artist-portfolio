@@ -145,7 +145,7 @@ export default function HomePage() {
                   <span className="relative inline-flex rounded-full h-full w-full" style={{ background: '#ff5a66' }} />
                 </span>
                 <span className="font-mono text-lg sm:text-2xl md:text-3xl lg:text-4xl uppercase tracking-[0.18em] md:tracking-[0.25em] font-bold leading-none" style={{ color: '#ff5a66' }}>
-                  Now Live <span className="opacity-70">—</span> Voting Coming Soon
+                  Now Live <span className="opacity-70">—</span> Voting Soon
                 </span>
               </div>
 
