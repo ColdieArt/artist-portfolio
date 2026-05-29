@@ -826,25 +826,23 @@ async function handleVsVote(request: Request, env: Env): Promise<Response> {
     const isTopContender = afterRank <= 5;
     const isClimber = afterRank < beforeRank;
 
-    // Priority cascade — exactly one badge per vote. Pure flavor.
-    let badge: { kind: string; label: string; detail?: string };
+    // Priority cascade — exactly one badge per vote. Pure flavor, label only.
+    let badge: { kind: string; label: string };
     if (isUpset) {
-      badge = { kind: 'upset', label: 'UPSET', detail: `+${eloDelta}` };
+      badge = { kind: 'upset', label: 'UPSET' };
     } else if (isStreak) {
-      badge = { kind: 'streak', label: 'STREAK ×3', detail: `+${eloDelta}` };
+      badge = { kind: 'streak', label: 'STREAK' };
     } else if (isTopContender) {
-      badge = { kind: 'top', label: 'TOP CONTENDER', detail: `#${afterRank}` };
+      badge = { kind: 'top', label: 'TOP CONTENDER' };
     } else if (isClimber) {
-      badge = {
-        kind: 'climber',
-        label: 'CLIMBER',
-        detail: `#${beforeRank} → #${afterRank}`,
-      };
+      badge = { kind: 'climber', label: 'CLIMBER' };
     } else if (isTightCall) {
-      badge = { kind: 'tight', label: 'TIGHT CALL', detail: `+${eloDelta}` };
+      badge = { kind: 'tight', label: 'TIGHT CALL' };
     } else {
-      badge = { kind: 'delta', label: `+${eloDelta}` };
+      badge = { kind: 'delta', label: 'VOTE LOCKED' };
     }
+    // Variables are still computed above for telemetry / future use.
+    void eloDelta; void beforeRank; void afterRank;
 
     return json({
       ok: true,

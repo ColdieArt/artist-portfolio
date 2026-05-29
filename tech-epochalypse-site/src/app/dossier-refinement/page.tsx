@@ -22,7 +22,7 @@ type Pair = { left: Img; right: Img; overlord: string }
 // worker call signature still works.
 const overlord = 'all'
 
-type Badge = { kind: string; label: string; detail?: string }
+type Badge = { kind: string; label: string }
 
 export default function VsPage() {
   const [pair, setPair] = useState<Pair | null>(null)
@@ -205,11 +205,6 @@ export default function VsPage() {
                         <div className="text-base md:text-xl tracking-[0.25em] leading-none">
                           {badge.label}
                         </div>
-                        {badge.detail && (
-                          <div className="text-xs md:text-sm tracking-[0.2em] text-white/70 mt-1.5">
-                            {badge.detail}
-                          </div>
-                        )}
                       </div>
                     </div>
                   )}
