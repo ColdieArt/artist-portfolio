@@ -32,7 +32,7 @@ interface Entry {
 }
 
 export default function SubjEntriesGallery({
-  category = 'general submission',
+  category,
 }: {
   category?: string
 }) {
@@ -44,7 +44,10 @@ export default function SubjEntriesGallery({
     let cancelled = false
     async function load() {
       try {
-        const qs = `?category=${encodeURIComponent(category)}`
+        // No category filter by default — SUBJ:01 is the only active event,
+        // so every approved record is a SUBJ:01 entry. Pass `category` only
+        // when filtering for a specific competition.
+        const qs = category ? `?category=${encodeURIComponent(category)}` : ''
         const res = await fetch(`/api/airtable-records${qs}`, { cache: 'no-store' })
         if (!res.ok) throw new Error('fetch failed')
         const data = await res.json()
@@ -79,7 +82,12 @@ export default function SubjEntriesGallery({
       </div>
     )
   }
-  if (error || entries.length === 0) {
+  if (error) {
+    // Surface failure in dev console; render nothing on page.
+    if (typeof window !== 'undefined') console.warn('SubjEntriesGallery: failed to load entries')
+    return null
+  }
+  if (entries.length === 0) {
     return null
   }
 
