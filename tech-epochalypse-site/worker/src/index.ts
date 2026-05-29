@@ -657,12 +657,18 @@ function isAdmin(request: Request, env: Env): boolean {
 }
 
 // GET /vs/pair?overlord=slug|all
-// Strategy: weight toward (1) images with fewest votes, (2) close Elo opponents.
+// Strategy: every approved image is reachable in every query.
+//   - Pull the FULL approved pool (no LIMIT cap that would exclude high-vote
+//     entries — that was causing some images to "disappear" after the field
+//     got uneven).
+//   - Pick A from the lowest-vote tier (front 33% of the sorted pool) so
+//     under-served images get prioritized.
+//   - Pick B uniformly at random from the rest of the pool. No Elo-proximity
+//     bias, so every other image has an equal shot at being the opponent.
 async function handleVsPair(request: Request, env: Env): Promise<Response> {
   try {
     const overlord = new URL(request.url).searchParams.get('overlord') || 'all';
 
-    // Pull a candidate pool ordered by fewest votes first, then random within tier.
     const where = overlord === 'all' ? '' : 'AND overlord = ?2';
     const params: unknown[] = ['approved'];
     if (overlord !== 'all') params.push(overlord);
@@ -671,8 +677,7 @@ async function handleVsPair(request: Request, env: Env): Promise<Response> {
       `SELECT id, overlord, title, image_url, elo, votes, wins, losses, status, created_at
        FROM images
        WHERE status = ?1 ${where}
-       ORDER BY votes ASC, RANDOM()
-       LIMIT 40`
+       ORDER BY votes ASC, RANDOM()`
     )
       .bind(...params)
       .all<ImageRow>();
@@ -682,23 +687,17 @@ async function handleVsPair(request: Request, env: Env): Promise<Response> {
       return json({ error: 'Not enough approved images for this filter', count: rows.length }, 404);
     }
 
-    // Pick image A from the front of the list (low-vote bias), then pick B as
-    // the closest-Elo opponent from the remainder.
-    const aIdx = Math.floor(Math.random() * Math.min(8, rows.length));
+    // Image A: lowest-vote tier. Use the front 1/3 of the sorted pool so even
+    // when one image has lagged in exposure, it gets surfaced — but with
+    // enough breadth that we don't always show the same handful.
+    const tierSize = Math.max(2, Math.ceil(rows.length / 3));
+    const aIdx = Math.floor(Math.random() * tierSize);
     const a = rows[aIdx];
-    let b: ImageRow | null = null;
-    let bestDelta = Infinity;
-    for (let i = 0; i < rows.length; i++) {
-      if (i === aIdx) continue;
-      const delta = Math.abs(rows[i].elo - a.elo);
-      // Add a small random jitter so we don't always pick the same neighbor.
-      const jittered = delta + Math.random() * 30;
-      if (jittered < bestDelta) {
-        bestDelta = jittered;
-        b = rows[i];
-      }
-    }
-    if (!b) return json({ error: 'Could not select opponent' }, 500);
+
+    // Image B: uniformly random from the remaining pool.
+    let bIdx = Math.floor(Math.random() * (rows.length - 1));
+    if (bIdx >= aIdx) bIdx++; // skip A's slot without bias
+    const b = rows[bIdx];
 
     // Shuffle which one is on the left.
     const [left, right] = Math.random() < 0.5 ? [a, b] : [b, a];
