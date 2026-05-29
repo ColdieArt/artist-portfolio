@@ -12,6 +12,10 @@ const UserExports = dynamic(() => import('@/components/UserExports'), {
     </div>
   ),
 })
+const SubjEntriesGallery = dynamic(() => import('@/components/SubjEntriesGallery'), {
+  ssr: false,
+  loading: () => null,
+})
 
 // ⚠️ SHOW_SUBMISSIONS_GALLERY = false while the submission window is open.
 // When false:
@@ -302,6 +306,12 @@ export default function SubjPage({ params }: { params: { id: string } }) {
           </div>
         </div>
       </section>
+
+      {/* ── Live entries wall (read-only) ──
+          Mirrors the homepage gallery: simple thumbnail grid of every
+          approved Airtable record. Shown during the submission window so
+          visitors can see what's been entered. Hides itself if zero entries. */}
+      <SubjEntriesGallery />
 
       {/* ── Submissions Gallery + Voting ──
           NOTE: while SHOW_SUBMISSIONS_GALLERY is false (during the
