@@ -84,6 +84,9 @@ export default {
     if (request.method === 'GET' && path === '/vs/admin/pending') {
       return handleVsPending(request, env);
     }
+    if (request.method === 'GET' && path === '/vs/admin/list') {
+      return handleVsAdminList(request, env);
+    }
     if (request.method === 'POST' && path === '/vs/admin/decide') {
       return handleVsDecide(request, env);
     }
@@ -896,7 +899,7 @@ async function handleVsLeaderboard(request: Request, env: Env): Promise<Response
   }
 }
 
-// GET /vs/admin/pending — admin only
+// GET /vs/admin/pending — admin only (kept for backwards compatibility)
 async function handleVsPending(request: Request, env: Env): Promise<Response> {
   if (!isAdmin(request, env)) return json({ error: 'Unauthorized' }, 401);
   try {
@@ -910,6 +913,46 @@ async function handleVsPending(request: Request, env: Env): Promise<Response> {
     return json({ items: (res.results || []).map(stripImage) });
   } catch (e) {
     return json({ error: 'Failed to load pending' }, 500);
+  }
+}
+
+// GET /vs/admin/list?status=approved|pending|rejected — admin only.
+// Returns items for the requested status plus the count breakdown across
+// all three statuses (so the UI can show tab counters in one round-trip).
+async function handleVsAdminList(request: Request, env: Env): Promise<Response> {
+  if (!isAdmin(request, env)) return json({ error: 'Unauthorized' }, 401);
+  const status = (new URL(request.url).searchParams.get('status') || 'pending').toLowerCase();
+  if (!['approved', 'pending', 'rejected'].includes(status)) {
+    return json({ error: 'Invalid status' }, 400);
+  }
+  try {
+    const itemsRes = await env.VS_DB.prepare(
+      `SELECT id, overlord, title, image_url, elo, votes, wins, losses, status, created_at
+       FROM images
+       WHERE status = ?1
+       ORDER BY created_at DESC
+       LIMIT 500`
+    )
+      .bind(status)
+      .all<ImageRow>();
+
+    const countsRes = await env.VS_DB.prepare(
+      `SELECT status, COUNT(*) AS c FROM images GROUP BY status`
+    ).all<{ status: string; c: number }>();
+
+    const counts: Record<string, number> = { approved: 0, pending: 0, rejected: 0 };
+    for (const row of countsRes.results || []) {
+      counts[row.status] = row.c;
+    }
+
+    return json({
+      status,
+      items: (itemsRes.results || []).map(stripImage),
+      counts,
+    });
+  } catch (e) {
+    console.error('vs/admin/list error:', e);
+    return json({ error: 'Failed to load list' }, 500);
   }
 }
 
@@ -1039,10 +1082,18 @@ async function handleVsAirtableImport(request: Request, env: Env): Promise<Respo
       offset = data.offset;
     } while (offset);
 
-    // 2. Upsert each into D1.
+    // 2. Migrate each image to R2 (once) + upsert D1 row.
+    //    Strategy: pick the best-available Airtable URL (raw > full thumb >
+    //    large > small), download it, store in R2 under a deterministic key
+    //    so re-runs are idempotent. The D1 image_url field then holds the
+    //    permanent worker-served R2 URL instead of an expiring Airtable URL.
+    const workerOrigin = new URL(request.url).origin;
     let inserted = 0;
     let updated = 0;
+    let migrated = 0; // newly copied into R2 this run
     let skipped = 0;
+    const failures: { id: string; reason: string }[] = [];
+
     for (const r of records) {
       const overlord = r.fields?.Overlord || 'unknown';
       const title = r.fields?.Title || '';
@@ -1051,23 +1102,60 @@ async function handleVsAirtableImport(request: Request, env: Env): Promise<Respo
         skipped++;
         continue;
       }
-      const thumbUrl =
+
+      // Prefer the raw original; fall back through thumbnail sizes for
+      // records where only thumbnails are reliably available.
+      const sourceUrl =
+        image.url ||
+        image.thumbnails?.full?.url ||
         image.thumbnails?.large?.url ||
-        image.thumbnails?.small?.url ||
-        image.url;
-      if (!thumbUrl) {
+        image.thumbnails?.small?.url;
+      if (!sourceUrl) {
         skipped++;
         continue;
       }
-      const existing = await env.VS_DB.prepare('SELECT id FROM images WHERE id = ?1')
+
+      // Determine R2 key + check existing row.
+      const r2Key = `data-refinement/${r.id}.jpg`;
+      const r2Url = `${workerOrigin}/image/${r2Key}`;
+
+      const existing = await env.VS_DB.prepare(
+        'SELECT id, image_url FROM images WHERE id = ?1'
+      )
         .bind(r.id)
-        .first();
+        .first<{ id: string; image_url: string }>();
+
+      // Migrate the bytes into R2 unless the object is already there.
+      const alreadyInR2 = await env.GALLERY_BUCKET.head(r2Key);
+      if (!alreadyInR2) {
+        try {
+          const imgRes = await fetch(sourceUrl);
+          if (!imgRes.ok) throw new Error(`source HTTP ${imgRes.status}`);
+          const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
+          const bytes = await imgRes.arrayBuffer();
+          await env.GALLERY_BUCKET.put(r2Key, bytes, {
+            httpMetadata: { contentType },
+            customMetadata: {
+              source: 'airtable',
+              recordId: r.id,
+              overlord,
+              migratedAt: new Date().toISOString(),
+            },
+          });
+          migrated++;
+        } catch (err) {
+          failures.push({ id: r.id, reason: (err as Error).message });
+          skipped++;
+          continue;
+        }
+      }
+
       if (existing) {
         await env.VS_DB.prepare(
           `UPDATE images SET image_url = ?1, overlord = ?2, title = ?3, status = 'approved'
            WHERE id = ?4`
         )
-          .bind(thumbUrl, overlord, title, r.id)
+          .bind(r2Url, overlord, title, r.id)
           .run();
         updated++;
       } else {
@@ -1076,7 +1164,7 @@ async function handleVsAirtableImport(request: Request, env: Env): Promise<Respo
           `INSERT INTO images (id, overlord, title, image_url, elo, votes, wins, losses, status, created_at)
            VALUES (?1, ?2, ?3, ?4, 1500, 0, 0, 0, 'approved', ?5)`
         )
-          .bind(r.id, overlord, title, thumbUrl, createdAt)
+          .bind(r.id, overlord, title, r2Url, createdAt)
           .run();
         inserted++;
       }
@@ -1087,8 +1175,12 @@ async function handleVsAirtableImport(request: Request, env: Env): Promise<Respo
       total: records.length,
       inserted,
       updated,
+      migrated,
       skipped,
-      note: 'Airtable image URLs are signed and expire after ~2 hours. Re-run this endpoint periodically to refresh the URLs in D1.',
+      failures,
+      note:
+        'Images now stored permanently in R2 under data-refinement/. ' +
+        'Re-running this endpoint only re-downloads images not already in R2.',
     });
   } catch (e) {
     console.error('airtable-import error:', e);
