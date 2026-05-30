@@ -141,6 +141,7 @@ export default function VsPage() {
           <div className="flex flex-wrap items-center justify-center gap-4 font-mono text-xs uppercase tracking-wider">
             <span className="text-white/40">
               Votes cast: {quota ? `${quota.used} / ${quota.limit}` : count}
+              <span className="text-white/30 normal-case ml-2">(max 25 votes per person)</span>
             </span>
             {/* Leaderboard link hidden during the submission window.
                 Flip the `false` to bring it back once results are public. */}
