@@ -198,71 +198,24 @@
       border-color: #aaa;
     }
 
-    /* ─── PREVIEW PRINT BUTTON (bottom-right, mirror of PRINT) ─── */
-    #preview-print-btn {
-      position: fixed;
-      bottom: 16px;
-      right: 16px;
-      z-index: 250;
-      background: #000;
-      color: #ffb84d;
-      border: 1px solid #ffb84d;
-      padding: 10px 18px;
-      font-family: monospace;
-      font-size: 11px;
-      font-weight: bold;
-      letter-spacing: 2px;
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: background 0.2s;
-    }
-    #preview-print-btn:hover { background: #1a1410; }
-    #preview-print-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    #preview-print-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.96);
-      z-index: 9000;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-    }
-    #preview-print-overlay.open { display: flex; }
-    #preview-print-overlay .ppo-header {
-      color: #ffb84d;
-      font-family: monospace;
-      font-size: 12px;
-      letter-spacing: 2px;
-      margin-bottom: 10px;
-      text-align: center;
-    }
-    #preview-print-overlay .ppo-img {
+    /* ─── PRINT-FORM PREVIEW THUMB (shown above the name/email inputs) ─── */
+    #print-form-thumb {
+      display: block;
       max-width: 100%;
-      max-height: calc(100% - 110px);
+      max-height: 280px;
+      margin: 0 auto 16px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: #000;
       object-fit: contain;
-      border: 1px solid rgba(255,255,255,0.2);
     }
-    #preview-print-overlay .ppo-meta {
-      color: #777;
+    #print-form-thumb-label {
       font-family: monospace;
       font-size: 10px;
-      margin-top: 8px;
+      color: #888;
+      letter-spacing: 1px;
+      text-align: center;
+      margin-bottom: 6px;
     }
-    #preview-print-overlay .ppo-close {
-      margin-top: 12px;
-      background: #fff;
-      color: #000;
-      border: none;
-      padding: 10px 28px;
-      font-family: monospace;
-      font-size: 12px;
-      font-weight: bold;
-      letter-spacing: 2px;
-      cursor: pointer;
-    }
-    #preview-print-overlay .ppo-close:hover { background: #ddd; }
 
     /* ─── RESET BUTTON (bottom-left, above PRINT) ─── */
     #reset-btn {
@@ -4968,13 +4921,6 @@ setTimeout(function () {
 
   <!-- ─── PRINT BUTTON (bottom-left) ─── -->
   <button id="print-btn">PRINT</button>
-  <button id="preview-print-btn" title="Render the print at full resolution and show it on screen, without uploading">PREVIEW PRINT</button>
-  <div id="preview-print-overlay">
-    <div class="ppo-header">PRINT PREVIEW — what would be saved (no upload)</div>
-    <img id="preview-print-img" class="ppo-img" alt="Print preview" />
-    <div class="ppo-meta" id="preview-print-meta"></div>
-    <button class="ppo-close" id="preview-print-close">CLOSE</button>
-  </div>
 
   <!-- ─── PRINT ORDER MODAL ─── -->
   <div id="print-modal-overlay">
@@ -4982,6 +4928,8 @@ setTimeout(function () {
       <div id="print-form">
         <h2>Print Your 3D Kinetic Collage</h2>
         <p>Enter your name to register your custom layout. Save your print number — staff will use it to verify your name when you pick up your signed art print on opening night.</p>
+        <div id="print-form-thumb-label">YOUR PRINT — exactly what will be saved</div>
+        <img id="print-form-thumb" alt="Your composition preview" />
         <div id="print-fields">
           <input id="print-name-input" class="print-input active" type="text" readonly placeholder="Customer Name" autocomplete="off" />
           <input id="print-email-input-2" class="print-input" type="text" readonly placeholder="Email Address" autocomplete="off" />
@@ -5260,16 +5208,140 @@ setTimeout(function () {
       printContent.classList.add('success-view');
     }
 
+    // ── Print capture cache ──────────────────────────────────────────────
+    // The full-res JPEG is captured the moment the PRINT modal opens (so we
+    // freeze the exact frame the visitor saw), kept in memory while they fill
+    // the form, then either uploaded on SUBMIT or dropped when they cancel.
+    const printFormThumb = document.getElementById('print-form-thumb');
+    let captureCache = null; // { imageBlob, fullDataUrl, thumbDataUrl, meshStates, capturedAt }
+
+    function clearCaptureCache() {
+      captureCache = null;
+      if (printFormThumb) {
+        printFormThumb.removeAttribute('src');
+        printFormThumb.alt = 'Your composition preview';
+      }
+    }
+
+    async function captureForPrint() {
+      const PRINT_W = 1712;
+      const PRINT_H = 2444;
+      const r = await waitForRenderer();
+
+      const origW = r.domElement.width;
+      const origH = r.domElement.height;
+      const origAspect = window.camera ? window.camera.aspect : 1;
+
+      r.setSize(PRINT_W, PRINT_H);
+      if (window.camera) {
+        window.camera.aspect = PRINT_W / PRINT_H;
+        window.camera.updateProjectionMatrix();
+      }
+      if (window.composer) {
+        window.composer.setSize(PRINT_W, PRINT_H);
+        window.composer.render();
+      } else if (window.scene && window.camera) {
+        r.render(window.scene, window.camera);
+      }
+
+      // Progressive JPEG compression — heavy effect stacks (BIO-CODER, OG, etc.)
+      // can push the JPEG past Vercel's 4.5MB body limit and trigger HTTP 413.
+      const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+      const QUALITY_STEPS = [0.78, 0.65, 0.55, 0.45, 0.35];
+      let fullDataUrl, imageBlob;
+      for (let i = 0; i < QUALITY_STEPS.length; i++) {
+        fullDataUrl = r.domElement.toDataURL('image/jpeg', QUALITY_STEPS[i]);
+        imageBlob = await (await fetch(fullDataUrl)).blob();
+        if (imageBlob.size <= MAX_UPLOAD_BYTES) break;
+        console.warn('[print] q=' + QUALITY_STEPS[i] + ' → ' + (imageBlob.size/1048576).toFixed(2) + 'MB');
+      }
+      if (imageBlob.size > MAX_UPLOAD_BYTES) {
+        const downCanvas = document.createElement('canvas');
+        downCanvas.width = Math.round(PRINT_W * 0.75);
+        downCanvas.height = Math.round(PRINT_H * 0.75);
+        const dctx = downCanvas.getContext('2d');
+        const sourceImg = new Image();
+        sourceImg.src = fullDataUrl;
+        await new Promise((res) => { sourceImg.onload = res; });
+        dctx.drawImage(sourceImg, 0, 0, downCanvas.width, downCanvas.height);
+        fullDataUrl = downCanvas.toDataURL('image/jpeg', 0.55);
+        imageBlob = await (await fetch(fullDataUrl)).blob();
+      }
+
+      // Generate 600px-wide thumbnail for the form preview AND the success view
+      const thumbCanvas = document.createElement('canvas');
+      const thumbW = 600;
+      const thumbH = Math.round(PRINT_H * (thumbW / PRINT_W));
+      thumbCanvas.width = thumbW;
+      thumbCanvas.height = thumbH;
+      const tctx = thumbCanvas.getContext('2d');
+      const sourceImg = new Image();
+      sourceImg.src = fullDataUrl;
+      await new Promise((res) => { sourceImg.onload = res; });
+      tctx.drawImage(sourceImg, 0, 0, thumbW, thumbH);
+      const thumbDataUrl = thumbCanvas.toDataURL('image/jpeg', 0.85);
+
+      // Restore live size
+      r.setSize(origW, origH);
+      if (window.camera) {
+        window.camera.aspect = origAspect;
+        window.camera.updateProjectionMatrix();
+      }
+      if (window.composer) window.composer.setSize(origW, origH);
+
+      // Snapshot mesh state at capture time (same instant as the frame)
+      const meshStates = [];
+      if (window.scene) {
+        window.scene.children.forEach(child => {
+          if (child.userData && child.userData.id) {
+            meshStates.push({
+              id: child.userData.id,
+              position: { x: child.position.x, y: child.position.y, z: child.position.z },
+              rotation: { x: child.rotation.x, y: child.rotation.y, z: child.rotation.z },
+              scale: { x: child.scale.x, y: child.scale.y, z: child.scale.z },
+              visible: child.visible,
+              userScale: child.userData.userScale || 1.0,
+            });
+          }
+        });
+      }
+
+      return { imageBlob, fullDataUrl, thumbDataUrl, meshStates, capturedAt: new Date() };
+    }
+
     if (printBtn && printOverlay && !isEmbedded) {
-      printBtn.onclick = (e) => {
+      printBtn.onclick = async (e) => {
         e.stopPropagation();
         printOverlay.classList.add('open');
         showFormView();
+        // Capture the full-res print immediately so what they see in the preview
+        // is exactly what would be saved (effects, marquee positions, etc).
+        if (printFormThumb) {
+          printFormThumb.removeAttribute('src');
+          printFormThumb.alt = 'Capturing your print…';
+        }
+        printSubmitBtn.disabled = true;
+        printStatus.style.color = '#aaa';
+        printStatus.textContent = 'PREPARING PREVIEW…';
+        try {
+          captureCache = await captureForPrint();
+          if (printFormThumb) printFormThumb.src = captureCache.thumbDataUrl;
+          printSubmitBtn.disabled = false;
+          printStatus.textContent = '';
+        } catch (err) {
+          console.error('Capture failed:', err);
+          captureCache = null;
+          if (printFormThumb) printFormThumb.alt = 'Could not capture — try again';
+          printStatus.style.color = '#e66';
+          printStatus.textContent = 'Could not prepare print — please retry';
+        }
       };
 
       printOverlay.onclick = (e) => {
         if (e.target === printOverlay) {
           printOverlay.classList.remove('open');
+          // User exited without submitting → drop the cached full-res JPEG
+          clearCaptureCache();
           showFormView();
         }
       };
@@ -5277,6 +5349,7 @@ setTimeout(function () {
       if (printCloseBtn) {
         printCloseBtn.onclick = () => {
           printOverlay.classList.remove('open');
+          clearCaptureCache();
           showFormView();
           // Reset artwork to original positions + re-randomize face for next visitor
           try { if (typeof resetPiecesToOriginalPositions === 'function') resetPiecesToOriginalPositions(); }
@@ -5299,94 +5372,19 @@ setTimeout(function () {
           setActiveInput(printEmailInput2);
           return;
         }
+        if (!captureCache) {
+          printStatus.style.color = '#e66';
+          printStatus.textContent = 'Print not ready — close and reopen';
+          return;
+        }
 
         printSubmitBtn.disabled = true;
         printStatus.style.color = '#aaa';
-        printStatus.textContent = 'CAPTURING...';
+        printStatus.textContent = 'UPLOADING…';
 
         try {
-          const PRINT_W = 1712;
-          const PRINT_H = 2444;
-          const r = await waitForRenderer();
-
-          const origW = r.domElement.width;
-          const origH = r.domElement.height;
-          const origAspect = window.camera ? window.camera.aspect : 1;
-
-          r.setSize(PRINT_W, PRINT_H);
-          if (window.camera) {
-            window.camera.aspect = PRINT_W / PRINT_H;
-            window.camera.updateProjectionMatrix();
-          }
-          if (window.composer) {
-            window.composer.setSize(PRINT_W, PRINT_H);
-            window.composer.render();
-          } else if (window.scene && window.camera) {
-            r.render(window.scene, window.camera);
-          }
-
-          // Progressive JPEG compression — heavy effect stacks (BIO-CODER, OG, etc.)
-          // can push the JPEG past Vercel's 4.5MB body limit and trigger HTTP 413.
-          const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
-          const QUALITY_STEPS = [0.78, 0.65, 0.55, 0.45, 0.35];
-          let fullDataUrl, imageBlob;
-          for (let i = 0; i < QUALITY_STEPS.length; i++) {
-            fullDataUrl = r.domElement.toDataURL('image/jpeg', QUALITY_STEPS[i]);
-            imageBlob = await (await fetch(fullDataUrl)).blob();
-            if (imageBlob.size <= MAX_UPLOAD_BYTES) break;
-            console.warn('[print] q=' + QUALITY_STEPS[i] + ' → ' + (imageBlob.size/1048576).toFixed(2) + 'MB');
-          }
-          if (imageBlob.size > MAX_UPLOAD_BYTES) {
-            const downCanvas = document.createElement('canvas');
-            downCanvas.width = Math.round(PRINT_W * 0.75);
-            downCanvas.height = Math.round(PRINT_H * 0.75);
-            const dctx = downCanvas.getContext('2d');
-            const sourceImg = new Image();
-            sourceImg.src = fullDataUrl;
-            await new Promise((res) => { sourceImg.onload = res; });
-            dctx.drawImage(sourceImg, 0, 0, downCanvas.width, downCanvas.height);
-            fullDataUrl = downCanvas.toDataURL('image/jpeg', 0.55);
-            imageBlob = await (await fetch(fullDataUrl)).blob();
-          }
-
-          // Generate 600px-wide thumbnail for success view
-          const thumbCanvas = document.createElement('canvas');
-          const thumbW = 600;
-          const thumbH = Math.round(PRINT_H * (thumbW / PRINT_W));
-          thumbCanvas.width = thumbW;
-          thumbCanvas.height = thumbH;
-          const tctx = thumbCanvas.getContext('2d');
-          const sourceImg = new Image();
-          sourceImg.src = fullDataUrl;
-          await new Promise((res) => { sourceImg.onload = res; });
-          tctx.drawImage(sourceImg, 0, 0, thumbW, thumbH);
-          const thumbDataUrl = thumbCanvas.toDataURL('image/jpeg', 0.85);
-
-          r.setSize(origW, origH);
-          if (window.camera) {
-            window.camera.aspect = origAspect;
-            window.camera.updateProjectionMatrix();
-          }
-          if (window.composer) {
-            window.composer.setSize(origW, origH);
-          }
-
-          const meshStates = [];
-          if (window.scene) {
-            window.scene.children.forEach(child => {
-              if (child.userData && child.userData.id) {
-                meshStates.push({
-                  id: child.userData.id,
-                  position: { x: child.position.x, y: child.position.y, z: child.position.z },
-                  rotation: { x: child.rotation.x, y: child.rotation.y, z: child.rotation.z },
-                  scale: { x: child.scale.x, y: child.scale.y, z: child.scale.z },
-                  visible: child.visible,
-                  userScale: child.userData.userScale || 1.0,
-                });
-              }
-            });
-          }
-          const compositionJson = JSON.stringify({ meshes: meshStates, timestamp: new Date().toISOString() });
+          const { imageBlob, thumbDataUrl, meshStates } = captureCache;
+          const compositionJson = JSON.stringify({ meshes: meshStates, timestamp: captureCache.capturedAt.toISOString() });
 
           // Local sequential number (used in filename + offline fallback)
           const localNum = nextLocalNumber();
@@ -6146,98 +6144,6 @@ setTimeout(function () {
     canvas.addEventListener('pointerleave', onUp, opts);
 
     if (window.console) console.log('[pinch-scale] ready — 2-finger uniform, 3-finger axis-lock');
-  });
-})();
-</script>
-<script>
-/**
- * PREVIEW PRINT — captures the scene at full print resolution (1712×2444)
- * using the SAME render path as the actual PRINT button (composer + camera
- * aspect set to print proportions, single composer.render() call), then
- * shows the resulting JPEG in a full-screen overlay without uploading.
- *
- * Lets you audit which effects render correctly at print resolution vs the
- * live viewport — marquees, glitch, feedback buffers, etc. Toggle an effect,
- * tap PREVIEW PRINT, inspect, close, repeat.
- */
-(function() {
-  function whenReady(cb) {
-    if (window.renderer && document.getElementById('preview-print-btn')) cb();
-    else setTimeout(() => whenReady(cb), 100);
-  }
-  whenReady(() => {
-    const btn = document.getElementById('preview-print-btn');
-    const overlay = document.getElementById('preview-print-overlay');
-    const img = document.getElementById('preview-print-img');
-    const meta = document.getElementById('preview-print-meta');
-    const closeBtn = document.getElementById('preview-print-close');
-
-    async function capturePrintFrame() {
-      const r = window.renderer;
-      const PRINT_W = 1712;
-      const PRINT_H = 2444;
-      const origW = r.domElement.width;
-      const origH = r.domElement.height;
-      const origAspect = window.camera ? window.camera.aspect : 1;
-
-      r.setSize(PRINT_W, PRINT_H);
-      if (window.camera) {
-        window.camera.aspect = PRINT_W / PRINT_H;
-        window.camera.updateProjectionMatrix();
-      }
-      if (window.composer) {
-        window.composer.setSize(PRINT_W, PRINT_H);
-        window.composer.render();
-      } else if (window.scene && window.camera) {
-        r.render(window.scene, window.camera);
-      }
-      const dataUrl = r.domElement.toDataURL('image/jpeg', 0.78);
-
-      // Restore live size
-      r.setSize(origW, origH);
-      if (window.camera) {
-        window.camera.aspect = origAspect;
-        window.camera.updateProjectionMatrix();
-      }
-      if (window.composer) window.composer.setSize(origW, origH);
-      return { dataUrl, w: PRINT_W, h: PRINT_H };
-    }
-
-    btn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      btn.disabled = true;
-      btn.textContent = 'CAPTURING…';
-      try {
-        const { dataUrl, w, h } = await capturePrintFrame();
-        img.src = dataUrl;
-        // base64 char count → bytes is *3/4 minus padding
-        const bytes = Math.floor((dataUrl.length - 'data:image/jpeg;base64,'.length) * 3 / 4);
-        const kb = (bytes / 1024).toFixed(0);
-        const mb = (bytes / 1048576).toFixed(2);
-        meta.textContent = w + ' × ' + h + ' · ' + (bytes < 1048576 ? (kb + ' KB') : (mb + ' MB')) + ' · JPEG q=0.78';
-        overlay.classList.add('open');
-      } catch (err) {
-        console.error('[preview-print] capture error:', err);
-        meta.textContent = 'ERROR: ' + (err.message || 'capture failed');
-        overlay.classList.add('open');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'PREVIEW PRINT';
-      }
-    });
-
-    closeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      overlay.classList.remove('open');
-      img.src = '';
-    });
-    // Tap the overlay backdrop to dismiss
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) {
-        overlay.classList.remove('open');
-        img.src = '';
-      }
-    });
   });
 })();
 </script>
