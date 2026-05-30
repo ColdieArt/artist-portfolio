@@ -198,6 +198,72 @@
       border-color: #aaa;
     }
 
+    /* ─── PREVIEW PRINT BUTTON (bottom-right, mirror of PRINT) ─── */
+    #preview-print-btn {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      z-index: 250;
+      background: #000;
+      color: #ffb84d;
+      border: 1px solid #ffb84d;
+      padding: 10px 18px;
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: background 0.2s;
+    }
+    #preview-print-btn:hover { background: #1a1410; }
+    #preview-print-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    #preview-print-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.96);
+      z-index: 9000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+    #preview-print-overlay.open { display: flex; }
+    #preview-print-overlay .ppo-header {
+      color: #ffb84d;
+      font-family: monospace;
+      font-size: 12px;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    #preview-print-overlay .ppo-img {
+      max-width: 100%;
+      max-height: calc(100% - 110px);
+      object-fit: contain;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    #preview-print-overlay .ppo-meta {
+      color: #777;
+      font-family: monospace;
+      font-size: 10px;
+      margin-top: 8px;
+    }
+    #preview-print-overlay .ppo-close {
+      margin-top: 12px;
+      background: #fff;
+      color: #000;
+      border: none;
+      padding: 10px 28px;
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      cursor: pointer;
+    }
+    #preview-print-overlay .ppo-close:hover { background: #ddd; }
+
     /* ─── RESET BUTTON (bottom-left, above PRINT) ─── */
     #reset-btn {
       position: fixed;
@@ -4902,6 +4968,13 @@ setTimeout(function () {
 
   <!-- ─── PRINT BUTTON (bottom-left) ─── -->
   <button id="print-btn">PRINT</button>
+  <button id="preview-print-btn" title="Render the print at full resolution and show it on screen, without uploading">PREVIEW PRINT</button>
+  <div id="preview-print-overlay">
+    <div class="ppo-header">PRINT PREVIEW — what would be saved (no upload)</div>
+    <img id="preview-print-img" class="ppo-img" alt="Print preview" />
+    <div class="ppo-meta" id="preview-print-meta"></div>
+    <button class="ppo-close" id="preview-print-close">CLOSE</button>
+  </div>
 
   <!-- ─── PRINT ORDER MODAL ─── -->
   <div id="print-modal-overlay">
@@ -6073,6 +6146,98 @@ setTimeout(function () {
     canvas.addEventListener('pointerleave', onUp, opts);
 
     if (window.console) console.log('[pinch-scale] ready — 2-finger uniform, 3-finger axis-lock');
+  });
+})();
+</script>
+<script>
+/**
+ * PREVIEW PRINT — captures the scene at full print resolution (1712×2444)
+ * using the SAME render path as the actual PRINT button (composer + camera
+ * aspect set to print proportions, single composer.render() call), then
+ * shows the resulting JPEG in a full-screen overlay without uploading.
+ *
+ * Lets you audit which effects render correctly at print resolution vs the
+ * live viewport — marquees, glitch, feedback buffers, etc. Toggle an effect,
+ * tap PREVIEW PRINT, inspect, close, repeat.
+ */
+(function() {
+  function whenReady(cb) {
+    if (window.renderer && document.getElementById('preview-print-btn')) cb();
+    else setTimeout(() => whenReady(cb), 100);
+  }
+  whenReady(() => {
+    const btn = document.getElementById('preview-print-btn');
+    const overlay = document.getElementById('preview-print-overlay');
+    const img = document.getElementById('preview-print-img');
+    const meta = document.getElementById('preview-print-meta');
+    const closeBtn = document.getElementById('preview-print-close');
+
+    async function capturePrintFrame() {
+      const r = window.renderer;
+      const PRINT_W = 1712;
+      const PRINT_H = 2444;
+      const origW = r.domElement.width;
+      const origH = r.domElement.height;
+      const origAspect = window.camera ? window.camera.aspect : 1;
+
+      r.setSize(PRINT_W, PRINT_H);
+      if (window.camera) {
+        window.camera.aspect = PRINT_W / PRINT_H;
+        window.camera.updateProjectionMatrix();
+      }
+      if (window.composer) {
+        window.composer.setSize(PRINT_W, PRINT_H);
+        window.composer.render();
+      } else if (window.scene && window.camera) {
+        r.render(window.scene, window.camera);
+      }
+      const dataUrl = r.domElement.toDataURL('image/jpeg', 0.78);
+
+      // Restore live size
+      r.setSize(origW, origH);
+      if (window.camera) {
+        window.camera.aspect = origAspect;
+        window.camera.updateProjectionMatrix();
+      }
+      if (window.composer) window.composer.setSize(origW, origH);
+      return { dataUrl, w: PRINT_W, h: PRINT_H };
+    }
+
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      btn.disabled = true;
+      btn.textContent = 'CAPTURING…';
+      try {
+        const { dataUrl, w, h } = await capturePrintFrame();
+        img.src = dataUrl;
+        // base64 char count → bytes is *3/4 minus padding
+        const bytes = Math.floor((dataUrl.length - 'data:image/jpeg;base64,'.length) * 3 / 4);
+        const kb = (bytes / 1024).toFixed(0);
+        const mb = (bytes / 1048576).toFixed(2);
+        meta.textContent = w + ' × ' + h + ' · ' + (bytes < 1048576 ? (kb + ' KB') : (mb + ' MB')) + ' · JPEG q=0.78';
+        overlay.classList.add('open');
+      } catch (err) {
+        console.error('[preview-print] capture error:', err);
+        meta.textContent = 'ERROR: ' + (err.message || 'capture failed');
+        overlay.classList.add('open');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'PREVIEW PRINT';
+      }
+    });
+
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      overlay.classList.remove('open');
+      img.src = '';
+    });
+    // Tap the overlay backdrop to dismiss
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('open');
+        img.src = '';
+      }
+    });
   });
 })();
 </script>
