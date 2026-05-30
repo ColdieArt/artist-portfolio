@@ -662,47 +662,54 @@ function isAdmin(request: Request, env: Env): boolean {
 }
 
 // GET /vs/pair?overlord=slug|all
-// Strategy: every approved image is reachable in every query.
-//   - Pull the FULL approved pool (no LIMIT cap that would exclude high-vote
-//     entries — that was causing some images to "disappear" after the field
-//     got uneven).
-//   - Pick A from the lowest-vote tier (front 33% of the sorted pool) so
-//     under-served images get prioritized.
-//   - Pick B uniformly at random from the rest of the pool. No Elo-proximity
-//     bias, so every other image has an equal shot at being the opponent.
+// Strategy: every approved image gets exposure to every voter before any
+// image is shown twice.
+//   - Compute the voter hash from the request.
+//   - Sort the approved pool by (a) how many times THIS voter has already
+//     seen the image, ascending — so unseen-to-this-voter images come first
+//     — then by (b) total votes ascending so brand-new entries also get a
+//     boost, then random tiebreak.
+//   - Pick A from the front tier, then B from the front of the remainder.
+//     Both A and B are drawn from low-exposure candidates, so high-vote
+//     images don't get stranded behind a uniform-random opponent slot.
 async function handleVsPair(request: Request, env: Env): Promise<Response> {
   try {
     const overlord = new URL(request.url).searchParams.get('overlord') || 'all';
+    const hash = await voterHash(request);
 
-    const where = overlord === 'all' ? '' : 'AND overlord = ?2';
-    const params: unknown[] = ['approved'];
+    const where = overlord === 'all' ? '' : 'AND i.overlord = ?3';
+    const params: unknown[] = [hash, 'approved'];
     if (overlord !== 'all') params.push(overlord);
 
     const pool = await env.VS_DB.prepare(
-      `SELECT id, overlord, title, image_url, elo, votes, wins, losses, status, created_at
-       FROM images
-       WHERE status = ?1 ${where}
-       ORDER BY votes ASC, RANDOM()`
+      `SELECT i.id, i.overlord, i.title, i.image_url, i.elo, i.votes, i.wins, i.losses, i.status, i.created_at,
+              (SELECT COUNT(*) FROM votes v
+               WHERE v.voter_hash = ?1
+                 AND (v.winner_id = i.id OR v.loser_id = i.id)) AS voter_seen
+       FROM images i
+       WHERE i.status = ?2 ${where}
+       ORDER BY voter_seen ASC, i.votes ASC, RANDOM()`
     )
       .bind(...params)
-      .all<ImageRow>();
+      .all<ImageRow & { voter_seen: number }>();
 
     const rows = pool.results || [];
     if (rows.length < 2) {
       return json({ error: 'Not enough approved images for this filter', count: rows.length }, 404);
     }
 
-    // Image A: lowest-vote tier. Use the front 1/3 of the sorted pool so even
-    // when one image has lagged in exposure, it gets surfaced — but with
-    // enough breadth that we don't always show the same handful.
+    // Pick A from the front 1/3 (lowest voter-exposure + lowest total votes).
     const tierSize = Math.max(2, Math.ceil(rows.length / 3));
     const aIdx = Math.floor(Math.random() * tierSize);
     const a = rows[aIdx];
 
-    // Image B: uniformly random from the remaining pool.
-    let bIdx = Math.floor(Math.random() * (rows.length - 1));
-    if (bIdx >= aIdx) bIdx++; // skip A's slot without bias
-    const b = rows[bIdx];
+    // Pick B from the front of the remainder, with the same low-exposure
+    // bias. This means BOTH slots prefer images the voter hasn't seen, so
+    // high-vote-count images aren't stuck only being eligible as a uniform
+    // random opponent.
+    const remainder = rows.filter((_, i) => i !== aIdx);
+    const bTier = Math.max(2, Math.ceil(remainder.length / 3));
+    const b = remainder[Math.floor(Math.random() * bTier)];
 
     // Shuffle which one is on the left.
     const [left, right] = Math.random() < 0.5 ? [a, b] : [b, a];
