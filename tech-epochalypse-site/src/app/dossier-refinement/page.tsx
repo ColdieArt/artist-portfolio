@@ -32,6 +32,8 @@ export default function VsPage() {
   const [count, setCount] = useState(0)
   const [badge, setBadge] = useState<Badge | null>(null)
   const [badgeVisible, setBadgeVisible] = useState(false)
+  const [limitReached, setLimitReached] = useState(false)
+  const [quota, setQuota] = useState<{ used: number; limit: number } | null>(null)
 
   const loadPair = useCallback(async (slug: string) => {
     setLoading(true)
@@ -77,6 +79,13 @@ export default function VsPage() {
         const nextBadge: Badge = (data?.badge as Badge) || { kind: 'delta', label: 'VOTE LOCKED' }
         setBadge(nextBadge)
         requestAnimationFrame(() => setBadgeVisible(true))
+        if (typeof data?.used === 'number' && typeof data?.limit === 'number') {
+          setQuota({ used: data.used, limit: data.limit })
+        }
+        if (data?.limitReached) {
+          setLimitReached(true)
+          return // don't queue another pair load
+        }
         setCount((c) => c + 1)
       } catch {
         // Network failure — still confirm the click visually.
@@ -130,7 +139,9 @@ export default function VsPage() {
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 font-mono text-xs uppercase tracking-wider">
-            <span className="text-white/40">Votes this session: {count}</span>
+            <span className="text-white/40">
+              Votes cast: {quota ? `${quota.used} / ${quota.limit}` : count}
+            </span>
             {/* Leaderboard link hidden during the submission window.
                 Flip the `false` to bring it back once results are public. */}
             {false && (
@@ -141,7 +152,25 @@ export default function VsPage() {
           </div>
         </div>
 
-        {loading && (
+        {limitReached && (
+          <div className="text-center py-20 max-w-xl mx-auto">
+            <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/60 mb-4">
+              Limit Reached
+            </p>
+            <h2 className="font-display text-3xl md:text-4xl text-white uppercase tracking-[0.05em] mb-4">
+              Thanks for voting.
+            </h2>
+            <p className="font-mono text-sm text-white/70 leading-relaxed mb-2">
+              You&rsquo;ve cast {quota?.limit ?? 25} votes — the maximum allowed
+              per visitor. Every comparison you made feeds the ranking.
+            </p>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/50 mt-6">
+              Winners announced Thu Jun 11 · 2 PM PT
+            </p>
+          </div>
+        )}
+
+        {!limitReached && loading && (
           <div className="text-center py-24 font-mono text-xs text-white/40 uppercase tracking-wider">
             Loading…
           </div>
@@ -156,7 +185,7 @@ export default function VsPage() {
           </div>
         )}
 
-        {!loading && pair && (
+        {!limitReached && !loading && pair && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 max-w-5xl mx-auto">
             {[pair.left, pair.right].map((img) => {
               const isWinner = voted?.winnerId === img.id

@@ -640,10 +640,12 @@ type ImageRow = {
   created_at: number;
 };
 
+// Hash by IP only. We deliberately drop the User-Agent (which would give the
+// same person on Safari vs Chrome two separate quotas) so the per-IP vote cap
+// can't be circumvented by switching browsers on the same device/network.
 async function voterHash(request: Request): Promise<string> {
   const ip = request.headers.get('CF-Connecting-IP') || '';
-  const ua = request.headers.get('User-Agent') || '';
-  const data = new TextEncoder().encode(`${ip}|${ua}`);
+  const data = new TextEncoder().encode(`ip:${ip}`);
   const buf = await crypto.subtle.digest('SHA-256', data);
   return Array.from(new Uint8Array(buf))
     .map((b) => b.toString(16).padStart(2, '0'))
@@ -769,6 +771,29 @@ async function handleVsVote(request: Request, env: Env): Promise<Response> {
       return json({ ok: true, deduped: true, badge: { kind: 'dup', label: 'ALREADY COUNTED' } });
     }
 
+    // Per-IP vote cap. Once an IP has cast PER_IP_LIMIT counted votes, further
+    // votes are rejected with a distinct status so the client can show a
+    // "limit reached" message.
+    const PER_IP_LIMIT = 25;
+    const usedRow = await env.VS_DB.prepare(
+      `SELECT COUNT(*) AS c FROM votes WHERE voter_hash = ?1`
+    )
+      .bind(hash)
+      .first<{ c: number }>();
+    const used = usedRow?.c ?? 0;
+    if (used >= PER_IP_LIMIT) {
+      return json(
+        {
+          ok: false,
+          limitReached: true,
+          used,
+          limit: PER_IP_LIMIT,
+          badge: { kind: 'limit', label: 'LIMIT REACHED' },
+        },
+        429
+      );
+    }
+
     // --- Pre-vote signals (used to compute the flavor badge) ---
     const preGap = Math.abs(winner.elo - loser.elo);
     const isUpset = winner.elo < loser.elo && loser.elo - winner.elo >= 100;
@@ -854,6 +879,8 @@ async function handleVsVote(request: Request, env: Env): Promise<Response> {
       winner: { id: winnerId, elo: Math.round(newWinnerElo) },
       loser: { id: loserId, elo: Math.round(newLoserElo) },
       badge,
+      used: used + 1,
+      limit: PER_IP_LIMIT,
     });
   } catch (e) {
     console.error('vs/vote error:', e);
