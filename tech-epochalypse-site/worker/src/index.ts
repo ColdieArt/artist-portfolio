@@ -698,18 +698,24 @@ async function handleVsPair(request: Request, env: Env): Promise<Response> {
       return json({ error: 'Not enough approved images for this filter', count: rows.length }, 404);
     }
 
-    // Pick A from the front 1/3 (lowest voter-exposure + lowest total votes).
-    const tierSize = Math.max(2, Math.ceil(rows.length / 3));
-    const aIdx = Math.floor(Math.random() * tierSize);
-    const a = rows[aIdx];
+    // Strict-tier selection: always prefer the lowest voter_seen count first.
+    // Within a tier, prefer the lowest total-vote count next; ties broken
+    // randomly. This guarantees that every image is shown to the voter
+    // exactly once before any image is shown twice, then twice before any
+    // third, and so on — given a large enough vote budget.
+    function pickFromTier(candidates: (ImageRow & { voter_seen: number })[]) {
+      if (!candidates.length) return null;
+      const minSeen = candidates[0].voter_seen;
+      const sameSeen = candidates.filter((r) => r.voter_seen === minSeen);
+      const minVotes = sameSeen.reduce((m, r) => Math.min(m, r.votes), Infinity);
+      const eligible = sameSeen.filter((r) => r.votes === minVotes);
+      return eligible[Math.floor(Math.random() * eligible.length)];
+    }
 
-    // Pick B from the front of the remainder, with the same low-exposure
-    // bias. This means BOTH slots prefer images the voter hasn't seen, so
-    // high-vote-count images aren't stuck only being eligible as a uniform
-    // random opponent.
-    const remainder = rows.filter((_, i) => i !== aIdx);
-    const bTier = Math.max(2, Math.ceil(remainder.length / 3));
-    const b = remainder[Math.floor(Math.random() * bTier)];
+    const a = pickFromTier(rows);
+    if (!a) return json({ error: 'Could not select A' }, 500);
+    const b = pickFromTier(rows.filter((r) => r.id !== a.id));
+    if (!b) return json({ error: 'Could not select B' }, 500);
 
     // Shuffle which one is on the left.
     const [left, right] = Math.random() < 0.5 ? [a, b] : [b, a];
