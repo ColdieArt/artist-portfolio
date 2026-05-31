@@ -384,14 +384,9 @@ function _cropDims() {
 }
 
 function updateCropOverlay() {
-    if (!cropOverlayEl) return;
-    const d = _cropDims();
-    if (!d) { cropOverlayEl.style.display = 'none'; return; }
-    cropOverlayEl.style.display = 'block';
-    cropOverlayEl.style.left = d.x + 'px';
-    cropOverlayEl.style.top = d.y + 'px';
-    cropOverlayEl.style.width = d.w + 'px';
-    cropOverlayEl.style.height = d.h + 'px';
+    // 1:1 cropping overlay disabled — crop math still drives getCropCanvasRect()
+    // for any downstream export logic, but the visual mask is no longer shown.
+    if (cropOverlayEl) cropOverlayEl.style.display = 'none';
 }
 
 function getCropCanvasRect(srcCanvas) {
