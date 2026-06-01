@@ -3861,7 +3861,7 @@ function init() {
         } else {
             leftUiContainer.style.top = '10px'; // Show it
             trashButtonElement.style.display = 'none'; // Show TRASH button
-            loadImgBtn.style.display = 'block';
+            loadImgBtn.style.display = 'none'; // LOAD button hidden
             cropHBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */
             cropVBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */
             arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; // Move arrow below the UI
@@ -3873,7 +3873,7 @@ function init() {
     // Left UI starts EXPANDED — buttons visible (trash stays hidden), arrow pointing up below the panel.
     trashButtonElement.style.display = 'none';
     exportButtonElement.style.display = 'none';
-    loadImgBtn.style.display = 'block';
+    loadImgBtn.style.display = 'none'; // LOAD button hidden
     cropHBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */
     cropVBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */
     arrowSpan.innerHTML = '&#x25B2;';
