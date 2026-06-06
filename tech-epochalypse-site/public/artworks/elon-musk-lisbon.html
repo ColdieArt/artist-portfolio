@@ -4140,12 +4140,12 @@ function onPointerMove(event) {
             selectedObject.position.y = intersection.y - offset.y;
             selectedObject.position.z = initialObjectZ;
             
-            // If the object is the ear, update its initialPosition in userData so it doesn't snap back on resize until reset
+            // If the object is the ear, update its userData.initialPosition so it
+            // doesn't snap back on resize. Do NOT mutate the config — that's the
+            // source of truth for RESET and mutating it breaks reset-to-original
+            // after extreme drags.
             if (selectedObject.userData.id === 'ear') {
                  selectedObject.userData.initialPosition.copy(selectedObject.position);
-                 // Also update the config for reset consistency
-                 const earConfig = initialAssetConfigs.find(c => c.id === 'ear');
-                 if (earConfig) earConfig.initialPosition.copy(selectedObject.position);
             }
 
             // Update redaction rectangle positions if the selected object is an eye
