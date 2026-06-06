@@ -199,11 +199,11 @@
       border-color: #aaa;
     }
 
-    /* ─── RESET BUTTON (bottom-left, above PRINT) ─── */
+    /* ─── RESET BUTTON — bottom-right so the error overlay (bottom-left) can't cover it ─── */
     #reset-btn {
       position: fixed;
-      bottom: 72px; /* 16px PRINT bottom + ~40px PRINT height + 16px gap */
-      left: 16px;
+      bottom: 16px;
+      right: 16px;
       z-index: 250;
       background: #000;
       color: #fff;
@@ -5935,28 +5935,38 @@ setTimeout(function () {
     const canvas = window.renderer.domElement;
     const pointers = new Map();
 
-    // Defensive fix: when transformControls.detach() leaves .object null,
-    // the helper still tries to render and crashes. Manage helper visibility.
+    // Defensive fix: TransformControls.updateMatrixWorld dereferences .object
+    // without a null check (vendor/three TransformControls.js:436). Monkey-patch
+    // the helper so the update is a no-op when nothing is attached — visibility
+    // toggling alone isn't enough because three.js traverses children regardless.
     (function patchTransformControls() {
       const tc = window.transformControls;
-      if (!tc || tc.__patchedAttachDetach) return;
-      tc.__patchedAttachDetach = true;
-      const helperOf = () => (tc.getHelper ? tc.getHelper() : tc);
+      if (!tc || tc.__patchedFully) return;
+      tc.__patchedFully = true;
+      const helper = tc.getHelper ? tc.getHelper() : tc;
+      function wrap(obj) {
+        if (!obj || !obj.updateMatrixWorld) return;
+        const orig = obj.updateMatrixWorld;
+        obj.updateMatrixWorld = function(force) {
+          if (tc.object == null) return;
+          return orig.call(this, force);
+        };
+      }
+      wrap(helper);
+      if (tc !== helper) wrap(tc);
       const origDetach = tc.detach.bind(tc);
       tc.detach = function() {
         const r = origDetach();
-        const h = helperOf(); if (h) h.visible = false;
+        if (helper) helper.visible = false;
         return r;
       };
       const origAttach = tc.attach.bind(tc);
       tc.attach = function(obj) {
         const r = origAttach(obj);
-        const h = helperOf(); if (h) h.visible = !!obj;
+        if (helper) helper.visible = !!obj;
         return r;
       };
-      if (!tc.object) {
-        const h = helperOf(); if (h) h.visible = false;
-      }
+      if (!tc.object && helper) helper.visible = false;
     })();
     let mode = 'idle', target = null, initDist = 0;
     let initScale = { x: 1, y: 1, z: 1 }, initUserScale = 1;
