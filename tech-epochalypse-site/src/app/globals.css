@@ -465,3 +465,169 @@
 .animate-warning-flash { animation: warning-flash 1.1s ease-in-out infinite; }
 .animate-warning-bar   { animation: warning-bar   1.1s ease-in-out infinite; }
 .animate-warning-glow  { animation: warning-glow  2.2s ease-in-out infinite; }
+
+/* ════════════════════════════════════════════════════════════════════
+   DOSSIER / BINDER ARCHIVE  (used by /dossier)
+   A physical case-file aesthetic: manila sheets and printed papers
+   floating on a dark desk, clipped, taped, and rubber-stamped.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* Desk surface the binder sits on — dark felt with a faint warm vignette. */
+.dossier-desk {
+  background-color: #07070a;
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% -10%, rgba(58, 52, 38, 0.45), transparent 60%),
+    radial-gradient(ellipse 90% 60% at 50% 110%, rgba(30, 28, 24, 0.5), transparent 55%);
+}
+
+/* Paper fibre texture, shared by every sheet via background-image stacking. */
+.paper-fibre {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='0.5'/%3E%3C/svg%3E");
+  background-blend-mode: multiply;
+}
+
+/* A single sheet of paper. Aged off-white. */
+.paper-sheet {
+  position: relative;
+  background-color: #ece6d4;
+  color: #211e16;
+  background-image:
+    linear-gradient(125deg, rgba(0, 0, 0, 0.05), transparent 35%, rgba(120, 105, 70, 0.06) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='0.35'/%3E%3C/svg%3E");
+  background-blend-mode: normal, multiply;
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.5),
+    0 22px 45px -18px rgba(0, 0, 0, 0.8),
+    inset 0 0 70px rgba(125, 110, 70, 0.14);
+}
+
+/* Manila folder card — warmer, used for tabs and the folder body. */
+.paper-manila {
+  background-color: #d6c89f;
+  color: #2a2415;
+}
+
+/* Faint blue ledger ruling. */
+.paper-ruled {
+  background-image:
+    repeating-linear-gradient(180deg, transparent 0, transparent 27px, rgba(40, 70, 110, 0.14) 28px),
+    linear-gradient(90deg, transparent 46px, rgba(150, 40, 40, 0.25) 46px, rgba(150, 40, 40, 0.25) 47px, transparent 47px);
+}
+
+/* Three-hole punch — place inside a relatively-positioned sheet. */
+.punch-holes {
+  position: absolute;
+  left: 14px;
+  top: 0;
+  bottom: 0;
+  width: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  pointer-events: none;
+}
+.punch-holes > i {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #07070a;
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.9),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.25);
+}
+
+/* Strip of translucent tape. */
+.tape {
+  position: absolute;
+  width: 116px;
+  height: 34px;
+  background: linear-gradient(180deg, rgba(228, 220, 178, 0.5), rgba(205, 196, 150, 0.42));
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+  z-index: 5;
+}
+.tape::before,
+.tape::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 3px, rgba(255, 255, 255, 0.25) 3px 5px);
+}
+.tape::before { left: -6px; clip-path: polygon(100% 0, 0 18%, 100% 36%, 0 54%, 100% 72%, 0 90%, 100% 100%); }
+.tape::after  { right: -6px; clip-path: polygon(0 0, 100% 18%, 0 36%, 100% 54%, 0 72%, 100% 90%, 0 100%); }
+
+/* Rubber stamp — distressed ink that sits ON the paper. */
+.rubber-stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Black Ops One', Impact, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #8c2b22;
+  border: 4px double #8c2b22;
+  padding: 6px 16px;
+  border-radius: 3px;
+  opacity: 0.82;
+  mix-blend-mode: multiply;
+  -webkit-mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='3'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.5 1.3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23r)'/%3E%3C/svg%3E");
+  mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='3'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.5 1.3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23r)'/%3E%3C/svg%3E");
+  -webkit-mask-size: cover;
+  mask-size: cover;
+}
+.rubber-stamp--ink { color: #1c1a14; border-color: #1c1a14; }
+.rubber-stamp--blue { color: #243f6b; border-color: #243f6b; }
+
+/* Typewriter caption block — used for labels under photos. */
+.tw-label {
+  font-family: 'Special Elite', 'Courier New', monospace;
+  color: #211e16;
+}
+
+/* Printed photo: white border, soft shadow, slight bow. */
+.photo-print {
+  background: #fbfaf5;
+  padding: 9px 9px 9px;
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.4),
+    0 16px 30px -14px rgba(0, 0, 0, 0.85);
+}
+.photo-print img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* Subtle paper lift on hover for interactive cards. */
+.lift {
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.45s ease;
+  will-change: transform;
+}
+.lift:hover {
+  transform: translateY(-6px) rotate(0deg) scale(1.015);
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.4),
+    0 34px 50px -20px rgba(0, 0, 0, 0.9);
+}
+
+/* Red string / classification edge for the cover. */
+.confidential-stripe {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #8c2b22 0 18px,
+    #1c1a14 18px 36px
+  );
+}
+
+/* Coffee ring decoration. */
+.coffee-ring {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 6px solid rgba(95, 70, 35, 0.16);
+  box-shadow: inset 0 0 14px rgba(95, 70, 35, 0.1);
+  pointer-events: none;
+}
