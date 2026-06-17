@@ -11,20 +11,11 @@ const BioCoder = dynamic(() => import('@/components/BioCoder'), {
   ssr: false,
   loading: () => null,
 })
-const SubjEntriesGallery = dynamic(() => import('@/components/SubjEntriesGallery'), {
-  ssr: false,
-  loading: () => null,
-})
 
 export default function HomePage() {
   return (
     <>
-      {/* ── Hero - Noir Dossier ──
-          ⚠️ TEMPORARILY HIDDEN while the SUBJ:01 CTA block below acts as
-          the homepage hero (i.e. during an active competition window).
-          Flip the `false &&` to bring this hero back as the top module.
-          Do NOT delete the markup. */}
-      {false && (
+      {/* ── Hero - Noir Dossier ── */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
         {/* Particle background with pixelated blocks */}
         <ParticleNetwork />
@@ -101,106 +92,6 @@ export default function HomePage() {
           </svg>
         </div>
       </section>
-      )}
-
-      {/* ── SUBJ:01 — Active competition CTA (now serving as the HERO) ──
-          Funnels homepage visitors straight into the live competition page.
-          The big white button is a 1:1 visual replica of the SUBJ:01 chip in
-          the top nav (mono / uppercase / 0.2em tracking / bg-white text-black)
-          just scaled way up so it can't be missed.
-
-          NOTE: While the Noir Dossier hero block above is gated off, this
-          section takes the hero slot (min-h-screen, flex-centered). Between
-          competitions, hide this with `{false && (…)}` and re-enable the
-          hero block above so the homepage falls back to the Noir Dossier
-          intro. Both blocks are intentionally retained. */}
-      <section className="relative min-h-screen flex items-center py-24 md:py-32 section-padding bg-black overflow-hidden">
-        {/* Pulsing red radial glow — fills the section with a warning ambience.
-            Sits behind everything, never receives pointer events. */}
-        <div
-          className="absolute inset-0 pointer-events-none animate-warning-glow"
-          style={{ background: 'radial-gradient(ellipse at center, rgba(229,57,70,0.22) 0%, rgba(229,57,70,0.04) 45%, transparent 75%)' }}
-          aria-hidden
-        />
-        {/* Top + bottom red bars flashing in sync with the banner — emergency-tape feel. */}
-        <div className="absolute inset-x-0 top-0 h-[3px] animate-warning-bar pointer-events-none" style={{ background: '#ff5a66' }} aria-hidden />
-        <div className="absolute inset-x-0 bottom-0 h-[3px] animate-warning-bar pointer-events-none" style={{ background: '#ff5a66' }} aria-hidden />
-
-        <div className="page-container relative z-10">
-          <ScrollReveal>
-            <div className="max-w-5xl mx-auto text-center">
-              {/* GIANT FLASHING RED WARNING BANNER — emergency-system styling.
-                  Border, fill, and box-shadow all pulse via animate-warning-flash;
-                  the dot inside still has its own ping animation for the second beat. */}
-              <div
-                className="inline-flex items-center justify-center gap-4 md:gap-6 mb-10 md:mb-14 px-6 py-4 md:px-12 md:py-6 border-2 animate-warning-flash"
-                style={{
-                  borderColor: '#ff5a66',
-                  background: 'rgba(229, 57, 70, 0.12)',
-                  boxShadow: '0 0 40px rgba(229, 57, 70, 0.55), inset 0 0 20px rgba(229, 57, 70, 0.15)',
-                }}
-              >
-                <span className="relative flex h-4 w-4 md:h-5 md:w-5 flex-shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: '#ff5a66' }} />
-                  <span className="relative inline-flex rounded-full h-full w-full" style={{ background: '#ff5a66' }} />
-                </span>
-                <span className="font-mono text-lg sm:text-2xl md:text-3xl lg:text-4xl uppercase tracking-[0.18em] md:tracking-[0.25em] font-bold leading-none" style={{ color: '#ff5a66' }}>
-                  Now Live <span className="opacity-70">—</span> Voting Soon
-                </span>
-              </div>
-
-              {/* Classified header */}
-              <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/60 mb-3">
-                Tech Epochalypse Remix Competition
-              </p>
-
-              {/* Title — display font, big */}
-              <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-white uppercase tracking-[0.03em] leading-[0.95] mb-6">
-                SUBJ:&nbsp;01
-                <span className="block text-3xl md:text-5xl lg:text-6xl mt-3 text-white/70">
-                  The Singularity
-                </span>
-              </h2>
-
-              {/* Overview — same copy used on /subj/01's header */}
-              <p className="font-mono text-base md:text-lg text-white/80 leading-relaxed max-w-2xl mx-auto mb-10">
-                Five tech overlords, each a face of the Singularity. Pick one,
-                remix it in Coldie&rsquo;s editor, and submit your own parallax
-                collage. Use Coldie&rsquo;s assets, upload your own, or both —
-                all entries compete equally.
-              </p>
-
-              {/* The big button — same recipe as the nav chip, scaled ~3x */}
-              <Link
-                href="/subj/01"
-                className="group inline-flex items-center gap-4 font-mono text-base md:text-xl uppercase tracking-[0.2em] bg-white text-black px-10 md:px-16 py-5 md:py-7 hover:bg-white/90 transition-colors duration-300"
-              >
-                <span>Enter SUBJ:&nbsp;01</span>
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="none" className="transition-transform duration-300 group-hover:translate-x-1">
-                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </Link>
-
-              {/* Quick facts row */}
-              <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 font-mono text-[10px] uppercase tracking-[0.2em] text-white/40">
-                <span>Free to enter</span>
-                <span className="hidden sm:inline w-px h-3 bg-white/20" />
-                <span>1 submission per person</span>
-                <span className="hidden sm:inline w-px h-3 bg-white/20" />
-                <span>3 winners</span>
-                <span className="hidden sm:inline w-px h-3 bg-white/20" />
-                <span>Artists keep 80%</span>
-              </div>
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
-
-      {/* ── SUBJ:01 Live Entries Gallery ──
-          Read-only wall of every approved submission, fetched from Airtable
-          via /api/airtable-records (category: "general submission").
-          Hides itself if there are no entries or the fetch fails. */}
-      <SubjEntriesGallery />
 
       {/* ── Overlord Dossiers on Scroll ── */}
       <section className="relative py-32 section-padding bg-black grid-lines">
