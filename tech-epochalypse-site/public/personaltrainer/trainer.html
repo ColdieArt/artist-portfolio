@@ -310,6 +310,16 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  .save-status { font-size: 12.5px; color: var(--muted); text-align: right; margin: -4px 2px 12px; font-weight: 700; }
+  .save-status.saved { color: var(--good); }
+  .resume-banner { background: rgba(245,185,66,0.12); border: 1px solid rgba(245,185,66,0.5); border-radius: 12px; padding: 15px; margin-bottom: 18px; }
+  .resume-banner .rb-title { font-weight: 800; font-size: 16px; }
+  .resume-banner .rb-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .resume-actions { display: flex; gap: 10px; margin-top: 13px; }
+  .resume-actions button { flex: 1; padding: 13px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); }
+  .rb-resume { background: var(--accent); color: #fff; border: none; }
+  .rb-discard { background: var(--surface-2); color: var(--danger); }
+
   .fade { animation: fade .2s ease; }
   @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 </style>
@@ -339,7 +349,7 @@ const PROGRAM = [
   ]},
   { key: "lowerA", label: "Day 2", name: "Lower A", exercises: [
     { name: "Barbell Back Squat", sets: 4, reps: "5-6" },
-    { name: "Romanian Deadlift", sets: 3, reps: "6-8" },
+    { name: "Cable Pull-Through", sets: 3, reps: "10-12" },
     { name: "Leg Press", sets: 3, reps: "10-12" },
     { name: "Leg Curl", sets: 3, reps: "10-12" },
     { name: "Standing Calf Raise", sets: 4, reps: "12-15" },
@@ -355,7 +365,8 @@ const PROGRAM = [
     { name: "Overhead Triceps Extension", sets: 3, reps: "10-12" },
   ]},
   { key: "lowerB", label: "Day 4", name: "Lower B", exercises: [
-    { name: "Deadlift", sets: 4, reps: "4-6" },
+    { name: "Back Extension Machine (45°)", sets: 3, reps: "10-12" },
+    { name: "Glute Drive / Hip Thrust Machine", sets: 3, reps: "8-10" },
     { name: "Hack Squat or Leg Press", sets: 3, reps: "8-10" },
     { name: "Walking Lunges", sets: 3, reps: "10-12 / leg" },
     { name: "Leg Extension", sets: 3, reps: "12-15" },
@@ -419,6 +430,54 @@ function saveSessions(arr) {
 // Most recent session for a given day key (sessions stored newest-first)
 function lastSessionFor(dayKey) {
   return loadSessions().find(s => s.dayKey === dayKey) || null;
+}
+
+/* ---------- In-progress draft (autosave so a crash never loses a workout) ---------- */
+const DRAFT_KEY = "liftlog.draft.v1";
+function loadDraft() {
+  try { return JSON.parse(localStorage.getItem(DRAFT_KEY)); } catch (e) { return null; }
+}
+function clearDraft() { localStorage.removeItem(DRAFT_KEY); }
+// Read the current session inputs from the DOM and persist them immediately
+function saveDraft(dayKey) {
+  const day = PROGRAM.find(d => d.key === dayKey);
+  if (!day) return;
+  const exercises = day.exercises.map((ex, ei) => {
+    const sets = [];
+    for (let s = 0; s < ex.sets; s++) {
+      const wEl = document.querySelector(`[data-w="${ei}-${s}"]`);
+      const rEl = document.querySelector(`[data-r="${ei}-${s}"]`);
+      sets.push({ weight: wEl ? wEl.value.trim() : "", reps: rEl ? rEl.value.trim() : "" });
+    }
+    return { name: ex.name, sets: sets };
+  });
+  const noteEl = document.getElementById("note");
+  const dateEl = document.getElementById("workoutDate");
+  localStorage.setItem(DRAFT_KEY, JSON.stringify({
+    dayKey: dayKey,
+    date: dateEl ? dateEl.value : todayInputVal(),
+    note: noteEl ? noteEl.value : "",
+    exercises: exercises,
+  }));
+  flashSaved();
+}
+let saveStatusTimer;
+function flashSaved() {
+  const el = document.getElementById("saveStatus");
+  if (!el) return;
+  el.textContent = "✓ Saved";
+  el.classList.add("saved");
+  clearTimeout(saveStatusTimer);
+  saveStatusTimer = setTimeout(() => {
+    el.textContent = "✓ Autosaves as you go";
+    el.classList.remove("saved");
+  }, 1200);
+}
+function discardDraft() {
+  if (!confirm("Discard your unfinished workout? This can't be undone.")) return;
+  clearDraft();
+  toast("Draft discarded");
+  goHome();
 }
 
 /* ---------- Weigh-in / goals storage ---------- */
@@ -558,6 +617,26 @@ function goHome() {
   histTab.classList.remove("active");
   const sessions = loadSessions();
   let html = `<div class="fade">`;
+
+  const draft = loadDraft();
+  if (draft && draft.dayKey) {
+    const dd = PROGRAM.find(x => x.key === draft.dayKey);
+    if (dd) {
+      let logged = 0;
+      (draft.exercises || []).forEach(e => e.sets.forEach(st => { if (st.weight !== "" || st.reps !== "") logged++; }));
+      html += `<div class="resume-banner">
+        <div class="rb-title">⏳ Unfinished workout: ${esc(dd.name)}</div>
+        <div class="rb-sub">${logged} set${logged !== 1 ? "s" : ""} logged · your entries are saved.</div>
+        <div class="resume-actions">
+          <button class="rb-resume" onclick="openSession('${draft.dayKey}')">Resume</button>
+          <button class="rb-discard" onclick="discardDraft()">Discard</button>
+        </div>
+      </div>`;
+    } else {
+      clearDraft();
+    }
+  }
+
   html += `<div class="section-title">Choose today's workout</div>`;
   PROGRAM.forEach(day => {
     const last = sessions.find(s => s.dayKey === day.key);
@@ -655,7 +734,22 @@ function openSession(dayKey, prefill) {
   backBtn.setAttribute("onclick", "goHome()");
   histTab.classList.remove("active");
 
+  // If reopening (crash/close) with no explicit prefill, restore the autosaved draft
+  if (!prefill) {
+    const draft = loadDraft();
+    if (draft && draft.dayKey === dayKey && (draft.exercises || []).length === day.exercises.length) {
+      prefill = draft;
+    }
+  }
+  const dateVal = (prefill && prefill.date) ? prefill.date : todayInputVal();
+
   let html = `<div class="fade">`;
+  html += `<div class="save-status" id="saveStatus">✓ Autosaves as you go</div>`;
+  html += `<div class="card">
+      <label class="fld-label first">Workout date</label>
+      <input type="date" id="workoutDate" class="std-input" value="${dateVal}" max="${todayInputVal()}">
+      <div class="wi-sub" style="margin-top:8px">Set a past date to log a workout you did earlier.</div>
+    </div>`;
   if (last) {
     html += `<div class="section-title">Beat your last session — ${fmtDateShort(last.date)}</div>`;
   } else {
@@ -722,9 +816,16 @@ function openSession(dayKey, prefill) {
 
   html += `<div class="sticky-foot">
       <button class="btn" onclick="finishWorkout('${dayKey}')">Finish Workout</button>
+      <button class="btn secondary" style="margin-top:10px" onclick="saveDraft('${dayKey}');toast('✓ Progress saved');goHome()">Save &amp; finish later</button>
     </div></div>`;
 
   view.innerHTML = html;
+
+  // Autosave on every edit — survives phone lock, tab eviction, accidental close
+  view.querySelectorAll("[data-w], [data-r], #note, #workoutDate").forEach(el => {
+    el.addEventListener("input", () => saveDraft(dayKey));
+  });
+
   window.scrollTo(0,0);
 }
 
@@ -749,11 +850,13 @@ function finishWorkout(dayKey) {
   }
 
   const note = document.getElementById("note").value.trim();
+  const dateEl = document.getElementById("workoutDate");
   // hold the workout; it's saved after the cool-down screen
   pendingSession = {
     dayKey: dayKey,
     dayName: day.name,
     dayLabel: day.label,
+    date: dateEl ? dateEl.value : todayInputVal(), // YYYY-MM-DD, converted at commit
     note: note,
     exercises: exercises,
   };
@@ -787,12 +890,14 @@ function showCooldown(dayKey) {
 
 function commitSession() {
   if (!pendingSession) return goHome();
+  const dv = pendingSession.date; // YYYY-MM-DD from the workout-date picker
   pendingSession.id = Date.now();
-  pendingSession.date = new Date().toISOString();
+  pendingSession.date = dv ? inputDateToISO(dv) : new Date().toISOString();
   const all = loadSessions();
-  all.unshift(pendingSession); // newest first
+  all.unshift(pendingSession); // newest first (loadSessions re-sorts by date)
   saveSessions(all);
   pendingSession = null;
+  clearDraft(); // workout is now permanently saved — drop the in-progress draft
   toast("✓ Workout saved!");
   goHome();
 }
