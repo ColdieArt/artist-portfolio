@@ -94,6 +94,22 @@
   .ex-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; gap: 10px; }
   .ex-name { font-size: 18px; font-weight: 700; }
   .ex-target { font-size: 13px; color: var(--muted); white-space: nowrap; font-weight: 600; }
+  .coach-toggle {
+    background: var(--accent-dim); border: 1px solid var(--accent);
+    border-radius: 8px; padding: 2px 8px; margin-left: 6px;
+    font-size: 13px; line-height: 1.4; cursor: pointer; vertical-align: middle;
+  }
+  .coach-toggle:active { opacity: .7; }
+  .coach-note {
+    display: flex; gap: 9px; align-items: flex-start;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    border-radius: 11px;
+    padding: 12px 13px;
+    margin-bottom: 12px;
+    font-size: 14.5px; line-height: 1.45; color: #dbe6ff; font-weight: 500;
+  }
+  .coach-note .cn-icon { flex-shrink: 0; }
 
   .set-row {
     display: grid;
@@ -414,6 +430,38 @@ const COOLDOWN = {
   ],
 };
 function dayType(dayKey) { return dayKey.indexOf("upper") === 0 ? "upper" : "lower"; }
+
+/* ---------- Coach notes (per exercise — form cues + personalized feedback) ---------- */
+const COACH_NOTES = {
+  "Barbell Bench Press": "Target is 5-6 reps — your 120×4 was a touch heavy. Drop to ~110-115 so every set lands in range, then climb. Shoulder blades pinned back and down, feet driving the floor, controlled descent to mid-chest.",
+  "Barbell Row": "Hinge to ~45° and keep that torso angle honest — don't let it creep upright as it gets heavy. Pull to the lower ribs, squeeze the shoulder blades.",
+  "Overhead Press": "Squeeze glutes and brace so you don't lean back. Bar travels straight up past the chin; shrug at the top.",
+  "Lat Pulldown": "Drive the elbows down and back, chest tall, pull to the upper chest. Control the way up — no swinging.",
+  "Incline Dumbbell Press": "30-45° bench. Solid upper-chest builder alongside flat bench. Slight arc, stop just short of lockout to keep tension.",
+  "Barbell/DB Curl": "Elbows pinned to your sides, no swinging. Use 2.5 lb jumps here — 5 lb is a big leap on curls.",
+  "Triceps Pushdown": "Elbows glued to the ribs, full lockout, slow return. 2.5 lb jumps work better than 5 here.",
+  "Barbell Back Squat": "Your squat is light relative to your bench, which means it'll climb FAST — add 5-10 lb almost every session for a while. Brace hard, break at hips and knees together, hit at least parallel.",
+  "Cable Pull-Through": "It's a hip hinge, not a squat — push the hips back, feel the hamstrings stretch, then snap the hips forward. Soft knees.",
+  "Leg Press": "Feet mid-platform. Don't let your lower back round at the bottom — stop where it stays flat. Full but controlled range.",
+  "Leg Curl": "Direct hamstring work — one of two ham slots in your week now. Squeeze hard at the top, slow negative.",
+  "Standing Calf Raise": "Full stretch at the bottom, pause, full contraction at the top. No bouncing.",
+  "Hanging Leg Raise": "Bodyweight is perfect — logging 0 wt is correct. Control the lower, don't swing. Add reps before you add weight.",
+  "Incline Barbell/DB Press": "Upper-chest focus. Same cues as flat — retract the shoulder blades, controlled tempo, stop short of lockout.",
+  "Pull-Ups or Lat Pulldown": "On pull-ups, log bodyweight (or added weight). Full hang to chin over the bar; use a band or the pulldown if you can't hit the rep target.",
+  "Seated Cable Row": "Chest tall, pull to the navel, squeeze the mid-back. Keep it strict — don't heave with the low back.",
+  "Dumbbell Shoulder Press": "Press slightly in front of the head, don't flare the elbows straight out to the sides. Strong front-delt work.",
+  "Lateral Raises": "This is your ONLY side-delt work all week — treat it as important. Lead with the elbows, slight forward tilt, no swinging. We may add a second dose on Upper A later.",
+  "Hammer Curls": "Neutral grip hits the brachialis and forearms. Keep it strict; small weight jumps.",
+  "Overhead Triceps Extension": "Elbows in and pointing forward, full stretch overhead. Targets the long head.",
+  "Back Extension Machine (45°)": "Posterior-chain work — hinge and squeeze the glutes at the top, don't hyperextend the low back.",
+  "Glute Drive / Hip Thrust Machine": "Drive through the heels to full hip lockout, squeeze the glutes hard at the top for a beat.",
+  "Hack Squat or Leg Press": "Big quad driver. Controlled depth, don't let the knees cave in. Push hard — lots of room to progress here.",
+  "Walking Lunges": "You flagged these as brutal — that's normal, they're the hardest thing in the plan. If they wreck the rest of Lower B, do them LAST or swap for a machine (leg press/hack squat) until your base builds.",
+  "Seated Leg Curl": "NEW — added to balance your hamstring volume (you only had one ham slot before). First time: start around 40 lb like your Lower A curl and adjust. Squeeze at the top, slow negative.",
+  "Leg Extension": "Quad isolation — pause and squeeze at the top. Higher reps here; chase the burn.",
+  "Seated Calf Raise": "Bent knee hits the soleus. Full stretch, pause at the bottom, no bouncing.",
+  "Cable Crunch": "Round the spine down toward the floor with your abs — don't just hinge at the hips. Exhale hard at the bottom.",
+};
 
 /* ---------- Storage ---------- */
 const STORE_KEY = "liftlog.sessions.v1";
@@ -778,11 +826,13 @@ function openSession(dayKey, prefill) {
           <span>Match or beat last time — see your numbers below.</span></div>`;
       }
     }
+    const note = COACH_NOTES[ex.name];
     html += `<div class="card exercise" data-ex="${ei}" data-name="${esc(ex.name)}">
       <div class="ex-head">
-        <div class="ex-name">${esc(ex.name)}</div>
+        <div class="ex-name">${esc(ex.name)}${note ? ` <button class="coach-toggle" onclick="toggleNote(${ei})" aria-label="Coach note">💬</button>` : ""}</div>
         <div class="ex-target">${ex.sets} × ${ex.reps}</div>
       </div>
+      ${note ? `<div class="coach-note" id="cn-${ei}" style="display:none"><span class="cn-icon">💬</span><span>${esc(note)}</span></div>` : ""}
       ${banner}
       <div class="col-head"><span>Set</span><span>Weight</span><span>Reps</span></div>`;
     for (let s = 0; s < ex.sets; s++) {
@@ -828,6 +878,13 @@ function openSession(dayKey, prefill) {
   });
 
   window.scrollTo(0,0);
+}
+
+// Toggle the coach note for an exercise open/closed
+function toggleNote(ei) {
+  const el = document.getElementById("cn-" + ei);
+  if (!el) return;
+  el.style.display = el.style.display === "none" ? "flex" : "none";
 }
 
 function finishWorkout(dayKey) {
