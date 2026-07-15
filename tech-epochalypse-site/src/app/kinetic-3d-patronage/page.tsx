@@ -40,11 +40,38 @@ export default function Kinetic3DPatronagePage() {
           {/* Left: Benefits */}
           <div className="flex-1">
 
-            <div className="line-accent mb-16" />
+            <div className="line-accent mb-8" />
+
+            {/* First of Its Kind */}
+            <ScrollReveal>
+              <div className="mb-8 md:mb-12">
+                <div className="classified-header">
+                  Benefit 001 -{' '}
+                  <span className="redacted">Origin</span>
+                </div>
+                <h2 className="font-display text-3xl md:text-4xl text-white mb-6 uppercase tracking-[0.03em]">
+                  Kinetic 3D Collage Machine
+                </h2>
+                <div className="space-y-4 text-white text-sm font-mono leading-relaxed">
+                  <p>
+                    Tech Epochalypse is the first time Coldie has adopted the
+                    mantra &lsquo;touch the art&rsquo; in a digital context.
+                    Creating the interface that takes collage from a static
+                    assemblage into a living artwork, Coldie invites the viewer
+                    to interact with the work and create unique compositions. To
+                    feel something. The goal is to educate about who the tech
+                    overlords are and allow us to reshape the way their identity
+                    is visualized.
+                  </p>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            <div className="line-accent mb-8" />
 
             {/* Network Effect */}
             <ScrollReveal>
-              <div className="mb-16 md:mb-24">
+              <div className="mb-8 md:mb-12">
                 <div className="classified-header">
                   Benefit 002 -{' '}
                   <span className="redacted">Distribution</span>
@@ -99,11 +126,11 @@ export default function Kinetic3DPatronagePage() {
               </div>
             </ScrollReveal>
 
-            <div className="line-accent mb-16" />
+            <div className="line-accent mb-8" />
 
             {/* Real-Time Evolution */}
             <ScrollReveal>
-              <div className="mb-16 md:mb-24">
+              <div className="mb-8 md:mb-12">
                 <div className="classified-header">
                   Benefit 003 -{' '}
                   <span className="redacted">Evolution</span>
@@ -155,11 +182,11 @@ export default function Kinetic3DPatronagePage() {
               </div>
             </ScrollReveal>
 
-            <div className="line-accent mb-16" />
+            <div className="line-accent mb-8" />
 
             {/* Added-Value: Collaborative Print */}
             <ScrollReveal>
-              <div className="mb-16 md:mb-24">
+              <div className="mb-8 md:mb-12">
                 <div className="classified-header">
                   Benefit 004 -{' '}
                   <span className="redacted">Added-Value</span>
@@ -203,23 +230,26 @@ export default function Kinetic3DPatronagePage() {
                         <span className="text-white/30 select-none">-</span>
                         <p>Signed and numbered 1/1/10 per overlord.</p>
                       </div>
-                      <div className="flex items-baseline gap-3">
-                        <span className="text-white/30 select-none">-</span>
-                        <p>
-                          Full Set collectors can create multi-overlord mashup portraits
-                        </p>
-                      </div>
+                    </div>
+                    <div className="mt-5 border border-red-600 bg-red-600/10 p-4">
+                      <h4 className="font-mono text-[10px] uppercase tracking-[0.2em] text-red-500 mb-2">
+                        Full Set Upgrade
+                      </h4>
+                      <p className="text-white text-sm font-mono leading-relaxed">
+                        Full Set collectors have opportunity to have multiple
+                        overlords asset mashup on the physical work.
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
             </ScrollReveal>
 
-            <div className="line-accent mb-16" />
+            <div className="line-accent mb-8" />
 
             {/* Physical Kinetic 3D Series */}
             <ScrollReveal>
-              <div className="mb-16 md:mb-24">
+              <div className="mb-8 md:mb-12">
                 <div className="classified-header">
                   Benefit 005 -{' '}
                   <span className="redacted">Physical</span>
@@ -272,17 +302,18 @@ export default function Kinetic3DPatronagePage() {
                       <div className="flex items-baseline gap-3">
                         <span className="text-white/30 select-none">-</span>
                         <p>
-                          Founding System Collectors (Full set) Owning can have a
-                          mashup of the five Overlord elements on the physical
-                          work.
-                        </p>
-                      </div>
-                      <div className="flex items-baseline gap-3">
-                        <span className="text-white/30 select-none">-</span>
-                        <p>
                           Release date TBD based on R&amp;D and production.
                         </p>
                       </div>
+                    </div>
+                    <div className="mt-5 border border-red-600 bg-red-600/10 p-4">
+                      <h4 className="font-mono text-[10px] uppercase tracking-[0.2em] text-red-500 mb-2">
+                        Full Set Upgrade
+                      </h4>
+                      <p className="text-white text-sm font-mono leading-relaxed">
+                        Full Set collectors have opportunity to have multiple
+                        overlords asset mashup on the physical work.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -306,10 +337,6 @@ export default function Kinetic3DPatronagePage() {
                     <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">Editions / Overlord</span>
                     <span className="font-display text-lg text-white">10</span>
                   </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">Price</span>
-                    <span className="font-display text-lg text-white">$6,000 <span className="font-mono text-[10px] text-white/50">(in ETH)</span></span>
-                  </div>
                 </div>
               </div>
 
@@ -320,11 +347,21 @@ export default function Kinetic3DPatronagePage() {
                 </h3>
                 <div className="flex justify-between items-baseline mb-1">
                   <span className="font-mono text-sm text-white">5 Total</span>
-                  <span className="font-mono text-sm text-white">3 Available</span>
+                  <span className="font-mono text-sm text-white">2 Available</span>
                 </div>
-                <p className="font-mono text-[10px] text-white/40 mb-5">
+                <div className="flex justify-between items-baseline mb-1">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">Price</span>
+                  <span className="font-mono text-sm text-white">$30,000 <span className="font-mono text-[10px] text-white/50">(in ETH)</span></span>
+                </div>
+                <p className="font-mono text-[10px] text-white/40 mb-4">
                   Set of 5 Overlords
                 </p>
+                <div className="border border-red-600 bg-red-600/10 p-3">
+                  <p className="font-mono text-[10px] text-white leading-relaxed">
+                    Additional options available for Full Set Collectors, see
+                    each Benefit section for details.
+                  </p>
+                </div>
               </div>
 
               {/* Individual Tokens */}
@@ -333,12 +370,13 @@ export default function Kinetic3DPatronagePage() {
                   Individual Tokens
                 </h3>
                 <div className="space-y-3 text-white text-sm font-mono leading-relaxed">
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-white/30 select-none">-</span>
-                    <p>
-                      Discount applies toward the cost of the physical,
-                      if you choose to collect.
-                    </p>
+                  <div className="flex justify-between items-baseline pb-1">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">Price</span>
+                    <span className="font-mono text-sm text-white">$6,000 <span className="font-mono text-[10px] text-white/50">(in ETH)</span></span>
+                  </div>
+                  <div className="flex justify-between items-baseline">
+                    <span className="font-mono text-sm text-white">Elon Musk</span>
+                    <span className="font-mono text-[11px] text-white/60">5 ed. - <span className="text-white">1 avail</span></span>
                   </div>
                   <div className="flex justify-between items-baseline">
                     <span className="font-mono text-sm text-white">Mark Zuckerberg</span>
