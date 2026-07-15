@@ -26,6 +26,19 @@
     }
   },
   {
+    "name": "1Confirmation",
+    "avatar": null,
+    "pieces": ["elon-musk", "mark-zuckerberg", "sam-altman", "jeff-bezos", "jensen-huang"],
+    "bio": null,
+    "label": "Founding System Collector 003",
+    "founding": true,
+    "socials": {
+      "twitter": "https://x.com/1confirmation",
+      "instagram": null,
+      "website": null
+    }
+  },
+  {
     "name": "Benny Red Beard",
     "avatar": null,
     "pieces": ["elon-musk"],

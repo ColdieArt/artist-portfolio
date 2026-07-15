@@ -107,9 +107,6 @@ export default function SeriesPage() {
                     </div>
                   </div>
                   <div className="p-4 flex flex-col gap-2">
-                    <p className="font-mono text-[10px] text-white/40 uppercase tracking-wider">
-                      50 Moments
-                    </p>
                     <div className="flex gap-2">
                       <Link
                         href={`/overlords/${overlord.slug}`}

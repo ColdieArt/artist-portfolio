@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import ScrollReveal from '@/components/ScrollReveal'
+import overlords from '@/data/overlords.json'
 
 export const metadata: Metadata = {
   title: 'Kinetic 3D Patronage - Tech Epochalypse',
@@ -34,6 +35,53 @@ export default function Kinetic3DPatronagePage() {
             </p>
           </div>
         </ScrollReveal>
+
+        {/* The Five Overlords row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-16 md:mb-20">
+          {overlords.filter((o) => o.status !== 'unlisted').map((overlord, i) => (
+            <ScrollReveal key={overlord.slug} delay={i * 100}>
+              <div className="group relative bg-charcoal/30 border border-white/5 hover:border-white/10 overflow-hidden transition-all duration-500">
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                <div className="aspect-square relative overflow-hidden">
+                  {overlord.previewImage ? (
+                  <img
+                    src={overlord.previewImage}
+                    alt={overlord.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    style={{ filter: 'contrast(1.1)' }}
+                    loading="lazy"
+                  />
+                  ) : (
+                  <div className="w-full h-full bg-charcoal flex items-center justify-center">
+                    <span className="font-display text-6xl text-white">{overlord.number}</span>
+                  </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/60 mb-1">
+                      Node {overlord.number}
+                    </p>
+                    <h3 className="font-display text-lg text-white uppercase tracking-[0.03em]">
+                      {overlord.name}
+                    </h3>
+                    <p className="font-mono text-[10px] uppercase tracking-wider text-white/50">
+                      {overlord.title}
+                    </p>
+                  </div>
+                </div>
+                <div className="p-4 flex flex-col gap-2">
+                  <Link
+                    href={`/overlords/${overlord.slug}`}
+                    className="text-center font-mono text-[10px] uppercase tracking-wider text-white border border-white/10 px-3 py-2 hover:bg-white/5 transition-colors"
+                  >
+                    Interact
+                  </Link>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+              </div>
+            </ScrollReveal>
+          ))}
+        </div>
 
         {/* Two-column layout: Benefits + Sidebar */}
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
