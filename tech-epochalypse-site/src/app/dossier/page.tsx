@@ -16,18 +16,47 @@ export const metadata = {
    public/dossier/winners/. `designation` controls the stamp/label:
      'coldie'    → Coldie Selection  ("Selected" ink stamp)
      'community' → Community Vote     ("Voted" blue stamp, from /dossier-refinement)
+   Each winner is minted as an edition on the Tech Epochalypse — Dossier
+   contract (Transient Labs, Ethereum); `mint` is its token page.
    ──────────────────────────────────────────────────────────────────── */
 type Designation = 'coldie' | 'community'
 interface Winner {
   artist: string
   image: string
   designation: Designation
+  title: string
+  mint: string
+  price: string
 }
 
+const MINT_CONTRACT =
+  'https://www.transient.xyz/nfts/ethereum/0x96127e5b97c2919c10ddd86c66661bf5d27ba2b9'
+
 const WINNERS: Winner[] = [
-  { artist: '@BoyaGeorge', image: '/dossier/winners/@BoyaGeorge.jpeg', designation: 'coldie' },
-  { artist: '@METAGEISTVR', image: '/dossier/winners/@METAGEISTVR.jpeg', designation: 'coldie' },
-  { artist: '@ArtemIoha79094', image: '/dossier/winners/@ArtemIoha79094.jpeg', designation: 'community' },
+  {
+    artist: '@BoyaGeorge',
+    image: '/dossier/winners/@BoyaGeorge.jpeg',
+    designation: 'coldie',
+    title: 'Emperor of Dislikes — Mark Zuckerberg',
+    mint: `${MINT_CONTRACT}/2`,
+    price: '0.04 ETH',
+  },
+  {
+    artist: '@METAGEISTVR',
+    image: '/dossier/winners/@METAGEISTVR.jpeg',
+    designation: 'coldie',
+    title: 'BERG! — Mark Zuckerberg',
+    mint: `${MINT_CONTRACT}/1`,
+    price: '0.04 ETH',
+  },
+  {
+    artist: '@ArtemIoha79094',
+    image: '/dossier/winners/@ArtemIoha79094.jpeg',
+    designation: 'community',
+    title: 'Singularity — Elon Musk',
+    mint: `${MINT_CONTRACT}/3`,
+    price: '0.015 ETH',
+  },
 ]
 
 // Read every entry image dropped into public/dossier/entries/ at build time.
@@ -148,6 +177,9 @@ export default function DossierPage() {
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-[#9a9684] mt-3">
                 Two by Coldie · One by Community Vote · All 1:1
               </p>
+              <p className="font-mono text-xs uppercase tracking-[0.25em] text-[#8c2b22] mt-2">
+                Editions Minted · Now Collectible
+              </p>
             </div>
           </ScrollReveal>
 
@@ -172,19 +204,25 @@ export default function DossierPage() {
                       </span>
                     </div>
 
-                    {/* The artwork (1:1) */}
-                    <div className="photo-print">
+                    {/* The artwork (1:1) — links to its mint page */}
+                    <a
+                      href={w.mint}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="photo-print block group focus:outline-none focus:ring-2 focus:ring-[#8c2b22]"
+                      aria-label={`Collect “${w.title}” by ${w.artist} on Transient`}
+                    >
                       <div className="aspect-square overflow-hidden bg-[#0a0a0a] flex items-center justify-center">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={w.image}
                           alt={`SUBJ:01 winning selection by ${w.artist}`}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                       </div>
-                    </div>
+                    </a>
 
-                    {/* Typewriter caption — handle only */}
+                    {/* Typewriter caption — handle, title, and mint link */}
                     <div className="px-1 pt-4">
                       <p className="tw-label text-[10px] uppercase tracking-[0.25em] text-[#8c2b22]">
                         {meta.kicker}
@@ -192,6 +230,18 @@ export default function DossierPage() {
                       <h3 className="tw-label text-xl leading-tight text-[#1c1a14] mt-1">
                         {w.artist}
                       </h3>
+                      <p className="font-mono text-[11px] leading-snug text-[#4a4537] mt-1">
+                        {w.title}
+                      </p>
+
+                      <a
+                        href={w.mint}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-[#1c1a14] border border-[#1c1a14]/40 hover:bg-[#1c1a14] hover:text-[#ece6d4] transition-colors px-4 py-2"
+                      >
+                        Collect · {w.price} →
+                      </a>
                     </div>
                   </article>
                 </ScrollReveal>
@@ -273,6 +323,14 @@ export default function DossierPage() {
                 >
                   View SUBJ:01 Brief →
                 </Link>
+                <a
+                  href={MINT_CONTRACT}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#1c1a14] border border-[#1c1a14]/40 hover:bg-[#1c1a14] hover:text-[#ece6d4] transition-colors px-4 py-2"
+                >
+                  Collect the Winners →
+                </a>
               </div>
 
               <span className="rubber-stamp absolute bottom-6 right-8 text-xl" style={{ transform: 'rotate(-12deg)' }}>
