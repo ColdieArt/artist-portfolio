@@ -5,6 +5,134 @@
   <!-- Gallery API — update this URL after deploying the Cloudflare Worker -->
   <script>window.GALLERY_API_URL = window.location.origin;</script>
   <title>JEFF BEZOS — Collector Edition | Tech Epochalypse by Coldie</title>
+<!-- ─── COLLECTOR ACCESS GATE ─── -->
+  <!-- Soft access gate for collector invites. This is a deterrent, NOT security:
+       the page is static HTML on a CDN, so anyone who views source, disables
+       JS, or curls the URL gets the artwork regardless. What it does buy:
+       the password itself is never in the file (only the SHA-256 below), so a
+       casual visitor can't read it off the page and pass it around. For real
+       protection the gate has to live in front of the file — Vercel Deployment
+       Protection, Cloudflare Access, or serving these through the worker. -->
+  <style>
+    /* Hide the artwork from the very first paint, before any of it renders.
+       The gate itself is appended to <html>, outside <body>, so it stays
+       visible while this rule is in force. */
+    html.pw-locked body { visibility: hidden !important; }
+    html.pw-locked { background: #000; }
+    #pw-gate {
+      position: fixed; inset: 0; z-index: 2147483647;
+      background: #000; color: #fff;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-family: monospace; padding: 24px; box-sizing: border-box;
+      visibility: visible;
+    }
+    #pw-gate .pw-box { width: 100%; max-width: 340px; text-align: center; }
+    #pw-gate h1 {
+      font-size: 13px; letter-spacing: 3px; margin: 0 0 6px; font-weight: bold;
+    }
+    #pw-gate p {
+      font-size: 10px; letter-spacing: 1px; color: #777;
+      margin: 0 0 22px; line-height: 1.7;
+    }
+    #pw-gate input {
+      width: 100%; box-sizing: border-box; background: #111;
+      border: 1px solid #333; color: #fff; padding: 11px 13px;
+      font-family: monospace; font-size: 13px; letter-spacing: 2px;
+      outline: none; text-align: center;
+    }
+    #pw-gate input:focus { border-color: #777; }
+    #pw-gate button {
+      width: 100%; margin-top: 12px; background: #000; color: #fff;
+      border: 2px solid #fff; padding: 11px; font-family: monospace;
+      font-size: 12px; font-weight: bold; letter-spacing: 2px; cursor: pointer;
+    }
+    #pw-gate button:hover { background: #1a1a1a; }
+    #pw-gate .pw-err {
+      min-height: 14px; margin-top: 12px;
+      font-size: 10px; letter-spacing: 1px; color: #e66;
+    }
+    #pw-gate .pw-sig {
+      margin-top: 26px; font-size: 9px; letter-spacing: 2px; color: #444;
+    }
+  </style>
+  <script>
+  (function () {
+    var KEY = 'te_collector_access_v1';
+    var DIGEST = '88d35ea02b0cf7345f97e982c279ff7ab812ef3355fdaaa21cfad1f554dd04f0';
+
+    // Already unlocked on this device? Stay out of the way. One unlock covers
+    // every collector page, since they share an origin.
+    try { if (localStorage.getItem(KEY) === DIGEST) return; } catch (e) { /* private mode */ }
+
+    document.documentElement.classList.add('pw-locked');
+
+    function sha256Hex(str) {
+      // crypto.subtle needs a secure context; https and localhost both qualify.
+      if (!(window.crypto && window.crypto.subtle)) return Promise.resolve(null);
+      return window.crypto.subtle
+        .digest('SHA-256', new TextEncoder().encode(str))
+        .then(function (buf) {
+          return Array.prototype.map
+            .call(new Uint8Array(buf), function (b) { return b.toString(16).padStart(2, '0'); })
+            .join('');
+        });
+    }
+
+    function build() {
+      var gate = document.createElement('div');
+      gate.id = 'pw-gate';
+      gate.innerHTML =
+        '<div class="pw-box">' +
+          '<h1>TECH EPOCHALYPSE</h1>' +
+          '<p>COLLECTOR EDITION<br>ENTER YOUR ACCESS CODE</p>' +
+          '<input id="pw-input" type="password" autocomplete="off" ' +
+                 'autocapitalize="off" autocorrect="off" spellcheck="false" ' +
+                 'aria-label="Access code">' +
+          '<button id="pw-enter" type="button">ENTER</button>' +
+          '<div class="pw-err" id="pw-err"></div>' +
+          '<div class="pw-sig">COLDIE</div>' +
+        '</div>';
+      // Appended to <html>, not <body> — body is hidden while locked.
+      document.documentElement.appendChild(gate);
+
+      var input = gate.querySelector('#pw-input');
+      var err = gate.querySelector('#pw-err');
+      input.focus();
+
+      function unlock() {
+        try { localStorage.setItem(KEY, DIGEST); } catch (e) { /* private mode: this session only */ }
+        document.documentElement.classList.remove('pw-locked');
+        gate.remove();
+        // The artwork sized itself while body was hidden; nudge it to re-measure.
+        window.dispatchEvent(new Event('resize'));
+      }
+
+      function submit() {
+        var val = (input.value || '').trim().toLowerCase();
+        sha256Hex(val).then(function (hex) {
+          if (hex === DIGEST) { unlock(); return; }
+          err.textContent = hex === null ? 'BROWSER NOT SUPPORTED' : 'INCORRECT CODE';
+          input.value = '';
+          input.focus();
+        });
+      }
+
+      gate.querySelector('#pw-enter').addEventListener('click', submit);
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); submit(); }
+        else { err.textContent = ''; }
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', build);
+    } else {
+      build();
+    }
+  })();
+  </script>
+  <!-- ─── /COLLECTOR ACCESS GATE ─── -->
   <!-- Airtable submission handled server-side by the worker -->
   <!-- ─────────────────────────────────────────────────────────────────
        COLLECTOR PRINT CONFIG
