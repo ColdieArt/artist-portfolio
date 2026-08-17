@@ -333,7 +333,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                   <div className="border-t border-black/10 pt-3">
                     <p className="font-bold text-[10px] uppercase tracking-widest">The Promise</p>
                     <p className="mt-1 text-[10px]">
-                      Artist-first, collector-rewarding. Winners keep 80%. Nearly half of every drop returns to the collector community.
+                      Artist-first, collector-rewarding. Winners keep 80% of primary sales. Nearly half of every drop returns to the collector community.
                     </p>
                     <p className="mt-2 font-bold text-black text-xs">The Singularity has five faces. Pick yours.</p>
                   </div>
