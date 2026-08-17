@@ -5123,6 +5123,32 @@ setTimeout(function () {
   }
   #collector-hint .dismiss:hover { color: #fff; }
 
+  /* ─── 12" × 18" PRINT CROP GUIDE ───
+     Shows exactly the region CREATE MY PRINT will capture. The capture sets
+     camera.aspect to 2:3; a PerspectiveCamera holds its vertical FOV when the
+     aspect changes, so the print keeps the full viewport HEIGHT and narrows
+     horizontally to height × (12/18). That is precisely this box — no fudge
+     margin, or the guide would lie about what gets cut. */
+  #print-crop-overlay {
+    position: fixed;
+    border: 1.5px dashed rgba(255, 255, 255, 0.85);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+    z-index: 30;
+    pointer-events: none; /* never block dragging pieces underneath */
+    box-sizing: border-box;
+    display: none;
+  }
+  #print-crop-overlay .pc-label {
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    font-family: monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+  }
+
   #collector-modal {
     position: fixed;
     inset: 0;
@@ -5257,6 +5283,8 @@ setTimeout(function () {
   }
 </style>
 
+<div id="print-crop-overlay"><div class="pc-label">12 × 18 in — PRINT CROP</div></div>
+
 <button id="collector-cta">CREATE MY PRINT</button>
 
 <div id="collector-hint">
@@ -5344,6 +5372,63 @@ setTimeout(function () {
     hint.style.display = 'none';
     try { localStorage.setItem('collector_hint_dismissed_' + CFG.FILE_SLUG, '1'); } catch (e) { /* quota */ }
   };
+
+  // ── 12" × 18" print crop guide ──────────────────────────────────────
+  // Sized to the exact region capturePrint() will render (full viewport
+  // height, width = height × 12/18), so what's inside the dashes is what
+  // ends up on paper. Toggled from a button in the left tool column.
+  const cropOverlay = document.getElementById('print-crop-overlay');
+  function updateCropOverlay() {
+    const h = window.innerHeight;
+    const w = h * (CFG.PRINT_IN_W / CFG.PRINT_IN_H);
+    cropOverlay.style.width = w + 'px';
+    cropOverlay.style.height = h + 'px';
+    cropOverlay.style.left = ((window.innerWidth - w) / 2) + 'px';
+    cropOverlay.style.top = '0px';
+  }
+  let cropVisible = true;
+  function applyCropVisibility() {
+    cropOverlay.style.display = cropVisible ? 'block' : 'none';
+    if (cropVisible) updateCropOverlay();
+  }
+  window.addEventListener('resize', updateCropOverlay);
+
+  // The left tool column is built by the module's init(), so wait for it.
+  (function attachCropToggle() {
+    const leftUi = document.getElementById('left-ui-container');
+    if (!leftUi) { setTimeout(attachCropToggle, 100); return; }
+    const btn = document.createElement('button');
+    btn.id = 'print-crop-btn';
+    btn.textContent = 'PRINT 12×18';
+    const style = () => {
+      btn.style.cssText = 'background-color: black; color: ' + (cropVisible ? '#4CAF50' : 'white') +
+        '; padding: 4px; margin-top: 10px; border: 0.5px solid ' + (cropVisible ? '#4CAF50' : '#00BCD4') +
+        '; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none;' +
+        ' white-space: nowrap; box-sizing: border-box;';
+    };
+    style();
+    btn.onclick = (e) => { e.stopPropagation(); cropVisible = !cropVisible; applyCropVisibility(); style(); };
+    leftUi.appendChild(btn);
+    applyCropVisibility();
+  })();
+
+  // ── Keep the CTA clear of controls already parked bottom-right ──
+  // The mashup page pins its own fixed SAVE / LOAD buttons down there. At the
+  // CTA's default corner it covers both of them completely (they sit at
+  // z-index 250, the CTA at 400), leaving them unclickable. Lift the CTA above
+  // whatever is already there. No-op on pages without those buttons.
+  (function dodgeExistingControls(tries) {
+    const parked = ['collector-save-btn', 'collector-load-btn']
+      .map(id => document.getElementById(id))
+      .filter(Boolean);
+    if (!parked.length) {
+      if ((tries || 0) < 40) setTimeout(() => dodgeExistingControls((tries || 0) + 1), 100);
+      return;
+    }
+    const lift = Math.max.apply(null, parked.map(el =>
+      window.innerHeight - el.getBoundingClientRect().top));
+    cta.style.bottom = (lift + 12) + 'px';
+  })();
 
   function setStatus(msg, cls) {
     statusEl.textContent = msg || '';
@@ -5550,7 +5635,12 @@ setTimeout(function () {
     const base = (typeof window.saveComposition === 'function')
       ? window.saveComposition()
       : { version: 1, meshStates: [], note: 'saveComposition unavailable' };
-    return JSON.stringify(Object.assign({}, base, {
+    // Mashup pages publish which overlord each face element is currently set
+    // to. Recording it in plain names makes the JSON readable as a production
+    // spec ("Musk eyes, Bezos nose") instead of bare indices. A no-op on the
+    // single-overlord pages, which don't define the hook.
+    const mix = (typeof window.getOverlordMix === 'function') ? window.getOverlordMix() : null;
+    return JSON.stringify(Object.assign({}, base, mix ? { overlordMix: mix } : {}, {
       overlord: CFG.OVERLORD,
       collector: {
         name: meta.name,
