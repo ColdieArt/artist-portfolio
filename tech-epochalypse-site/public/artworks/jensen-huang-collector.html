@@ -355,6 +355,14 @@
     }
     #post-modal-btn:hover { background: #0d1117; }
     /* ─── ORBITAL TRANSFORM UI ─── */
+    /* Collector print editions: 3D and FLY are camera-motion effects that fight
+       the fixed print crop, so they're hidden from the tool panel. !important
+       because addButtonToggle writes inline display styles. */
+    #left-ui-container button[data-effect="yRotation"],
+    #left-ui-container button[data-effect="cameraAnimation"],
+    #right-ui-container button[data-effect="yRotation"],
+    #right-ui-container button[data-effect="cameraAnimation"] { display: none !important; }
+
     #orbital-transform-ui {
       position: fixed; z-index: 600; background: rgba(0,0,0,0.93);
       border: 1px solid rgba(255,255,255,0.28); padding: 10px 12px 9px;
