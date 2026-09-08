@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import ScrollReveal from '@/components/ScrollReveal'
+import { KINETIC_MINTS, KINETIC_COLLECTION_URL } from '@/data/kinetic-mints'
 
 // Lazy-load heavy canvas animations so nav becomes interactive immediately
 const ParticleNetwork = dynamic(() => import('@/components/ParticleNetwork'), {
@@ -211,30 +212,63 @@ export default function HomePage() {
                   Moments captured across all five Overlords - every piece is a
                   fragment of the network, scattered across collectors worldwide.
                 </p>
-                <Link href="/series" className="btn-primary">
-                  <span>Explore the Series</span>
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </Link>
+                <p className="text-white text-sm font-mono leading-relaxed mb-8 max-w-xl">
+                  <span className="text-white/50 uppercase tracking-[0.15em] text-xs">Available Now - </span>
+                  Four Kinetic 3D Interactive portraits are live on-chain:
+                  Zuckerberg, Altman, Bezos, and Huang.
+                </p>
+                <div className="flex flex-wrap items-center gap-4">
+                  <a
+                    href={KINETIC_COLLECTION_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-primary btn-pulse"
+                  >
+                    <span>Buy Now</span>
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </a>
+                  <Link href="/series" className="btn-secondary">
+                    <span>Explore the Series</span>
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </Link>
+                </div>
               </div>
-              <div className="md:w-80 shrink-0 grid grid-cols-2 gap-3">
-                {[
-                  { src: '/images/overlords/elon-musk-coldie-kinetic-3d-digital.avif', alt: 'Elon Musk - Kinetic 3D' },
-                  { src: '/images/overlords/jeff-bezos-coldie-kinetic-collage.avif', alt: 'Jeff Bezos - Kinetic Collage' },
-                  { src: '/images/overlords/jensen-huang-coldie-digital-3d-art.avif', alt: 'Jensen Huang - Digital 3D' },
-                  { src: '/images/overlords/sam-altman-coldie-kinetic-3d.avif', alt: 'Sam Altman - Kinetic 3D' },
-                ].map((img) => (
-                  <div key={img.src} className="aspect-square relative overflow-hidden border border-white/5 hover:border-white/15 transition-all duration-500 group">
-                    <img
-                      src={img.src}
-                      alt={img.alt}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  </div>
-                ))}
+              <div className="md:w-80 shrink-0">
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50 mb-3">
+                  Collect an Overlord
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  {KINETIC_MINTS.map((mint) => (
+                    <a
+                      key={mint.slug}
+                      href={mint.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Collect the ${mint.name} Kinetic 3D portrait on Transient`}
+                      className="aspect-square relative overflow-hidden border border-white/5 hover:border-white/30 transition-all duration-500 group block"
+                    >
+                      <img
+                        src={mint.image}
+                        alt={`${mint.name} - Kinetic 3D portrait by Coldie`}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                        <p className="font-display text-[11px] text-white uppercase tracking-[0.05em] leading-tight">
+                          {mint.name}
+                        </p>
+                        <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-white/50 group-hover:text-white transition-colors">
+                          Collect &rsaquo;
+                        </p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
           </ScrollReveal>
