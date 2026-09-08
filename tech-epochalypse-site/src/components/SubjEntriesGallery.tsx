@@ -1,11 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 
-// Lightweight, read-only gallery for active SUBJ entries.
+// Lightweight, read-only gallery for a SUBJ event's approved entries.
 // No voting, no metadata noise — just thumbnails.
-// Pulls from the existing /api/airtable-records proxy filtered to the
-// "general submission" category, matching how the subj page tags entries.
+//
+// Data comes from the gallery worker's GET /entries?category=<category>,
+// which reads Airtable server-side (Approved = 1, Category = <category>)
+// and returns the same {records: [...]} shape as the old /api proxy. The
+// site is a static export, so there is no Next API route to proxy through.
+
+const WORKER_URL =
+  process.env.NEXT_PUBLIC_GALLERY_WORKER_URL ||
+  'https://te-gallery-api.coldieart.workers.dev'
 
 interface AirtableThumb {
   small?: { url: string }
@@ -33,9 +40,20 @@ interface Entry {
 
 export default function SubjEntriesGallery({
   category,
+  eventLabel,
+  theme = 'noir',
+  emptyState,
 }: {
-  category?: string
+  /** Airtable "Category" value that tags this event's entries, e.g. 'subj-02'. */
+  category: string
+  /** Display label, e.g. '02'. */
+  eventLabel: string
+  /** 'noir' = black section w/ white type (SUBJ pages); 'dossier' = transparent, paper-desk palette. */
+  theme?: 'noir' | 'dossier'
+  /** Rendered instead of null when there are zero entries. */
+  emptyState?: ReactNode
 }) {
+  const dossier = theme === 'dossier'
   const [entries, setEntries] = useState<Entry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -44,11 +62,9 @@ export default function SubjEntriesGallery({
     let cancelled = false
     async function load() {
       try {
-        // No category filter by default — SUBJ:01 is the only active event,
-        // so every approved record is a SUBJ:01 entry. Pass `category` only
-        // when filtering for a specific competition.
-        const qs = category ? `?category=${encodeURIComponent(category)}` : ''
-        const res = await fetch(`/api/airtable-records${qs}`, { cache: 'no-store' })
+        const res = await fetch(`${WORKER_URL}/entries?category=${encodeURIComponent(category)}`, {
+          cache: 'no-store',
+        })
         if (!res.ok) throw new Error('fetch failed')
         const data = await res.json()
         if (cancelled) return
@@ -77,7 +93,7 @@ export default function SubjEntriesGallery({
 
   if (loading) {
     return (
-      <div className="text-center py-10 font-mono text-xs text-white/40 uppercase tracking-wider">
+      <div className={`text-center py-10 font-mono text-xs uppercase tracking-wider ${dossier ? 'text-[#9a9684]' : 'text-white/40'}`}>
         Loading entries…
       </div>
     )
@@ -88,20 +104,22 @@ export default function SubjEntriesGallery({
     return null
   }
   if (entries.length === 0) {
-    return null
+    return emptyState ? <>{emptyState}</> : null
   }
 
   return (
-    <section className="relative py-16 md:py-20 section-padding bg-black">
-      <div className="page-container">
+    <section className={dossier ? 'relative py-8' : 'relative py-16 md:py-20 section-padding bg-black'}>
+      <div className={dossier ? '' : 'page-container'}>
         <div className="text-center mb-8 md:mb-10">
-          <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/60 mb-3">
+          <p className={`font-mono text-xs uppercase tracking-[0.4em] mb-3 ${dossier ? 'text-[#8c2b22]' : 'text-white/60'}`}>
             Live Entries
           </p>
-          <h2 className="font-display text-3xl md:text-5xl text-white uppercase tracking-[0.05em] mb-3">
-            SUBJ:&nbsp;01 Submissions
+          <h2 className={dossier
+            ? 'font-stencil text-3xl sm:text-4xl uppercase tracking-[0.03em] text-[#ece6d4] mb-3'
+            : 'font-display text-3xl md:text-5xl text-white uppercase tracking-[0.05em] mb-3'}>
+            SUBJ:&nbsp;{eventLabel} Submissions
           </h2>
-          <p className="font-mono text-xs md:text-sm text-white/60 max-w-xl mx-auto">
+          <p className={`font-mono text-xs md:text-sm max-w-xl mx-auto ${dossier ? 'text-[#9a9684]' : 'text-white/60'}`}>
             {entries.length} {entries.length === 1 ? 'entry' : 'entries'} so far.
           </p>
         </div>
@@ -110,12 +128,12 @@ export default function SubjEntriesGallery({
           {entries.map((e) => (
             <div
               key={e.id}
-              className="aspect-square overflow-hidden border border-white/10 bg-black"
+              className={dossier ? 'photo-print aspect-square overflow-hidden' : 'aspect-square overflow-hidden border border-white/10 bg-black'}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={e.src}
-                alt={e.title || 'SUBJ:01 entry'}
+                alt={e.title || `SUBJ:${eventLabel} entry`}
                 className="w-full h-full object-cover"
                 loading="lazy"
               />

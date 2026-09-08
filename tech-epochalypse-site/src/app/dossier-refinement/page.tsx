@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
+import { ACTIVE_SUBJ } from '@/data/subj-events'
+
 const WORKER_URL =
   process.env.NEXT_PUBLIC_GALLERY_WORKER_URL ||
   'https://te-gallery-api.coldieart.workers.dev'
@@ -34,6 +36,9 @@ export default function VsPage() {
   const [badgeVisible, setBadgeVisible] = useState(false)
   const [limitReached, setLimitReached] = useState(false)
   const [quota, setQuota] = useState<{ used: number; limit: number } | null>(null)
+  // Set when the worker reports the voting window is closed (403). The
+  // worker enforces the window from its own clock; we just display it.
+  const [closedMsg, setClosedMsg] = useState<string | null>(null)
 
   const loadPair = useCallback(async (slug: string) => {
     setLoading(true)
@@ -48,7 +53,8 @@ export default function VsPage() {
       const data = await res.json()
       if (!res.ok) {
         setPair(null)
-        setError(data?.error || 'Could not load a pair.')
+        if (data?.votingClosed) setClosedMsg(data.error || 'Voting is closed.')
+        else setError(data?.error || 'Could not load a pair.')
       } else {
         setPair(data)
       }
@@ -85,6 +91,10 @@ export default function VsPage() {
         if (data?.limitReached) {
           setLimitReached(true)
           return // don't queue another pair load
+        }
+        if (data?.votingClosed) {
+          setClosedMsg(data.error || 'Voting is closed.')
+          return
         }
         setCount((c) => c + 1)
       } catch {
@@ -128,14 +138,14 @@ export default function VsPage() {
             sharper the ranking.
           </p>
           <p className="font-mono text-sm text-white/60 max-w-2xl mx-auto mb-3 leading-relaxed">
-            The top-ranked work wins the Community Pick and is minted into the
-            Tech Epochalypse dossier.
+            The top-ranked work wins the SUBJ:{ACTIVE_SUBJ.id} &ldquo;{ACTIVE_SUBJ.title}&rdquo; Community
+            Pick and is minted into the Tech Epochalypse dossier.
           </p>
           <p className="font-mono text-sm text-white/50 max-w-xl mx-auto mb-2">
             Use ← / → keys.
           </p>
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/60 max-w-xl mx-auto mb-6">
-            Voting: Fri May 29 &ndash; June 10 &middot; 11:59 PM PT
+            Voting: {ACTIVE_SUBJ.dates.voting}
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 font-mono text-xs uppercase tracking-wider">
@@ -166,18 +176,35 @@ export default function VsPage() {
               per visitor. Every comparison you made feeds the ranking.
             </p>
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/50 mt-6">
-              Winners announced Thu Jun 11 · 2 PM PT
+              Winners announced {ACTIVE_SUBJ.dates.winners}
             </p>
           </div>
         )}
 
-        {!limitReached && loading && (
+        {closedMsg && !limitReached && (
+          <div className="text-center py-20 max-w-xl mx-auto">
+            <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/60 mb-4">
+              Voting Window
+            </p>
+            <h2 className="font-display text-3xl md:text-4xl text-white uppercase tracking-[0.05em] mb-4">
+              {closedMsg}
+            </h2>
+            <p className="font-mono text-sm text-white/70 leading-relaxed mb-6">
+              Community voting for SUBJ:{ACTIVE_SUBJ.id} runs {ACTIVE_SUBJ.dates.voting}.
+            </p>
+            <a href={`/subj/${ACTIVE_SUBJ.id}`} className="btn-secondary">
+              <span>View the Brief</span>
+            </a>
+          </div>
+        )}
+
+        {!closedMsg && !limitReached && loading && (
           <div className="text-center py-24 font-mono text-xs text-white/40 uppercase tracking-wider">
             Loading…
           </div>
         )}
 
-        {!loading && error && (
+        {!closedMsg && !loading && error && (
           <div className="text-center py-24">
             <p className="font-mono text-sm text-white/70 mb-6">{error}</p>
             <button onClick={() => loadPair(overlord)} className="btn-secondary">
@@ -186,7 +213,7 @@ export default function VsPage() {
           </div>
         )}
 
-        {!limitReached && !loading && pair && (
+        {!closedMsg && !limitReached && !loading && pair && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 max-w-5xl mx-auto">
             {[pair.left, pair.right].map((img) => {
               const isWinner = voted?.winnerId === img.id

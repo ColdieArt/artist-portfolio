@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { ACTIVE_SUBJ_ID } from '@/data/subj-events'
 
 const navLinks = [
   { href: '/overlords', label: 'OVERLORDS' },
@@ -64,6 +65,12 @@ export default function Navigation() {
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
+          <Link
+            href={`/subj/${ACTIVE_SUBJ_ID}`}
+            className="font-mono text-xs uppercase tracking-[0.2em] bg-white text-black px-3 py-1 hover:bg-white/90 transition-colors duration-300"
+          >
+            SUBJ: {ACTIVE_SUBJ_ID}
+          </Link>
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -112,6 +119,12 @@ export default function Navigation() {
         }`}
       >
         <div className="flex flex-col py-6 px-6 gap-4">
+          <Link
+            href={`/subj/${ACTIVE_SUBJ_ID}`}
+            className="font-mono text-sm uppercase tracking-[0.2em] bg-white text-black px-3 py-2 inline-block w-fit hover:bg-white/90 transition-colors duration-300"
+          >
+            SUBJ: {ACTIVE_SUBJ_ID}
+          </Link>
           {navLinks.map((link) => (
             <Link
               key={link.href}
