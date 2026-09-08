@@ -3,7 +3,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Gallery API — update this URL after deploying the Cloudflare Worker -->
-  <script>window.GALLERY_API_URL = 'https://te-gallery-api.coldieart.workers.dev';</script>
+  <script>
+    window.GALLERY_API_URL = 'https://te-gallery-api.coldieart.workers.dev';
+    // Active design competition this editor submits into. Update when the
+    // next SUBJ launches (also update the .ss-chip label below).
+    window.SUBJ_EVENT = { id: '02', category: 'subj-02', href: '/subj/02' };
+  </script>
   <!-- Airtable submission handled server-side by the worker -->
   <script type="importmap">
     {
@@ -59,8 +64,8 @@
 
     /* ─── SUBMIT SUCCESS OVERLAY ───
        Shown for 3s after a successful judgment-protocol submission,
-       then the page navigates to /subj/01. Solid red full-viewport
-       cover with the SUBJ:01 chip + "SUBMIT SUCCESS" message. */
+       then the page navigates to /subj/02. Solid red full-viewport
+       cover with the SUBJ:02 chip + "SUBMIT SUCCESS" message. */
     #submit-success-overlay {
       display: none;
       position: fixed;
@@ -305,6 +310,85 @@
     #orbital-transform-ui .orb-duplicate-btn:hover { border-color: rgba(255,255,255,1); color: #fff; }
     #orbital-transform-ui .orb-trash-btn { border: 0.5px solid rgba(255,90,102,0.75); color: #ff5a66; }
     #orbital-transform-ui .orb-trash-btn:hover { border-color: rgba(255,120,130,1); color: #ff8a95; }
+
+    /* ─── PHONES (≤600px): transform dialog → 44px icon rail on the left edge ───
+       The desktop dialog is 230px wide, ~61% of a phone screen. On phones it
+       becomes a vertical, icon-only rail, vertically centred but never higher
+       than 190px so it clears the expanded asset list (which ends ~177px).
+       Same seven controls in the same order: asset name (vertical text),
+       MOVE / ROTATE / SCALE, RESET, DUPLICATE, DELETE, CLOSE. Each hit target
+       is 44×44. `!important` overrides the inline left/top the desktop
+       positioning code writes (updateOrbitalUIPosition also skips it on phones). */
+    @media (max-width: 600px) {
+      #orbital-transform-ui {
+        left: 8px !important; right: auto !important;
+        top: max(380px, 50%) !important; transform: translateY(-50%) !important;
+        width: 44px; min-width: 0; padding: 0; gap: 3px;
+        background: transparent; border: none; box-shadow: none;
+        flex-direction: column; align-items: stretch;
+      }
+      #orbital-transform-ui.open { display: flex; }
+      #orbital-transform-ui .orb-header,
+      #orbital-transform-ui .orb-modes,
+      #orbital-transform-ui .orb-action-row { display: contents; }
+      #orbital-transform-ui .orb-legend,
+      #orbital-transform-ui .orb-icon,
+      #orbital-transform-ui .orb-mode-label,
+      #orbital-transform-ui .orb-mode-hotkey { display: none; }
+      #orbital-transform-ui .orb-title-wrap {
+        order: 0; width: 44px; height: 64px; box-sizing: border-box;
+        background: rgba(0,0,0,0.93); border: 0.5px solid rgba(255,255,255,0.35);
+        display: flex; align-items: center; justify-content: center;
+      }
+      #orbital-transform-ui .orb-asset-name {
+        writing-mode: vertical-rl; transform: rotate(180deg);
+        font-size: 8px; letter-spacing: 1.5px; color: #ccc;
+        max-height: 56px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      #orbital-transform-ui .orb-mode-btn {
+        order: 1; width: 44px; height: 44px; padding: 0; gap: 0; box-sizing: border-box;
+        background: rgba(0,0,0,0.93); justify-content: center; align-items: center;
+      }
+      #orbital-transform-ui .orb-mode-btn.active { background: #fff; }
+      /* Icons: inline SVG through a CSS mask, painted with currentColor, so
+         they centre exactly in the 44px box regardless of the phone's font
+         and flip to black automatically on the white active button. */
+      #orbital-transform-ui .orb-mode-icon { display: none; }
+      #orbital-transform-ui .orb-mode-btn::before,
+      #orbital-transform-ui .orb-reset-btn::before,
+      #orbital-transform-ui .orb-duplicate-btn::before,
+      #orbital-transform-ui .orb-trash-btn::before,
+      #orbital-transform-ui .orb-close::before {
+        content: ''; display: block; width: 20px; height: 20px; flex: none;
+        margin: auto; /* centres on both axes in flex even where Safari drops justify-content */
+        background-color: currentColor;
+        -webkit-mask: var(--orb-icon) center / contain no-repeat;
+                mask: var(--orb-icon) center / contain no-repeat;
+      }
+      #orbital-transform-ui #orb-mode-translate { --orb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3'/%3E%3C/svg%3E"); }
+      #orbital-transform-ui #orb-mode-rotate    { --orb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5'/%3E%3C/svg%3E"); }
+      #orbital-transform-ui #orb-mode-scale     { --orb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20L20 4M4 20v-6M4 20h6M20 4v6M20 4h-6'/%3E%3C/svg%3E"); }
+      #orbital-transform-ui .orb-reset-btn      { --orb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12a8 8 0 1 0 2.3-5.7M4 4v5h5'/%3E%3C/svg%3E"); }
+      #orbital-transform-ui .orb-duplicate-btn  { --orb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 8h12v12H8zM16 8V4H4v12h4'/%3E%3C/svg%3E"); }
+      #orbital-transform-ui .orb-trash-btn      { --orb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3'/%3E%3C/svg%3E"); }
+      #orbital-transform-ui .orb-close          { --orb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E"); }
+      #orbital-transform-ui .orb-reset-btn,
+      #orbital-transform-ui .orb-duplicate-btn,
+      #orbital-transform-ui .orb-trash-btn,
+      #orbital-transform-ui .orb-close {
+        width: 44px; height: 44px; padding: 0; margin: 0; box-sizing: border-box;
+        font-size: 0; line-height: 1; background: rgba(0,0,0,0.93);
+        /* Column direction on purpose: iOS Safari ignores justify-content on
+           <button> (its content sits in an anonymous inline box) but honours
+           align-items, so horizontal centring must come from align-items. */
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+      }
+      #orbital-transform-ui .orb-reset-btn { order: 2; margin-top: 6px; }
+      #orbital-transform-ui .orb-duplicate-btn { order: 3; }
+      #orbital-transform-ui .orb-trash-btn { order: 4; }
+      #orbital-transform-ui .orb-close { order: 5; margin-top: 6px; color: #aaa; border: 0.5px solid rgba(255,255,255,0.35); }
+      #orbital-transform-ui .orb-close::before { width: 16px; height: 16px; }
+    }
   </style>
   <title>JENSEN-HUANG-AWS-MASTER | Made on juno.transient.xyz</title>
   <!-- Brand-stamp watermark uses the same body font as the marketing site
@@ -320,11 +404,11 @@
     KNOWYOUROVERLORD.ART&nbsp;&ndash;&nbsp;TECH EPOCHALYPSE&nbsp;&ndash;&nbsp;CREATED BY <a href="https://coldie3d.com/" target="_blank" rel="noopener noreferrer">COLDIE</a>&nbsp;2026
   </div>
   <!-- Submit-success overlay — shown for 3s after a successful judgment
-       submission, then redirects to /subj/01. See #submit-success-overlay
+       submission, then redirects to /subj/02. See #submit-success-overlay
        rule in <style> and the success branch of the judgmentBtn handler
        in the inline <script> below. -->
   <div id="submit-success-overlay" role="dialog" aria-live="polite" aria-hidden="true">
-    <div class="ss-chip">SUBJ:&nbsp;01</div>
+    <div class="ss-chip">SUBJ:&nbsp;02</div>
     <div class="ss-message">Submit Success</div>
   </div>
 
@@ -376,9 +460,14 @@ function _cropDims() {
 }
 
 function updateCropOverlay() {
-    // 1:1 cropping overlay disabled — crop math still drives getCropCanvasRect()
-    // for any downstream export logic, but the visual mask is no longer shown.
-    if (cropOverlayEl) cropOverlayEl.style.display = 'none';
+    if (!cropOverlayEl) return;
+    const d = _cropDims();
+    if (!d) { cropOverlayEl.style.display = 'none'; return; }
+    cropOverlayEl.style.display = 'block';
+    cropOverlayEl.style.left = d.x + 'px';
+    cropOverlayEl.style.top = d.y + 'px';
+    cropOverlayEl.style.width = d.w + 'px';
+    cropOverlayEl.style.height = d.h + 'px';
 }
 
 function getCropCanvasRect(srcCanvas) {
@@ -1775,6 +1864,11 @@ function init() {
             controls.enabled = true;
         }
     });
+    // Keep the hidden frames of an animated asset (forehead) in step with the
+    // frame the gizmo is actually moving / rotating / scaling.
+    transformControls.addEventListener('objectChange', () => {
+        if (transformControls.object) syncAnimatedSiblings(transformControls.object);
+    });
     const _transformHelper = transformControls.getHelper ? transformControls.getHelper() : transformControls;
     scene.add(_transformHelper);
     _transformHelper.visible = false;
@@ -2844,7 +2938,7 @@ function init() {
     // Left UI starts EXPANDED — buttons visible (trash stays hidden), arrow pointing up below the panel.
     trashButtonElement.style.display = 'none';
     exportButtonElement.style.display = 'none';
-    loadImgBtn.style.display = 'none'; // LOAD button hidden
+    loadImgBtn.style.display = 'block';
     cropHBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */
     cropVBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */
     arrowSpan.innerHTML = '&#x25B2;';
@@ -2995,9 +3089,41 @@ function getOrbitalScreenBounds(mesh) {
     return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
 }
 
+// ─── Animated multi-frame assets (forehead = 5 stacked meshes flipped visible
+// in turn). Any transform applied to the visible frame must be mirrored onto
+// its sibling frames or the animation falls apart the moment it flips. The
+// mouse-drag path already does this for position; the gizmo, the pinch
+// gesture and RESET call this instead.
+function syncAnimatedSiblings(mesh) {
+    if (!mesh || !foreheadMeshes.includes(mesh)) return;
+    const grp = mesh.userData.foreheadGroup;
+    foreheadMeshes.forEach(m => {
+        if (m === mesh || m.userData.foreheadGroup !== grp) return;
+        m.position.copy(mesh.position);
+        m.rotation.copy(mesh.rotation);
+        m.scale.copy(mesh.scale);
+        if (mesh.userData.userScale !== undefined) m.userData.userScale = mesh.userData.userScale;
+        if (mesh.userData.currentLayer !== undefined) m.userData.currentLayer = mesh.userData.currentLayer;
+    });
+}
+window.syncAnimatedSiblings = syncAnimatedSiblings;
+// Exposed for the plain-script touch handler and for testing.
+window.openOrbitalUI = (m) => openOrbitalUI(m);
+
+// Phones (≤600px) use the CSS icon-rail layout (see @media rule in <style>);
+// the desktop code below writes inline left/top that would fight it.
+function isPhoneRail() {
+    return !!(window.matchMedia && window.matchMedia('(max-width: 600px)').matches);
+}
+window.addEventListener('resize', () => {
+    const u = document.getElementById('orbital-transform-ui');
+    if (u && u.classList.contains('open')) updateOrbitalUIPosition();
+});
+
 function updateOrbitalUIPosition() {
     const ui = document.getElementById('orbital-transform-ui');
     if (!ui) return;
+    if (isPhoneRail()) { ui.style.left = ''; ui.style.top = ''; ui.style.transform = ''; return; }
     const lc = document.getElementById('left-ui-container');
     if (lc) {
         const lcRect = lc.getBoundingClientRect();
@@ -3077,6 +3203,8 @@ function setupOrbitalUI() {
         if (!orbitalTarget) return;
         orbitalTarget.rotation.set(0, 0, 0);
         orbitalTarget.scale.set(1, 1, 1);
+        orbitalTarget.userData.userScale = 1;
+        syncAnimatedSiblings(orbitalTarget);
     });
     document.getElementById('orb-close').addEventListener('click', function (e) {
         e.stopPropagation();
@@ -3220,7 +3348,7 @@ setTimeout(() => {
   </script>
 
   <!-- ─── EXPORT PANEL HTML ─── -->
-  <button id="submit-overlord-btn" style="display:none">SUBMIT</button>
+  <button id="submit-overlord-btn">SUBMIT</button>
 
   <div id="export-panel">
     <div class="panel-title">EXPORT</div>
@@ -3581,6 +3709,9 @@ setTimeout(() => {
         form.append('image', blob, 'export.jpg');
         if (thumbBlob) form.append('thumb', thumbBlob, 'export-thumb.jpg');
         form.append('overlord', OVERLORD_NAME);
+        // SUBJ event tag → Airtable "Category" + D1 images.event. Keeps this
+        // competition's entries separate from the archived SUBJ:01 pool.
+        form.append('category', SUBJ_EVENT.category);
         form.append('xAccount', xAccount);
         form.append('title', title);
         // Build composition JSON snapshot (positions, transforms, effects, uploaded image data)
@@ -3675,7 +3806,7 @@ setTimeout(() => {
 
         if (res.ok && data.ok) {
           // Show the red SUBMIT SUCCESS overlay for 3s, then redirect
-          // visitors to the SUBJ:01 overview so they can see their
+          // visitors to the SUBJ:02 overview so they can see their
           // submission listed alongside the rest of the cohort.
           judgmentStatus.style.color = '#4c4';
           judgmentStatus.textContent = 'SUBMITTED SUCCESSFULLY';
@@ -3685,7 +3816,7 @@ setTimeout(() => {
             _overlay.setAttribute('aria-hidden', 'false');
           }
           setTimeout(() => {
-            window.location.href = '/subj/01';
+            window.location.href = SUBJ_EVENT.href;
           }, 3000);
         } else {
           const errMsg = data.details || data.error || `HTTP ${res.status}`;
@@ -4114,6 +4245,7 @@ setTimeout(() => {
       if (mode === 'uniform') { const s = clamp(initUserScale * ratio); target.scale.setScalar(s); target.userData.userScale = s; }
       else if (mode === 'lock-x') { target.scale.x = clamp(initScale.x * ratio); }
       else if (mode === 'lock-y') { target.scale.y = clamp(initScale.y * ratio); }
+      if (window.syncAnimatedSiblings) window.syncAnimatedSiblings(target);
       e.preventDefault(); e.stopPropagation();
     }
     function onUp(e) {
