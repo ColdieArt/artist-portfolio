@@ -315,8 +315,8 @@
        The desktop dialog is 230px wide, ~61% of a phone screen and ~30% of an
        iPad in portrait. Below the desktop breakpoint it
        becomes a vertical, icon-only rail, vertically centred but never higher
-       than ~238px so it clears the expanded asset list + chevron (ends ~226px
-       now that the panel rests at LEFT_UI_TOP = 44px).
+       than ~288px so it clears the expanded asset list + chevron (ends ~276px
+       with the panel at LEFT_UI_TOP = 44px plus the SAVE/LOAD LAYOUT buttons).
        Same seven controls in the same order: asset name (vertical text),
        MOVE / ROTATE / SCALE, RESET, DUPLICATE, DELETE, CLOSE. Each hit target
        is 44×44. `!important` overrides the inline left/top the desktop
@@ -324,7 +324,7 @@
     @media (max-width: 1024px) {
       #orbital-transform-ui {
         left: 8px !important; right: auto !important;
-        top: max(440px, 50%) !important; transform: translateY(-50%) !important;
+        top: max(490px, 50%) !important; transform: translateY(-50%) !important;
         width: 44px; min-width: 0; padding: 0; gap: 3px;
         background: transparent; border: none; box-shadow: none;
         flex-direction: column; align-items: stretch;
@@ -2771,6 +2771,34 @@ function init() {
     loadImgBtn.onclick = (e) => { e.stopPropagation(); imageFileInput.click(); };
     leftUiContainer.appendChild(loadImgBtn);
 
+    // ── SAVE LAYOUT / LOAD LAYOUT — local JSON snapshots (see saveComposition) ──
+    const saveLayoutBtn = document.createElement('button');
+    saveLayoutBtn.id = 'save-layout-btn';
+    saveLayoutBtn.textContent = 'SAVE LAYOUT';
+    saveLayoutBtn.title = 'Download this layout as a JSON file so you can pick it up later';
+    saveLayoutBtn.style.cssText = `background-color: black; color: white; padding: 4px; margin-top: 10px; border: 0.5px solid #4CAF50; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; white-space: nowrap; box-sizing: border-box;`;
+    saveLayoutBtn.onclick = (e) => {
+        e.stopPropagation();
+        downloadComposition();
+        saveLayoutBtn.textContent = 'SAVED';
+        setTimeout(() => { saveLayoutBtn.textContent = 'SAVE LAYOUT'; }, 1500);
+    };
+    leftUiContainer.appendChild(saveLayoutBtn);
+
+    const loadLayoutBtn = document.createElement('button');
+    loadLayoutBtn.id = 'load-layout-btn';
+    loadLayoutBtn.textContent = 'LOAD LAYOUT';
+    loadLayoutBtn.title = 'Restore a layout from a JSON file you saved earlier';
+    loadLayoutBtn.style.cssText = `background-color: black; color: white; padding: 4px; border: 0.5px solid #2196F3; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; white-space: nowrap; box-sizing: border-box;`;
+    loadLayoutBtn.onclick = (e) => {
+        e.stopPropagation();
+        loadCompositionFromFile((ok) => {
+            loadLayoutBtn.textContent = ok ? 'LOADED' : 'BAD FILE';
+            setTimeout(() => { loadLayoutBtn.textContent = 'LOAD LAYOUT'; }, 1500);
+        });
+    };
+    leftUiContainer.appendChild(loadLayoutBtn);
+
     // ── CROP overlay element ──
     cropOverlayEl = document.createElement('div');
     cropOverlayEl.id = 'crop-overlay';
@@ -2948,7 +2976,7 @@ function init() {
     document.body.appendChild(arrowContainer);
     arrowContainer.onclick = (e) => {
         e.stopPropagation();
-        if (leftUiContainer.style.top === LEFT_UI_TOP_PX) { leftUiContainer.style.top = '-190px'; trashButtonElement.style.display = 'none'; exportButtonElement.style.display = 'none'; loadImgBtn.style.display = 'none'; cropHBtn.style.display = 'none'; cropVBtn.style.display = 'none'; arrowContainer.style.top = '0px'; arrowSpan.innerHTML = '&#x25BC;'; }
+        if (leftUiContainer.style.top === LEFT_UI_TOP_PX) { leftUiContainer.style.top = `-${leftUiContainer.offsetHeight + 20}px`; trashButtonElement.style.display = 'none'; exportButtonElement.style.display = 'none'; loadImgBtn.style.display = 'none'; cropHBtn.style.display = 'none'; cropVBtn.style.display = 'none'; arrowContainer.style.top = '0px'; arrowSpan.innerHTML = '&#x25BC;'; }
         else { leftUiContainer.style.top = LEFT_UI_TOP_PX; trashButtonElement.style.display = 'none'; loadImgBtn.style.display = 'block'; cropHBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */ cropVBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */ arrowContainer.style.top = `${leftUiContainer.offsetHeight + LEFT_UI_TOP}px`; arrowSpan.innerHTML = '&#x25B2'; }
     };
     // Initial state setup for TRASH/EXPORT buttons and arrowContainer
@@ -3340,6 +3368,263 @@ function animate(currentTime) {
     if (effectControls.redactedGlitch) { redactedGlitchScrollOffset -= REDACTED_GLITCH_SCROLL_SPEED; if (redactedGlitchScrollOffset <= -(REDACTED_GLITCH_LINE_HEIGHT * REDACTED_GLITCH_TOTAL_LINES)) { redactedGlitchScrollOffset = 0; initializeRedactedGlitchPhraseData(); } updateRedactedGlitchTexture(); }
     composer.render();
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// SAVE LAYOUT / LOAD LAYOUT — local JSON snapshots so entrants can work on a
+// piece over several sessions without losing progress. Ported from the
+// collector edition. SAVE downloads a .json (and keeps a copy in
+// localStorage); LOAD restores from a chosen .json. Nothing auto-restores on
+// page load, so a fresh visitor always starts from the default layout.
+// ─────────────────────────────────────────────────────────────────────────
+const COMPOSITION_STORAGE_KEY = 'jensen_huang_subj02_layout_v1';
+
+function saveComposition() {
+    const meshStates = [];
+    scene.children.forEach(child => {
+        if (!child.userData || !child.userData.id) return;
+        const state = {
+            id: child.userData.id,
+            position: { x: child.position.x, y: child.position.y, z: child.position.z },
+            rotation: { x: child.rotation.x, y: child.rotation.y, z: child.rotation.z },
+            scale: { x: child.scale.x, y: child.scale.y, z: child.scale.z },
+            visible: child.visible,
+            userScale: child.userData.userScale || 1.0,
+            currentLayer: child.userData.currentLayer,
+            opacity: child.material ? child.material.opacity : 1,
+            transparent: child.material ? child.material.transparent : false,
+        };
+        // Animated forehead frames: keep frame index + group so duplicates rebuild correctly.
+        if (child.userData.foreheadFrame !== undefined) {
+            state.foreheadFrame = child.userData.foreheadFrame;
+            state.foreheadGroup = child.userData.foreheadGroup;
+        }
+        if (child.userData.isUploaded && child.material && child.material.map && child.material.map.image) {
+            try {
+                const img = child.material.map.image;
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth || img.width;
+                canvas.height = img.naturalHeight || img.height;
+                canvas.getContext('2d').drawImage(img, 0, 0);
+                state.uploadedImageData = canvas.toDataURL('image/png');
+                state.isUploaded = true;
+                state.initialScale = child.userData.initialScale;
+            } catch (e) { console.warn('Could not save uploaded image:', state.id, e); }
+        }
+        meshStates.push(state);
+    });
+    const removedAssets = initialAssetConfigs.filter(c => c.removed).map(c => c.id);
+    return {
+        version: 1,
+        overlord: (typeof OVERLORD_NAME !== 'undefined' ? OVERLORD_NAME : (window.OVERLORD_NAME || 'jensen-huang')),
+        event: (window.SUBJ_EVENT && window.SUBJ_EVENT.category) || 'subj-02',
+        timestamp: Date.now(),
+        meshStates,
+        removedAssets,
+        effectControls: { ...effectControls },
+        camera: {
+            position: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+            target: { x: controls.target.x, y: controls.target.y, z: controls.target.z },
+        },
+    };
+}
+
+function cloneFromOriginal(srcId, state) {
+    const orig = scene.children.find(c => c.userData && c.userData.id === srcId);
+    if (!orig || !orig.geometry || !orig.material) return null;
+    const newGeo = orig.geometry.clone();
+    const newMat = orig.material.clone();
+    if (orig.material.map) newMat.map = orig.material.map;
+    if (state.opacity !== undefined) {
+        newMat.opacity = state.opacity;
+        newMat.transparent = state.transparent || state.opacity < 1;
+        newMat.needsUpdate = true;
+    }
+    const clone = new THREE.Mesh(newGeo, newMat);
+    clone.position.set(state.position.x, state.position.y, state.position.z);
+    clone.rotation.set(state.rotation.x, state.rotation.y, state.rotation.z);
+    if (state.scale) clone.scale.set(state.scale.x, state.scale.y, state.scale.z);
+    clone.visible = state.visible !== false;
+    clone.userData.id = state.id;
+    clone.userData.currentLayer = state.currentLayer;
+    clone.userData.initialPosition = clone.position.clone();
+    clone.userData.initialLayer = state.currentLayer;
+    clone.userData.initialScale = orig.userData.initialScale
+        ? { width: orig.userData.initialScale.width, height: orig.userData.initialScale.height }
+        : undefined;
+    clone.userData.userScale = state.userScale || 1.0;
+    if (state.foreheadFrame !== undefined) {
+        clone.userData.foreheadFrame = state.foreheadFrame;
+        clone.userData.foreheadGroup = state.foreheadGroup;
+        clone.visible = (state.foreheadFrame === currentForeheadIndex);
+        foreheadMeshes.push(clone);
+    }
+    scene.add(clone);
+    draggableObjects.push(clone);
+    if (typeof cameraAnimationTargets !== 'undefined') cameraAnimationTargets.push(clone);
+    return clone;
+}
+
+function removeMeshEverywhere(mesh) {
+    scene.remove(mesh);
+    draggableObjects = draggableObjects.filter(o => o !== mesh);
+    cameraAnimationTargets = cameraAnimationTargets.filter(o => o !== mesh);
+    foreheadMeshes = foreheadMeshes.filter(o => o !== mesh);
+    shufflingCardMeshes = shufflingCardMeshes.filter(o => o !== mesh);
+}
+
+function restoreComposition(data) {
+    if (!data || data.version !== 1) return false;
+    if (orbitalTarget) closeOrbitalUI();
+
+    // Start from the default layout so a LOAD replaces (not merges with) the
+    // current one: drop previous duplicates and uploads, un-remove assets.
+    scene.children.slice().forEach(c => {
+        if (!c.userData || !c.userData.id) return;
+        if (c.userData.isUploaded || String(c.userData.id).startsWith('dup_')) removeMeshEverywhere(c);
+    });
+
+    if (data.removedAssets && data.removedAssets.length > 0) {
+        data.removedAssets.forEach(id => {
+            const mesh = scene.children.find(c => c.userData && c.userData.id === id);
+            if (mesh) removeMeshEverywhere(mesh);
+            const configIndex = initialAssetConfigs.findIndex(c => c.id === id);
+            if (configIndex !== -1) initialAssetConfigs[configIndex].removed = true;
+        });
+    }
+
+    const uploadedStates = (data.meshStates || []).filter(s => s.isUploaded && s.uploadedImageData);
+    const uploadPromises = uploadedStates.map(state => new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            const texture = new THREE.Texture(img);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            texture.minFilter = THREE.LinearFilter;
+            texture.magFilter = THREE.LinearFilter;
+            texture.generateMipmaps = false;
+            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            texture.needsUpdate = true;
+            const w = state.initialScale ? state.initialScale.width : 4;
+            const h = state.initialScale ? state.initialScale.height : 4;
+            const geometry = new THREE.PlaneGeometry(w, h);
+            const material = new THREE.MeshBasicMaterial({
+                map: texture, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5,
+                opacity: state.opacity !== undefined ? state.opacity : 1,
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(state.position.x, state.position.y, state.position.z);
+            mesh.rotation.set(state.rotation.x, state.rotation.y, state.rotation.z);
+            if (state.scale) mesh.scale.set(state.scale.x, state.scale.y, state.scale.z);
+            mesh.visible = state.visible !== false;
+            mesh.userData.currentLayer = state.currentLayer;
+            mesh.userData.initialPosition = mesh.position.clone();
+            mesh.userData.initialLayer = state.currentLayer;
+            mesh.userData.id = state.id;
+            mesh.userData.initialScale = { width: w, height: h };
+            mesh.userData.isUploaded = true;
+            mesh.userData.userScale = state.userScale || 1.0;
+            scene.add(mesh);
+            draggableObjects.push(mesh);
+            if (typeof cameraAnimationTargets !== 'undefined') cameraAnimationTargets.push(mesh);
+            resolve();
+        };
+        img.onerror = () => { console.warn('Failed to restore uploaded image:', state.id); resolve(); };
+        img.src = state.uploadedImageData;
+    }));
+
+    Promise.all(uploadPromises).then(() => {
+        (data.meshStates || []).forEach(state => {
+            if (state.isUploaded) return;
+            let mesh = scene.children.find(c => c.userData && c.userData.id === state.id);
+            if (!mesh && typeof state.id === 'string' && state.id.startsWith('dup_')) {
+                const m = state.id.match(/^dup_(.+)_\d+$/);
+                if (m) mesh = cloneFromOriginal(m[1], state);
+                if (mesh) return; // cloneFromOriginal already applied state
+            }
+            if (!mesh) return;
+            mesh.position.set(state.position.x, state.position.y, state.position.z);
+            mesh.rotation.set(state.rotation.x, state.rotation.y, state.rotation.z);
+            if (state.scale) mesh.scale.set(state.scale.x, state.scale.y, state.scale.z);
+            // Forehead frames keep their animation-driven visibility.
+            if (mesh.userData.foreheadFrame === undefined) mesh.visible = state.visible !== false;
+            mesh.userData.currentLayer = state.currentLayer;
+            mesh.userData.userScale = state.userScale || 1.0;
+            if (mesh.material && state.opacity !== undefined) {
+                mesh.material.opacity = state.opacity;
+                mesh.material.transparent = state.transparent || state.opacity < 1;
+                mesh.material.needsUpdate = true;
+            }
+            if (mesh === rightEyeMesh && rightEyeRedactionRect) { rightEyeRedactionRect.position.x = mesh.position.x; rightEyeRedactionRect.position.y = mesh.position.y; }
+            if (mesh === leftEyeMesh && leftEyeRedactionRect) { leftEyeRedactionRect.position.x = mesh.position.x; leftEyeRedactionRect.position.y = mesh.position.y; }
+        });
+
+        if (data.camera) {
+            camera.position.set(data.camera.position.x, data.camera.position.y, data.camera.position.z);
+            controls.target.set(data.camera.target.x, data.camera.target.y, data.camera.target.z);
+            controls.update();
+        }
+
+        if (data.effectControls) {
+            const skipKeys = ['thresholdValue', 'shadowBrightness', 'pixelSize'];
+            const presetEffects = ['anon', 'og', 'hacker', 'surveillance', 'greed'];
+            const clickEffect = (key) => { const btn = document.querySelector(`button[data-effect="${key}"]`); if (btn) btn.click(); };
+            // Turn off anything on now that the snapshot has off, then turn on
+            // what it has on, presets first so their side effects settle.
+            for (const key in effectControls) {
+                if (skipKeys.includes(key)) continue;
+                if (effectControls[key] && !data.effectControls[key]) clickEffect(key);
+            }
+            presetEffects.forEach(key => { if (data.effectControls[key] && !effectControls[key]) clickEffect(key); });
+            for (const key in data.effectControls) {
+                if (skipKeys.includes(key) || presetEffects.includes(key)) continue;
+                if (data.effectControls[key] && !effectControls[key]) clickEffect(key);
+            }
+            skipKeys.forEach(k => { if (data.effectControls[k] !== undefined) effectControls[k] = data.effectControls[k]; });
+        }
+    });
+    return true;
+}
+
+function downloadComposition() {
+    const data = saveComposition();
+    const json = JSON.stringify(data);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'subj02-jensen-huang-layout_' + new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-') + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    try { localStorage.setItem(COMPOSITION_STORAGE_KEY, json); } catch (e) { /* quota */ }
+}
+
+function loadCompositionFromFile(onDone) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+    input.style.display = 'none';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            let ok = false;
+            try {
+                const data = JSON.parse(evt.target.result);
+                ok = restoreComposition(data);
+                if (ok) { try { localStorage.setItem(COMPOSITION_STORAGE_KEY, evt.target.result); } catch (err) { /* quota */ } }
+            } catch (err) { console.error('Failed to load layout:', err); }
+            if (onDone) onDone(ok);
+        };
+        reader.readAsText(file);
+        document.body.removeChild(input);
+    };
+    document.body.appendChild(input);
+    input.click();
+}
+// Exposed for testing / debugging.
+window.subjLayout = { save: saveComposition, restore: restoreComposition, download: downloadComposition };
 
 init();
 preloadCardTextures(() => animate());
