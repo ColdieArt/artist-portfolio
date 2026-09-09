@@ -33,9 +33,9 @@
     /* ─── BRAND STAMP (top-right attribution watermark) ───
        Subtle credit + Coldie link so anyone showing screenshots / videos
        of the tool carries the KnowYourOverlord.ART → Tech Epochalypse →
-       Coldie attribution. Black @ 50% so it reads against light areas of
-       the artwork and falls away over dark areas. Body font, italic, 100
-       tracking (= 0.1em letter-spacing). */
+       Coldie attribution. White (SUBJ:02 request) so it reads over the
+       dimmed crop-overlay margins. Body font, italic, 100 tracking
+       (= 0.1em letter-spacing). The right effects rail starts below it. */
     #brand-stamp {
       position: fixed;
       top: 16px;
@@ -45,7 +45,7 @@
       font-style: italic;
       font-weight: 400;
       font-size: 13px;
-      color: rgba(0, 0, 0, 0.5);
+      color: #fff;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       user-select: none;
@@ -59,7 +59,7 @@
       transition: color 0.15s;
     }
     #brand-stamp a:hover {
-      color: rgba(0, 0, 0, 0.9);
+      color: #ccc;
     }
 
     /* ─── SUBMIT SUCCESS OVERLAY ───
@@ -311,18 +311,20 @@
     #orbital-transform-ui .orb-trash-btn { border: 0.5px solid rgba(255,90,102,0.75); color: #ff5a66; }
     #orbital-transform-ui .orb-trash-btn:hover { border-color: rgba(255,120,130,1); color: #ff8a95; }
 
-    /* ─── PHONES (≤600px): transform dialog → 44px icon rail on the left edge ───
-       The desktop dialog is 230px wide, ~61% of a phone screen. On phones it
+    /* ─── PHONES + TABLETS (≤1024px): transform dialog → 44px icon rail on the left edge ───
+       The desktop dialog is 230px wide, ~61% of a phone screen and ~30% of an
+       iPad in portrait. Below the desktop breakpoint it
        becomes a vertical, icon-only rail, vertically centred but never higher
-       than 190px so it clears the expanded asset list (which ends ~177px).
+       than ~238px so it clears the expanded asset list + chevron (ends ~226px
+       now that the panel rests at LEFT_UI_TOP = 44px).
        Same seven controls in the same order: asset name (vertical text),
        MOVE / ROTATE / SCALE, RESET, DUPLICATE, DELETE, CLOSE. Each hit target
        is 44×44. `!important` overrides the inline left/top the desktop
        positioning code writes (updateOrbitalUIPosition also skips it on phones). */
-    @media (max-width: 600px) {
+    @media (max-width: 1024px) {
       #orbital-transform-ui {
         left: 8px !important; right: auto !important;
-        top: max(380px, 50%) !important; transform: translateY(-50%) !important;
+        top: max(440px, 50%) !important; transform: translateY(-50%) !important;
         width: 44px; min-width: 0; padding: 0; gap: 3px;
         background: transparent; border: none; box-shadow: none;
         flex-direction: column; align-items: stretch;
@@ -1174,6 +1176,16 @@ let trashButtonElement = null;
 let exportButtonElement = null;
 let leftUiContainer = null;
 let arrowContainer = null;
+// Set when a gizmo (move/rotate/scale) drag ends. The browser still fires a
+// `click` for that pointer sequence, and by then TransformControls has
+// already cleared its own `dragging` flag — so without this the click would
+// raycast under the cursor and switch selection to whatever the pointer was
+// released over. Consumed by onClick; cleared by every fresh pointerdown.
+let gizmoDragJustEnded = false;
+// Resting top of the left panel: below the white attribution line at the top
+// of the page (16px + one 13px line + gap). init(), the chevron toggle and
+// onWindowResize all key off this.
+const LEFT_UI_TOP = 44; const LEFT_UI_TOP_PX = LEFT_UI_TOP + 'px';
 
 const initialAssetConfigs = [];
 
@@ -1860,8 +1872,9 @@ function init() {
     transformControls.addEventListener('dragging-changed', (e) => {
         if (e.value) {
             controls.enabled = false;
-        } else if (!cameraAnimationActive && !effectControls.yRotation) {
-            controls.enabled = true;
+        } else {
+            gizmoDragJustEnded = true;
+            if (!cameraAnimationActive && !effectControls.yRotation) controls.enabled = true;
         }
     });
     // Keep the hidden frames of an animated asset (forehead) in step with the
@@ -2686,12 +2699,15 @@ function init() {
 
     leftUiContainer = document.createElement('div');
     leftUiContainer.id = 'left-ui-container';
-    leftUiContainer.style.cssText = 'position: absolute; top: 10px; left: 10px; padding: 10px; border-radius: 5px; font-family: monospace; z-index: 100; display: flex; flex-direction: column; gap: 5px; transition: top 0.5s ease-in-out;';
-    leftUiContainer.style.top = '10px'; // Start expanded
+    leftUiContainer.style.cssText = 'position: absolute; top: ' + LEFT_UI_TOP_PX + '; left: 10px; padding: 10px; border-radius: 5px; font-family: monospace; z-index: 100; display: flex; flex-direction: column; gap: 5px; transition: top 0.5s ease-in-out;';
+    leftUiContainer.style.top = LEFT_UI_TOP_PX; // Start expanded
     document.body.appendChild(leftUiContainer);
     const rightUiContainer = document.createElement('div');
     rightUiContainer.id = 'right-ui-container';
-    rightUiContainer.style.cssText = 'position: absolute; top: 10px; right: 10px; padding: 10px; display: none; flex-direction: column; gap: 5px;';
+    // SUBJ:02 — the right effects rail is shown on this editor (it is hidden
+    // on the other base overlord pages; see collector editions for the rule).
+    // z-index matches the left rail so the 1:1 crop overlay's dimming layer (z 50) never greys it out.
+    rightUiContainer.style.cssText = 'position: absolute; top: 44px; right: 10px; padding: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 100; font-family: monospace;';
     document.body.appendChild(rightUiContainer);
 
     const leftUiOrder = ['yRotation', 'cameraAnimation', 'surveillance', 'greed', 'hacker', 'shadow', 'redactedGlitch'];
@@ -2714,7 +2730,8 @@ function init() {
         return b;
     };
     leftUiContainer.appendChild(createResetButton());
-    rightUiContainer.appendChild(createResetButton());
+    // SUBJ:02: no RESET on the right rail — the left panel's RESET covers it.
+    // rightUiContainer.appendChild(createResetButton());
     const createTrashButton = () => {
         const b = document.createElement('button');
         b.id = 'trash-button'; b.innerHTML = 'TRASH';
@@ -2931,8 +2948,8 @@ function init() {
     document.body.appendChild(arrowContainer);
     arrowContainer.onclick = (e) => {
         e.stopPropagation();
-        if (leftUiContainer.style.top === '10px') { leftUiContainer.style.top = '-190px'; trashButtonElement.style.display = 'none'; exportButtonElement.style.display = 'none'; loadImgBtn.style.display = 'none'; cropHBtn.style.display = 'none'; cropVBtn.style.display = 'none'; arrowContainer.style.top = '0px'; arrowSpan.innerHTML = '&#x25BC;'; }
-        else { leftUiContainer.style.top = '10px'; trashButtonElement.style.display = 'none'; loadImgBtn.style.display = 'block'; cropHBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */ cropVBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */ arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`; arrowSpan.innerHTML = '&#x25B2'; }
+        if (leftUiContainer.style.top === LEFT_UI_TOP_PX) { leftUiContainer.style.top = '-190px'; trashButtonElement.style.display = 'none'; exportButtonElement.style.display = 'none'; loadImgBtn.style.display = 'none'; cropHBtn.style.display = 'none'; cropVBtn.style.display = 'none'; arrowContainer.style.top = '0px'; arrowSpan.innerHTML = '&#x25BC;'; }
+        else { leftUiContainer.style.top = LEFT_UI_TOP_PX; trashButtonElement.style.display = 'none'; loadImgBtn.style.display = 'block'; cropHBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */ cropVBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */ arrowContainer.style.top = `${leftUiContainer.offsetHeight + LEFT_UI_TOP}px`; arrowSpan.innerHTML = '&#x25B2'; }
     };
     // Initial state setup for TRASH/EXPORT buttons and arrowContainer
     // Left UI starts EXPANDED — buttons visible (trash stays hidden), arrow pointing up below the panel.
@@ -2942,9 +2959,9 @@ function init() {
     cropHBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */
     cropVBtn.style.display = 'none'; /* HIDDEN: 1:1 is the only crop during SUBJ:01 */
     arrowSpan.innerHTML = '&#x25B2;';
-    requestAnimationFrame(() => {
-        arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
-    });
+    const placeArrowBelowPanel = () => { arrowContainer.style.top = `${leftUiContainer.offsetHeight + LEFT_UI_TOP}px`; };
+    placeArrowBelowPanel();
+    requestAnimationFrame(placeArrowBelowPanel);
     setupOrbitalUI();
 }
 
@@ -2954,12 +2971,12 @@ function onWindowResize() {
     if (pixelationPass) pixelationPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
     if (asciiPass) asciiPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
     if (cctvFeedPass) cctvFeedPass.uniforms['resolution'].value.set(window.innerWidth, window.innerHeight);
-    if (leftUiContainer.style.top === '10px') arrowContainer.style.top = `${leftUiContainer.offsetHeight + 10}px`;
+    if (leftUiContainer.style.top === LEFT_UI_TOP_PX) arrowContainer.style.top = `${leftUiContainer.offsetHeight + LEFT_UI_TOP}px`;
     lastActivityTime = performance.now(); stopCameraAnimationAndReset();
 }
 
 function onPointerDown(event) {
-    lastActivityTime = performance.now(); isDragging = false; pointerDownPosition.set(event.clientX, event.clientY);
+    lastActivityTime = performance.now(); isDragging = false; gizmoDragJustEnded = false; pointerDownPosition.set(event.clientX, event.clientY);
     if (event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#orbital-transform-ui')) { selectedObject = null; controls.enabled = true; return; }
     if (transformControls && transformControls.axis) { selectedObject = null; return; }
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -3014,6 +3031,9 @@ function onClick(event) {
     lastActivityTime = performance.now();
     if (isDragging || event.target.closest('#left-ui-container') || event.target.closest('#right-ui-container') || event.target.closest('#arrow-container') || event.target.closest('#orbital-transform-ui')) return;
     if (transformControls && transformControls.dragging) return;
+    // A gizmo drag just released here: keep the current selection. Switching
+    // to another asset requires a fresh click on it.
+    if (gizmoDragJustEnded) { gizmoDragJustEnded = false; return; }
     stopCameraAnimationAndReset();
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
@@ -3110,10 +3130,10 @@ window.syncAnimatedSiblings = syncAnimatedSiblings;
 // Exposed for the plain-script touch handler and for testing.
 window.openOrbitalUI = (m) => openOrbitalUI(m);
 
-// Phones (≤600px) use the CSS icon-rail layout (see @media rule in <style>);
+// Phones and tablets (≤1024px) use the CSS icon-rail layout (see @media rule in <style>);
 // the desktop code below writes inline left/top that would fight it.
 function isPhoneRail() {
-    return !!(window.matchMedia && window.matchMedia('(max-width: 600px)').matches);
+    return !!(window.matchMedia && window.matchMedia('(max-width: 1024px)').matches);
 }
 window.addEventListener('resize', () => {
     const u = document.getElementById('orbital-transform-ui');
