@@ -2,6 +2,7 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import ScrollReveal from '@/components/ScrollReveal'
 import { KINETIC_MINTS, KINETIC_COLLECTION_URL } from '@/data/kinetic-mints'
+import { ACTIVE_SUBJ } from '@/data/subj-events'
 
 // Lazy-load heavy canvas animations so nav becomes interactive immediately
 const ParticleNetwork = dynamic(() => import('@/components/ParticleNetwork'), {
@@ -12,11 +13,20 @@ const BioCoder = dynamic(() => import('@/components/BioCoder'), {
   ssr: false,
   loading: () => null,
 })
+const SubjEntriesGallery = dynamic(() => import('@/components/SubjEntriesGallery'), {
+  ssr: false,
+  loading: () => null,
+})
 
 export default function HomePage() {
   return (
     <>
-      {/* ── Hero - Noir Dossier ── */}
+      {/* ── Hero - Noir Dossier ──
+          ⚠️ TEMPORARILY HIDDEN while the SUBJ CTA block below acts as the
+          homepage hero (i.e. during an active competition window).
+          Flip the `false &&` to bring this hero back as the top module.
+          Do NOT delete the markup. */}
+      {false && (
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
         {/* Particle background with pixelated blocks */}
         <ParticleNetwork />
@@ -93,6 +103,99 @@ export default function HomePage() {
           </svg>
         </div>
       </section>
+      )}
+
+      {/* ── SUBJ:<active> — Active competition CTA (now serving as the HERO) ──
+          Same format as the SUBJ:01 launch hero, themed for the active event
+          from src/data/subj-events.ts. The big white button is a scaled-up
+          replica of the SUBJ chip in the top nav.
+
+          NOTE: While the Noir Dossier hero block above is gated off, this
+          section takes the hero slot (min-h-screen, flex-centered). Between
+          competitions, hide this with `{false && (…)}` and re-enable the
+          hero block above so the homepage falls back to the Noir Dossier
+          intro. Both blocks are intentionally retained. */}
+      <section className="relative min-h-screen flex items-center py-24 md:py-32 section-padding bg-black overflow-hidden">
+        {/* Pulsing red radial glow — fills the section with a warning ambience.
+            Sits behind everything, never receives pointer events. */}
+        <div
+          className="absolute inset-0 pointer-events-none animate-warning-glow"
+          style={{ background: 'radial-gradient(ellipse at center, rgba(229,57,70,0.22) 0%, rgba(229,57,70,0.04) 45%, transparent 75%)' }}
+          aria-hidden
+        />
+        {/* Top + bottom red bars flashing in sync with the banner. */}
+        <div className="absolute inset-x-0 top-0 h-[3px] animate-warning-bar pointer-events-none" style={{ background: '#ff5a66' }} aria-hidden />
+        <div className="absolute inset-x-0 bottom-0 h-[3px] animate-warning-bar pointer-events-none" style={{ background: '#ff5a66' }} aria-hidden />
+
+        <div className="page-container relative z-10">
+          <ScrollReveal>
+            <div className="max-w-5xl mx-auto text-center">
+              {/* Flashing red warning banner */}
+              <div
+                className="inline-flex items-center justify-center gap-4 md:gap-6 mb-10 md:mb-14 px-6 py-4 md:px-12 md:py-6 border-2 animate-warning-flash"
+                style={{
+                  borderColor: '#ff5a66',
+                  background: 'rgba(229, 57, 70, 0.12)',
+                  boxShadow: '0 0 40px rgba(229, 57, 70, 0.55), inset 0 0 20px rgba(229, 57, 70, 0.15)',
+                }}
+              >
+                <span className="relative flex h-4 w-4 md:h-5 md:w-5 flex-shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: '#ff5a66' }} />
+                  <span className="relative inline-flex rounded-full h-full w-full" style={{ background: '#ff5a66' }} />
+                </span>
+                <span className="font-mono text-lg sm:text-2xl md:text-3xl lg:text-4xl uppercase tracking-[0.18em] md:tracking-[0.25em] font-bold leading-none" style={{ color: '#ff5a66' }}>
+                  Submissions Live
+                </span>
+              </div>
+
+              <p className="font-mono text-xs uppercase tracking-[0.4em] text-white/60 mb-3">
+                {ACTIVE_SUBJ.subtitle}
+              </p>
+
+              <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-white uppercase tracking-[0.03em] leading-[0.95] mb-6">
+                SUBJ:&nbsp;{ACTIVE_SUBJ.id}
+                <span className="block text-3xl md:text-5xl lg:text-6xl mt-3 text-white/70">
+                  {ACTIVE_SUBJ.title}
+                </span>
+              </h2>
+
+              {/* Overview — same copy used on /subj/<id>'s header */}
+              <p className="font-mono text-base md:text-lg text-white/80 leading-relaxed max-w-2xl mx-auto mb-10">
+                {ACTIVE_SUBJ.shortDescription}
+              </p>
+
+              <Link
+                href={`/subj/${ACTIVE_SUBJ.id}`}
+                className="group inline-flex items-center gap-4 font-mono text-base md:text-xl uppercase tracking-[0.2em] bg-white text-black px-10 md:px-16 py-5 md:py-7 hover:bg-white/90 transition-colors duration-300"
+              >
+                <span>Enter SUBJ:&nbsp;{ACTIVE_SUBJ.id}</span>
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="none" className="transition-transform duration-300 group-hover:translate-x-1">
+                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
+
+              {/* Quick facts row */}
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 font-mono text-[10px] uppercase tracking-[0.2em] text-white/40">
+                <span>Closes {ACTIVE_SUBJ.dates.closes}</span>
+                <span className="hidden sm:inline w-px h-3 bg-white/20" />
+                <span>Free to enter</span>
+                <span className="hidden sm:inline w-px h-3 bg-white/20" />
+                <span>1 submission per person</span>
+                <span className="hidden sm:inline w-px h-3 bg-white/20" />
+                <span>3 winners</span>
+                <span className="hidden sm:inline w-px h-3 bg-white/20" />
+                <span>Artists keep 80%</span>
+              </div>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ── Live Entries Gallery ──
+          Read-only wall of every approved submission for the active event,
+          read from the gallery worker (/entries?category=…). Hides itself
+          if there are no entries or the fetch fails. */}
+      <SubjEntriesGallery category={ACTIVE_SUBJ.category} eventLabel={ACTIVE_SUBJ.id} />
 
       {/* ── Overlord Dossiers on Scroll ── */}
       <section className="relative py-32 section-padding bg-black grid-lines">

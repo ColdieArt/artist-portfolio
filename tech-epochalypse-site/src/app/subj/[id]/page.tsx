@@ -107,9 +107,6 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                   </span>
                 )}
               </div>
-              <p className="font-mono text-sm text-white/70 leading-relaxed mt-3 max-w-3xl">
-                {event.shortDescription}
-              </p>
             </div>
           </ScrollReveal>
         </div>
@@ -150,8 +147,8 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                     {isClosed
                       ? 'The editor is closed for this event. Entries are archived in the Dossier.'
                       : single
-                        ? 'One subject, one category. Click to open the editor.'
-                        : 'Your pick locks your entry’s category. Click to open the editor.'}
+                        ? 'One subject, one category. Click to open the kinetic 3D collage machine.'
+                        : 'Your pick locks your entry’s category. Click to open the kinetic 3D collage machine.'}
                   </p>
                 </div>
               </ScrollReveal>
@@ -182,7 +179,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                         </div>
                       ) : (
                         <div className={`absolute top-2 right-2 font-mono uppercase tracking-wider text-white/90 bg-black/60 border border-white/20 px-1.5 py-0.5 transition-opacity ${single ? 'text-[11px] md:text-xs px-3 py-1.5 opacity-100' : 'text-[9px] opacity-0 group-hover:opacity-100'}`}>
-                          {single ? 'Open the Editor →' : 'Remix →'}
+                          {single ? 'Open the Kinetic 3D Collage Machine →' : 'Remix →'}
                         </div>
                       )}
                     </div>
@@ -258,7 +255,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                   <div className="border-t border-black/10 pt-3">
                     <div className="font-bold uppercase tracking-widest text-[10px] mb-2">How to Enter</div>
                     <ol className="space-y-1 ml-1">
-                      <li className="flex gap-1.5"><span className="shrink-0 font-bold">1.</span><span>{single ? 'Open the editor (left).' : 'Pick an overlord (left).'}</span></li>
+                      <li className="flex gap-1.5"><span className="shrink-0 font-bold">1.</span><span>{single ? 'Open the kinetic 3D collage machine (left).' : 'Pick an overlord (left).'}</span></li>
                       <li className="flex gap-1.5"><span className="shrink-0 font-bold">2.</span><span>Use depth + motion controls to build your collage.</span></li>
                       <li className="flex gap-1.5"><span className="shrink-0 font-bold">3.</span><span>Remix Coldie&rsquo;s assets, upload your own, or both.</span></li>
                       <li className="flex gap-1.5"><span className="shrink-0 font-bold">4.</span><span>Submit before the deadline.</span></li>

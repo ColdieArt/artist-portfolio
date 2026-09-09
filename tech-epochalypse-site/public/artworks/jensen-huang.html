@@ -2766,7 +2766,7 @@ function init() {
 
     const loadImgBtn = document.createElement('button');
     loadImgBtn.id = 'load-image-btn';
-    loadImgBtn.textContent = 'LOAD';
+    loadImgBtn.textContent = 'IMPORT';
     loadImgBtn.style.cssText = `background-color: black; color: white; padding: 4px; margin-top: 10px; border: 0.5px solid #FF9800; border-radius: 0; cursor: pointer; font-family: monospace; font-size: 7px; outline: none; white-space: nowrap; box-sizing: border-box; display: none;`;
     loadImgBtn.onclick = (e) => { e.stopPropagation(); imageFileInput.click(); };
     leftUiContainer.appendChild(loadImgBtn);

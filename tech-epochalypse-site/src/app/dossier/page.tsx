@@ -197,7 +197,7 @@ export default function DossierPage() {
                       href={subject.artworkFile ?? `/subj/${active.id}`}
                       className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-[#1c1a14] border border-[#1c1a14]/40 hover:bg-[#1c1a14] hover:text-[#ece6d4] transition-colors px-5 py-3"
                     >
-                      Open the Editor →
+                      Open the Kinetic 3D Collage Machine →
                     </Link>
                   </div>
                 </div>
