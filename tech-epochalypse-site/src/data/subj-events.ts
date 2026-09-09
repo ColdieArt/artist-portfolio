@@ -1,9 +1,9 @@
 // ─────────────────────────────────────────────────────────────────────────
-// SUBJ design competitions — single source of truth for the site.
+// SUBJ design competitions - single source of truth for the site.
 //
 // Add a new entry here when the next SUBJ launches. /subj/<id> renders from
 // this table; the worker (worker/src/index.ts → SUBJ_EVENTS) holds the same
-// dates for server-side window enforcement — keep the two in sync.
+// dates for server-side window enforcement - keep the two in sync.
 //
 // `category` is the exact string written to Airtable's "Category" column
 // and to D1 `images.event`. SUBJ:01 predates event tagging, so its Airtable
@@ -21,7 +21,7 @@ export interface SubjEventConfig {
   shortDescription: string
   /** Overlord slugs eligible for this event (order = display order). */
   overlordSlugs: string[]
-  /** Epoch ms — used by the client-side vote CTA to pick its state. */
+  /** Epoch ms - used by the client-side vote CTA to pick its state. */
   voteOpen: number
   voteClose: number
   /** Display strings for the brief column. */
@@ -52,7 +52,7 @@ export const SUBJ_EVENTS: Record<string, SubjEventConfig> = {
     status: 'closed',
     category: 'general submission',
     shortDescription:
-      'Five tech overlords, each a face of the Singularity. Pick one, remix it in Coldie’s editor, and submit your own parallax collage. Use Coldie’s assets, upload your own, or both — all entries compete equally.',
+      'Five tech overlords, each a face of the Singularity. Pick one, remix it in Coldie’s editor, and submit your own parallax collage. Use Coldie’s assets, upload your own, or both. All entries compete equally.',
     overlordSlugs: ['elon-musk', 'mark-zuckerberg', 'sam-altman', 'jeff-bezos', 'jensen-huang'],
     voteOpen: Date.UTC(2026, 4, 29, 7),
     voteClose: Date.UTC(2026, 5, 11, 7),
@@ -78,7 +78,7 @@ export const SUBJ_EVENTS: Record<string, SubjEventConfig> = {
     status: 'live',
     category: 'subj-02',
     shortDescription:
-      'One overlord. One threshold. Jensen Huang built the machine it woke up inside — now remix him in Coldie’s editor and file your evidence of the morning after. Use Coldie’s assets, upload your own, or both — all entries compete equally.',
+      'One overlord. One threshold. Jensen Huang built the machine it woke up inside. Now remix him in Coldie’s editor and file your evidence of the morning after. Use Coldie’s assets, upload your own, or both. All entries compete equally.',
     overlordSlugs: ['jensen-huang'],
     // Voting: Wed Sep 23 12:00 AM PT → Wed Sep 30 11:59 PM PT (PDT = UTC-7)
     voteOpen: Date.UTC(2026, 8, 23, 7),

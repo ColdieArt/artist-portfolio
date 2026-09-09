@@ -38,9 +38,9 @@ export function generateStaticParams() {
 
 export function generateMetadata({ params }: { params: { id: string } }) {
   const event = SUBJ_EVENTS[params.id]
-  if (!event) return { title: 'SUBJ — Not Found' }
+  if (!event) return { title: 'SUBJ: Not Found' }
   return {
-    title: `SUBJ:${event.id} — ${event.title} | Tech Epochalypse`,
+    title: `SUBJ:${event.id} ${event.title} | Tech Epochalypse`,
     description: event.shortDescription,
   }
 }
@@ -62,9 +62,9 @@ const BRIEF_COPY: Record<string, JSX.Element> = {
   ),
   '02': (
     <>
-      The threshold has been crossed. No launch event, no keynote &mdash;
-      just a line in a log file and a world that reads differently the
-      morning after. AGI has arrived, and Jensen Huang built the machine it
+      The threshold has been crossed. No launch event, no keynote. Just a
+      line in a log file and a world that reads differently the morning
+      after. AGI has arrived, and Jensen Huang built the machine it
       woke up inside. He sold the picks and shovels to the gold rush, then
       found out the gold could think. Every GPU is a witness. Every data
       center is a crime scene or a cathedral, depending on who files the
@@ -99,7 +99,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
               <div className="classified-header">{event.subtitle}</div>
               <div className="flex flex-wrap items-center gap-4">
                 <h1 className="font-display text-3xl md:text-5xl text-white uppercase tracking-[0.03em]">
-                  SUBJ:{event.id} &mdash; {event.title}
+                  SUBJ:{event.id} &middot; {event.title}
                 </h1>
                 {isClosed && (
                   <span className="font-mono text-[10px] md:text-xs uppercase tracking-[0.3em] border border-red-500/70 text-red-400 px-3 py-1 rotate-[-2deg]">
@@ -111,51 +111,6 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                 {event.shortDescription}
               </p>
             </div>
-          </ScrollReveal>
-        </div>
-      </section>
-
-      {/* ── Archive CTA (closed events) / Vote CTA (live events) ──
-          Sits directly under the SUBJ header. For a closed event it funnels
-          to the Dossier archive (winners + full submission record). For a
-          live event it's the Dossier Refinement pairwise-vote CTA, which
-          switches itself on when the voting window opens. */}
-      <section className="pb-6 md:pb-8 section-padding">
-        <div className="page-container">
-          <ScrollReveal>
-            {isClosed && event.archiveHref ? (
-              <Link
-                href={event.archiveHref}
-                className="group block border border-white/20 hover:border-white bg-white/[0.02] hover:bg-white/[0.06] transition-colors duration-300 p-5 md:p-7"
-              >
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  <div>
-                    <div className="classified-header">Filed in the Dossier</div>
-                    <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em] mt-1">
-                      Winners &amp; Full Submission Record
-                    </h2>
-                    <p className="font-mono text-xs md:text-sm text-white/70 mt-2 max-w-2xl leading-relaxed">
-                      SUBJ:{event.id} is closed and archived. The three winning
-                      selections, their mint pages, and every entry submitted
-                      into evidence are preserved in the permanent case file.
-                    </p>
-                  </div>
-                  <span className="inline-flex items-center gap-3 font-mono text-xs md:text-sm uppercase tracking-[0.2em] bg-white text-black px-5 md:px-7 py-3 md:py-4 shrink-0">
-                    <span>Open the Archive</span>
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="transition-transform duration-300 group-hover:translate-x-1">
-                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </span>
-                </div>
-              </Link>
-            ) : (
-              <SubjVoteCta
-                voteOpen={event.voteOpen}
-                voteClose={event.voteClose}
-                votingLabel={event.dates.voting}
-                eventLabel={`SUBJ:${event.id}`}
-              />
-            )}
           </ScrollReveal>
         </div>
       </section>
@@ -183,7 +138,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
         <div className="page-container">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8">
 
-            {/* LEFT (60%) — Pick Your Overlord / The Subject */}
+            {/* LEFT (60%) - Pick Your Overlord / The Subject */}
             <div className="lg:col-span-3">
               <ScrollReveal>
                 <div className="mb-5">
@@ -215,7 +170,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-3">
                         <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/60 mb-0.5">
-                          SUBJECT {o.number} &mdash; {o.title}
+                          SUBJECT {o.number} &middot; {o.title}
                         </div>
                         <div className={`font-display text-white uppercase tracking-[0.03em] leading-tight ${single ? 'text-2xl md:text-4xl' : 'text-base md:text-lg'}`}>
                           {o.name}
@@ -242,9 +197,49 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                   )
                 })}
               </div>
+
+              {/* Archive CTA (closed events) / Vote CTA (live events) - sits
+                  directly under the subject card, beside the brief column. */}
+              <div className="mt-6 md:mt-8">
+                <ScrollReveal>
+                  {isClosed && event.archiveHref ? (
+                    <Link
+                      href={event.archiveHref}
+                      className="group block border border-white/20 hover:border-white bg-white/[0.02] hover:bg-white/[0.06] transition-colors duration-300 p-5 md:p-7"
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                          <div className="classified-header">Filed in the Dossier</div>
+                          <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em] mt-1">
+                            Winners &amp; Full Submission Record
+                          </h2>
+                          <p className="font-mono text-xs md:text-sm text-white/70 mt-2 max-w-2xl leading-relaxed">
+                            SUBJ:{event.id} is closed and archived. The three winning
+                            selections, their mint pages, and every entry submitted
+                            into evidence are preserved in the permanent case file.
+                          </p>
+                        </div>
+                        <span className="inline-flex items-center gap-3 font-mono text-xs md:text-sm uppercase tracking-[0.2em] bg-white text-black px-5 md:px-7 py-3 md:py-4 shrink-0">
+                          <span>Open the Archive</span>
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="transition-transform duration-300 group-hover:translate-x-1">
+                            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </span>
+                      </div>
+                    </Link>
+                  ) : (
+                    <SubjVoteCta
+                      voteOpen={event.voteOpen}
+                      voteClose={event.voteClose}
+                      votingLabel={event.dates.voting}
+                      eventLabel={`SUBJ:${event.id}`}
+                    />
+                  )}
+                </ScrollReveal>
+              </div>
             </div>
 
-            {/* RIGHT (40%) — Compact Brief (sticky on desktop) */}
+            {/* RIGHT (40%) - Compact Brief (sticky on desktop) */}
             <aside className="lg:col-span-2">
               <div className="subj-brief bg-white p-5 md:p-6 lg:sticky lg:top-24">
                 <div className="font-mono text-[11px] text-black leading-snug space-y-4">
@@ -289,12 +284,12 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                   <div className="border-t border-black/10 pt-3">
                     <div className="font-bold uppercase tracking-widest text-[10px] mb-2">Winners (3)</div>
                     <ul className="space-y-1 ml-1">
-                      <li className="flex gap-1.5"><span className="shrink-0">&rarr;</span><span><strong>Curator&rsquo;s Pick 1</strong> &mdash; Coldie picks &mdash; Edition of 10</span></li>
-                      <li className="flex gap-1.5"><span className="shrink-0">&rarr;</span><span><strong>Curator&rsquo;s Pick 2</strong> &mdash; Coldie picks &mdash; Edition of 10</span></li>
+                      <li className="flex gap-1.5"><span className="shrink-0">&rarr;</span><span><strong>Curator&rsquo;s Pick 1:</strong> Coldie picks, edition of 10</span></li>
+                      <li className="flex gap-1.5"><span className="shrink-0">&rarr;</span><span><strong>Curator&rsquo;s Pick 2:</strong> Coldie picks, edition of 10</span></li>
                       <li className="flex gap-1.5">
                         <span className="shrink-0">&rarr;</span>
                         <span>
-                          <strong>Community Pick</strong> &mdash; most votes &mdash; Edition of 42
+                          <strong>Community Pick:</strong> most votes, edition of 42
                           <span className="block italic text-black/60 mt-0.5">Voting happens once submissions close.</span>
                         </span>
                       </li>
@@ -304,7 +299,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                     </p>
                   </div>
 
-                  {/* EDITIONS — collapsible to keep the column short */}
+                  {/* EDITIONS - collapsible to keep the column short */}
                   <details className="border-t border-black/10 pt-3 group">
                     <summary className="font-bold uppercase tracking-widest text-[10px] cursor-pointer select-none flex items-center justify-between">
                       <span>Edition Breakdown</span>
@@ -331,7 +326,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                     </div>
                   </details>
 
-                  {/* COLLECTOR REWARDS — collapsible */}
+                  {/* COLLECTOR REWARDS - collapsible */}
                   <details className="border-t border-black/10 pt-3 group">
                     <summary className="font-bold uppercase tracking-widest text-[10px] cursor-pointer select-none flex items-center justify-between">
                       <span>Collector Rewards</span>
@@ -357,17 +352,6 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                     </div>
                   </details>
 
-                  {/* THE VARIANT — collapsible */}
-                  <details className="border-t border-black/10 pt-3 group">
-                    <summary className="font-bold uppercase tracking-widest text-[10px] cursor-pointer select-none flex items-center justify-between">
-                      <span>The Variant</span>
-                      <span className="text-black/40 group-open:rotate-90 transition-transform">&rsaquo;</span>
-                    </summary>
-                    <p className="mt-2 text-[10px]">
-                      Coldie creates a 1/1 Variant in response: a fully kinetic 3D piece with a unique control layer found in no other work. One Variant per SUBJ event, held as a dedicated series for institutional and gallery presentation.
-                    </p>
-                  </details>
-
                   {/* PROMISE / Sign-off */}
                   <div className="border-t border-black/10 pt-3">
                     <p className="font-bold text-[10px] uppercase tracking-widest">The Promise</p>
@@ -388,13 +372,13 @@ export default function SubjPage({ params }: { params: { id: string } }) {
           Simple thumbnail grid of every approved Airtable record tagged with
           this event's category. Shown during the submission window so
           visitors can see what's been entered. Hides itself if zero entries.
-          Closed events don't show it — their record lives in the Dossier. */}
+          Closed events don't show it - their record lives in the Dossier. */}
       {!isClosed && <SubjEntriesGallery category={event.category} eventLabel={event.id} />}
 
       {/* ── Submissions Gallery + Voting ──
           NOTE: while SHOW_SUBMISSIONS_GALLERY is false (during the
-          submission window), the ENTIRE section below — line accent,
-          section header, AND the <UserExports> gallery — is hidden.
+          submission window), the ENTIRE section below - line accent,
+          section header, AND the <UserExports> gallery - is hidden.
           To restore when submissions close:
             1. Flip SHOW_SUBMISSIONS_GALLERY → true (top of file).
             2. Optionally flip VOTING_ENABLED → true in EnhancedGallery.tsx
@@ -414,7 +398,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                   </h2>
                   <p className="font-mono text-sm text-white mt-3">
                     The submissions gallery reveals once the submission window
-                    closes. Voting opens at the same time — check back to pick
+                    closes. Voting opens at the same time. Check back to pick
                     the Community Pick winner.
                   </p>
                 </div>
@@ -431,7 +415,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
         </>
       )}
 
-      {/* ── Archive index — every SUBJ, past and present ── */}
+      {/* ── Archive index - every SUBJ, past and present ── */}
       <div className="line-accent" />
       <section className="py-8 md:py-12 section-padding">
         <div className="page-container">

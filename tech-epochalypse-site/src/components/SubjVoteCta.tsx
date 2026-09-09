@@ -32,13 +32,13 @@ export default function SubjVoteCta({ voteOpen, voteClose, votingLabel, eventLab
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
         <div className="classified-header">
-          {phase === 'open' ? 'Community Vote — Now Open' : phase === 'after' ? 'Community Vote — Closed' : 'Community Vote — Opens at Close'}
+          {phase === 'open' ? 'Community Vote: Now Open' : phase === 'after' ? 'Community Vote: Closed' : 'Community Vote: Opens at Close'}
         </div>
         <h2 className="font-display text-2xl md:text-3xl text-white uppercase tracking-[0.03em] mt-1">
           Dossier Refinement
         </h2>
         <p className="font-mono text-xs md:text-sm text-white/70 mt-2 max-w-2xl leading-relaxed">
-          Two entries, side by side. Pick the one you prefer — then do it
+          Two entries, side by side. Pick the one you prefer, then do it
           again. Every choice is a head-to-head match, not a tally. Votes feed
           a ranking algorithm (Elo, the system used to rank chess players)
           that tracks <em>which</em> entries beat <em>which</em>. The
