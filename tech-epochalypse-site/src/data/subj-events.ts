@@ -78,7 +78,7 @@ export const SUBJ_EVENTS: Record<string, SubjEventConfig> = {
     status: 'live',
     category: 'subj-02',
     shortDescription:
-      'One overlord. One threshold. Jensen Huang built the machine it woke up inside. Now remix him in Coldie’s editor and file your evidence of the morning after. Use Coldie’s assets, upload your own, or both. All entries compete equally.',
+      'One overlord. One threshold. Jensen Huang built the machine it woke up inside. Now remix him in Coldie’s kinetic 3D collage machine and file your evidence of the morning after. Use Coldie’s assets, upload your own, or both. All entries compete equally.',
     overlordSlugs: ['jensen-huang'],
     // Voting: Wed Sep 23 12:00 AM PT → Wed Sep 30 11:59 PM PT (PDT = UTC-7)
     voteOpen: Date.UTC(2026, 8, 23, 7),
