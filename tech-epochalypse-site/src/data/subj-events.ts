@@ -21,6 +21,8 @@ export interface SubjEventConfig {
   shortDescription: string
   /** Overlord slugs eligible for this event (order = display order). */
   overlordSlugs: string[]
+  /** Epoch ms. Submissions are refused (worker) and the site shows a closed state after this. */
+  submitClose: number
   /** Epoch ms - used by the client-side vote CTA to pick its state. */
   voteOpen: number
   voteClose: number
@@ -54,6 +56,7 @@ export const SUBJ_EVENTS: Record<string, SubjEventConfig> = {
     shortDescription:
       'Five tech overlords, each a face of the Singularity. Pick one, remix it in Coldie’s editor, and submit your own parallax collage. Use Coldie’s assets, upload your own, or both. All entries compete equally.',
     overlordSlugs: ['elon-musk', 'mark-zuckerberg', 'sam-altman', 'jeff-bezos', 'jensen-huang'],
+    submitClose: Date.UTC(2026, 4, 29, 7),
     voteOpen: Date.UTC(2026, 4, 29, 7),
     voteClose: Date.UTC(2026, 5, 11, 7),
     dates: {
@@ -81,6 +84,8 @@ export const SUBJ_EVENTS: Record<string, SubjEventConfig> = {
       'One overlord. One threshold. Jensen Huang built the machine it woke up inside. Now remix him in Coldie’s kinetic 3D collage machine and file your evidence of the morning after. Use Coldie’s assets, upload your own, or both. All entries compete equally.',
     overlordSlugs: ['jensen-huang'],
     // Voting: Wed Sep 23 12:00 AM PT → Wed Sep 30 11:59 PM PT (PDT = UTC-7)
+    // Submissions closed Wed Sep 23 11:59 PM PT
+    submitClose: Date.UTC(2026, 8, 24, 7),
     voteOpen: Date.UTC(2026, 8, 23, 7),
     voteClose: Date.UTC(2026, 9, 1, 7),
     dates: {
@@ -102,3 +107,6 @@ export const SUBJ_EVENTS: Record<string, SubjEventConfig> = {
 /** The event currently accepting submissions / votes. */
 export const ACTIVE_SUBJ_ID = '02'
 export const ACTIVE_SUBJ = SUBJ_EVENTS[ACTIVE_SUBJ_ID]
+
+/** True while an event's submission window is open (evaluated at build time for the static export). */
+export const submissionsOpen = (e: SubjEventConfig) => e.status === 'live' && Date.now() < e.submitClose

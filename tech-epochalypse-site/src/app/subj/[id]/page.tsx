@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import ScrollReveal from '@/components/ScrollReveal'
 import SubjVoteCta from '@/components/SubjVoteCta'
 import overlords from '@/data/overlords.json'
-import { SUBJ_EVENTS } from '@/data/subj-events'
+import { SUBJ_EVENTS, submissionsOpen } from '@/data/subj-events'
 
 const UserExports = dynamic(() => import('@/components/UserExports'), {
   ssr: false,
@@ -81,6 +81,8 @@ export default function SubjPage({ params }: { params: { id: string } }) {
   if (!event) notFound()
 
   const isClosed = event.status === 'closed'
+  // Submission window over but the event still live (voting / judging).
+  const entryClosed = isClosed || !submissionsOpen(event)
   const eventOverlords = event.overlordSlugs
     .map((slug) => overlords.find((o) => o.slug === slug))
     .filter((o): o is (typeof overlords)[number] => !!o)
@@ -146,7 +148,9 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                   <p className="font-mono text-xs text-white/60 mt-2">
                     {isClosed
                       ? 'The editor is closed for this event. Entries are archived in the Dossier.'
-                      : single
+                      : entryClosed
+                        ? `Submissions closed ${event.dates.closes}. Community voting runs ${event.dates.voting}.`
+                        : single
                         ? 'One subject, one category. Click to open the kinetic 3D collage machine.'
                         : 'Your pick locks your entry’s category. Click to open the kinetic 3D collage machine.'}
                   </p>
@@ -161,7 +165,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                       <img
                         src={o.previewImage ?? '/images/placeholder.png'}
                         alt={o.name}
-                        className={`w-full h-full object-cover transition-transform duration-700 ${isClosed ? 'grayscale opacity-60' : 'group-hover:scale-105'}`}
+                        className={`w-full h-full object-cover transition-transform duration-700 ${entryClosed ? 'grayscale opacity-60' : 'group-hover:scale-105'}`}
                         loading="lazy"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
@@ -173,9 +177,9 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                           {o.name}
                         </div>
                       </div>
-                      {isClosed ? (
+                      {entryClosed ? (
                         <div className="absolute top-2 right-2 font-mono text-[9px] uppercase tracking-wider text-red-400 bg-black/60 border border-red-500/50 px-1.5 py-0.5">
-                          Closed
+                          {isClosed ? 'Closed' : 'Submissions Closed'}
                         </div>
                       ) : (
                         <div className={`absolute top-2 right-2 font-mono uppercase tracking-wider text-white/90 bg-black/60 border border-white/20 px-1.5 py-0.5 transition-opacity ${single ? 'text-[11px] md:text-xs px-3 py-1.5 opacity-100' : 'text-[9px] opacity-0 group-hover:opacity-100'}`}>
@@ -185,7 +189,7 @@ export default function SubjPage({ params }: { params: { id: string } }) {
                     </div>
                   )
                   const cls = 'group relative bg-charcoal/30 border border-white/5 overflow-hidden transition-all duration-300'
-                  return isClosed ? (
+                  return entryClosed ? (
                     <div key={o.slug} className={cls}>{card}</div>
                   ) : (
                     <Link key={o.slug} href={o.artworkFile} className={`${cls} hover:border-white/30`}>

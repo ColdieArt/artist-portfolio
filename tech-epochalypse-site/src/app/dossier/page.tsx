@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic'
 import ScrollReveal from '@/components/ScrollReveal'
 import SubjVoteCta from '@/components/SubjVoteCta'
 import overlords from '@/data/overlords.json'
-import { ACTIVE_SUBJ } from '@/data/subj-events'
+import { ACTIVE_SUBJ, submissionsOpen } from '@/data/subj-events'
 import { SUBJ_01_WINNERS } from '@/data/subj-01-archive'
 import { getSubj01EntryImages } from '@/lib/dossier-entries'
 
@@ -28,6 +28,7 @@ export const metadata = {
    ──────────────────────────────────────────────────────────────────── */
 export default function DossierPage() {
   const active = ACTIVE_SUBJ
+  const entryOpen = submissionsOpen(active)
   const subject = overlords.find((o) => o.slug === active.overlordSlugs[0])!
   const subj01Entries = getSubj01EntryImages()
 
@@ -114,7 +115,7 @@ export default function DossierPage() {
               <span className="tape" style={{ top: '-12px', right: '48px', transform: 'rotate(4deg)', width: '110px' }} />
               <div className="absolute -top-4 right-6 sm:right-10 z-10">
                 <span className="rubber-stamp rubber-stamp--blue text-xl sm:text-2xl" style={{ transform: 'rotate(7deg)' }}>
-                  Accepting Entries
+                  {entryOpen ? 'Accepting Entries' : 'Voting Open'}
                 </span>
               </div>
 
@@ -191,13 +192,13 @@ export default function DossierPage() {
                       href={`/subj/${active.id}`}
                       className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] bg-[#1c1a14] text-[#ece6d4] hover:bg-[#8c2b22] transition-colors px-5 py-3"
                     >
-                      Read the Brief &amp; Enter →
+                      {entryOpen ? <>Read the Brief &amp; Enter →</> : 'Read the Brief →'}
                     </Link>
                     <Link
-                      href={subject.artworkFile ?? `/subj/${active.id}`}
+                      href={entryOpen ? (subject.artworkFile ?? `/subj/${active.id}`) : '/dossier-refinement'}
                       className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-[#1c1a14] border border-[#1c1a14]/40 hover:bg-[#1c1a14] hover:text-[#ece6d4] transition-colors px-5 py-3"
                     >
-                      Open the Kinetic 3D Collage Machine →
+                      {entryOpen ? 'Open the Kinetic 3D Collage Machine →' : 'Cast Your Vote →'}
                     </Link>
                   </div>
                 </div>

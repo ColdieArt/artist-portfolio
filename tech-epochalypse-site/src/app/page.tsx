@@ -2,7 +2,7 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import ScrollReveal from '@/components/ScrollReveal'
 import { KINETIC_MINTS, KINETIC_COLLECTION_URL } from '@/data/kinetic-mints'
-import { ACTIVE_SUBJ } from '@/data/subj-events'
+import { ACTIVE_SUBJ, submissionsOpen } from '@/data/subj-events'
 
 // Lazy-load heavy canvas animations so nav becomes interactive immediately
 const ParticleNetwork = dynamic(() => import('@/components/ParticleNetwork'), {
@@ -19,6 +19,7 @@ const SubjEntriesGallery = dynamic(() => import('@/components/SubjEntriesGallery
 })
 
 export default function HomePage() {
+  const entryOpen = submissionsOpen(ACTIVE_SUBJ)
   return (
     <>
       {/* ── Hero - Noir Dossier ──
@@ -144,7 +145,7 @@ export default function HomePage() {
                   <span className="relative inline-flex rounded-full h-full w-full" style={{ background: '#ff5a66' }} />
                 </span>
                 <span className="font-mono text-lg sm:text-2xl md:text-3xl lg:text-4xl uppercase tracking-[0.18em] md:tracking-[0.25em] font-bold leading-none" style={{ color: '#ff5a66' }}>
-                  Submissions Live
+                  {entryOpen ? 'Submissions Live' : <>Submissions Closed <span className="opacity-70">&middot;</span> Voting Open</>}
                 </span>
               </div>
 
@@ -165,10 +166,10 @@ export default function HomePage() {
               </p>
 
               <Link
-                href={`/subj/${ACTIVE_SUBJ.id}`}
+                href={entryOpen ? `/subj/${ACTIVE_SUBJ.id}` : '/dossier-refinement'}
                 className="group inline-flex items-center gap-4 font-mono text-base md:text-xl uppercase tracking-[0.2em] bg-white text-black px-10 md:px-16 py-5 md:py-7 hover:bg-white/90 transition-colors duration-300"
               >
-                <span>Enter SUBJ:&nbsp;{ACTIVE_SUBJ.id}</span>
+                <span>{entryOpen ? <>Enter SUBJ:&nbsp;{ACTIVE_SUBJ.id}</> : 'Cast Your Vote'}</span>
                 <svg width="18" height="18" viewBox="0 0 16 16" fill="none" className="transition-transform duration-300 group-hover:translate-x-1">
                   <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -176,7 +177,7 @@ export default function HomePage() {
 
               {/* Quick facts row */}
               <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 font-mono text-[10px] uppercase tracking-[0.2em] text-white/40">
-                <span>Closes {ACTIVE_SUBJ.dates.closes}</span>
+                <span>{entryOpen ? `Closes ${ACTIVE_SUBJ.dates.closes}` : `Voting ${ACTIVE_SUBJ.dates.voting}`}</span>
                 <span className="hidden sm:inline w-px h-3 bg-white/20" />
                 <span>Free to enter</span>
                 <span className="hidden sm:inline w-px h-3 bg-white/20" />
