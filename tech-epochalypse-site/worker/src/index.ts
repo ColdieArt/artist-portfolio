@@ -87,6 +87,10 @@ const SUBJ_EVENTS: Record<string, SubjEvent> = {
   },
 };
 const ACTIVE_EVENT = 'subj-02';
+// Counted votes allowed per voter (IP) per event. SUBJ:02 has a much smaller
+// pool than SUBJ:01, so each voter gets four head-to-heads and is done.
+const VOTE_LIMITS: Record<string, number> = { 'subj-01': 25, 'subj-02': 4 };
+const voteLimitFor = (eventId: string) => VOTE_LIMITS[eventId] ?? 25;
 const LEGACY_CATEGORY = 'general submission';
 
 // Map the client-supplied Airtable Category → D1 event id.
@@ -972,6 +976,14 @@ async function handleVsPair(request: Request, env: Env): Promise<Response> {
       .all<ImageRow & { voter_seen: number }>();
 
     const rows = pool.results || [];
+    const quotaLimit = voteLimitFor(event);
+    const usedRow = await env.VS_DB.prepare(`SELECT COUNT(*) AS c FROM votes WHERE voter_hash = ?1 AND event = ?2`)
+      .bind(hash, event)
+      .first<{ c: number }>();
+    const quotaUsed = usedRow?.c ?? 0;
+    if (quotaUsed >= quotaLimit) {
+      return json({ error: 'Vote limit reached', limitReached: true, used: quotaUsed, limit: quotaLimit, event }, 429);
+    }
     if (rows.length < 2) {
       return json({ error: 'Not enough approved images for this filter', count: rows.length }, 404);
     }
@@ -997,7 +1009,7 @@ async function handleVsPair(request: Request, env: Env): Promise<Response> {
 
     // Shuffle which one is on the left.
     const [left, right] = Math.random() < 0.5 ? [a, b] : [b, a];
-    return json({ left: stripImage(left), right: stripImage(right), overlord, event });
+    return json({ left: stripImage(left), right: stripImage(right), overlord, event, used: quotaUsed, limit: quotaLimit });
   } catch (e) {
     console.error('vs/pair error:', e);
     return json({ error: 'Failed to get pair' }, 500);
@@ -1090,7 +1102,7 @@ async function handleVsVote(request: Request, env: Env): Promise<Response> {
     // Per-IP vote cap. Once an IP has cast PER_IP_LIMIT counted votes, further
     // votes are rejected with a distinct status so the client can show a
     // "limit reached" message.
-    const PER_IP_LIMIT = 25;
+    const PER_IP_LIMIT = voteLimitFor(event);
     // Quota is per event, so SUBJ:01 voters start fresh for SUBJ:02.
     const usedRow = await env.VS_DB.prepare(
       `SELECT COUNT(*) AS c FROM votes WHERE voter_hash = ?1 AND event = ?2`

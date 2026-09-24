@@ -51,9 +51,13 @@ export default function VsPage() {
         cache: 'no-store',
       })
       const data = await res.json()
+      if (typeof data?.used === 'number' && typeof data?.limit === 'number') {
+        setQuota({ used: data.used, limit: data.limit })
+      }
       if (!res.ok) {
         setPair(null)
         if (data?.votingClosed) setClosedMsg(data.error || 'Voting is closed.')
+        else if (data?.limitReached) setLimitReached(true)
         else setError(data?.error || 'Could not load a pair.')
       } else {
         setPair(data)
@@ -127,7 +131,7 @@ export default function VsPage() {
             Dossier Refinement
           </h1>
           <p className="font-mono text-sm text-white/70 max-w-2xl mx-auto mb-3 leading-relaxed">
-            Two entries, side by side. Pick the one you prefer — then do it
+            Two entries, side by side. Pick the one you prefer, then do it
             again. Every choice is a head-to-head match, not a tally.
           </p>
           <p className="font-mono text-sm text-white/60 max-w-2xl mx-auto mb-3 leading-relaxed">
@@ -151,7 +155,7 @@ export default function VsPage() {
           <div className="flex flex-wrap items-center justify-center gap-4 font-mono text-xs uppercase tracking-wider">
             <span className="text-white/40">
               Votes cast: {quota ? `${quota.used} / ${quota.limit}` : count}
-              <span className="text-white/30 normal-case ml-2">(max 25 votes per person)</span>
+              <span className="text-white/30 normal-case ml-2">(max {quota?.limit ?? 4} votes per person)</span>
             </span>
             {/* Leaderboard link hidden during the submission window.
                 Flip the `false` to bring it back once results are public. */}
@@ -172,7 +176,7 @@ export default function VsPage() {
               Thanks for voting.
             </h2>
             <p className="font-mono text-sm text-white/70 leading-relaxed mb-2">
-              You&rsquo;ve cast {quota?.limit ?? 25} votes — the maximum allowed
+              You&rsquo;ve cast {quota?.limit ?? 4} votes, the maximum allowed
               per visitor. Every comparison you made feeds the ranking.
             </p>
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/50 mt-6">
