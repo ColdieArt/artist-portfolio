@@ -76,14 +76,14 @@ const SUBJ_EVENTS: Record<string, SubjEvent> = {
   },
   // AGI Has Arrived — Jensen Huang only. All times Pacific (UTC-7 in Sep/Oct):
   //   submissions  Wed Sep 9 09:00 ET  →  Wed Sep 23 23:59 PT
-  //   voting       Wed Sep 23 00:00 PT →  Wed Sep 30 23:59 PT
+  //   voting       Wed Sep 23 00:00 PT →  Wed Oct 7 23:59 PT (extended one week on Sep 30)
   'subj-02': {
     id: 'subj-02', label: 'SUBJ:02',
     // ⚠️ TEMP (2026-09-08): opened early so Coldie can test the Airtable
     // submission flow. Restore to Date.UTC(2026, 8, 9, 13) (Sep 9, 9 AM ET)
     // before announcing, or leave as-is if early entries are acceptable.
     submitOpen: Date.UTC(2026, 8, 8, 0), submitClose: Date.UTC(2026, 8, 24, 7),
-    voteOpen: Date.UTC(2026, 8, 23, 7), voteClose: Date.UTC(2026, 9, 1, 7),
+    voteOpen: Date.UTC(2026, 8, 23, 7), voteClose: Date.UTC(2026, 9, 8, 7),
   },
 };
 const ACTIVE_EVENT = 'subj-02';

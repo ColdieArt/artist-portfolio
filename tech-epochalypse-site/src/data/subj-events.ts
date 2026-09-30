@@ -87,11 +87,12 @@ export const SUBJ_EVENTS: Record<string, SubjEventConfig> = {
     // Submissions closed Wed Sep 23 11:59 PM PT
     submitClose: Date.UTC(2026, 8, 24, 7),
     voteOpen: Date.UTC(2026, 8, 23, 7),
-    voteClose: Date.UTC(2026, 9, 1, 7),
+    // Extended one week on Sep 30: now closes Wed Oct 7 11:59 PM PT
+    voteClose: Date.UTC(2026, 9, 8, 7),
     dates: {
       opens: 'Wed Sep 9 · 9 AM ET',
       closes: 'Wed Sep 23 · 11:59 PM PT',
-      voting: 'Wed Sep 23 – Wed Sep 30 · 11:59 PM PT',
+      voting: 'Wed Sep 23 – Wed Oct 7 · 11:59 PM PT',
       winners: 'Wed Oct 7',
       mints: 'Wed Oct 14',
       snapshot: 'Sep 23, 11:59 PM PT',
