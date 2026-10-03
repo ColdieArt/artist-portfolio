@@ -21,7 +21,7 @@
       "source": "/(.*)",
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Content-Security-Policy", "value": "frame-ancestors 'self' https://coldie3d.com https://www.coldie3d.com" },
         { "key": "X-XSS-Protection", "value": "1; mode=block" }
       ]
     }
