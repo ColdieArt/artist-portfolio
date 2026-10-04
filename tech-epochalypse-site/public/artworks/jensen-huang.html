@@ -2675,7 +2675,7 @@ function init() {
 
     const buttonsConfig = [
         { label: '3D', property: 'yRotation', pass: null },
-        { label: 'FLY', property: 'cameraAnimation', pass: null },
+        { label: 'ANIMATE', property: 'cameraAnimation', pass: null }, // was 'FLY'
         { label: 'SHADOW', property: 'shadow', pass: darkPass },
         { label: 'ASCII', property: 'ascii', pass: asciiPass },
         { label: 'HEATMAP', property: 'heatmap', pass: heatmapPass },
@@ -2710,7 +2710,7 @@ function init() {
     rightUiContainer.style.cssText = 'position: absolute; top: 44px; right: 10px; padding: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 100; font-family: monospace;';
     document.body.appendChild(rightUiContainer);
 
-    const leftUiOrder = ['yRotation', 'cameraAnimation', 'surveillance', 'greed', 'hacker', 'shadow', 'redactedGlitch'];
+    const leftUiOrder = ['yRotation', 'surveillance', 'greed', 'hacker', 'shadow', 'redactedGlitch', 'cameraAnimation']; // 'cameraAnimation' moved to end: ANIMATE button sits below effect filters, above RESET
     const buttonConfigMap = new Map(buttonsConfig.map(config => [config.property, config]));
     // ⚠️ HIDDEN_BUTTONS — property names listed here are NOT rendered in
     // the left UI for the current SUBJ:01 competition. The underlying
@@ -2718,14 +2718,18 @@ function init() {
     // is suppressed. Remove an entry to bring its button back.
     //   '3D'  ↔ 'yRotation'
     //   'FLY' ↔ 'cameraAnimation'
-    const HIDDEN_BUTTONS = new Set(['yRotation', 'cameraAnimation', 'shadow']);
+    // 'cameraAnimation' removed from HIDDEN_BUTTONS so the ANIMATE button
+    // (previously labelled FLY, now relabelled ANIMATE in buttonsConfig)
+    // renders in the left UI. It is reordered in leftUiOrder below so it
+    // sits beneath the effect filters, separated from the RESET button.
+    const HIDDEN_BUTTONS = new Set(['yRotation', 'shadow']);
     leftUiOrder.forEach(p => { if (HIDDEN_BUTTONS.has(p)) return; const c = buttonConfigMap.get(p); if (c) addButtonToggle(leftUiContainer, c.label, c.property, c.pass); });
     buttonsConfig.forEach(c => { if (!leftUiOrder.includes(c.property)) addButtonToggle(rightUiContainer, c.label, c.property, c.pass); });
 
     const createResetButton = () => {
         const b = document.createElement('button');
         b.textContent = 'RESET';
-        b.style.cssText = 'background-color: black; color: white; padding: 4px; margin-top: 10px; border: 0.5px solid rgba(0,0,0,0.8); cursor: pointer; font-family: monospace; font-size: 7px;';
+        b.style.cssText = 'background-color: black; color: white; padding: 4px; margin-top: 28px; border: 0.5px solid rgba(0,0,0,0.8); cursor: pointer; font-family: monospace; font-size: 7px;'; /* 28px: extra space so RESET is visibly SEPARATED from the ANIMATE button above */
         b.onclick = (e) => { e.stopPropagation(); resetPiecesToOriginalPositions(); };
         return b;
     };

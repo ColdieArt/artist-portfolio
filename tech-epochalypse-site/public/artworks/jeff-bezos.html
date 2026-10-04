@@ -3220,7 +3220,7 @@ function init() {
     // Define buttons to be added to both UIs
     const buttonsConfig = [
         { label: '3D', property: 'yRotation', pass: null },
-        { label: 'FLY', property: 'cameraAnimation', pass: null },
+        { label: 'ANIMATE', property: 'cameraAnimation', pass: null }, // was 'FLY'
         { label: 'SHADOW', property: 'shadow', pass: darkPass },
         { label: 'ASCII', property: 'ascii', pass: asciiPass },
         { label: 'HEATMAP', property: 'heatmap', pass: heatmapPass },
@@ -3282,12 +3282,12 @@ function init() {
     // Define the desired order of buttons for the left UI
     const leftUiOrder = [
         'yRotation', // 3D
-        'cameraAnimation', // FLY
         'surveillance', // NEW SURVEILLANCE BUTTON
         'greed', // NEW GREED BUTTON (now ULTERIOR MOVTIVES)
         'hacker', // HACKER moved to position 5
         'shadow',
-        'redactedGlitch'
+        'redactedGlitch',
+        'cameraAnimation' // ANIMATE (moved below the effect filters, above RESET)
     ];
 
     // Map property names to their full config objects for easy lookup
@@ -3304,7 +3304,11 @@ function init() {
     //   'FLY' ↔ 'cameraAnimation'
     //
     // (See the buttonsConfig array above for the full label↔property map.)
-    const HIDDEN_BUTTONS = new Set(['yRotation', 'cameraAnimation', 'shadow']);
+    // 'cameraAnimation' removed from HIDDEN_BUTTONS so the ANIMATE button
+    // (previously labelled FLY, now relabelled ANIMATE in buttonsConfig)
+    // renders in the left UI. It is reordered in leftUiOrder below so it
+    // sits beneath the effect filters, separated from the RESET button.
+    const HIDDEN_BUTTONS = new Set(['yRotation', 'shadow']);
     leftUiOrder.forEach(propertyName => {
         if (HIDDEN_BUTTONS.has(propertyName)) return;
         const config = buttonConfigMap.get(propertyName);
@@ -3328,7 +3332,7 @@ function init() {
             background-color: black; /* Changed from #CC0000 to black */
             color: white;
             padding: 4px;
-            margin-top: 10px;
+            margin-top: 28px; /* extra space so RESET is visibly SEPARATED from the ANIMATE button above */
             border: 0.5px solid rgba(0, 0, 0, 0.8);
             border-radius: 0;
             cursor: pointer;
