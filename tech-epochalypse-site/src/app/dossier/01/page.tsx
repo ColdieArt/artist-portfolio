@@ -149,9 +149,16 @@ export default function DossierSubj01Page() {
                     >
                       <div className="aspect-square overflow-hidden bg-[#0a0a0a] flex items-center justify-center">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
+                        {/* 200-850KB winner JPEGs. Lazy + async-decode +
+                            low priority so the main Next.js chunks arrive
+                            before these do; the nav stays interactive
+                            while the archive continues to paint in. */}
                         <img
                           src={w.image}
                           alt={`SUBJ:01 winning selection by ${w.artist}`}
+                          loading="lazy"
+                          decoding="async"
+                          fetchPriority="low"
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                       </div>

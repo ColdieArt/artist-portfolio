@@ -263,9 +263,15 @@ export default function MainframePage() {
           <ScrollReveal>
             <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8 items-start">
               <div className="aspect-[3/4] relative overflow-hidden bg-charcoal dossier-border">
+                {/* 2.4MB file. loading=lazy + async decode + low fetch
+                    priority so Next.js chunks arrive first and the nav
+                    becomes clickable sooner. */}
                 <img
                   src="/Coldie-artist-headshot.jpg"
                   alt="Coldie - Artist"
+                  loading="lazy"
+                  decoding="async"
+                  fetchPriority="low"
                   className="w-full h-full object-cover"
                   style={{ filter: 'grayscale(1) contrast(1.2)' }}
                 />

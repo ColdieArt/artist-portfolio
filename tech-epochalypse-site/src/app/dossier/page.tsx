@@ -130,9 +130,14 @@ export default function DossierPage() {
                   >
                     <div className="aspect-square overflow-hidden bg-[#0a0a0a]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
+                      {/* Hero portrait is visible on first paint but can be
+                          deprioritized so Next.js chunks win the connection
+                          slots first and the nav becomes clickable sooner. */}
                       <img
                         src={subject.previewImage ?? '/images/placeholder.png'}
                         alt={`${subject.name} — subject of SUBJ:${active.id}`}
+                        decoding="async"
+                        fetchPriority="low"
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                     </div>
@@ -303,7 +308,20 @@ export default function DossierPage() {
                       style={{ transform: `rotate(${[-6, 3, -2][i]}deg)`, zIndex: 3 - i }}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={w.image} alt={`SUBJ:01 winner ${w.artist}`} />
+                      {/* 80 to 96px thumbnails rendered from winner JPEGs that
+                          weigh 200 to 850KB each. loading="lazy" defers the
+                          download until the user scrolls to the SUBJ:01
+                          archive card; fetchPriority="low" keeps them out of
+                          the critical-path queue when they do download, so
+                          the Next.js chunks arrive first and nav stays
+                          responsive. */}
+                      <img
+                        src={w.image}
+                        alt={`SUBJ:01 winner ${w.artist}`}
+                        loading="lazy"
+                        decoding="async"
+                        fetchPriority="low"
+                      />
                     </div>
                   ))}
                 </div>
