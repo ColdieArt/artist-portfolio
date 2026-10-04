@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import ScrollReveal from '@/components/ScrollReveal'
-import ContactColdie from '@/components/ContactColdie'
+// ContactColdie import removed: the Get in Touch section now uses a plain
+// mailto link instead of opening the InquiryForm modal. The component file
+// (ContactColdie.tsx) is intentionally kept in the repo in case the form
+// is ever re-enabled; just reimport + <ContactColdie /> to bring it back.
 
 export const metadata: Metadata = {
   title: 'Dossier - Tech Epochalypse',
@@ -35,9 +38,15 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16 mb-24 md:mb-32">
           <ScrollReveal className="lg:col-span-2">
             <div className="aspect-[3/4] relative overflow-hidden bg-charcoal dossier-border">
+              {/* 2.4MB file. loading="lazy" + async decode + low fetch
+                  priority so this doesn't block the Next.js chunk download
+                  queue on first paint; interactivity shows up sooner. */}
               <img
                 src="/Coldie-artist-headshot.jpg"
                 alt="Coldie - Artist"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
                 className="w-full h-full object-cover"
                 style={{ filter: 'grayscale(1) contrast(1.2)' }}
               />
@@ -299,7 +308,17 @@ export default function AboutPage() {
               >
                 <span>Visit Coldie3d.com</span>
               </a>
-              <ContactColdie />
+              {/* Previously used <ContactColdie /> which opened an InquiryForm
+                  modal (Turnstile-protected). Replaced with a direct mailto
+                  link so visitors are not blocked by a broken form path.
+                  Keep the ContactColdie + InquiryForm components in the
+                  codebase in case the form is ever re-enabled. */}
+              <a
+                href="mailto:coldieart@gmail.com"
+                className="btn-primary"
+              >
+                <span>Email Coldie</span>
+              </a>
             </div>
           </div>
         </ScrollReveal>
