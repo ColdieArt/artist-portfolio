@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tech Epochalypse · Collector Brief</title>
+<meta name="description" content="Five living portraits of the people shaping our digital reality. Kinetic 3D interactive art by Coldie. Full sets and individual tokens.">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="Tech Epochalypse · Collector Brief">
+<meta property="og:description" content="Five overlords. One network. Infinite iterations. Kinetic 3D interactive art by Coldie.">
+<meta property="og:image" content="https://www.knowyouroverlord.art/images/overlords/mark-zuckerberg-pixelated-kinetic-art.jpeg">
+<meta property="og:url" content="https://www.knowyouroverlord.art/collect">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #1e1e1e;
+    --ink: #ececec;
+    --body: #bdbdbd;
+    --dim: #9a9a9a;
+    --rule: #333333;
+    --rule-soft: #2a2a2a;
+    --gold: #d4a843;
+  }
+  html { background: var(--bg); -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Mono", "Courier New", monospace;
+    font-size: 14px; line-height: 1.6;
+  }
+  a { color: inherit; }
+  .page { max-width: 1040px; margin: 0 auto; padding: 32px 24px 40px; }
+
+  .label { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--dim); }
+  .gold { color: var(--gold); }
+  .display { font-family: "Special Elite", "Courier New", monospace; font-weight: 400; }
+
+  .top { display: flex; justify-content: space-between; gap: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
+  .top a { text-decoration: none; }
+  .top a:hover { color: var(--ink); }
+
+  .hero { padding: 40px 0 8px; }
+  h1 { font-size: clamp(38px, 8vw, 72px); line-height: 1; letter-spacing: 0.02em; }
+  .tag { margin-top: 14px; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; }
+  .intro { margin-top: 18px; max-width: 720px; color: #cfcfcf; font-size: 15px; }
+  .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px; padding: 12px 20px;
+    font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; text-decoration: none;
+    border: 1px solid #4a4a4a; color: var(--ink); transition: background .15s, border-color .15s;
+  }
+  .btn:hover { border-color: var(--ink); }
+  .btn.solid { background: var(--gold); border-color: var(--gold); color: #141414; font-weight: 600; }
+  .btn.solid:hover { background: #e2bb5c; border-color: #e2bb5c; }
+
+  .nodes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-top: 40px; }
+  .node { text-decoration: none; display: block; }
+  .node .frame { aspect-ratio: 1; overflow: hidden; }
+  .node img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
+  .node:hover img { transform: scale(1.05); }
+  .node .n { margin-top: 10px; }
+  .node .name { font-size: 14px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; margin-top: 2px; }
+  .node .role { font-size: 12px; color: var(--dim); }
+  .node .touch { margin-top: 6px; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); opacity: 0; transition: opacity .2s; }
+  .node:hover .touch { opacity: 1; }
+  @media (hover: none) { .node .touch { opacity: 1; } }
+
+  .section { margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--rule); }
+  h2 { font-size: 24px; letter-spacing: 0.02em; margin: 6px 0 10px; }
+  .cols { display: grid; grid-template-columns: 1fr 1.15fr; gap: 48px; }
+  p + p { margin-top: 10px; }
+  .muted { color: var(--body); }
+  blockquote { font-family: "Special Elite", monospace; font-size: 19px; line-height: 1.4; margin: 4px 0 14px; }
+
+  ul.list { list-style: none; margin-top: 4px; font-size: 13px; }
+  ul.list li { padding: 8px 0; border-bottom: 1px solid var(--rule-soft); display: flex; gap: 16px; }
+  ul.list li:last-child { border-bottom: 0; }
+  ul.list b { font-weight: 500; min-width: 86px; }
+  ul.list span { color: var(--body); }
+
+  .offer { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 12px; }
+  .card { border: 1px solid #3a3a3a; padding: 22px 22px 20px; display: flex; flex-direction: column; }
+  .card.feature { border-color: var(--gold); }
+  .card .head { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .price { font-size: 32px; line-height: 1.1; margin: 12px 0 4px; }
+  .price small { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--dim); letter-spacing: 0.1em; white-space: nowrap; }
+  .card p { color: var(--body); margin-top: 8px; }
+  .card .btn { margin-top: auto; align-self: flex-start; }
+  .card .spacer { height: 18px; }
+  .avail { list-style: none; margin-top: 12px; border-top: 1px solid var(--rule-soft); }
+  .avail li { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--rule-soft); font-size: 13px; }
+  .avail li a { text-decoration: none; }
+  .avail li a:hover { color: var(--gold); }
+  .avail .count { color: var(--gold); }
+  .avail .count small { color: var(--dim); font-size: 11px; letter-spacing: 0.1em; margin-left: 4px; }
+
+  .owners { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 12px; }
+  .owners ul { list-style: none; border-top: 1px solid var(--rule-soft); margin-top: 8px; }
+  .owners li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--rule-soft); font-size: 13px; }
+  .owners li a { text-decoration: none; }
+  .owners li a:hover { color: var(--gold); }
+  .owners li span:last-child { color: var(--dim); text-align: right; }
+  @media (max-width: 860px) { .owners { grid-template-columns: 1fr; } }
+
+  .benefits { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 8px; }
+  .benefit .t { font-weight: 500; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; margin: 6px 0; }
+  .benefit p { color: #b5b5b5; font-size: 13px; }
+
+  .foot { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 24px; }
+  .specs { display: flex; flex-wrap: wrap; gap: 14px 28px; }
+  .specs div { display: flex; flex-direction: column; gap: 2px; }
+  .specs .v { font-size: 13px; }
+  .contact { text-align: right; font-size: 13px; }
+  .contact .site { font-size: 15px; font-weight: 500; letter-spacing: 0.08em; text-decoration: none; }
+  .contact a:hover { color: var(--gold); }
+
+  @media (max-width: 860px) {
+    .nodes { grid-template-columns: repeat(3, 1fr); }
+    .cols, .offer { grid-template-columns: 1fr; gap: 32px; }
+    .benefits { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 520px) {
+    .page { padding: 24px 16px 32px; }
+    .top .right { display: none; }
+    .nodes { grid-template-columns: 1fr 1fr; gap: 14px; }
+    .benefits { grid-template-columns: 1fr; gap: 16px; }
+    .price { font-size: 28px; }
+    .contact { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <div class="top">
+    <span class="label">Coldie · Kinetic 3D Interactive Art · 2026</span>
+    <a class="label right" href="/">knowyouroverlord.art</a>
+  </div>
+
+  <section class="hero">
+    <h1 class="display">TECH EPOCHALYPSE</h1>
+    <div class="tag">Five overlords · One network · <span class="gold">Infinite iterations</span></div>
+    <p class="intro">
+      Five living portraits of the people shaping our digital reality. Each work is a fully interactive kinetic
+      3D collage: fragments of public imagery, fractured, reassembled and set in motion. Not a fixed image, but
+      a composition the collector can explore, reshape and make their own.
+    </p>
+    <div class="cta-row">
+      <a class="btn solid" href="#collect">Collect</a>
+      <a class="btn" href="/overlords">Touch the art ›</a>
+    </div>
+  </section>
+
+  <div class="nodes">
+    <a class="node" href="/overlords/elon-musk"><div class="frame"><img src="/images/overlords/ElonMusk-Thumbnail.png" alt="Elon Musk kinetic 3D portrait"></div><div class="label n">Node I</div><div class="name">Elon Musk</div><div class="role">The Architect</div><div class="touch">Touch the art ›</div></a>
+    <a class="node" href="/overlords/mark-zuckerberg"><div class="frame"><img src="/images/overlords/Zuckerberg-web.jpg" alt="Mark Zuckerberg kinetic 3D portrait"></div><div class="label n">Node II</div><div class="name">Mark Zuckerberg</div><div class="role">The Connector</div><div class="touch">Touch the art ›</div></a>
+    <a class="node" href="/overlords/sam-altman"><div class="frame"><img src="/images/overlords/Altman-web.jpg" alt="Sam Altman kinetic 3D portrait"></div><div class="label n">Node III</div><div class="name">Sam Altman</div><div class="role">The Accelerationist</div><div class="touch">Touch the art ›</div></a>
+    <a class="node" href="/overlords/jeff-bezos"><div class="frame"><img src="/images/overlords/Bezos-thumb.jpg" alt="Jeff Bezos kinetic 3D portrait"></div><div class="label n">Node IV</div><div class="name">Jeff Bezos</div><div class="role">The Optimizer</div><div class="touch">Touch the art ›</div></a>
+    <a class="node" href="/overlords/jensen-huang"><div class="frame"><img src="/images/overlords/Huang-web.jpg" alt="Jensen Huang kinetic 3D portrait"></div><div class="label n">Node V</div><div class="name">Jensen Huang</div><div class="role">The Chipmaker</div><div class="touch">Touch the art ›</div></a>
+  </div>
+
+  <section class="section cols">
+    <div>
+      <div class="label">The Mantra</div>
+      <h2 class="display">Touch the Art</h2>
+      <blockquote>Move it. The face shifts. The layers separate. What was hidden becomes visible.</blockquote>
+      <p class="muted">
+        "Touch the art" began with Coldie's physical, magnetic collages. Tech Epochalypse is the first time the
+        mantra lives in a digital work. The interface turns collage from a static assemblage into a living
+        artwork, where every viewer builds a unique composition and reshapes how the overlords are seen.
+      </p>
+      <p class="muted">Anyone can touch the art. <span style="color:var(--ink)">Only the token holder owns it.</span></p>
+    </div>
+    <div>
+      <div class="label">The Kinetic Token</div>
+      <h2 class="display">A Portrait That Never Sits Still</h2>
+      <ul class="list">
+        <li><b>Drag</b><span>Move every fragment of the portrait freely.</span></li>
+        <li><b>Depth</b><span>Click to push a piece through 15 depth layers.</span></li>
+        <li><b>Animate</b><span>"3D" and "FLY" modes set the collage in motion.</span></li>
+        <li><b>Layers</b><span>Five effect layers, toggled alone or combined.</span></li>
+        <li><b>Capture</b><span>Save layouts. Export stills and video.</span></li>
+        <li><b>Anywhere</b><span>Any browser, desktop or touch. Arweave-backed.</span></li>
+        <li><b>Living</b><span>ERC-7160 token upgrades as the medium evolves. <span class="gold">Recently pushed: upgraded 3D GUI.</span></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="collect">
+    <div class="label">Collect · Each Overlord is an edition of 10: 5 in full sets, 5 as individual tokens</div>
+    <div class="offer">
+      <div class="card feature">
+        <div class="head"><span class="label gold">The Complete Network</span><span class="label">5 sets · 2 available</span></div>
+        <div class="price display">Full Set of 5 <small>$30,000 IN ETH</small></div>
+        <p>All five Overlords with matching series numbers across the set. Full Set collectors may commission a
+          multi-Overlord mashup on their collaborative print and physical magnetic work.</p>
+        <div class="spacer"></div>
+        <a class="btn solid" href="https://x.com/Coldie" target="_blank" rel="noopener">Inquire about a full set ›</a>
+      </div>
+      <div class="card">
+        <div class="head"><span class="label">Individual Tokens</span><span class="label">5 tokens per Overlord</span></div>
+        <div class="price display">Single Overlord <small>$6,000 IN ETH</small></div>
+        <ul class="avail">
+          <li><span>Elon Musk</span><span class="count">1<small>AVAILABLE</small></span></li>
+          <li><a href="https://www.transient.xyz/nfts/ethereum/0xea030bb4da83c7b470f6d6109880116459509553/25" target="_blank" rel="noopener">Mark Zuckerberg ›</a><span class="count">3<small>AVAILABLE</small></span></li>
+          <li><a href="https://www.transient.xyz/nfts/ethereum/0xea030bb4da83c7b470f6d6109880116459509553/27" target="_blank" rel="noopener">Sam Altman ›</a><span class="count">4<small>AVAILABLE</small></span></li>
+          <li><a href="https://www.transient.xyz/nfts/ethereum/0xea030bb4da83c7b470f6d6109880116459509553/24" target="_blank" rel="noopener">Jensen Huang ›</a><span class="count">4<small>AVAILABLE</small></span></li>
+        </ul>
+        <div class="spacer"></div>
+        <a class="btn" href="https://www.transient.xyz/nfts/ethereum/0xea030bb4da83c7b470f6d6109880116459509553" target="_blank" rel="noopener">Collect on Transient ›</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="label">Collected By · Selected Collectors</div>
+    <div class="owners">
+      <div>
+        <div class="label gold">Full Sets</div>
+        <ul>
+          <li><a href="https://x.com/RaoulGMI" target="_blank" rel="noopener">Raoul Pal</a><span>Founding Collector 001</span></li>
+          <li><a href="https://x.com/web3crusadr" target="_blank" rel="noopener">Christian Thompson</a><span>Founding Collector 002</span></li>
+          <li><a href="https://x.com/1confirmation" target="_blank" rel="noopener">1Confirmation</a><span>Founding Collector 003</span></li>
+        </ul>
+      </div>
+      <div>
+        <div class="label">Individual Tokens</div>
+        <ul>
+          <li><a href="https://x.com/redbeardnft" target="_blank" rel="noopener">Benny Red Beard</a><span>Elon Musk</span></li>
+          <li><a href="https://x.com/batsoupyum" target="_blank" rel="noopener">Batsoupyum</a><span>Elon Musk</span></li>
+          <li><span>Karate Kid</span><span>Mark Zuckerberg</span></li>
+          <li><span>Chikai</span><span>Jensen Huang</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="label">Founding Collector Benefits</div>
+    <div class="benefits">
+      <div class="benefit"><div class="t">Collaborative Print</div><p>One 12″ × 18″ gallery print of your own kinetic composition. Signed and numbered.</p></div>
+      <div class="benefit"><div class="t">Magnetic Physical</div><p>First right to the 18″ × 24″ physical magnetic edition (1/10 per Overlord), with a $6,000 credit. The medium sold at <a href="https://onlineonly.christies.com/s/first-open-post-war-contemporary-art/coldie-b-1982-286/245196" target="_blank" rel="noopener">Christie's</a> in 2024.</p></div>
+      <div class="benefit"><div class="t">Dossier Allocations</div><p>Exclusive physical and digital releases tied to the Overlord you hold, created by community remix competitions.</p></div>
+      <div class="benefit"><div class="t">Recognition</div><p>Patrons are named on the <a href="/collectors">project hub</a> as the founding signals of a new medium of collage.</p></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="specs">
+      <div><span class="label">Chain</span><span class="v">Ethereum</span></div>
+      <div><span class="label">Standard</span><span class="v">ERC-7160</span></div>
+      <div><span class="label">Editions</span><span class="v">10 per Overlord</span></div>
+      <div><span class="label">Protocol</span><span class="v">Transient Labs</span></div>
+      <div><span class="label">Medium</span><span class="v">Interactive WebGL</span></div>
+    </div>
+    <div class="contact">
+      <a class="site" href="/">KNOWYOUROVERLORD.ART</a>
+      <div class="muted"><a href="https://x.com/Coldie" target="_blank" rel="noopener">X @Coldie</a> · <a href="https://www.instagram.com/coldie3dart" target="_blank" rel="noopener">IG @coldie3dart</a></div>
+    </div>
+  </footer>
+
+</main>
+</body>
+</html>
