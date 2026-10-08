@@ -462,14 +462,12 @@ function _cropDims() {
 }
 
 function updateCropOverlay() {
-    if (!cropOverlayEl) return;
-    const d = _cropDims();
-    if (!d) { cropOverlayEl.style.display = 'none'; return; }
-    cropOverlayEl.style.display = 'block';
-    cropOverlayEl.style.left = d.x + 'px';
-    cropOverlayEl.style.top = d.y + 'px';
-    cropOverlayEl.style.width = d.w + 'px';
-    cropOverlayEl.style.height = d.h + 'px';
+    // 1:1 cropping overlay disabled to match the other 4 overlord editors.
+    // Crop math still drives getCropCanvasRect() for any downstream export
+    // logic, but the visual mask (dashed border + darkening wash) is no
+    // longer shown. To restore the overlay, replace this body with the
+    // original render routine kept in git history (commit 5208b3b).
+    if (cropOverlayEl) cropOverlayEl.style.display = 'none';
 }
 
 function getCropCanvasRect(srcCanvas) {
@@ -2704,10 +2702,13 @@ function init() {
     document.body.appendChild(leftUiContainer);
     const rightUiContainer = document.createElement('div');
     rightUiContainer.id = 'right-ui-container';
-    // SUBJ:02 — the right effects rail is shown on this editor (it is hidden
-    // on the other base overlord pages; see collector editions for the rule).
-    // z-index matches the left rail so the 1:1 crop overlay's dimming layer (z 50) never greys it out.
-    rightUiContainer.style.cssText = 'position: absolute; top: 44px; right: 10px; padding: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 100; font-family: monospace;';
+    // Right effects rail HIDDEN on Jensen to match the other 4 base overlord
+    // editors. The container is still created so the overflow buttonsConfig
+    // forEach below (line that iterates `buttonsConfig`) has a valid parent
+    // for buttons not in leftUiOrder; they get appended but never render.
+    // To bring the rail back, drop the display:none and restore the
+    // original top:44 / z-index:100 inline styles (see commit 7816d4c).
+    rightUiContainer.style.cssText = 'position: absolute; top: 44px; right: 10px; padding: 10px; display: none; flex-direction: column; gap: 5px; z-index: 100; font-family: monospace;';
     document.body.appendChild(rightUiContainer);
 
     const leftUiOrder = ['yRotation', 'surveillance', 'greed', 'hacker', 'shadow', 'redactedGlitch', 'cameraAnimation']; // 'cameraAnimation' moved to end: ANIMATE button sits below effect filters, above RESET
