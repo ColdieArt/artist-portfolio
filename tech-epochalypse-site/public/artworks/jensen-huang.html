@@ -314,17 +314,17 @@
     /* ─── PHONES + TABLETS (≤1024px): transform dialog → 44px icon rail on the left edge ───
        The desktop dialog is 230px wide, ~61% of a phone screen and ~30% of an
        iPad in portrait. Below the desktop breakpoint it
-       becomes a vertical, icon-only rail, vertically centred but never higher
-       than ~288px so it clears the expanded asset list + chevron (ends ~276px
-       with the panel at LEFT_UI_TOP = 44px plus the SAVE/LOAD LAYOUT buttons).
+       becomes a vertical, icon-only rail docked to the TOP-RIGHT edge,
+       vertically top-aligned with the left UI container (both start at
+       LEFT_UI_TOP = 44px) so the two rails read as a matched pair.
        Same seven controls in the same order: asset name (vertical text),
        MOVE / ROTATE / SCALE, RESET, DUPLICATE, DELETE, CLOSE. Each hit target
        is 44×44. `!important` overrides the inline left/top the desktop
        positioning code writes (updateOrbitalUIPosition also skips it on phones). */
     @media (max-width: 1024px) {
       #orbital-transform-ui {
-        left: 8px !important; right: auto !important;
-        top: max(490px, 50%) !important; transform: translateY(-50%) !important;
+        left: auto !important; right: 8px !important;
+        top: 44px !important; transform: none !important;
         width: 44px; min-width: 0; padding: 0; gap: 3px;
         background: transparent; border: none; box-shadow: none;
         flex-direction: column; align-items: stretch;
