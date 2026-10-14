@@ -152,7 +152,7 @@ def paper_difference(rgb, bg):
     return diff - brighter
 
 
-def build_alpha(rgb, bg, noise, scale, paper_floor):
+def build_alpha(rgb, bg, noise, scale, paper_floor, thin_fibre):
     """Opacity per pixel: 0 = background, 1 = solid bill, in between = fibres / soft edge."""
     diff = paper_difference(rgb, bg)
     dist = np.linalg.norm(diff, axis=2)
@@ -160,6 +160,15 @@ def build_alpha(rgb, bg, noise, scale, paper_floor):
     lo = max(4.0, 3.5 * noise)          # below this it's just scanner noise
     hi = max(lo + 6.0, paper_floor)     # the palest paper on the bill is at least this different
     alpha = np.clip((dist - lo) / (hi - lo), 0.0, 1.0)
+
+    # Hairs and fibres thinner than the scanner can resolve come out pale
+    # because the white behind them bleeds in. Judge those against a darker
+    # fibre colour so they become partly see-through and get their real,
+    # darker colour back instead of showing as a light line.
+    window = max(3, int(round(8 * scale)) | 1)
+    body = ndimage.binary_opening(alpha >= 0.5, structure=np.ones((window, window)))
+    thin = (alpha > 0) & ~ndimage.binary_dilation(body, iterations=1)
+    alpha[thin] = np.clip((dist[thin] - lo) / (thin_fibre - lo), 0.0, 1.0)
 
     # Soft-edge refinement: at the outer edge a pixel is a blend of paper and
     # background. Compare it with solid paper just inside the edge to work out
@@ -248,7 +257,7 @@ def process(path, out_dir, dpi_override, keep_mm):
 
     bg, noise = estimate_background(rgb, scale)
     bg = add_edge_shadow(rgb, bg, noise, scale, dpi)
-    alpha, fg, fg_support = build_alpha(rgb, bg, noise, scale, paper_floor=24.0)
+    alpha, fg, fg_support = build_alpha(rgb, bg, noise, scale, paper_floor=24.0, thin_fibre=80.0)
     alpha, removed = remove_dust(alpha, scale, keep_mm, dpi)
     colour = clean_colours(rgb, bg, alpha, fg, fg_support)
     save_outputs(path.stem, colour, alpha, removed, out_dir, dpi)
