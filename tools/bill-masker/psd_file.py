@@ -82,7 +82,12 @@ def _layer(name, planes, hidden=False, mask=None):
     return record, bytes(data)
 
 
-def write_psd(path, bill_rgb, mask, original_rgb, composite_rgb, dpi):
+def _resource(rid, data):
+    data += b"\0" * (len(data) % 2)
+    return b"8BIM" + struct.pack(">H", rid) + b"\0\0" + struct.pack(">I", len(data)) + data
+
+
+def write_psd(path, bill_rgb, mask, original_rgb, composite_rgb, dpi, icc=None):
     """All images are uint8 arrays of the same height and width."""
     h, w = mask.shape
     opaque = np.full((h, w), 255, np.uint8)
@@ -98,7 +103,9 @@ def write_psd(path, bill_rgb, mask, original_rgb, composite_rgb, dpi):
 
     fixed = int(round(dpi * 65536))
     res = struct.pack(">IHHIHH", fixed, 1, 1, fixed, 1, 1)
-    resources = b"8BIM" + struct.pack(">H", 0x03ED) + b"\0\0" + struct.pack(">I", len(res)) + res
+    resources = _resource(0x03ED, res)
+    if icc:
+        resources += _resource(0x040F, icc)  # embedded colour profile
 
     with open(path, "wb") as f:
         f.write(b"8BPS" + struct.pack(">H6xHIIHH", 1, 3, h, w, 8, 3))

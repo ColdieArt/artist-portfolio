@@ -40,15 +40,17 @@ Image.MAX_IMAGE_PIXELS = None  # 1200 DPI scans are large; they are trusted loca
 
 SCAN_EXTENSIONS = {".tif", ".tiff", ".png", ".jpg", ".jpeg"}
 WEB_LONG_EDGE = 2400
+MAX_SHADOW = 80.0  # how much darker than open background the edge shadow can get
 
 
 def load_scan(path):
-    """Return (rgb float array 0-255, dpi or None)."""
+    """Return (rgb float array 0-255, dpi or None, colour profile or None)."""
     with Image.open(path) as im:
         dpi = im.info.get("dpi")
         dpi = float(dpi[0]) if dpi and dpi[0] > 1 else None
+        icc = im.info.get("icc_profile")
         if path.suffix.lower() not in (".tif", ".tiff"):
-            return np.asarray(im.convert("RGB"), dtype=np.float32), dpi
+            return np.asarray(im.convert("RGB"), dtype=np.float32), dpi, icc
 
     # TIFF scans are often 16 bits per channel, which tifffile reads reliably.
     arr = tifffile.imread(path)
@@ -57,12 +59,12 @@ def load_scan(path):
     rgb = arr[..., :3].astype(np.float32)
     if arr.dtype == np.uint16:
         rgb /= 257.0
-    return rgb, dpi
+    return rgb, dpi, icc
 
 
 def edge_blur_px(scale):
-    """How far the scanner smears a paper edge, in pixels."""
-    return max(4, int(round(16 * scale)))
+    """How far the scanner smears a paper edge, in pixels (about 4 at 1200 DPI)."""
+    return max(2, int(round(4 * scale)))
 
 
 def smooth_fill(values, weights, sigma):
@@ -129,11 +131,13 @@ def add_edge_shadow(rgb, bg, noise, scale, dpi):
 
     # Shadow = neutral, softly darkened areas that join up with clear
     # background. Grey patches enclosed by paper are left alone.
-    candidate = neutral & (floor <= 40.0)
+    # Right beside the paper the shadow is at its deepest, about 70 levels
+    # darker than open background.
+    candidate = neutral & (floor <= MAX_SHADOW)
     labels, _ = ndimage.label(candidate, structure=np.ones((3, 3)))
     touching = np.unique(labels[clear & candidate])
     region = np.isin(labels, touching[touching > 0])
-    shadow = np.where(region, np.minimum(floor, 40.0), 0.0)
+    shadow = np.where(region, np.minimum(floor, MAX_SHADOW), 0.0)
 
     # The shadow carries on under the blurred outer edge of the paper; extend
     # it a short way so those edge pixels are judged against the grey they sit on.
@@ -220,57 +224,111 @@ def remove_dust(alpha, dpi, keep_mm, piece_mm2=20.0):
     return out, removed
 
 
-def finish_edges(rgb, bg, alpha, diff, dist, scale):
+def trim_pale_rim(rgb, bg, alpha, scale, dpi):
+    """Remove the pale, nearly colourless band that can run along an edge.
+
+    Next to the paper the glass shadow picks up a little warmth bounced off the
+    paper, so it is no longer perfectly grey, but it is still far paler and
+    less coloured than any bill paper. Only bands wider than a hair are
+    removed, and only within half a millimetre of the background, so hairs
+    and strands are left alone.
+    """
+    diff = rgb - bg
+    mean = diff.mean(axis=2)
+    colourfulness = np.linalg.norm(diff - mean[..., None], axis=2)
+    pale = (alpha > 0) & (colourfulness < 16.0) & (-mean < 75.0)
+    k = max(3, int(round(5 * scale)) | 1)
+    pale = ndimage.binary_opening(pale, structure=np.ones((k, k)))
+    near = ndimage.distance_transform_edt(alpha > 0) <= 0.5 / 25.4 * dpi
+    clear = alpha <= 0
+    rim = ndimage.binary_propagation(clear, mask=clear | (pale & near)) & ~clear
+    out = alpha.copy()
+    out[rim] = 0.0
+    return out, rim
+
+
+def thin_strands(alpha, scale):
+    """Hairs and fibres sticking out of the bill: anything narrower than ~0.2 mm."""
+    window = max(3, int(round(8 * scale)) | 1)
+    body = ndimage.binary_opening(alpha >= 0.5, structure=np.ones((window, window)))
+    return (alpha > 0) & ~ndimage.binary_dilation(body, iterations=1)
+
+
+def fill_from(rgb, source, sigma):
+    """Spread the colours of `source` pixels outwards, smoothly, to cover every pixel."""
+    out = np.zeros(rgb.shape, dtype=np.float32)
+    done = np.zeros(source.shape, dtype=bool)
+    weights = source.astype(np.float32)
+    for s in (sigma, 2 * sigma, 4 * sigma, 8 * sigma, 16 * sigma):
+        channels = [smooth_fill(rgb[..., c], weights, s) for c in range(3)]
+        support = channels[0][1]
+        take = ~done & (support > 0.05)
+        for c in range(3):
+            out[..., c][take] = channels[c][0][take]
+        done |= take
+        if done.all():
+            return out
+    if source.any():
+        _, (iy, ix) = ndimage.distance_transform_edt(~source, return_indices=True)
+        out[~done] = rgb[iy, ix][~done]
+    return out
+
+
+def finish_edges(rgb, bg, alpha, diff, dist, scale, strands, thin_fibre=80.0):
     """Give every edge pixel the bill's own colour, so nothing white is left.
 
-    Along any edge (outside, holes, fibres) the scanner blends paper with the
-    background. Each such pixel is matched with the solid paper right beside
-    it: it takes that paper's colour, and its opacity says how much paper it
-    held. Edge pixels at least as strong as the paper beside them (ink running
-    up to a tear, say) keep their own colour.
+    Along the edges (outside, holes) the scanner blends paper with the
+    background. Each such pixel takes the colour of the solid paper beside it,
+    and its opacity says how much paper it held; the faintest blend is trimmed
+    so the bill goes straight from its colour to see-through. Edge pixels at
+    least as strong as the paper beside them (ink running up to a tear) keep
+    their own colour.
+
+    Hairs and strands keep their own colour (a copper hair stays copper): only
+    the white showing through them is taken out.
     """
     band = edge_blur_px(scale)
     near_edge = ndimage.distance_transform_edt(alpha > 0) <= band
-    core = (alpha >= 1.0) & ~near_edge & (dist >= 40.0)
+    core = (alpha >= 1.0) & ~near_edge & (dist >= 40.0) & ~strands
     if not core.any():
         return rgb, alpha
 
-    # Colour of the nearest solid paper, lightly averaged so it isn't blotchy.
-    _, (iy, ix) = ndimage.distance_transform_edt(~core, return_indices=True)
-    paper = rgb[iy, ix]
-    avg = np.empty_like(paper)
-    for c in range(3):
-        avg[..., c], support = smooth_fill(rgb[..., c], core.astype(np.float32), band / 2)
-    paper = np.where(support[..., None] > 0.1, avg, paper)
-
+    paper = fill_from(rgb, core, float(band))
     paper_diff = paper - bg
     strength = np.sum(diff * paper_diff, axis=2) / np.maximum(np.sum(paper_diff ** 2, axis=2), 1e-6)
-    strength = np.clip(strength, 0.0, 1.0)
+    trimmed = np.clip((strength - 0.15) / 0.8, 0.0, 1.0)
 
-    edge = near_edge & (alpha > 0) & (strength < 0.95)
+    edge = near_edge & (alpha > 0) & (strength < 0.95) & ~strands
     out_alpha = alpha.copy()
-    out_alpha[edge] = np.minimum(alpha[edge], strength[edge])
+    out_alpha[edge] = np.minimum(alpha[edge], trimmed[edge])
     colour = rgb.copy()
     colour[edge] = paper[edge]
+
+    # Strands: opacity from how strongly they show, colour with the white removed.
+    a = np.clip(dist / thin_fibre, 0.0, 1.0)
+    unmixed = np.clip(bg + diff / np.maximum(a, 0.05)[..., None], 0, 255)
+    out_alpha[strands] = np.minimum(alpha[strands], a[strands])
+    colour[strands] = unmixed[strands]
     return colour, out_alpha
 
 
-def save_outputs(name, rgb, alpha, removed, out_dir, dpi, original):
+def save_outputs(name, rgb, alpha, removed, out_dir, dpi, original, icc=None):
     rgba = np.dstack([rgb, alpha * 255.0]).round().astype(np.uint8)
     mask = (alpha * 255.0).round().astype(np.uint8)
     dpi_info = (dpi, dpi)
 
     full = Image.fromarray(rgba, "RGBA")
-    full.save(out_dir / f"{name}.png", dpi=dpi_info, optimize=False, compress_level=6)
+    colour_profile = {"icc_profile": icc} if icc else {}
+    full.save(out_dir / f"{name}.png", dpi=dpi_info, optimize=False, compress_level=6, **colour_profile)
     Image.fromarray(mask, "L").save(out_dir / f"{name}-mask.png", dpi=dpi_info)
 
     on_white = (rgb * alpha[..., None] + 255.0 * (1 - alpha[..., None])).round().astype(np.uint8)
     write_psd(out_dir / f"{name}.psd", rgba[..., :3], mask,
-              np.clip(original, 0, 255).round().astype(np.uint8), on_white, dpi)
+              np.clip(original, 0, 255).round().astype(np.uint8), on_white, dpi, icc)
 
     web = full.copy()
     web.thumbnail((WEB_LONG_EDGE, WEB_LONG_EDGE), Image.LANCZOS)
-    web.save(out_dir / f"{name}-web.webp", quality=90, method=6)
+    web.save(out_dir / f"{name}-web.webp", quality=90, method=6, **colour_profile)
 
     # Review sheet: over black, over magenta, and dust that was removed in red.
     a = alpha[..., None]
@@ -285,7 +343,7 @@ def save_outputs(name, rgb, alpha, removed, out_dir, dpi, original):
 
 
 def process(path, out_dir, dpi_override, keep_mm):
-    rgb, file_dpi = load_scan(path)
+    rgb, file_dpi, icc = load_scan(path)
     dpi = dpi_override or file_dpi or 1200.0
     scale = max(dpi / 1200.0, 0.25)  # pixel distances below are tuned for 1200 DPI
 
@@ -294,8 +352,13 @@ def process(path, out_dir, dpi_override, keep_mm):
     alpha, diff, dist = rough_alpha(rgb, bg, noise, paper_floor=24.0)
     alpha, removed = remove_dust(alpha, dpi, keep_mm)
     alpha, holes = cut_holes(rgb, bg, alpha, noise, scale, dpi)
-    colour, alpha = finish_edges(rgb, bg, alpha, diff, dist, scale)
-    save_outputs(path.stem, colour, alpha, removed | holes, out_dir, dpi, original=rgb)
+    alpha, rim = trim_pale_rim(rgb, bg, alpha, scale, dpi)
+    # Specks that were only joined to the bill through a hole or rim are loose now.
+    alpha, loose = remove_dust(alpha, dpi, keep_mm)
+    removed |= loose
+    strands = thin_strands(alpha, scale)
+    colour, alpha = finish_edges(rgb, bg, alpha, diff, dist, scale, strands)
+    save_outputs(path.stem, colour, alpha, removed | holes | rim, out_dir, dpi, original=rgb, icc=icc)
 
     h, w = alpha.shape
     print(f"{path.name}: {w}x{h}px @ {dpi:.0f} DPI, background noise {noise:.1f}, "
