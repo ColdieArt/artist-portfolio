@@ -7,15 +7,16 @@ For every scan in the input folder this writes, into the output folder:
   <name>-mask.png   black/white mask for Photoshop (white = bill, black = background)
   <name>-web.webp   smaller see-through copy for the website
   <name>-check.jpg  review sheet: the cut-out over black and over magenta, plus
-                    anything that was removed as scanner dust shown in red
+                    the dust and holes that were cut out shown in red
 
 How it works, in short: the scanner background is plain off-white, so the
 background colour is measured around the whole bill (it drifts a little across
-the scanner bed), and every pixel is judged by how different it is from the
-background right behind it. Pixels that are only partly paper - frayed fibres,
-the soft outer edge - become partly see-through instead of being cut off, and
-their colour is cleaned so no white fringe is left behind. Holes in the bill
-become see-through the same way, because they show the background colour.
+the scanner bed), along with the soft grey shadow the torn edges cast on the
+glass. Every pixel is judged against the background right behind it. Edge
+pixels take the colour of the paper right beside them, so the bill goes
+straight from its own colour to see-through with no white in between. Holes
+through the bill are cut out, hairs and strands attached to the bill are kept,
+and every loose speck on the glass is removed.
 
 Usage:
   python3 mask_bills.py INPUT_FOLDER OUTPUT_FOLDER [--dpi 1200]
@@ -152,77 +153,102 @@ def paper_difference(rgb, bg):
     return diff - brighter
 
 
-def build_alpha(rgb, bg, noise, scale, paper_floor, thin_fibre):
-    """Opacity per pixel: 0 = background, 1 = solid bill, in between = fibres / soft edge."""
+def rough_alpha(rgb, bg, noise, paper_floor):
+    """First pass: 0 = background, 1 = paper, in between = faint."""
     diff = paper_difference(rgb, bg)
     dist = np.linalg.norm(diff, axis=2)
-
     lo = max(4.0, 3.5 * noise)          # below this it's just scanner noise
     hi = max(lo + 6.0, paper_floor)     # the palest paper on the bill is at least this different
-    alpha = np.clip((dist - lo) / (hi - lo), 0.0, 1.0)
+    return np.clip((dist - lo) / (hi - lo), 0.0, 1.0), diff, dist
 
-    # Hairs and fibres thinner than the scanner can resolve come out pale
-    # because the white behind them bleeds in. Judge those against a darker
-    # fibre colour so they become partly see-through and get their real,
-    # darker colour back instead of showing as a light line.
+
+def cut_holes(rgb, bg, alpha, noise, scale, dpi):
+    """Make holes through the bill see-through.
+
+    The bill sits slightly above the glass, so a hole shows background in
+    shadow: grey rather than white, but just as colourless. Paper and dirt are
+    always tinted (beige, brown, green) or much darker, so a colourless, light
+    patch inside the bill is a hole. Only the body of the bill is searched:
+    hairs and strands sticking out are pale too, and must be kept.
+    """
+    diff = rgb - bg
+    mean = diff.mean(axis=2)
+    colourfulness = np.linalg.norm(diff - mean[..., None], axis=2)
     window = max(3, int(round(8 * scale)) | 1)
     body = ndimage.binary_opening(alpha >= 0.5, structure=np.ones((window, window)))
-    thin = (alpha > 0) & ~ndimage.binary_dilation(body, iterations=1)
-    alpha[thin] = np.clip((dist[thin] - lo) / (thin_fibre - lo), 0.0, 1.0)
-
-    # Soft-edge refinement: at the outer edge a pixel is a blend of paper and
-    # background. Compare it with solid paper just inside the edge to work out
-    # how much paper it really holds.
-    blur = edge_blur_px(scale)
-    solid = ndimage.binary_erosion(alpha >= 1.0, iterations=max(1, int(round(2 * scale))))
-    sigma = float(blur)
-    fg = np.empty(rgb.shape, dtype=np.float32)
-    for c in range(3):
-        fg[..., c], support = smooth_fill(rgb[..., c], solid.astype(np.float64), sigma)
-    fg_diff = fg - bg
-    fg_len2 = np.sum(fg_diff ** 2, axis=2)
-    proj = np.clip(np.sum(diff * fg_diff, axis=2) / np.maximum(fg_len2, 1e-6), 0.0, 1.0)
-
-    # Blended pixels only exist right next to true background (the scanner's
-    # optical blur is only a few pixels wide), so only refine there. Further in, pale
-    # paper and loose fibres keep their full strength.
-    near_bg = ndimage.binary_dilation(alpha <= 0.0, iterations=blur)
-    trusted = near_bg & ~solid & (alpha > 0) & (support > 0.05) & (np.sqrt(fg_len2) > dist)
-    refined = alpha.copy()
-    refined[trusted] = np.minimum(alpha[trusted], proj[trusted])
-    return refined, fg, support
+    hole = body & (colourfulness < max(7.0, 4.0 * noise)) & (-mean < 75.0)
+    hole = ndimage.binary_opening(hole, iterations=1)          # ignore single stray pixels
+    min_px = (0.08 / 25.4 * dpi) ** 2                          # smaller than ~0.08 mm across is noise
+    labels, n = ndimage.label(hole)
+    if n:
+        sizes = ndimage.sum(hole, labels, index=np.arange(1, n + 1))
+        hole = np.isin(labels, np.flatnonzero(sizes >= min_px) + 1)
+    # Take in the slightly tinted rim around each hole as well.
+    rim = body & (colourfulness < 14.0) & (-mean < 110.0)
+    hole = ndimage.binary_propagation(hole, mask=rim | hole)
+    hole = ndimage.binary_dilation(hole, iterations=max(1, int(round(2 * scale))))
+    out = alpha.copy()
+    out[hole] = 0.0
+    return out, hole
 
 
-def remove_dust(alpha, scale, keep_mm, dpi):
-    """Drop specks floating in the background far from the bill. Returns (alpha, removed_mask)."""
+def remove_dust(alpha, dpi, keep_mm, piece_mm2=20.0):
+    """Remove every speck not attached to the bill. Returns (alpha, removed_mask).
+
+    Separate pieces bigger than `piece_mm2` (a torn-off corner, say) are kept.
+    With keep_mm > 0, specks that close to the bill are kept too.
+    """
     present = alpha > 0.02
     labels, n = ndimage.label(present, structure=np.ones((3, 3)))
     if n <= 1:
         return alpha, np.zeros_like(present)
     sizes = ndimage.sum(present, labels, index=np.arange(1, n + 1))
-    main = labels == (int(np.argmax(sizes)) + 1)
-    keep_px = keep_mm / 25.4 * dpi
-    far = ndimage.distance_transform_edt(~main) > keep_px
-    # A speck goes only if every pixel of it is far from the bill.
-    near_ids = np.unique(labels[present & ~far])
-    removed = present & ~main & ~np.isin(labels, near_ids)
+    px_per_mm = dpi / 25.4
+    keep_ids = set((np.flatnonzero(sizes >= piece_mm2 * px_per_mm ** 2) + 1).tolist())
+    keep_ids.add(int(np.argmax(sizes)) + 1)
+    kept = np.isin(labels, list(keep_ids))
+    if keep_mm > 0:
+        near = ndimage.distance_transform_edt(~kept) <= keep_mm * px_per_mm
+        kept |= np.isin(labels, np.unique(labels[present & near]))
+    removed = present & ~kept
     out = alpha.copy()
     out[removed] = 0.0
     return out, removed
 
 
-def clean_colours(rgb, bg, alpha, fg, fg_support):
-    """Take the background colour back out of partly see-through pixels (no white fringe)."""
-    a = alpha[..., None]
-    with np.errstate(divide="ignore", invalid="ignore"):
-        unmixed = bg + (rgb - bg) / np.maximum(a, 1e-3)
-    unmixed = np.clip(unmixed, 0, 255)
-    # Very faint pixels have too little signal to unmix; lean on nearby paper
-    # colour where there is some.
-    weight = np.clip((a - 0.05) / 0.25, 0, 1)
-    fallback = np.where(fg_support[..., None] > 0.05, fg, unmixed)
-    out = np.where(a >= 1.0, rgb, weight * unmixed + (1 - weight) * fallback)
-    return np.clip(out, 0, 255)
+def finish_edges(rgb, bg, alpha, diff, dist, scale):
+    """Give every edge pixel the bill's own colour, so nothing white is left.
+
+    Along any edge (outside, holes, fibres) the scanner blends paper with the
+    background. Each such pixel is matched with the solid paper right beside
+    it: it takes that paper's colour, and its opacity says how much paper it
+    held. Edge pixels at least as strong as the paper beside them (ink running
+    up to a tear, say) keep their own colour.
+    """
+    band = edge_blur_px(scale)
+    near_edge = ndimage.distance_transform_edt(alpha > 0) <= band
+    core = (alpha >= 1.0) & ~near_edge & (dist >= 40.0)
+    if not core.any():
+        return rgb, alpha
+
+    # Colour of the nearest solid paper, lightly averaged so it isn't blotchy.
+    _, (iy, ix) = ndimage.distance_transform_edt(~core, return_indices=True)
+    paper = rgb[iy, ix]
+    avg = np.empty_like(paper)
+    for c in range(3):
+        avg[..., c], support = smooth_fill(rgb[..., c], core.astype(np.float32), band / 2)
+    paper = np.where(support[..., None] > 0.1, avg, paper)
+
+    paper_diff = paper - bg
+    strength = np.sum(diff * paper_diff, axis=2) / np.maximum(np.sum(paper_diff ** 2, axis=2), 1e-6)
+    strength = np.clip(strength, 0.0, 1.0)
+
+    edge = near_edge & (alpha > 0) & (strength < 0.95)
+    out_alpha = alpha.copy()
+    out_alpha[edge] = np.minimum(alpha[edge], strength[edge])
+    colour = rgb.copy()
+    colour[edge] = paper[edge]
+    return colour, out_alpha
 
 
 def save_outputs(name, rgb, alpha, removed, out_dir, dpi):
@@ -257,10 +283,11 @@ def process(path, out_dir, dpi_override, keep_mm):
 
     bg, noise = estimate_background(rgb, scale)
     bg = add_edge_shadow(rgb, bg, noise, scale, dpi)
-    alpha, fg, fg_support = build_alpha(rgb, bg, noise, scale, paper_floor=24.0, thin_fibre=80.0)
-    alpha, removed = remove_dust(alpha, scale, keep_mm, dpi)
-    colour = clean_colours(rgb, bg, alpha, fg, fg_support)
-    save_outputs(path.stem, colour, alpha, removed, out_dir, dpi)
+    alpha, diff, dist = rough_alpha(rgb, bg, noise, paper_floor=24.0)
+    alpha, removed = remove_dust(alpha, dpi, keep_mm)
+    alpha, holes = cut_holes(rgb, bg, alpha, noise, scale, dpi)
+    colour, alpha = finish_edges(rgb, bg, alpha, diff, dist, scale)
+    save_outputs(path.stem, colour, alpha, removed | holes, out_dir, dpi)
 
     h, w = alpha.shape
     print(f"{path.name}: {w}x{h}px @ {dpi:.0f} DPI, background noise {noise:.1f}, "
@@ -272,8 +299,8 @@ def main():
     ap.add_argument("input", type=Path, help="a scan, or a folder of scans")
     ap.add_argument("output", type=Path, help="folder for the results")
     ap.add_argument("--dpi", type=float, help="scan resolution, if the files don't record it (default 1200)")
-    ap.add_argument("--keep-mm", type=float, default=1.5,
-                    help="specks closer than this to the bill are kept as part of it (default 1.5 mm)")
+    ap.add_argument("--keep-mm", type=float, default=0.0,
+                    help="keep loose specks within this distance of the bill (default 0: remove them all)")
     args = ap.parse_args()
 
     files = [args.input] if args.input.is_file() else sorted(

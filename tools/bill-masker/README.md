@@ -17,12 +17,14 @@ fibre and torn edge. Holes through the bill become see-through as well.
 - **Background colour.** It's measured all around the bill, because a scanner bed is never perfectly even.
 - **Edge shadow.** A torn bill doesn't lie flat, so its edges cast a soft grey
   shadow on the glass. Grey that is soft and wide counts as shadow and is removed.
-  Fibres and hairs are thin and sharp, so they're kept even where they cross the shadow.
-- **Soft edges.** A pixel that is only partly paper, such as a fibre or the blurred
-  outer edge, becomes partly see-through, and the white is taken out of its colour
-  so there's no pale outline.
-- **Dust.** Specks sitting on the glass more than 1.5 mm from the bill are removed
-  (they show in red on the review sheet). Anything closer is kept as part of the bill.
+- **No white edges.** Every pixel along an edge takes the colour of the bill
+  paper right beside it, so the bill goes straight from its own colour to
+  see-through, with no white or grey outline.
+- **Holes.** The bill sits slightly above the glass, so a hole shows grey,
+  colourless background. Colourless light patches inside the bill are cut out.
+- **Hairs and strands** sticking out of the bill are kept, in the bill's colour.
+- **Dust.** Every loose speck that isn't attached to the bill is removed. Torn-off
+  pieces bigger than 20 mm² are kept. The review sheet shows what was cut out (dust and holes) in red.
 
 ## Running it
 
@@ -34,7 +36,7 @@ python3 mask_bills.py scans/ masked/
 Options:
 
 - `--dpi 1200` sets the resolution, only needed if the scan files don't record it.
-- `--keep-mm 3` keeps loose specks up to 3 mm from the bill instead of 1.5 mm.
+- `--keep-mm 2` keeps loose specks within 2 mm of the bill (by default they're all removed).
 
 Put the scans in `scans/` and the results land in `masked/`. Both folders stay
 out of git because the files are large.
