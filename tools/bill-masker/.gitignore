@@ -1,0 +1,4 @@
+# Scans and results are large; keep them out of git.
+scans/
+masked/
+__pycache__/
