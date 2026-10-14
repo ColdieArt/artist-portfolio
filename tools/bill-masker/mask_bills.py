@@ -5,6 +5,8 @@ For every scan in the input folder this writes, into the output folder:
 
   <name>.png        full-resolution bill with a see-through background (prints, NFT masters)
   <name>-mask.png   black/white mask for Photoshop (white = bill, black = background)
+  <name>.psd        Photoshop file: the bill with an editable layer mask, and
+                    the untouched scan as a hidden layer underneath
   <name>-web.webp   smaller see-through copy for the website
   <name>-check.jpg  review sheet: the cut-out over black and over magenta, plus
                     the dust and holes that were cut out shown in red
@@ -31,6 +33,8 @@ import numpy as np
 import tifffile
 from PIL import Image
 from scipy import ndimage
+
+from psd_file import write_psd
 
 Image.MAX_IMAGE_PIXELS = None  # 1200 DPI scans are large; they are trusted local files
 
@@ -251,7 +255,7 @@ def finish_edges(rgb, bg, alpha, diff, dist, scale):
     return colour, out_alpha
 
 
-def save_outputs(name, rgb, alpha, removed, out_dir, dpi):
+def save_outputs(name, rgb, alpha, removed, out_dir, dpi, original):
     rgba = np.dstack([rgb, alpha * 255.0]).round().astype(np.uint8)
     mask = (alpha * 255.0).round().astype(np.uint8)
     dpi_info = (dpi, dpi)
@@ -259,6 +263,10 @@ def save_outputs(name, rgb, alpha, removed, out_dir, dpi):
     full = Image.fromarray(rgba, "RGBA")
     full.save(out_dir / f"{name}.png", dpi=dpi_info, optimize=False, compress_level=6)
     Image.fromarray(mask, "L").save(out_dir / f"{name}-mask.png", dpi=dpi_info)
+
+    on_white = (rgb * alpha[..., None] + 255.0 * (1 - alpha[..., None])).round().astype(np.uint8)
+    write_psd(out_dir / f"{name}.psd", rgba[..., :3], mask,
+              np.clip(original, 0, 255).round().astype(np.uint8), on_white, dpi)
 
     web = full.copy()
     web.thumbnail((WEB_LONG_EDGE, WEB_LONG_EDGE), Image.LANCZOS)
@@ -287,7 +295,7 @@ def process(path, out_dir, dpi_override, keep_mm):
     alpha, removed = remove_dust(alpha, dpi, keep_mm)
     alpha, holes = cut_holes(rgb, bg, alpha, noise, scale, dpi)
     colour, alpha = finish_edges(rgb, bg, alpha, diff, dist, scale)
-    save_outputs(path.stem, colour, alpha, removed | holes, out_dir, dpi)
+    save_outputs(path.stem, colour, alpha, removed | holes, out_dir, dpi, original=rgb)
 
     h, w = alpha.shape
     print(f"{path.name}: {w}x{h}px @ {dpi:.0f} DPI, background noise {noise:.1f}, "

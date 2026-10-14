@@ -9,6 +9,7 @@ fibre and torn edge. Holes through the bill become see-through as well.
 | --- | --- |
 | `name.png` | Full-size bill on a see-through background, at the scan's DPI (prints, NFT master) |
 | `name-mask.png` | Black and white mask for Photoshop (white = bill) |
+| `name.psd` | Photoshop file: the bill with an editable layer mask, plus the untouched scan as a hidden layer underneath |
 | `name-web.webp` | Lighter see-through copy, 2400 px on the long side (website) |
 | `name-check.jpg` | Review sheet: the bill over black, over magenta, and any dust it removed shown in red |
 
