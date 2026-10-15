@@ -1,15 +1,19 @@
 """Write a layered Photoshop (.psd) file without needing Photoshop.
 
-The file has two layers:
-  "Bill"           the cut-out bill, with the mask as an editable layer mask
-  "Original scan"  the untouched scan underneath, hidden, for comparison
+The file has a "Bill" layer: the cut-out bill with the mask as an editable
+layer mask. Optionally a hidden "Original scan" layer goes underneath, for
+comparison (this roughly doubles the file size).
 
-Layout follows Adobe's published PSD file format specification. Channel data is
-RLE (PackBits) compressed, which every Photoshop version reads.
+Layout follows Adobe's published PSD file format specification. Layer
+channels are ZIP compressed with prediction, the most compact option
+Photoshop reads. The flattened preview copy can be left blank, as Photoshop
+does with "Maximize Compatibility" off: Photoshop always rebuilds the image
+from the layers, and the blank copy keeps the file far smaller.
 """
 
 import re
 import struct
+import zlib
 
 import numpy as np
 
@@ -48,6 +52,14 @@ def _rle_channel(plane):
     return counts, b"".join(rows)
 
 
+def _zip_channel(plane):
+    """Channel data block, ZIP with prediction (each byte stored as the change from its left neighbour)."""
+    delta = plane.astype(np.int16)
+    delta[:, 1:] -= plane[:, :-1]
+    data = zlib.compress((delta & 0xFF).astype(np.uint8).tobytes(), 6)
+    return struct.pack(">H", 3) + data
+
+
 def _pascal(name, pad):
     raw = name.encode("latin-1")[:255]
     data = bytes([len(raw)]) + raw
@@ -62,8 +74,7 @@ def _layer(name, planes, hidden=False, mask=None):
     data = bytearray()
     info = bytearray()
     for cid, plane in channels:
-        counts, packed = _rle_channel(plane)
-        blob = struct.pack(">H", 1) + counts + packed
+        blob = _zip_channel(plane)
         info += struct.pack(">hI", cid, len(blob))
         data += blob
 
@@ -87,19 +98,24 @@ def _resource(rid, data):
     return b"8BIM" + struct.pack(">H", rid) + b"\0\0" + struct.pack(">I", len(data)) + data
 
 
-def write_psd(path, bill_rgb, mask, original_rgb, composite_rgb, dpi, icc=None):
-    """All images are uint8 arrays of the same height and width."""
+def write_psd(path, bill_rgb, mask, dpi, icc=None, original_rgb=None, composite_rgb=None):
+    """All images are uint8 arrays of the same height and width.
+
+    original_rgb: add the untouched scan as a hidden layer underneath.
+    composite_rgb: a real flattened preview; when omitted it is left blank (white).
+    """
     h, w = mask.shape
     opaque = np.full((h, w), 255, np.uint8)
 
-    bottom = _layer("Original scan", [(-1, opaque)] + [(c, original_rgb[..., c]) for c in range(3)],
-                    hidden=True)
-    top = _layer("Bill", [(-1, opaque)] + [(c, bill_rgb[..., c]) for c in range(3)], mask=mask)
+    layers = [_layer("Bill", [(-1, opaque)] + [(c, bill_rgb[..., c]) for c in range(3)], mask=mask)]
+    if original_rgb is not None:
+        layers.insert(0, _layer("Original scan",
+                                [(-1, opaque)] + [(c, original_rgb[..., c]) for c in range(3)],
+                                hidden=True))
 
-    layers = struct.pack(">h", 2) + bottom[0] + top[0] + bottom[1] + top[1]
-    layers += b"\0" * (len(layers) % 2)
-    layer_info = struct.pack(">I", len(layers)) + layers
-    layer_section = layer_info + struct.pack(">I", 0)  # no global layer mask
+    body = struct.pack(">h", len(layers)) + b"".join(r for r, _ in layers) + b"".join(d for _, d in layers)
+    body += b"\0" * (len(body) % 2)
+    layer_section = struct.pack(">I", len(body)) + body + struct.pack(">I", 0)  # no global layer mask
 
     fixed = int(round(dpi * 65536))
     res = struct.pack(">IHHIHH", fixed, 1, 1, fixed, 1, 1)
@@ -107,11 +123,14 @@ def write_psd(path, bill_rgb, mask, original_rgb, composite_rgb, dpi, icc=None):
     if icc:
         resources += _resource(0x040F, icc)  # embedded colour profile
 
+    if composite_rgb is None:
+        composite_rgb = np.full((h, w, 3), 255, np.uint8)
+
     with open(path, "wb") as f:
         f.write(b"8BPS" + struct.pack(">H6xHIIHH", 1, 3, h, w, 8, 3))
         f.write(struct.pack(">I", 0))                          # colour mode data
-        f.write(struct.pack(">I", len(resources)) + resources)  # resolution
+        f.write(struct.pack(">I", len(resources)) + resources)  # resolution, colour profile
         f.write(struct.pack(">I", len(layer_section)) + layer_section)
-        # Flattened preview, used by apps that don't read layers.
+        # Flattened copy, used only by apps that don't read layers.
         counts, packed = zip(*(_rle_channel(composite_rgb[..., c]) for c in range(3)))
         f.write(struct.pack(">H", 1) + b"".join(counts) + b"".join(packed))

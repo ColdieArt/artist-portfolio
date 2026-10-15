@@ -5,8 +5,9 @@ For every scan in the input folder this writes, into the output folder:
 
   <name>.png        full-resolution bill with a see-through background (prints, NFT masters)
   <name>-mask.png   black/white mask for Photoshop (white = bill, black = background)
-  <name>.psd        Photoshop file: the bill with an editable layer mask, and
-                    the untouched scan as a hidden layer underneath
+  <name>.psd        Photoshop file: the bill with an editable layer mask (the
+                    real scan is kept 3 mm around the bill, so painting the
+                    mask back restores anything that was cut)
   <name>-web.webp   smaller see-through copy for the website
   <name>-check.jpg  review sheet: the cut-out over black and over magenta, plus
                     the dust and holes that were cut out shown in red
@@ -312,7 +313,7 @@ def finish_edges(rgb, bg, alpha, diff, dist, scale, strands, thin_fibre=80.0):
     return colour, out_alpha
 
 
-def save_outputs(name, rgb, alpha, removed, out_dir, dpi, original, icc=None):
+def save_outputs(name, rgb, alpha, removed, out_dir, dpi, original, icc=None, psd_with_scan=False):
     rgba = np.dstack([rgb, alpha * 255.0]).round().astype(np.uint8)
     mask = (alpha * 255.0).round().astype(np.uint8)
     dpi_info = (dpi, dpi)
@@ -322,9 +323,14 @@ def save_outputs(name, rgb, alpha, removed, out_dir, dpi, original, icc=None):
     full.save(out_dir / f"{name}.png", dpi=dpi_info, optimize=False, compress_level=6, **colour_profile)
     Image.fromarray(mask, "L").save(out_dir / f"{name}-mask.png", dpi=dpi_info)
 
-    on_white = (rgb * alpha[..., None] + 255.0 * (1 - alpha[..., None])).round().astype(np.uint8)
-    write_psd(out_dir / f"{name}.psd", rgba[..., :3], mask,
-              np.clip(original, 0, 255).round().astype(np.uint8), on_white, dpi, icc)
+    # PSD "Bill" layer: the real scan is kept up to 3 mm around the bill, so
+    # painting the mask back in restores anything that was cut (a fibre, say);
+    # further out it is plain white, which keeps the file small.
+    scan = np.clip(original, 0, 255).round().astype(np.uint8)
+    keep = ndimage.distance_transform_edt(alpha <= 0) <= 3.0 / 25.4 * dpi
+    layer = np.where((alpha > 0)[..., None], rgba[..., :3], np.where(keep[..., None], scan, 255)).astype(np.uint8)
+    write_psd(out_dir / f"{name}.psd", layer, mask, dpi, icc,
+              original_rgb=scan if psd_with_scan else None)
 
     web = full.copy()
     web.thumbnail((WEB_LONG_EDGE, WEB_LONG_EDGE), Image.LANCZOS)
@@ -342,7 +348,7 @@ def save_outputs(name, rgb, alpha, removed, out_dir, dpi, original, icc=None):
     check.save(out_dir / f"{name}-check.jpg", quality=88)
 
 
-def process(path, out_dir, dpi_override, keep_mm):
+def process(path, out_dir, dpi_override, keep_mm, psd_with_scan=False):
     rgb, file_dpi, icc = load_scan(path)
     dpi = dpi_override or file_dpi or 1200.0
     scale = max(dpi / 1200.0, 0.25)  # pixel distances below are tuned for 1200 DPI
@@ -358,7 +364,8 @@ def process(path, out_dir, dpi_override, keep_mm):
     removed |= loose
     strands = thin_strands(alpha, scale)
     colour, alpha = finish_edges(rgb, bg, alpha, diff, dist, scale, strands)
-    save_outputs(path.stem, colour, alpha, removed | holes | rim, out_dir, dpi, original=rgb, icc=icc)
+    save_outputs(path.stem, colour, alpha, removed | holes | rim, out_dir, dpi, original=rgb, icc=icc,
+                 psd_with_scan=psd_with_scan)
 
     h, w = alpha.shape
     print(f"{path.name}: {w}x{h}px @ {dpi:.0f} DPI, background noise {noise:.1f}, "
@@ -370,6 +377,8 @@ def main():
     ap.add_argument("input", type=Path, help="a scan, or a folder of scans")
     ap.add_argument("output", type=Path, help="folder for the results")
     ap.add_argument("--dpi", type=float, help="scan resolution, if the files don't record it (default 1200)")
+    ap.add_argument("--psd-with-scan", action="store_true",
+                    help="also put the untouched scan in the PSD as a hidden layer (about doubles its size)")
     ap.add_argument("--keep-mm", type=float, default=0.0,
                     help="keep loose specks within this distance of the bill (default 0: remove them all)")
     args = ap.parse_args()
@@ -380,7 +389,7 @@ def main():
         sys.exit(f"No scans found in {args.input}")
     args.output.mkdir(parents=True, exist_ok=True)
     for f in files:
-        process(f, args.output, args.dpi, args.keep_mm)
+        process(f, args.output, args.dpi, args.keep_mm, args.psd_with_scan)
 
 
 if __name__ == "__main__":

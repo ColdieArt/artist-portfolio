@@ -9,7 +9,7 @@ fibre and torn edge. Holes through the bill become see-through as well.
 | --- | --- |
 | `name.png` | Full-size bill on a see-through background, at the scan's DPI (prints, NFT master) |
 | `name-mask.png` | Black and white mask for Photoshop (white = bill) |
-| `name.psd` | Photoshop file: the bill with an editable layer mask, plus the untouched scan as a hidden layer underneath |
+| `name.psd` | Photoshop file: the bill with an editable layer mask. The real scan is kept 3 mm around the bill, so painting the mask back restores anything that was cut |
 | `name-web.webp` | Lighter see-through copy, 2400 px on the long side (website) |
 | `name-check.jpg` | Review sheet: the bill over black, over magenta, and any dust it removed shown in red |
 
@@ -37,6 +37,7 @@ python3 mask_bills.py scans/ masked/
 Options:
 
 - `--dpi 1200` sets the resolution, only needed if the scan files don't record it.
+- `--psd-with-scan` also puts the untouched scan in the PSD as a hidden layer (about doubles its size, which can push it over GitHub's 100 MB limit).
 - `--keep-mm 2` keeps loose specks within 2 mm of the bill (by default they're all removed).
 
 Put the scans in `scans/` and the results land in `masked/`. Both folders stay
